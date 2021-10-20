@@ -1,0 +1,45 @@
+Current repository structure:
+
+master: base branch that has common tools and infrastructure
+
+runoff: development specific to runoff task, i.e., adding new surface runoff options
+
+refactor: initial refactor of Noah-MP soil water routines to define structure for further refactor expansion
+
+=========================================
+
+This repository has two purposes:
+
+1. provide a quick testing enviornment for incorporating new options related to the NWM v3.0 Runoff Task
+
+2. provide a sandbox for initial refactor of soilwater code including reproducibility tests
+
+=========================================
+
+Steps to running model:
+
+1. Configure environment and build
+
+  a. (optional) create your own environment file in the config directory, need Fortran compiler and NetCDF library 
+  
+  b. ./configure
+  
+    if you didn't create your own environment file, choose any option and manually set compiler and library paths
+  
+  c. make
+  
+2. Change setup in namelist.input in run/
+
+3. Run soil_moisture.exe in run/
+
+=========================================
+
+Reproducibility tests (located in test/reproduce):
+
+1. run_namelist_combos.perl
+
+  a. change testname, then run
+  
+2. compare_results.perl
+
+  a. change names to compare, then run, will produce report in reports/
