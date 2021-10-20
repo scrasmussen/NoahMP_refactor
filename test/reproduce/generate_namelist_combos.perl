@@ -2,7 +2,7 @@
 
 # Directory where results will be placed
 
-$testname  = "snow_canopy_soilwater_refact";
+$testname  = "waterall_addrunoff_baseline";
 
 # @combos = ("vt01.r3d3","vt02.r3d3","vt03.r3d3",
 #           "vt04.r3d3","vt05.r3d3","vt06.r3d3",
@@ -12,15 +12,10 @@ $testname  = "snow_canopy_soilwater_refact";
 #           "vt16.r3d3","vt17.r3d3","vt18.r3d3",
 #           "vt19.r3d3","vt20.r3d3");
 
- @combos = ("vt01.r3d3","vt02.r3d3","vt03.r3d3",
-            "vt04.r3d3","vt05.r3d3","vt06.r3d3",
-            "vt07.r3d3","vt08.r3d3","vt09.r3d3",
-            "vt10.r3d3","vt11.r3d3","vt12.r3d3");
-
-# @combos = ("vt01.r1d1","vt02.r1d1","vt03.r1d1",
-#           "vt04.r1d1","vt05.r1d1","vt06.r1d1",
-#           "vt07.r1d1","vt08.r1d1","vt09.r1d1",
-#           "vt10.r1d1","vt11.r1d1","vt12.r1d1");
+ @combos = ("vt01.r6d1","vt02.r6d1","vt03.r6d1",
+            "vt04.r6d1","vt05.r6d1","vt06.r6d1",
+            "vt07.r6d1","vt08.r6d1","vt09.r6d1",
+            "vt10.r6d1","vt11.r6d1","vt12.r6d1");
 
 # @combos = ("vt01.r2d2","vt02.r2d2","vt03.r2d2",
 #           "vt04.r2d2","vt05.r2d2","vt06.r2d2",
@@ -45,4 +40,3 @@ for($combo=0; $combo<=11; $combo++)
  }
    
 chdir("..");
-

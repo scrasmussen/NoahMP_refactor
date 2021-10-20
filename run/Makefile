@@ -6,32 +6,14 @@
 include ../user_build_options
 
 OBJS = \
-        ../src/NamelistRead.o \
-        ../src/LevelsType.o \
-        ../src/DomainType.o \
-        ../src/OptionsType.o \
-        ../src/ParametersType.o \
-        ../src/ForcingType.o \
-        ../src/EnergyType.o \
-        ../src/WaterType.o \
-        ../src/WaterModule.o \
-        ../src/CanopyWaterModule.o \
-        ../src/SnowWaterModule.o \
-        ../src/SnowWaterRenew.o \
-        ../src/SnowLayerChange.o \
-        ../src/SoilWaterModule.o \
-        ../src/SoilWaterRetentionCoeff.o \
-        ../src/SurfaceRunoffInfiltration.o \
-        ../src/SurfaceRunoffModule.o \
-        ../src/SoilWaterMovement.o \
-        ../src/SubsurfaceRunoffModule.o \
+	../src/water_routines.o \
 	../driver/water_output.o \
 	../driver/water_driver.o
 
-CMD = water_refac.exe
+CMD = water.exe
 all:	$(CMD)
 
-water_refac.exe: $(OBJS)
+water.exe: $(OBJS)
 	$(COMPILERF90) -o $(@) -I../driver -I../src $(OBJS) $(NETCDFLIB)
 
 # This command cleans up
