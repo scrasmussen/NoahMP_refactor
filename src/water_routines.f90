@@ -4710,7 +4710,6 @@ CONTAINS
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_veg_parameters")
     endif
 
     if ( trim(DATASET_IDENTIFIER) == "USGS" ) then
@@ -4722,7 +4721,6 @@ CONTAINS
     else
        write(*,'("WARNING: Unrecognized DATASET_IDENTIFIER in subroutine READ_MP_VEG_PARAMETERS")')
        write(*,'("WARNING: DATASET_IDENTIFIER = ''", A, "''")') trim(DATASET_IDENTIFIER)
-       call wrf_error_fatal("STOP in Noah-MP read_mp_veg_parameters")
     endif
     close(15)
 
@@ -4875,7 +4873,6 @@ CONTAINS
 
     IF(ierr .NE. 0 ) THEN
       WRITE(message,FMT='(A)') 'module_sf_noahmpdrv.F: read_mp_soil_parameters: failure opening SOILPARM.TBL'
-      CALL wrf_error_fatal ( message )
     END IF
 
     READ (21,*)
@@ -4883,7 +4880,6 @@ CONTAINS
     READ (21,*) SLCATS
     WRITE( message , * ) 'SOIL TEXTURE CLASSIFICATION = ', TRIM ( SLTYPE ) , ' FOUND', &
                SLCATS,' CATEGORIES'
-    CALL wrf_message ( message )
 
     DO LC=1,SLCATS
       READ (21,*) ITMP,BEXP_TABLE(LC),SMCDRY_TABLE(LC),F1_TABLE(LC),SMCMAX_TABLE(LC),   &
@@ -4906,7 +4902,6 @@ CONTAINS
 
     IF(ierr .NE. 0 ) THEN
       WRITE(message,FMT='(A)') 'module_sf_noahlsm.F: read_mp_soil_parameters: failure opening GENPARM.TBL'
-      CALL wrf_error_fatal ( message )
     END IF
 
     READ (22,*)
@@ -4977,7 +4972,6 @@ CONTAINS
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_rad_parameters")
     endif
 
     read(15,noahmp_rad_parameters)
@@ -5046,7 +5040,6 @@ RSURF_SNOW_TABLE     = -1.E36
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_global_parameters")
     endif
 
     read(15,noahmp_global_parameters)
@@ -5225,7 +5218,6 @@ RSURF_SNOW_TABLE     = RSURF_SNOW
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_crop_parameters")
     endif
 
     read(15,noahmp_crop_parameters)
@@ -5408,7 +5400,6 @@ RSURF_SNOW_TABLE     = RSURF_SNOW
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_crop_parameters")
     endif
 
     read(15,noahmp_irrigation_parameters)
@@ -5465,7 +5456,6 @@ RSURF_SNOW_TABLE     = RSURF_SNOW
     end if
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_tiledrain_parameters")
     endif
     read(15,noahmp_tiledrain_parameters)
     close(15)
@@ -5483,6 +5473,7 @@ RSURF_SNOW_TABLE     = RSURF_SNOW
     KLAT_FAC_TABLE           = KLAT_FAC
 
   end subroutine read_tiledrain_parameters
+
   subroutine read_mp_optional_parameters()
     implicit none
     integer :: ierr
@@ -5516,7 +5507,6 @@ RSURF_SNOW_TABLE     = RSURF_SNOW
 
     if (ierr /= 0) then
        write(*,'("WARNING: Cannot find file MPTABLE.TBL")')
-       call wrf_error_fatal("STOP in Noah-MP read_mp_optional_parameters")
     endif
 
     read(15,noahmp_optional_parameters)
