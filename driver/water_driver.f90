@@ -343,7 +343,6 @@ use water_routines, only: canwater_intercept, canwater, snowwater, soilwater, no
   etran = 0.0
 
   qseva           = evaprate/3600.0 ! soil evaporation [mm/s]
-  etrani(1:nsoil) = tranrate/3600.0 ! transpiration from each level[mm/s]
   btrani(1:nsoil) = 0.0
   totalwat = sum(dzsnso(1:nsoil)*smc*1000.0) ! [mm]
   tw0 = totalwat
@@ -387,7 +386,6 @@ use water_routines, only: canwater_intercept, canwater, snowwater, soilwater, no
   SFCTMP = 298.0 !model-level temperature (k)
 
 !!!!!!!!!!!!!!!!!! for snow water
-  SNOFLOW         = 0.0
   IF (TG .GT. 273.15) THEN
      frozen_ground = .false.
   ELSE
@@ -450,10 +448,18 @@ use water_routines, only: canwater_intercept, canwater, snowwater, soilwater, no
     !SNOW = RAIN * 0.9
     !RAIN = RAIN * 0.1
 
+!!!============================================= Start the original Water Subroutine ==========================================
+! initialize
+
+   ETRANI(1:NSOIL) = 0.
+   SNOFLOW         = 0.
+   RUNSUB          = 0.
+   QINSUR          = 0.
+
+
   !---------------------------------------------------------------------
   ! call the canopy water routines
   !---------------------------------------------------------------------
-! add canopy intercepted water (extracted from PRECIP_HEAT module)
    call canwater_intercept (parameters,ILOC ,JLOC ,VEGTYP ,DT ,UU ,VV    , & !in
                           ELAI   ,ESAI   ,FVEG   ,IST    ,                 & !in
                           BDFALL ,RAIN   ,SNOW   ,FP     ,                 & !in
