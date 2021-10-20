@@ -8,7 +8,7 @@ module ConfigType
   save
   private
 
-!=== define "namelist" sub-type of config_type (config%namelist%variable)
+!=== define "namelist" sub-type of config_type (config%nmlist%variable)
   type :: namelist_type
 
     ! define specific namelist variables
@@ -27,7 +27,7 @@ module ConfigType
 !=== define config type that includes namelist & domain subtypes
   type, public :: config_type
 
-    type(namelist_type) :: namelist
+    type(namelist_type) :: nmlist ! not using "namelist" to avoid issue with Fortran intrinsic namelist function
     type(domain_type)   :: domain
 
   end type config_type

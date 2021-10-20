@@ -14,8 +14,8 @@ contains
 
     type(noahmp_type) :: noahmp
 
-    noahmp%config%namelist%runoff_option = 1
-    noahmp%config%domain%dt              = 1800.0
+    noahmp%config%nmlist%runoff_option = 1
+    noahmp%config%domain%dt            = 1800.0
 
   end subroutine ConfigInitDefault
 
@@ -25,8 +25,8 @@ contains
     type(noahmp_type) :: noahmp
     type(input_type)  :: input
 
-    noahmp%config%namelist%runoff_option = input%OPT_RUN
-    noahmp%config%domain%dt              = input%timestep
+    noahmp%config%nmlist%runoff_option = input%OPT_RUN
+    noahmp%config%domain%dt            = input%timestep
 
   end subroutine ConfigInitTransfer
 
