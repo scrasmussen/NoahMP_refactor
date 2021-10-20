@@ -648,7 +648,7 @@ KLAT_FAC   =   1.30,   1.80,   2.10,   2.60,   2.90,   2.50,   2.30,   3.00,   2
  !-------------------------------------------------
  ! this part is originally from GENPARM.TBL
  !-------------------------------------------------
-SLOPE_DATA  = 9, 0.1, 0.6, 1.0, 0.35, 0.55, 0.8, 0.63, 0.0, 0.0 ! slope factor for soil drainage (9 different slope types)
+SLOPE_DATA  = 0.1, 0.6, 1.0, 0.35, 0.55, 0.8, 0.63, 0.0, 0.0 ! slope factor for soil drainage (9 different slope types)
 SBETA_DATA  = -2.0    ! heat flux reduction factor from the overlying green canopy (not used)
 FXEXP_DATA  = 2.0     ! not used
 CSOIL_DATA  = 2.00E+6 ! Soil heat capacity [J m-3 K-1]
