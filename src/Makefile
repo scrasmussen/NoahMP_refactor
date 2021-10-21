@@ -5,7 +5,7 @@
 
 include ../user_build_options
 
-OBJS = water_routines.o
+OBJS = forcing_routines.o
 
 all:	$(OBJS)
 

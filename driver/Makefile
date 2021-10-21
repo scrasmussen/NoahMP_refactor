@@ -5,15 +5,15 @@
 
 include ../user_build_options
 
-OBJS = water_output.o water_driver.o
+OBJS = forcing_output.o forcing_driver.o
 
 all:	$(OBJS)
 
-water_driver.o: water_driver.f90
+forcing_driver.o: forcing_driver.f90
 
 	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) -I../src -I./ $(*).f90 
 
-water_output.o: water_output.f90
+forcing_output.o: forcing_output.f90
 
 	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90 
 
@@ -28,5 +28,5 @@ clean:
 # Dependencies:
 #
 
-water_driver.o: water_output.o ../src/water_routines.o 
+forcing_driver.o: forcing_output.o ../src/forcing_routines.o 
 

@@ -6,14 +6,14 @@
 include ../user_build_options
 
 OBJS = \
-	../src/water_routines.o \
-	../driver/water_output.o \
-	../driver/water_driver.o
+	../src/forcing_routines.o \
+	../driver/forcing_output.o \
+	../driver/forcing_driver.o
 
-CMD = water.exe
+CMD = forcing.exe
 all:	$(CMD)
 
-water.exe: $(OBJS)
+forcing.exe: $(OBJS)
 	$(COMPILERF90) -o $(@) -I../driver -I../src $(OBJS) $(NETCDFLIB)
 
 # This command cleans up
