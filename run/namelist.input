@@ -2,6 +2,7 @@
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
   output_filename = "output.nc"
+  runsnow         = .false. ! whether to run snow cases
 /
 
 &forcing
@@ -9,11 +10,12 @@
   rain_duration = 3       ! duration of rain events [hours]
   dry_duration  = 3     ! duration of no-rain events [hours]
   raining       = .true.  ! start with rain
-  evaprate      = 0.005       ! constant soil evaporation rate [mm/hr]
-  tranrate      = 0.005       ! constant transpiration rate [mm/hr] (all layers)
-  fcev_e        = 5.0       ! constant canopy evaporation (w/m2) [+ to atm ]
-  fctr_e        = 5.0       ! constant transpiration (w/m2) [+ to atm]
-  qvap          = 0.000005       ! evaporation/sublimation rate mm/s
+  uwind         = 3.0   ! wind speed m/s
+  vwind         = 3.0   ! wind speed m/s
+  sfcpres       = 90000.0  ! surface pressure Pa
+  fcev_e        = 5.0       ! constant canopy evaporation heat (w/m2) [+ to atm ]
+  fctr_e        = 5.0       ! constant transpiration heat (w/m2) [+ to atm]
+  fgev_e        = 15.0      ! evaporation/sublimation heat (w/m2) [+ to atm]
 /
 
 &structure
@@ -34,8 +36,6 @@
 &fixed_initial
  zsoil     = -0.1, -0.4, -1.0, -2.0  ! depth to level interface [m]
  dzsnso    =  0.0, 0.0,   0.0, 0.1,  0.3,  0.6,  1.0  ! level thickness [m]
- sice      =  0.0,  0.0,  0.0,  0.0  ! initial soil ice profile [vol]
- sh2o      =  0.3,  0.3,  0.3,  0.3  ! initial soil liquid profile [vol]
 /
 
 &uniform_initial

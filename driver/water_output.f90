@@ -1,6 +1,8 @@
-module output
+module water_output
 
   use netcdf
+
+  implicit none
 
   integer           :: ncid
   integer           :: iret
@@ -8,44 +10,56 @@ module output
   integer           :: soil_dim
   integer           :: snow_dim
   integer           :: snso_dim
-  integer           :: time_id
-  integer           :: evap_id
-  integer           :: tran_id
-  integer           :: smc_id
-  integer           :: smcm_id
-  integer           :: prcp_id
-  integer           :: sfrn_id
-  integer           :: ugrn_id
-  integer           :: qinsur_id
 
-  integer           :: qintr_id
-  integer           :: qints_id
-  integer           :: qdripr_id
-  integer           :: qdrips_id
-  integer           :: qthror_id
-  integer           :: qthros_id
-  integer           :: qrain_id
-  integer           :: qsnow_id
-  integer           :: snowhin_id
-  integer           :: fwet_id
-  integer           :: cmc_id
-  integer           :: canliq_id
-  integer           :: canice_id
-  integer           :: ecan_id
-  integer           :: etran_id
- 
-  integer           :: snowh_id
-  integer           :: sneqv_id
-  integer           :: ponding_id
-  integer           :: ponding1_id
-  integer           :: ponding2_id
-  integer           :: qsnbot_id
-  integer           :: qsnfro_id
-  integer           :: qsnsub_id
-  integer           :: snice_id
-  integer           :: snliq_id
-  integer           :: stc_id
-  integer           :: zsnso_id
+  integer           :: ISNOW_id
+  integer           :: CANLIQ_id
+  integer           :: CANICE_id
+  integer           :: TV_id
+  integer           :: SNOWH_id
+  integer           :: SNEQV_id
+  integer           :: SNICE_id
+  integer           :: SNLIQ_id
+  integer           :: STC_id
+  integer           :: ZSNSO_id
+  integer           :: SH2O_id
+  integer           :: SMC_id
+  integer           :: SICE_id
+  integer           :: ZWT_id
+  integer           :: WA_id
+  integer           :: WT_id
+  integer           :: DZSNSO_id
+  integer           :: WSLAKE_id
+  integer           :: SMCWTD_id
+  integer           :: DEEPRECH_id
+  integer           :: RECH_id
+  integer           :: IRAMTFI_id
+  integer           :: IRAMTMI_id
+  integer           :: IRFIRATE_id
+  integer           :: IRMIRATE_id
+  integer           :: CMC_id
+  integer           :: ECAN_id
+  integer           :: ETRAN_id
+  integer           :: FWET_id
+  integer           :: RUNSRF_id
+  integer           :: RUNSUB_id
+  integer           :: QIN_id
+  integer           :: QDIS_id
+  integer           :: PONDING1_id
+  integer           :: PONDING2_id
+  integer           :: QSNBOT_id
+  integer           :: QTLDRN_id
+  integer           :: QINSUR_id
+  integer           :: QSEVA_id
+  integer           :: QSDEW_id
+  integer           :: QSNFRO_id
+  integer           :: QSNSUB_id
+  integer           :: ETRANI_id
+  integer           :: WCND_id
+  integer           :: QDRAIN_id
+  integer           :: SNOFLOW_id
+  integer           :: FCRMAX_id
+  integer           :: FICEOLD_id
+  integer           :: errwat_id
 
 contains
 
@@ -63,136 +77,170 @@ contains
     iret = nf90_def_dim(ncid, "snow", nsnow, snow_dim)
     iret = nf90_def_dim(ncid, "snso", nsnow+nsoil, snso_dim)
 
-! for soil water
-    iret = nf90_def_var(ncid, "timestep",             NF90_INT  , (/time_dim/), time_id)
-    iret = nf90_def_var(ncid, "precipitation",        NF90_FLOAT, (/time_dim/), prcp_id)
-    iret = nf90_def_var(ncid, "waterin_sfc",        NF90_FLOAT, (/time_dim/), qinsur_id)
-    iret = nf90_def_var(ncid, "surface_runoff",       NF90_FLOAT, (/time_dim/), sfrn_id)
-    iret = nf90_def_var(ncid, "subsurf_runoff",       NF90_FLOAT, (/time_dim/), ugrn_id)
-    iret = nf90_def_var(ncid, "evaporation",          NF90_FLOAT, (/time_dim/), evap_id)
-    iret = nf90_def_var(ncid, "transpiration",        NF90_FLOAT, (/time_dim/), tran_id)
-    iret = nf90_def_var(ncid, "soil_moisture_mm",     NF90_FLOAT, (/time_dim,soil_dim/), smcm_id)
-    iret = nf90_def_var(ncid, "soil_moisture",        NF90_FLOAT, (/time_dim,soil_dim/), smc_id)
-! for canopy water
-    iret = nf90_def_var(ncid, "rain_intercept",        NF90_FLOAT, (/time_dim/), qintr_id)
-    iret = nf90_def_var(ncid, "snow_intercept",        NF90_FLOAT, (/time_dim/), qints_id)
-    iret = nf90_def_var(ncid, "rain_drip",        NF90_FLOAT, (/time_dim/), qdripr_id)
-    iret = nf90_def_var(ncid, "snow_drip",        NF90_FLOAT, (/time_dim/), qdrips_id)
-    iret = nf90_def_var(ncid, "rain_through",        NF90_FLOAT, (/time_dim/), qthror_id)
-    iret = nf90_def_var(ncid, "snow_through",        NF90_FLOAT, (/time_dim/), qthros_id)
-    iret = nf90_def_var(ncid, "rain_surface",        NF90_FLOAT, (/time_dim/), qrain_id)
-    iret = nf90_def_var(ncid, "snow_surface",        NF90_FLOAT, (/time_dim/), qsnow_id)
-    iret = nf90_def_var(ncid, "snowhin",        NF90_FLOAT, (/time_dim/), snowhin_id)
-    iret = nf90_def_var(ncid, "FWET",        NF90_FLOAT, (/time_dim/), fwet_id)
-    iret = nf90_def_var(ncid, "CMC",        NF90_FLOAT, (/time_dim/), cmc_id)
-    iret = nf90_def_var(ncid, "CANLIQ",        NF90_FLOAT, (/time_dim/), canliq_id)
-    iret = nf90_def_var(ncid, "CANICE",        NF90_FLOAT, (/time_dim/), canice_id)
-    iret = nf90_def_var(ncid, "ECAN",        NF90_FLOAT, (/time_dim/), ecan_id)
-    iret = nf90_def_var(ncid, "ETRAN",        NF90_FLOAT, (/time_dim/), etran_id)
-! for snow water
-    iret = nf90_def_var(ncid, "SNOWH",        NF90_FLOAT, (/time_dim/), snowh_id) 
-    iret = nf90_def_var(ncid, "SNEQV",        NF90_FLOAT, (/time_dim/), sneqv_id)
-    iret = nf90_def_var(ncid, "PONDING",        NF90_FLOAT, (/time_dim/), ponding_id)
-    iret = nf90_def_var(ncid, "PONDING1",        NF90_FLOAT, (/time_dim/), ponding1_id)
-    iret = nf90_def_var(ncid, "PONDING2",        NF90_FLOAT, (/time_dim/), ponding2_id)
-    iret = nf90_def_var(ncid, "QSNBOT",        NF90_FLOAT, (/time_dim/), qsnbot_id)
-    iret = nf90_def_var(ncid, "QSNFRO",        NF90_FLOAT, (/time_dim/), qsnfro_id)
-    iret = nf90_def_var(ncid, "QSNSUB",        NF90_FLOAT, (/time_dim/), qsnsub_id)
-    iret = nf90_def_var(ncid, "SNICE",        NF90_FLOAT, (/time_dim,snow_dim/), snice_id)
-    iret = nf90_def_var(ncid, "SNLIQ",        NF90_FLOAT, (/time_dim,snow_dim/), snliq_id)
-    iret = nf90_def_var(ncid, "STC",        NF90_FLOAT, (/time_dim,snso_dim/), stc_id)
-    iret = nf90_def_var(ncid, "ZSNSO",        NF90_FLOAT, (/time_dim,snso_dim/), zsnso_id)
+    iret = nf90_def_var(ncid, "ISNOW",       NF90_INT  , (/time_dim/), ISNOW_id)
+    iret = nf90_def_var(ncid, "CANLIQ",      NF90_FLOAT, (/time_dim/), CANLIQ_id)
+    iret = nf90_def_var(ncid, "CANICE",      NF90_FLOAT, (/time_dim/), CANICE_id)
+    iret = nf90_def_var(ncid, "TV",          NF90_FLOAT, (/time_dim/), TV_id)
+    iret = nf90_def_var(ncid, "SNOWH",       NF90_FLOAT, (/time_dim/), SNOWH_id)
+    iret = nf90_def_var(ncid, "SNEQV",       NF90_FLOAT, (/time_dim/), SNEQV_id)
+    iret = nf90_def_var(ncid, "SNICE",       NF90_FLOAT, (/time_dim,snow_dim/), SNICE_id)
+    iret = nf90_def_var(ncid, "SNLIQ",       NF90_FLOAT, (/time_dim,snow_dim/), SNLIQ_id)
+    iret = nf90_def_var(ncid, "STC",         NF90_FLOAT, (/time_dim,snso_dim/), STC_id)
+    iret = nf90_def_var(ncid, "ZSNSO",       NF90_FLOAT, (/time_dim,snso_dim/), ZSNSO_id)
+    iret = nf90_def_var(ncid, "SH2O",        NF90_FLOAT, (/time_dim,soil_dim/), SH2O_id)
+    iret = nf90_def_var(ncid, "SMC",         NF90_FLOAT, (/time_dim,soil_dim/), SMC_id)
+    iret = nf90_def_var(ncid, "SICE",        NF90_FLOAT, (/time_dim,soil_dim/), SICE_id)
+    iret = nf90_def_var(ncid, "ZWT",         NF90_FLOAT, (/time_dim/), ZWT_id)
+    iret = nf90_def_var(ncid, "WA",          NF90_FLOAT, (/time_dim/), WA_id)
+    iret = nf90_def_var(ncid, "WT",          NF90_FLOAT, (/time_dim/), WT_id)
+    iret = nf90_def_var(ncid, "DZSNSO",      NF90_FLOAT, (/time_dim,snso_dim/), DZSNSO_id)
+    iret = nf90_def_var(ncid, "WSLAKE",      NF90_FLOAT, (/time_dim/), WSLAKE_id)
+    iret = nf90_def_var(ncid, "SMCWTD",      NF90_FLOAT, (/time_dim/), SMCWTD_id)
+    iret = nf90_def_var(ncid, "DEEPRECH",    NF90_FLOAT, (/time_dim/), DEEPRECH_id)
+    iret = nf90_def_var(ncid, "RECH",        NF90_FLOAT, (/time_dim/), RECH_id)
+    iret = nf90_def_var(ncid, "IRAMTFI",     NF90_FLOAT, (/time_dim/), IRAMTFI_id)
+    iret = nf90_def_var(ncid, "IRAMTMI",     NF90_FLOAT, (/time_dim/), IRAMTMI_id)
+    iret = nf90_def_var(ncid, "IRFIRATE",    NF90_FLOAT, (/time_dim/), IRFIRATE_id)
+    iret = nf90_def_var(ncid, "IRMIRATE",    NF90_FLOAT, (/time_dim/), IRMIRATE_id) 
+    iret = nf90_def_var(ncid, "CMC",         NF90_FLOAT, (/time_dim/), CMC_id)
+    iret = nf90_def_var(ncid, "ECAN",        NF90_FLOAT, (/time_dim/), ECAN_id)
+    iret = nf90_def_var(ncid, "ETRAN",       NF90_FLOAT, (/time_dim/), ETRAN_id)
+    iret = nf90_def_var(ncid, "FWET",        NF90_FLOAT, (/time_dim/), FWET_id)
+    iret = nf90_def_var(ncid, "RUNSRF",      NF90_FLOAT, (/time_dim/), RUNSRF_id)
+    iret = nf90_def_var(ncid, "RUNSUB",      NF90_FLOAT, (/time_dim/), RUNSUB_id)
+    iret = nf90_def_var(ncid, "QIN",         NF90_FLOAT, (/time_dim/), QIN_id)
+    iret = nf90_def_var(ncid, "QDIS",        NF90_FLOAT, (/time_dim/), QDIS_id)
+    iret = nf90_def_var(ncid, "PONDING1",    NF90_FLOAT, (/time_dim/), PONDING1_id)
+    iret = nf90_def_var(ncid, "PONDING2",    NF90_FLOAT, (/time_dim/), PONDING2_id)
+    iret = nf90_def_var(ncid, "QSNBOT",      NF90_FLOAT, (/time_dim/), QSNBOT_id)
+    iret = nf90_def_var(ncid, "QTLDRN",      NF90_FLOAT, (/time_dim/), QTLDRN_id)
+    iret = nf90_def_var(ncid, "QINSUR",      NF90_FLOAT, (/time_dim/), QINSUR_id)
+    iret = nf90_def_var(ncid, "QSEVA",       NF90_FLOAT, (/time_dim/), QSEVA_id)
+    iret = nf90_def_var(ncid, "QSDEW",       NF90_FLOAT, (/time_dim/), QSDEW_id)
+    iret = nf90_def_var(ncid, "QSNFRO",      NF90_FLOAT, (/time_dim/), QSNFRO_id)
+    iret = nf90_def_var(ncid, "QSNSUB",      NF90_FLOAT, (/time_dim/), QSNSUB_id)
+    iret = nf90_def_var(ncid, "ETRANI",      NF90_FLOAT, (/time_dim,soil_dim/), ETRANI_id)
+    iret = nf90_def_var(ncid, "WCND",        NF90_FLOAT, (/time_dim,soil_dim/), WCND_id)
+    iret = nf90_def_var(ncid, "QDRAIN",      NF90_FLOAT, (/time_dim/), QDRAIN_id)
+    iret = nf90_def_var(ncid, "SNOFLOW",     NF90_FLOAT, (/time_dim/), SNOFLOW_id)
+    iret = nf90_def_var(ncid, "FCRMAX",      NF90_FLOAT, (/time_dim/), FCRMAX_id)
+    iret = nf90_def_var(ncid, "FICEOLD",     NF90_FLOAT, (/time_dim,snow_dim/), FICEOLD_id)
+    iret = nf90_def_var(ncid, "errwat",      NF90_FLOAT, (/time_dim/), errwat_id)
 
     iret = nf90_enddef(ncid)
   
    end subroutine initialize_output
 
-   subroutine add_to_output(itime,nsoil,dzsnso,dt,qinsur,runsrf,runsub,qseva,etrani,smc,rain,&
-                            qintr,qints,qdripr,qdrips,qthror,qthros,qrain,qsnow,snowhin,fwet,&
-                            cmc,canliq,canice,ecan,etran,nsnow,snowh,sneqv,ponding,ponding1,ponding2,&
-                            QSNBOT,QSNFRO,QSNSUB,SNICE,SNLIQ,STC,zsnso )
+  subroutine add_to_output(itime,NSOIL,NSNOW,ISNOW,CANLIQ,CANICE,TV,SNOWH,SNEQV,&
+                     SNICE,SNLIQ,STC,ZSNSO,SH2O,SMC,SICE,ZWT,WA,WT,DZSNSO,&
+                     WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
+                     CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
+                     QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat)
 
-     integer                :: itime
-     integer                :: nsoil
-     real                   :: dt 
-     real                   :: qinsur      !water input on soil surface [m/s]
-     real                   :: runsrf      !surface runoff [mm/s] 
-     real                   :: runsub      !baseflow (sturation excess) [mm/s]
-     real                   :: qseva       !soil surface evap rate [mm/s]
-     real, dimension(nsoil) :: etrani      !transpiration rate (mm/s) [+]
-     real, dimension(nsoil) :: smc         !total soil water content [m3/m3]
-     real, dimension(nsoil) :: dzsnso      !soil level thickness [m]
-     real, dimension(nsoil) :: smcmm       !total soil water content [mm]
-     real                   :: rain
-     real                   :: qintr
-     real                   :: qints
-     real                   :: qdripr
-     real                   :: qdrips
-     real                   :: qthror
-     real                   :: qthros
-     real                   :: qrain
-     real                   :: qsnow
-     real                   :: snowhin
-     real                   :: fwet
-     real                   :: cmc
-     real                   :: canliq
-     real                   :: canice
-     real                   :: ecan
-     real                   :: etran
-     integer                :: nsnow
-     real                   :: snowh
-     real                   :: sneqv
-     real                   :: ponding
-     real                   :: ponding1
-     real                   :: ponding2
-     real                   :: qsnbot
-     real                   :: qsnfro
-     real                   :: qsnsub
-     real, dimension(nsnow) :: snice
-     real, dimension(nsnow) :: snliq
-     real, dimension(nsoil+nsnow) :: stc
-     real, dimension(nsoil+nsnow) :: zsnso
+     integer                       :: itime
+     integer                       :: nsoil
+     integer                       :: nsnow
+     real                          :: TV      ! canopy temperature
+     real, dimension(nsnow)        :: FICEOLD !ice fraction at last timestep
+     real, dimension(nsoil+nsnow)  :: ZSNSO   !depth of snow/soil layer-bottom
+     integer                       :: ISNOW   !actual no. of snow layers
+     real                          :: CANLIQ  !intercepted liquid water (mm)
+     real                          :: CANICE  !intercepted ice mass (mm)
+     REAL                          :: SNOWH   !snow height [m]
+     REAL                          :: SNEQV   !snow water eqv. [mm]
+     real, dimension(nsnow)        :: SNICE   !snow layer ice [mm]
+     real, dimension(nsnow)        :: SNLIQ   !snow layer liquid water [mm]
+     real, dimension(nsoil+nsnow)  :: STC     !snow/soil layer temperature [k]
+     real, dimension(nsoil)        :: SICE    ! soil ice content [m3/m3]
+     real, dimension(nsoil)        :: SH2O    ! soil liquid water content [m3/m3]
+     real, dimension(nsoil)        :: SMC         !total soil water content [m3/m3]
+     real                          :: ZWT        !the depth to water table [m]
+     real                          :: WA      !water storage in aquifer [mm]
+     real                          :: WT      !water storage in aquifer + stuarated soil [mm]
+     REAL                          :: WSLAKE  !water storage in lake (can be -) (mm)
+     real                          :: SMCWTD      !soil water content between bottom of the soil and water table [m3/m3]
+     real                          :: DEEPRECH    !recharge to or from the water table when deep [m]
+     real                          :: RECH !recharge to or from the water table when shallow [m] (diagnostic)
+     real                          :: IRAMTFI  ! irrigation water amount [m] to be applied, flood
+     real                          :: IRAMTMI  ! irrigation water amount [m] to be applied, Micro
+     real                          :: IRFIRATE ! rate of irrigation by flood [m/timestep]
+     real                          :: IRMIRATE ! rate of irrigation by micro [m/timestep]
+     real                          :: CMC     !intercepted water per ground area (mm)
+     real                          :: ECAN    !evap of intercepted water (mm/s) [+]
+     real                          :: ETRAN   !transpiration rate (mm/s) [+]
+     real                          :: FWET    !wetted/snowed fraction of canopy (-)
+     real                          :: RUNSRF      !surface runoff [mm/s] 
+     real                          :: RUNSUB      !baseflow (sturation excess) [mm/s]
+     real                          :: QIN     !groundwater recharge [mm/s]
+     real                          :: QDIS    !groundwater discharge [mm/s]
+     REAL                          :: PONDING1 ![mm]
+     REAL                          :: PONDING2 ![mm]
+     REAL                          :: QSNBOT !melting water out of snow bottom [mm/s]
+     real                          :: QTLDRN   !tile drainage (mm/s)
+     real                          :: QINSUR      !water input on soil surface [m/s]
+     real                          :: QSEVA   !soil surface evap rate [mm/s]
+     real, dimension(nsoil)        :: ETRANI      !transpiration rate (mm/s) [+]
+     REAL                          :: QSNFRO  !snow surface frost rate[mm/s]
+     REAL                          :: QSNSUB  !snow surface sublimation rate [mm/s]
+     REAL                          :: SNOFLOW !glacier flow [mm/s]
+     REAL                          :: QSDEW   !soil surface dew rate [mm/s]
+     real                          :: QDRAIN      !soil-bottom free drainage [mm/s] 
+     real                          :: FCRMAX      !maximum of fcr (-)
+     real, dimension(nsoil)        :: WCND        !hydraulic conductivity (m/s)
+     real                          :: errwat ! water balance error at each timestep [mm]
+     real, dimension(nsoil+nsnow)  :: DZSNSO  ! snow/soil layer thickness [m]
 
-     smcmm = smc*dzsnso*1000.0
-! for soilwater
-     iret = nf90_put_var(ncid, time_id, itime,                 start=(/itime+1/))
-     iret = nf90_put_var(ncid, prcp_id, rain*dt,               start=(/itime+1/))
-     iret = nf90_put_var(ncid, qinsur_id,qinsur*1000*dt,        start=(/itime+1/))
-     iret = nf90_put_var(ncid, sfrn_id, runsrf*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, ugrn_id, runsub*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, evap_id, qseva*1000.0*dt,       start=(/itime+1/))
-     iret = nf90_put_var(ncid, tran_id, sum(etrani)*1000.0*dt, start=(/itime+1/))
-     iret = nf90_put_var(ncid, smcm_id, smcmm,                 start=(/itime+1,1/), count=(/1,nsoil/))
-     iret = nf90_put_var(ncid,  smc_id, smc,                   start=(/itime+1,1/), count=(/1,nsoil/))
-! for canopy water  
-     iret = nf90_put_var(ncid, qintr_id, qintr*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qints_id, qints*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qdripr_id, qdripr*dt,           start=(/itime+1/))
-     iret = nf90_put_var(ncid, qdrips_id, qdrips*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qthror_id, qthror*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qthros_id, qthros*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qrain_id, qrain*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qsnow_id, qsnow*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, snowhin_id, snowhin*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, fwet_id, fwet,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, cmc_id, cmc,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, canliq_id, canliq,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, canice_id, canice,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, ecan_id, ecan*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, etran_id, etran*dt,             start=(/itime+1/))
-! for snow water
-     iret = nf90_put_var(ncid, snowh_id, snowh,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, sneqv_id, sneqv,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, ponding_id, ponding,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, ponding1_id, ponding1,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, ponding2_id, ponding2,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qsnbot_id, qsnbot*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qsnfro_id, qsnfro*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, qsnsub_id, qsnsub*dt,             start=(/itime+1/))
-     iret = nf90_put_var(ncid, snice_id, snice,       start=(/itime+1,1/), count=(/1,nsnow/))
-     iret = nf90_put_var(ncid, snliq_id, snliq,       start=(/itime+1,1/), count=(/1,nsnow/))
-     iret = nf90_put_var(ncid, stc_id, stc,       start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
-     iret = nf90_put_var(ncid, zsnso_id, zsnso,   start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+
+     iret = nf90_put_var(ncid, ISNOW_id,    ISNOW,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, CANLIQ_id,   CANLIQ,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, CANICE_id,   CANICE,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, TV_id,       TV,            start=(/itime+1/))
+     iret = nf90_put_var(ncid, SNOWH_id,    SNOWH,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, SNEQV_id,    SNEQV,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, SNICE_id,    SNICE,         start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, SNLIQ_id,    SNLIQ,         start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, STC_id,      STC,           start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, ZSNSO_id,    ZSNSO,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, SH2O_id,     SH2O,          start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, SMC_id,      SMC,           start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, SICE_id,     SICE,          start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, ZWT_id,      ZWT,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, WA_id,       WA,            start=(/itime+1/))
+     iret = nf90_put_var(ncid, WT_id,       WT,            start=(/itime+1/))
+     iret = nf90_put_var(ncid, DZSNSO_id,   DZSNSO,        start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, WSLAKE_id,   WSLAKE,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, SMCWTD_id,   SMCWTD,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, DEEPRECH_id, DEEPRECH,      start=(/itime+1/))
+     iret = nf90_put_var(ncid, RECH_id,     RECH,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, IRAMTFI_id,  IRAMTFI,       start=(/itime+1/))
+     iret = nf90_put_var(ncid, IRAMTMI_id,  IRAMTMI,       start=(/itime+1/))
+     iret = nf90_put_var(ncid, IRFIRATE_id, IRFIRATE,      start=(/itime+1/))
+     iret = nf90_put_var(ncid, IRMIRATE_id, IRMIRATE,      start=(/itime+1/))
+     iret = nf90_put_var(ncid, CMC_id,      CMC,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, ECAN_id,     ECAN,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, ETRAN_id,    ETRAN,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, FWET_id,     FWET,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, RUNSRF_id,   RUNSRF,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, RUNSUB_id,   RUNSUB,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QIN_id,      QIN,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, QDIS_id,     QDIS,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, PONDING1_id, PONDING1,      start=(/itime+1/))
+     iret = nf90_put_var(ncid, PONDING2_id, PONDING2,      start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSNBOT_id,   QSNBOT,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QTLDRN_id,   QTLDRN,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QINSUR_id,   QINSUR,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSEVA_id,    QSEVA,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSDEW_id,    QSDEW,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSNFRO_id,   QSNFRO,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSNSUB_id,   QSNSUB,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, ETRANI_id,   ETRANI,        start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, WCND_id,     WCND,          start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, QDRAIN_id,   QDRAIN,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, SNOFLOW_id,  SNOFLOW,       start=(/itime+1/))
+     iret = nf90_put_var(ncid, FCRMAX_id,   FCRMAX,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, FICEOLD_id,  FICEOLD,       start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, errwat_id,   errwat,        start=(/itime+1/))
 
    end subroutine add_to_output
 
@@ -202,5 +250,5 @@ contains
 
    end subroutine finalize_output
    
-end module output
+end module water_output
 
