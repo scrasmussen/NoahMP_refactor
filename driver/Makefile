@@ -1,7 +1,7 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .f90
+.SUFFIXES: .o .F90
 
 include ../user_build_options
 
@@ -9,13 +9,13 @@ OBJS = water_output.o water_driver.o
 
 all:	$(OBJS)
 
-water_driver.o: water_driver.f90
+water_driver.o: water_driver.F90
 
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) -I../src -I./ $(*).f90 
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) -I../src -I./ $(*).F90 
 
-water_output.o: water_output.f90
+water_output.o: water_output.F90
 
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90 
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).F90 
 
 #
 # This command cleans up object (etc) files:

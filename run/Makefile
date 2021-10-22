@@ -1,7 +1,7 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .f90
+.SUFFIXES: .o .F90
 
 include ../user_build_options
 

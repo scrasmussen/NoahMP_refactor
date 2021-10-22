@@ -1,7 +1,7 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .f90
+.SUFFIXES: .o .F90
 
 include ../user_build_options
 
@@ -9,8 +9,8 @@ OBJS = water_routines.o
 
 all:	$(OBJS)
 
-.f90.o:
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(*).f90
+.F90.o:
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(*).F90
 
 #
 # This command cleans up object (etc) files:

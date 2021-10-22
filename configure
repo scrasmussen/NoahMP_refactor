@@ -6,9 +6,10 @@
   }else {
      print "Please select from following predefined environments: \n\n";
 
-     print "   1. Cheyenne pgf compiler \n";
-     print "   2. Mike's Linux PGI compiler \n";
-     print "   3. Mike's Mac gfortran compiler \n";
+     print "   1. Cheyenne pgi compiler \n";
+     print "   2. Cheyenne intel compiler \n";
+     print "   3. Mike's Linux PGI compiler \n";
+     print "   4. Mike's Mac gfortran compiler \n";
      print "   0. exit only \n";
 
      printf "\nEnter selection : " ;
@@ -19,15 +20,20 @@
 
   if ($response == 1) {
               # Cheyenne 
-              system "cp config/user_build_options.cheyenne user_build_options"; 
+              system "cp config/user_build_options.cheyenne_PGI user_build_options"; 
             }
 
   elsif ($response == 2) {
+              # Cheyenne 
+              system "cp config/user_build_options.cheyenne_Intel user_build_options";
+            }
+
+  elsif ($response == 3) {
               # Mike's linux set up 
               system "cp config/user_build_options.mike.linux user_build_options"; 
             }
 
-  elsif ($response == 3) {
+  elsif ($response == 4) {
               # Mike's mac set up
               system "cp config/user_build_options.mike.gfortran user_build_options"; 
             }
