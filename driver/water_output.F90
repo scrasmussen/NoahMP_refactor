@@ -60,6 +60,9 @@ module water_output
   integer           :: FCRMAX_id
   integer           :: FICEOLD_id
   integer           :: errwat_id
+  integer           :: QRAIN_id
+  integer           :: QSNOW_id
+  integer           :: QVAP_id
 
 contains
 
@@ -126,6 +129,9 @@ contains
     iret = nf90_def_var(ncid, "FCRMAX",      NF90_FLOAT, (/time_dim/), FCRMAX_id)
     iret = nf90_def_var(ncid, "FICEOLD",     NF90_FLOAT, (/time_dim,snow_dim/), FICEOLD_id)
     iret = nf90_def_var(ncid, "errwat",      NF90_FLOAT, (/time_dim/), errwat_id)
+    iret = nf90_def_var(ncid, "QRAIN",       NF90_FLOAT, (/time_dim/), QRAIN_id)
+    iret = nf90_def_var(ncid, "QSNOW",       NF90_FLOAT, (/time_dim/), QSNOW_id)
+    iret = nf90_def_var(ncid, "QVAP",       NF90_FLOAT, (/time_dim/), QVAP_id)
 
     iret = nf90_enddef(ncid)
   
@@ -136,7 +142,7 @@ contains
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
                      CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
-                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat)
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -190,7 +196,9 @@ contains
      real, dimension(nsoil)        :: WCND        !hydraulic conductivity (m/s)
      real                          :: errwat ! water balance error at each timestep [mm]
      real, dimension(nsoil+nsnow)  :: DZSNSO  ! snow/soil layer thickness [m]
-
+     real                          :: QRAIN
+     real                          :: QSNOW
+     real                          :: QVAP
 
      iret = nf90_put_var(ncid, ISNOW_id,    ISNOW,         start=(/itime+1/))
      iret = nf90_put_var(ncid, CANLIQ_id,   CANLIQ,        start=(/itime+1/))
@@ -241,6 +249,9 @@ contains
      iret = nf90_put_var(ncid, FCRMAX_id,   FCRMAX,        start=(/itime+1/))
      iret = nf90_put_var(ncid, FICEOLD_id,  FICEOLD,       start=(/itime+1,1/), count=(/1,nsnow/))
      iret = nf90_put_var(ncid, errwat_id,   errwat,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, QRAIN_id,    QRAIN,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, QSNOW_id,    QSNOW,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, QVAP_id,    QVAP,           start=(/itime+1/))
 
    end subroutine add_to_output
 

@@ -512,7 +512,7 @@ end if
   SNICE = 0.0
   SNLIQ = 0.0
   SMC   = SH2O + SICE  ! initial volumetric soil water
-  ZWT   = -1.5
+  ZWT   = 2.5
   WA    = 0.0
   WT    = 0.0
   WSLAKE = 0.0
@@ -632,7 +632,7 @@ end if
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
                      CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
-                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat)
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -719,7 +719,7 @@ end if
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
                      CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
-                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat)
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP)
 
  
   end do ! time loop

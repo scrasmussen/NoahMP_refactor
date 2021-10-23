@@ -1855,6 +1855,7 @@ contains
        RSAT =  RSAT + WPLUS
        QDRAIN_SAVE = QDRAIN_SAVE + QDRAIN
        RUNSRF_SAVE = RUNSRF_SAVE + RUNSRF
+
     END DO
 
     QDRAIN = QDRAIN_SAVE/NITER
@@ -1863,8 +1864,8 @@ contains
     RUNSRF = RUNSRF * 1000. + RSAT * 1000./DT  ! m/s -> mm/s
     QDRAIN = QDRAIN * 1000.
 
+
 ! Calling tile drainage ! pvk
-!    print*, "OPT_TDRN=",OPT_TDRN
     IF (OPT_TDRN == 1 .AND. TDFRACMP .GT. 0.3 .AND. OPT_RUN == 3) THEN
         print*, "simple tile drain scheme is on"
         CALL TILE_DRAIN (parameters,NSOIL,SH2O,SMC,SICE,ZSOIL,QTLDRN,DT)
@@ -2770,7 +2771,6 @@ contains
              TEMPR1 = 0.0
              CALL RR1(parameters,I_0,I_MAX,YD,TEMPR1)
              YD = TEMPR1 + ((FSUR*DT) * (1 - (1-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
-             !print*,'YD=',YD,'YD_OLD=',YD_OLD,'ERROR=',ABS(YD - YD_OLD),'IZ=',IZ,'ERROR2=',ERROR,'DT=',DT
              IF ((ABS(YD - YD_OLD) .LE. ERROR) .OR. (IZ .EQ. IZMAX)) THEN
                 GOTO 1004
              END IF
@@ -3294,7 +3294,6 @@ END SUBROUTINE RR2
       END IF
 
     QTLDRN = TDRVOL / DT
-    !print*,"QTLDRN =",QTLDRN
 
   END SUBROUTINE TILE_DRAIN
 
