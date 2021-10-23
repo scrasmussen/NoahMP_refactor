@@ -53,8 +53,8 @@ for infdv in 1 2 3 ; do
 done # infdv
 done # runoff
 
-#  cd ..
-#  rm -rf workshop
+  cd ..
+  rm -rf workshop
 
 # End of script
  exit 0
