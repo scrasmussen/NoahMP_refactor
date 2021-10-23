@@ -620,6 +620,11 @@ end if
   rain_steps = rain_duration * 3600.0 / dt
   dry_steps  =  dry_duration * 3600.0 / dt
 
+! prevent too large SMC initial values
+  DO isoil = 1,nsoil
+     IF (SMC(isoil) .gt. parameters%SMCMAX(isoil)) SMC(isoil) = parameters%SMCMAX(isoil)
+  END DO
+
 !!!!!!========= initialization complete ==================================
 
 !---------------------------------------------------------------------
