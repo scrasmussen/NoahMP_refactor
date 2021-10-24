@@ -1,15 +1,16 @@
 #!/bin/bash
 #
-
- snowopt=.false.
 #  soiltp= 1~19 no 14
 #  vegetp= 1~20 no 17
 #  runoff= 1~8 no 5
+# infdv=1~3 only for runoff=8
+
+ snowopt=.true.
  irri=0
  irrim=0
-# infdv=1~3 only for runoff=8
  tdrn=0
- outdir=waterall_base_default
+
+ outdir=waterall_snow_default
 
  mkdir -p ./namelists/${outdir}
  rm -rf ./namelists/${outdir}/*

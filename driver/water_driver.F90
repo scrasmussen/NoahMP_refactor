@@ -610,7 +610,7 @@ end if
 
   IF(OPT_TDRN .gt. 0) THEN
       TDFRACMP = 0.5
-      ZWT   = -0.2  ! to allow the drainage effect to show up
+      ZWT   = 0.2  ! to allow the drainage effect to show up
   ELSE
       TDFRACMP = 0.0
   END IF
@@ -622,7 +622,11 @@ end if
 
 ! prevent too large SMC initial values
   DO isoil = 1,nsoil
-     IF (SMC(isoil) .gt. parameters%SMCMAX(isoil)) SMC(isoil) = parameters%SMCMAX(isoil)
+     IF (SMC(isoil) .gt. parameters%SMCMAX(isoil)) THEN
+        SH2O(isoil) = parameters%SMCMAX(isoil) * SH2O(isoil) / SMC(isoil)
+        SMC(isoil) = parameters%SMCMAX(isoil)
+        SICE(isoil) = max(0.0,SMC(isoil) - SH2O(isoil))
+     ENDIF
   END DO
 
 !!!!!!========= initialization complete ==================================
@@ -646,6 +650,9 @@ end if
   do itime = 1, ntime
   
   tw0 = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA ! [mm] 
+
+     IRFIRATE = 0.0
+     IRMIRATE = 0.0
 
   !---------------------------------------------------------------------
   ! calculate the input water
@@ -713,7 +720,9 @@ end if
  
 ! balance check for soil and snow layers  
     totalwat = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA      ! total soil+snow water [mm]
-    errwat = (QRAIN+QSNOW+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! accum error [mm]
+    errwat = (QRAIN+QSNOW+IRMIRATE*1000/DT+IRFIRATE*1000/DT+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! accum error [mm]
+
+
    
   !---------------------------------------------------------------------
   ! add to output file

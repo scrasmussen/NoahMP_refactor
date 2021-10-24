@@ -133,8 +133,8 @@ module water_routines
   REAL, PARAMETER :: TKAIR  = 0.023     !thermal conductivity of air (w/m/k) (not used MB: 20140718)
   REAL, PARAMETER :: RAIR   = 287.04    !gas constant for dry air (j/kg/k)
   REAL, PARAMETER :: RW     = 461.269   !gas constant for  water vapor (j/kg/k)
-  REAL, PARAMETER :: DENH2O = 1000.     !density of water (kg/m3)
-  REAL, PARAMETER :: DENICE = 917.      !density of ice (kg/m3)
+  REAL, PARAMETER :: DENH2O = 1000.0    !density of water (kg/m3)
+  REAL, PARAMETER :: DENICE = 917.0     !density of ice (kg/m3)
 
   INTEGER, PRIVATE, PARAMETER :: MBAND = 2
   INTEGER, PRIVATE, PARAMETER :: NSOIL = 4
@@ -500,7 +500,7 @@ contains
   REAL                             ,INTENT(INOUT):: SNOFLOW !glacier flow [mm/s]
   REAL                             ,INTENT(INOUT):: FCRMAX !maximum of FCR (-)
 
-  REAL, PARAMETER ::  WSLMAX = 5000.      !maximum lake water storage (mm)
+  REAL, PARAMETER ::  WSLMAX = 5000.0      !maximum lake water storage (mm)
 
 #ifdef WRF_HYDRO
   REAL                           , INTENT(INOUT)    :: sfcheadrt, WATBLED
@@ -509,10 +509,10 @@ contains
 ! ----------------------------------------------------------------------
 ! initialize
 
-   ETRANI(1:NSOIL) = 0.
-   SNOFLOW         = 0.
-   RUNSUB          = 0.
-   QINSUR          = 0.
+   ETRANI(1:NSOIL) = 0.0
+   SNOFLOW         = 0.0
+   RUNSUB          = 0.0
+   QINSUR          = 0.0
 
 ! canopy-intercepted snowfall/rainfall, drips, and throughfall
 
@@ -526,14 +526,14 @@ contains
 
 ! sublimation, frost, evaporation, and dew
 
-     QSNSUB = 0.
-     IF (SNEQV > 0.) THEN
+     QSNSUB = 0.0
+     IF (SNEQV > 0.0) THEN
        QSNSUB = MIN(QVAP, SNEQV/DT)
      ENDIF
      QSEVA = QVAP-QSNSUB
 
-     QSNFRO = 0.
-     IF (SNEQV > 0.) THEN
+     QSNFRO = 0.0
+     IF (SNEQV > 0.0) THEN
         QSNFRO = QDEW
      ENDIF
      QSDEW = QDEW - QSNFRO
@@ -546,12 +546,12 @@ contains
           &          QSNBOT ,SNOFLOW,PONDING1       ,PONDING2)  !out
 
    IF(FROZEN_GROUND) THEN
-      SICE(1) =  SICE(1) + (QSDEW-QSEVA)*DT/(DZSNSO(1)*1000.)
+      SICE(1) =  SICE(1) + (QSDEW-QSEVA)*DT/(DZSNSO(1)*1000.0)
       QSDEW = 0.0
       QSEVA = 0.0
-      IF(SICE(1) < 0.) THEN
+      IF(SICE(1) < 0.0) THEN
          SH2O(1) = SH2O(1) + SICE(1)
-         SICE(1) = 0.
+         SICE(1) = 0.0
       END IF
    END IF
 
@@ -584,21 +584,22 @@ contains
                              IRAMTFI,IRFIRATE)                         !inout
        QINSUR = QINSUR + (IRFIRATE/DT)                                ![m/s]
     END IF
+
 ! irrigation: call micro irrigation-pvk
     IF((CROPLU .EQV. .TRUE.) .AND. (IRAMTMI .GT. 0.0))THEN
        ! call micro irrigation, assuming we implement drip in first layer 
        ! of the Noah-MP. Change layer 1 moisture wrt to MI rate-pvk
        CALL MICRO_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,SICE,MIFAC, & !in
                              IRAMTMI,IRMIRATE)                          !inout
-       SH2O(1) = SH2O(1) + (IRMIRATE/(-1*ZSOIL(1)))
+       SH2O(1) = SH2O(1) + (IRMIRATE/(-1.0*ZSOIL(1)))
     END IF
 
 ! lake/soil water balances
 
     IF (IST == 2) THEN                                        ! lake
-       RUNSRF = 0.
-       IF(WSLAKE >= WSLMAX) RUNSRF = QINSUR*1000.             !mm/s
-       WSLAKE = WSLAKE + (QINSUR-QSEVA)*1000.*DT -RUNSRF*DT   !mm
+       RUNSRF = 0.0
+       IF(WSLAKE >= WSLMAX) RUNSRF = QINSUR*1000.0             !mm/s
+       WSLAKE = WSLAKE + (QINSUR-QSEVA)*1000.0*DT -RUNSRF*DT   !mm
     ELSE                                                      ! soil
        CALL      SOILWATER (parameters,NSOIL  ,NSNOW  ,DT     ,ZSOIL  ,DZSNSO , & !in
                             QINSUR ,QSEVA  ,ETRANI ,SICE   ,ILOC   , JLOC ,     & !in
@@ -635,7 +636,7 @@ contains
 
           SH2O(NSOIL) = SMC(NSOIL) - SICE(NSOIL)
           RUNSUB = RUNSUB + QDRAIN !it really comes from subroutine watertable, which is not called with the same frequency as the soil routines here
-          WA = 0.
+          WA = 0.0
        ENDIF
 
     ENDIF
@@ -709,61 +710,61 @@ contains
 ! evaporation, transpiration, and dew
 
       IF (.NOT.FROZEN_CANOPY) THEN             ! Barlage: change to frozen_canopy
-        ETRAN = MAX( FCTR/HVAP, 0. )
-        QEVAC = MAX( FCEV/HVAP, 0. )
-        QDEWC = ABS( MIN( FCEV/HVAP, 0. ) )
-        QSUBC = 0.
-        QFROC = 0.
+        ETRAN = MAX( FCTR/HVAP, 0.0 )
+        QEVAC = MAX( FCEV/HVAP, 0.0 )
+        QDEWC = ABS( MIN( FCEV/HVAP, 0.0 ) )
+        QSUBC = 0.0
+        QFROC = 0.0
       ELSE
-        ETRAN = MAX( FCTR/HSUB, 0. )
-        QEVAC = 0.
-        QDEWC = 0.
-        QSUBC = MAX( FCEV/HSUB, 0. )
-        QFROC = ABS( MIN( FCEV/HSUB, 0. ) )
+        ETRAN = MAX( FCTR/HSUB, 0.0 )
+        QEVAC = 0.0
+        QDEWC = 0.0
+        QSUBC = MAX( FCEV/HSUB, 0.0 )
+        QFROC = ABS( MIN( FCEV/HSUB, 0.0 ) )
       ENDIF
 
 ! canopy water balance. for convenience allow dew to bring CANLIQ above
 ! maxh2o or else would have to re-adjust drip
 
        QEVAC = MIN(CANLIQ/DT,QEVAC)
-       CANLIQ=MAX(0.,CANLIQ+(QDEWC-QEVAC)*DT)
+       CANLIQ=MAX(0.0,CANLIQ+(QDEWC-QEVAC)*DT)
        IF(CANLIQ <= 1.E-06) CANLIQ = 0.0
 
 ! --------------------------- canopy ice ------------------------------
 ! for canopy ice
 
-      MAXSNO = 6.6*(0.27+46./BDFALL) * (ELAI+ ESAI)
+      MAXSNO = 6.6*(0.27+46.0/BDFALL) * (ELAI+ ESAI)
 
       QSUBC = MIN(CANICE/DT,QSUBC)
-      CANICE= MAX(0.,CANICE + (QFROC-QSUBC)*DT)
-      IF(CANICE.LE.1.E-6) CANICE = 0.
+      CANICE= MAX(0.0,CANICE + (QFROC-QSUBC)*DT)
+      IF(CANICE.LE.1.E-6) CANICE = 0.0
 
 ! wetted fraction of canopy
 
-      IF(CANICE.GT.0.) THEN
-           FWET = MAX(0.,CANICE) / MAX(MAXSNO,1.E-06)
+      IF(CANICE.GT.0.0) THEN
+           FWET = MAX(0.0,CANICE) / MAX(MAXSNO,1.E-06)
       ELSE
-           FWET = MAX(0.,CANLIQ) / MAX(MAXLIQ,1.E-06)
+           FWET = MAX(0.0,CANLIQ) / MAX(MAXLIQ,1.E-06)
       ENDIF
-      FWET = MIN(FWET, 1.) ** 0.667
+      FWET = MIN(FWET, 1.0) ** 0.667
 
 ! phase change
 
-      QMELTC = 0.
-      QFRZC = 0.
+      QMELTC = 0.0
+      QFRZC = 0.0
 
       IF(CANICE.GT.1.E-6.AND.TV.GT.TFRZ) THEN
          QMELTC = MIN(CANICE/DT,(TV-TFRZ)*CICE*CANICE/DENICE/(DT*HFUS))
-         CANICE = MAX(0.,CANICE - QMELTC*DT)
-         CANLIQ = MAX(0.,CANLIQ + QMELTC*DT)
-         TV     = FWET*TFRZ + (1.-FWET)*TV
+         CANICE = MAX(0.0,CANICE - QMELTC*DT)
+         CANLIQ = MAX(0.0,CANLIQ + QMELTC*DT)
+         TV     = FWET*TFRZ + (1.0 - FWET)*TV
       ENDIF
 
       IF(CANLIQ.GT.1.E-6.AND.TV.LT.TFRZ) THEN
          QFRZC  = MIN(CANLIQ/DT,(TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS))
-         CANLIQ = MAX(0.,CANLIQ - QFRZC*DT)
-         CANICE = MAX(0.,CANICE + QFRZC*DT)
-         TV     = FWET*TFRZ + (1.-FWET)*TV
+         CANLIQ = MAX(0.0,CANLIQ - QFRZC*DT)
+         CANICE = MAX(0.0,CANICE + QFRZC*DT)
+         TV     = FWET*TFRZ + (1.0 - FWET)*TV
       ENDIF
 
 ! total canopy water
@@ -861,18 +862,18 @@ contains
 !set empty snow layers to zero
 
    do iz = -nsnow+1, isnow
-        snice(iz) = 0.
-        snliq(iz) = 0.
-        stc(iz)   = 0.
-        dzsnso(iz)= 0.
-        zsnso(iz) = 0.
+        snice(iz) = 0.0
+        snliq(iz) = 0.0
+        stc(iz)   = 0.0
+        dzsnso(iz)= 0.0
+        zsnso(iz) = 0.0
    enddo
 
 !to obtain equilibrium state of snow in glacier region
 
-   IF(SNEQV > 5000.) THEN   ! 5000 mm -> maximum water depth
+   IF(SNEQV > 5000.0) THEN   ! 5000 mm -> maximum water depth
       BDSNOW      = SNICE(0) / DZSNSO(0)
-      SNOFLOW     = (SNEQV - 5000.)
+      SNOFLOW     = (SNEQV - 5000.0)
       SNICE(0)    = SNICE(0)  - SNOFLOW
       DZSNSO(0)   = DZSNSO(0) - SNOFLOW/BDSNOW
       SNOFLOW     = SNOFLOW / DT
@@ -881,7 +882,7 @@ contains
 ! sum up snow mass for layered snow
 
    IF(ISNOW < 0) THEN  ! MB: only do for multi-layer
-       SNEQV = 0.
+       SNEQV = 0.0
        DO IZ = ISNOW+1,0
              SNEQV = SNEQV + SNICE(IZ) + SNLIQ(IZ)
        ENDDO
@@ -951,27 +952,27 @@ contains
 
 ! shallow snow / no layer
 
-    IF(ISNOW == 0 .and. QSNOW > 0.)  THEN
+    IF(ISNOW == 0 .and. QSNOW > 0.0)  THEN
       SNOWH = SNOWH + SNOWHIN * DT
       SNEQV = SNEQV + QSNOW * DT
     END IF
 
 ! creating a new layer
 
-    IF(ISNOW == 0  .AND. QSNOW>0. .AND. SNOWH >= 0.025) THEN !MB: change limit
+    IF(ISNOW == 0  .AND. QSNOW>0.0 .AND. SNOWH >= 0.025) THEN !MB: change limit
 !    IF(ISNOW == 0  .AND. QSNOW>0. .AND. SNOWH >= 0.05) THEN
       ISNOW    = -1
       NEWNODE  =  1
       DZSNSO(0)= SNOWH
-      SNOWH    = 0.
+      SNOWH    = 0.0
       STC(0)   = MIN(273.16, SFCTMP)   ! temporary setup
       SNICE(0) = SNEQV
-      SNLIQ(0) = 0.
+      SNLIQ(0) = 0.0
     END IF
 
 ! snow with layers
 
-    IF(ISNOW <  0 .AND. NEWNODE == 0 .AND. QSNOW > 0.) then
+    IF(ISNOW <  0 .AND. NEWNODE == 0 .AND. QSNOW > 0.0) then
          SNICE(ISNOW+1)  = SNICE(ISNOW+1)   + QSNOW   * DT
          DZSNSO(ISNOW+1) = DZSNSO(ISNOW+1)  + SNOWHIN * DT
     ENDIF
@@ -1027,7 +1028,7 @@ contains
        ISNOW_OLD = ISNOW
 
        DO J = ISNOW_OLD+1,0
-          IF (SNICE(J) <= .1) THEN
+          IF (SNICE(J) <= 0.1) THEN
              IF(J /= 0) THEN
                 SNLIQ(J+1) = SNLIQ(J+1) + SNLIQ(J)
                 SNICE(J+1) = SNICE(J+1) + SNICE(J)
@@ -1038,14 +1039,14 @@ contains
                 SNICE(J-1) = SNICE(J-1) + SNICE(J)
                 DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
                ELSE
-                 IF(SNICE(J) >= 0.) THEN
+                 IF(SNICE(J) >= 0.0) THEN
                   PONDING1 = SNLIQ(J)    ! ISNOW WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
                   SNEQV = SNICE(J)       ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
                   SNOWH = DZSNSO(J)      ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
                  ELSE   ! SNICE OVER-SUBLIMATED EARLIER
                   PONDING1 = SNLIQ(J) + SNICE(J)
-                  IF(PONDING1 < 0.) THEN  ! IF SNICE AND SNLIQ SUBLIMATES REMOVE FROM SOIL
-                   SICE(1) = MAX(0.0,SICE(1)+PONDING1/(DZSNSO(1)*1000.))
+                  IF(PONDING1 < 0.0) THEN  ! IF SNICE AND SNLIQ SUBLIMATES REMOVE FROM SOIL
+                   SICE(1) = MAX(0.0,SICE(1)+PONDING1/(DZSNSO(1)*1000.0))
                    PONDING1 = 0.0
                   END IF
                   SNEQV = 0.0
@@ -1074,17 +1075,17 @@ contains
 
 ! to conserve water in case of too large surface sublimation
 
-       IF(SICE(1) < 0.) THEN
+       IF(SICE(1) < 0.0) THEN
           SH2O(1) = SH2O(1) + SICE(1)
-          SICE(1) = 0.
+          SICE(1) = 0.0
        END IF
 
        IF(ISNOW ==0) RETURN   ! MB: get out if no longer multi-layer
 
-       SNEQV  = 0.
-       SNOWH  = 0.
-       ZWICE  = 0.
-       ZWLIQ  = 0.
+       SNEQV  = 0.0
+       SNOWH  = 0.0
+       ZWICE  = 0.0
+       ZWLIQ  = 0.0
 
        DO J = ISNOW+1,0
              SNEQV = SNEQV + SNICE(J) + SNLIQ(J)
@@ -1101,7 +1102,7 @@ contains
           ISNOW  = 0
           SNEQV = ZWICE
           PONDING2 = ZWLIQ           ! LIMIT OF ISNOW < 0 MEANS INPUT PONDING
-          IF(SNEQV <= 0.) SNOWH = 0. ! SHOULD BE ZERO; SEE ABOVE
+          IF(SNEQV <= 0.0) SNOWH = 0.0 ! SHOULD BE ZERO; SEE ABOVE
        END IF
 
 !       IF (SNOWH < 0.05 ) THEN
@@ -1220,9 +1221,9 @@ contains
           ! Specify a new snow layer
           IF (DZ(1) > 0.05) THEN
              MSNO = 2
-             DZ(1)    = DZ(1)/2.
-             SWICE(1) = SWICE(1)/2.
-             SWLIQ(1) = SWLIQ(1)/2.
+             DZ(1)    = DZ(1)/2.0
+             SWICE(1) = SWICE(1)/2.0
+             SWLIQ(1) = SWLIQ(1)/2.0
              DZ(2)    = DZ(1)
              SWICE(2) = SWICE(1)
              SWLIQ(2) = SWLIQ(1)
@@ -1248,18 +1249,18 @@ contains
              IF (MSNO <= 2 .AND. DZ(2) > 0.20) THEN  ! MB: change limit
 !             IF (MSNO <= 2 .AND. DZ(2) > 0.10) THEN
                 MSNO = 3
-                DTDZ = (TSNO(1) - TSNO(2))/((DZ(1)+DZ(2))/2.)
-                DZ(2)    = DZ(2)/2.
-                SWICE(2) = SWICE(2)/2.
-                SWLIQ(2) = SWLIQ(2)/2.
+                DTDZ = (TSNO(1) - TSNO(2))/((DZ(1)+DZ(2))/2.0)
+                DZ(2)    = DZ(2)/2.0
+                SWICE(2) = SWICE(2)/2.0
+                SWLIQ(2) = SWLIQ(2)/2.0
                 DZ(3)    = DZ(2)
                 SWICE(3) = SWICE(2)
                 SWLIQ(3) = SWLIQ(2)
-                TSNO(3) = TSNO(2) - DTDZ*DZ(2)/2.
+                TSNO(3) = TSNO(2) - DTDZ*DZ(2)/2.0
                 IF (TSNO(3) >= TFRZ) THEN
                    TSNO(3)  = TSNO(2)
                 ELSE
-                   TSNO(2) = TSNO(2) + DTDZ*DZ(2)/2.
+                   TSNO(2) = TSNO(2) + DTDZ*DZ(2)/2.0
                 ENDIF
 
              END IF
@@ -1336,7 +1337,7 @@ contains
     H2= (CICE*WICE2+CWAT*WLIQ2) * (T2-TFRZ)+HFUS*WLIQ2
 
     HC = H + H2
-    IF(HC < 0.)THEN
+    IF(HC < 0.0)THEN
        TC = TFRZ + HC/(CICE*WICEC + CWAT*WLIQC)
     ELSE IF (HC.LE.HFUS*WLIQC) THEN
        TC = TFRZ
@@ -1407,12 +1408,12 @@ contains
 
         WX      = SNICE(J) + SNLIQ(J)
         FICE(J) = SNICE(J) / WX
-        VOID    = 1. - (SNICE(J)/DENICE + SNLIQ(J)/DENH2O) / DZSNSO(J)
+        VOID    = 1.0 - (SNICE(J)/DENICE + SNLIQ(J)/DENH2O) / DZSNSO(J)
 
         ! Allow compaction only for non-saturated node and higher ice lens node.
         IF (VOID > 0.001 .AND. SNICE(J) > 0.1) THEN
            BI = SNICE(J) / DZSNSO(J)
-           TD = MAX(0.,TFRZ-STC(J))
+           TD = MAX(0.0,TFRZ-STC(J))
            DEXPF = EXP(-C4*TD)
 
            ! Settling as a result of destructive metamorphism
@@ -1432,10 +1433,10 @@ contains
            ! Compaction occurring during melt
 
            IF (IMELT(J) == 1) THEN
-              DDZ3 = MAX(0.,(FICEOLD(J) - FICE(J))/MAX(1.E-6,FICEOLD(J)))
+              DDZ3 = MAX(0.0,(FICEOLD(J) - FICE(J))/MAX(1.E-6,FICEOLD(J)))
               DDZ3 = - DDZ3/DT           ! sometimes too large
            ELSE
-              DDZ3 = 0.
+              DDZ3 = 0.0
            END IF
 
            ! Time rate of fractional change in DZ (units of s-1)
@@ -1514,11 +1515,11 @@ contains
 
 !for the case when SNEQV becomes '0' after 'COMBINE'
 
-   IF(SNEQV == 0.) THEN
-      SICE(1) =  SICE(1) + (QSNFRO-QSNSUB)*DT/(DZSNSO(1)*1000.)  ! Barlage: SH2O->SICE v3.6
-      IF(SICE(1) < 0.) THEN
+   IF(SNEQV == 0.0) THEN
+      SICE(1) =  SICE(1) + (QSNFRO-QSNSUB)*DT/(DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
+      IF(SICE(1) < 0.0) THEN
          SH2O(1) = SH2O(1) + SICE(1)
-         SICE(1) = 0.
+         SICE(1) = 0.0
       END IF
    END IF
 
@@ -1527,21 +1528,21 @@ contains
 ! excessive sublimation is used to reduce soil water. Smaller time steps would tend 
 ! to aviod this problem.
 
-   IF(ISNOW == 0 .and. SNEQV > 0.) THEN
+   IF(ISNOW == 0 .and. SNEQV > 0.0) THEN
       TEMP   = SNEQV
       SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
       PROPOR = SNEQV/TEMP
-      SNOWH  = MAX(0.,PROPOR * SNOWH)
+      SNOWH  = MAX(0.0,PROPOR * SNOWH)
       SNOWH  = MIN(MAX(SNOWH,SNEQV/500.0),SNEQV/50.0)  ! limit adjustment to a reasonable density
 
-      IF(SNEQV < 0.) THEN
-         SICE(1) = SICE(1) + SNEQV/(DZSNSO(1)*1000.)
-         SNEQV   = 0.
-         SNOWH   = 0.
+      IF(SNEQV < 0.0) THEN
+         SICE(1) = SICE(1) + SNEQV/(DZSNSO(1)*1000.0)
+         SNEQV   = 0.0
+         SNOWH   = 0.0
       END IF
-      IF(SICE(1) < 0.) THEN
+      IF(SICE(1) < 0.0) THEN
          SH2O(1) = SH2O(1) + SICE(1)
-         SICE(1) = 0.
+         SICE(1) = 0.0
       END IF
    END IF
 
@@ -1565,7 +1566,7 @@ contains
       !KWM:  Subroutine COMBINE can change ISNOW to make it 0 again?
       IF ( ISNOW < 0 ) THEN !KWM added this IF statement to prevent out-of-bounds array references
          SNLIQ(ISNOW+1) = SNLIQ(ISNOW+1) + QRAIN * DT
-         SNLIQ(ISNOW+1) = MAX(0., SNLIQ(ISNOW+1))
+         SNLIQ(ISNOW+1) = MAX(0.0, SNLIQ(ISNOW+1))
       ENDIF
 
    ENDIF !KWM  -- Can the ENDIF be moved toward the end of the subroutine (Just set QSNBOT=0)?
@@ -1573,17 +1574,17 @@ contains
 ! Porosity and partial volume
 
    DO J = ISNOW+1, 0
-     VOL_ICE(J)      = MIN(1., SNICE(J)/(DZSNSO(J)*DENICE))
-     EPORE(J)        = 1. - VOL_ICE(J)
+     VOL_ICE(J)      = MIN(1.0, SNICE(J)/(DZSNSO(J)*DENICE))
+     EPORE(J)        = 1.0 - VOL_ICE(J)
    END DO
 
-   QIN = 0.
-   QOUT = 0.
+   QIN = 0.0
+   QOUT = 0.0
 
    DO J = ISNOW+1, 0
      SNLIQ(J) = SNLIQ(J) + QIN
      VOL_LIQ(J) = SNLIQ(J)/(DZSNSO(J)*DENH2O)
-     QOUT = MAX(0.,(VOL_LIQ(J)-parameters%SSI*EPORE(J))*DZSNSO(J))
+     QOUT = MAX(0.0,(VOL_LIQ(J)-parameters%SSI*EPORE(J))*DZSNSO(J))
      IF(J == 0) THEN
        QOUT = MAX((VOL_LIQ(J)- EPORE(J))*DZSNSO(J) , parameters%SNOW_RET_FAC*DT*QOUT)
      END IF
@@ -1701,7 +1702,7 @@ contains
 
     DO K = 1,NSOIL
        EPORE   = MAX ( 1.E-4 , ( parameters%SMCMAX(K) - SICE(K) ) )
-       RSAT    = RSAT + MAX(0.,SH2O(K)-EPORE)*DZSNSO(K)
+       RSAT    = RSAT + MAX(0.0,SH2O(K)-EPORE)*DZSNSO(K)
        SH2O(K) = MIN(EPORE,SH2O(K))
     END DO
 
@@ -1738,10 +1739,11 @@ contains
 !jref impermable surface at urban
     IF ( parameters%urban_flag ) FCR(1)= 0.95
 
+
     IF(OPT_RUN == 1) THEN
        FFF = 6.0
        FSAT   = parameters%FSATMX*EXP(-0.5*FFF*(ZWT-2.0))
-       IF(QINSUR > 0.) THEN
+       IF(QINSUR > 0.0) THEN
          RUNSRF = QINSUR * ( (1.0-FCR(1))*FSAT + FCR(1) )
          PDDUM  = QINSUR - RUNSRF                          ! m/s 
        END IF
@@ -1749,8 +1751,8 @@ contains
 
     IF(OPT_RUN == 5) THEN
        FFF = 6.0
-       FSAT   = parameters%FSATMX*EXP(-0.5*FFF*MAX(-2.0-ZWT,0.))
-       IF(QINSUR > 0.) THEN
+       FSAT   = parameters%FSATMX*EXP(-0.5*FFF*MAX(-2.0-ZWT,0.0))
+       IF(QINSUR > 0.0) THEN
          RUNSRF = QINSUR * ( (1.0-FCR(1))*FSAT + FCR(1) )
          PDDUM  = QINSUR - RUNSRF                          ! m/s
        END IF
@@ -1759,7 +1761,7 @@ contains
     IF(OPT_RUN == 2) THEN
        FFF   = 2.0
        FSAT   = parameters%FSATMX*EXP(-0.5*FFF*ZWT)
-       IF(QINSUR > 0.) THEN
+       IF(QINSUR > 0.0) THEN
          RUNSRF = QINSUR * ( (1.0-FCR(1))*FSAT + FCR(1) )
          PDDUM  = QINSUR - RUNSRF                          ! m/s 
        END IF
@@ -1772,17 +1774,17 @@ contains
     END IF
 
     IF(OPT_RUN == 4) THEN
-       SMCTOT = 0.
-       DZTOT  = 0.
+       SMCTOT = 0.0
+       DZTOT  = 0.0
        DO K = 1,NSOIL
           DZTOT   = DZTOT  + DZSNSO(K)
           SMCTOT  = SMCTOT + SMC(K)/parameters%SMCMAX(K)*DZSNSO(K)
           IF(DZTOT >= 2.0) EXIT
        END DO
        SMCTOT = SMCTOT/DZTOT
-       FSAT   = MAX(0.01,SMCTOT) ** 4.        !BATS
+       FSAT   = MAX(0.01,SMCTOT) ** 4.0        !BATS
 
-       IF(QINSUR > 0.) THEN
+       IF(QINSUR > 0.0) THEN
          RUNSRF = QINSUR * ((1.0-FCR(1))*FSAT+FCR(1))
          PDDUM  = QINSUR - RUNSRF                       ! m/s
        END IF
@@ -1804,7 +1806,6 @@ contains
 ! determine iteration times and finer time step
 
     NITER = 1
-
 !    IF(OPT_INF == 1) THEN    !OPT_INF =2 may cause water imbalance
        NITER = 3
        IF (PDDUM*DT>DZSNSO(1)*parameters%SMCMAX(1) ) THEN
@@ -1813,30 +1814,29 @@ contains
 !    END IF                 
 
     DTFINE  = DT / NITER
-
 ! solve soil moisture
     FACC        = 1E-06
     QDRAIN_SAVE = 0.0
     RUNSRF_SAVE = 0.0
 
     DO ITER = 1, NITER
-       IF(QINSUR > 0. .and. OPT_RUN == 3) THEN
+       IF(QINSUR > 0.0 .and. OPT_RUN == 3) THEN
           CALL INFIL (parameters,NSOIL  ,DTFINE     ,ZSOIL  ,SH2O   ,SICE   , & !in
                       SICEMAX,QINSUR ,                         & !in
                       PDDUM  ,RUNSRF )                           !out
        END IF
 
-       IF(QINSUR > 0. .and. OPT_RUN == 6) THEN
+       IF(QINSUR > 0.0 .and. OPT_RUN == 6) THEN
           CALL COMPUTE_VIC_SURFRUNOFF(parameters,DTFINE,NSOIL,SMC,ZSOIL,QINSUR,& !in
                                       FSAT,RUNSRF,PDDUM)                         !out
        END IF
 
-       IF (QINSUR > 0. .AND. OPT_RUN == 7) THEN
+       IF (QINSUR > 0.0 .AND. OPT_RUN == 7) THEN
           CALL COMPUTE_XAJ_SURFRUNOFF(parameters,DTFINE,FCR,NSOIL,SMC,ZSOIL,QINSUR,& ! in
                                       RUNSRF,PDDUM)                                  ! out
        END IF
 
-       IF(QINSUR > 0. .and. OPT_RUN == 8) THEN
+       IF(QINSUR > 0.0 .and. OPT_RUN == 8) THEN
           CALL DYNAMIC_VIC(parameters,DTFINE,SMC,SH2O,SICE,SICEMAX,NSOIL,&
                            ZSOIL,QINSUR,FACC,PDDUM,RUNSRF)
        END IF
@@ -1861,8 +1861,8 @@ contains
     QDRAIN = QDRAIN_SAVE/NITER
     RUNSRF = RUNSRF_SAVE/NITER
 
-    RUNSRF = RUNSRF * 1000. + RSAT * 1000./DT  ! m/s -> mm/s
-    QDRAIN = QDRAIN * 1000.
+    RUNSRF = RUNSRF * 1000.0 + RSAT * 1000.0/DT  ! m/s -> mm/s
+    QDRAIN = QDRAIN * 1000.0
 
 
 ! Calling tile drainage ! pvk
@@ -1885,31 +1885,29 @@ contains
 ! removal of soil water due to groundwater flow (option 2)
 
     IF(OPT_RUN == 2) THEN
-         WTSUB = 0.
+         WTSUB = 0.0
          DO K = 1, NSOIL
            WTSUB = WTSUB + WCND(K)*DZSNSO(K)
          END DO
-
          DO K = 1, NSOIL
            MH2O    = RUNSUB*DT*(WCND(K)*DZSNSO(K))/WTSUB       ! mm
-           SH2O(K) = SH2O(K) - MH2O/(DZSNSO(K)*1000.)
+           SH2O(K) = SH2O(K) - MH2O/(DZSNSO(K)*1000.0)
          END DO
     END IF
 
 ! Limit MLIQ to be greater than or equal to watmin.
 ! Get water needed to bring MLIQ equal WATMIN from lower layer.
-
    IF(OPT_RUN /= 1) THEN
       DO IZ = 1, NSOIL
-         MLIQ(IZ) = SH2O(IZ)*DZSNSO(IZ)*1000.
+         MLIQ(IZ) = SH2O(IZ)*DZSNSO(IZ)*1000.0
       END DO
 
       WATMIN = 0.01           ! mm
       DO IZ = 1, NSOIL-1
-          IF (MLIQ(IZ) .LT. 0.) THEN
+          IF (MLIQ(IZ) .LT. 0.0) THEN
              XS = WATMIN-MLIQ(IZ)
           ELSE
-             XS = 0.
+             XS = 0.0
           END IF
           MLIQ(IZ  ) = MLIQ(IZ  ) + XS
           MLIQ(IZ+1) = MLIQ(IZ+1) - XS
@@ -1919,17 +1917,16 @@ contains
         IF (MLIQ(IZ) .LT. WATMIN) THEN
            XS = WATMIN-MLIQ(IZ)
         ELSE
-           XS = 0.
+           XS = 0.0
         END IF
         MLIQ(IZ) = MLIQ(IZ) + XS
         RUNSUB   = RUNSUB - XS/DT
         IF(OPT_RUN == 5)DEEPRECH = DEEPRECH - XS*1.E-3
 
       DO IZ = 1, NSOIL
-        SH2O(IZ)     = MLIQ(IZ) / (DZSNSO(IZ)*1000.)
+        SH2O(IZ)     = MLIQ(IZ) / (DZSNSO(IZ)*1000.0)
       END DO
    END IF
-
   END SUBROUTINE SOILWATER
 
 !== begin zwteq ====================================================================================
@@ -1964,7 +1961,7 @@ contains
   REAL, DIMENSION(1:NFINE) :: ZFINE !layer-bottom depth of the 100-L soil layers to 6.0 m
 ! ----------------------------------------------------------------------
 
-   WD1 = 0.
+   WD1 = 0.0
    DO K = 1,NSOIL
      WD1 = WD1 + (parameters%SMCMAX(1)-SH2O(K)) * DZSNSO(K) ! [m]
    ENDDO
@@ -1974,12 +1971,12 @@ contains
       ZFINE(K) = FLOAT(K) * DZFINE
    ENDDO
 
-   ZWT = -3.*ZSOIL(NSOIL) - 0.001   ! initial value [m]
+   ZWT = -3.0*ZSOIL(NSOIL) - 0.001   ! initial value [m]
 
-   WD2 = 0.
+   WD2 = 0.0
    DO K = 1,NFINE
-     TEMP  = 1. + (ZWT-ZFINE(K))/parameters%PSISAT(1)
-     WD2   = WD2 + parameters%SMCMAX(1)*(1.-TEMP**(-1./parameters%BEXP(1)))*DZFINE
+     TEMP  = 1.0 + (ZWT-ZFINE(K))/parameters%PSISAT(1)
+     WD2   = WD2 + parameters%SMCMAX(1)*(1.0-TEMP**(-1.0/parameters%BEXP(1)))*DZFINE
      IF(ABS(WD2-WD1).LE.0.01) THEN
         ZWT = ZFINE(K)
         EXIT
@@ -2030,7 +2027,7 @@ contains
 ! --------------------------------------------------------------------------------
 
     IF (QINSUR >  0.0) THEN
-       DT1 = DT /86400.
+       DT1 = DT /86400.0
        SMCAV = parameters%SMCMAX(1) - parameters%SMCWLT(1)
 
 ! maximum infiltration rate
@@ -2048,17 +2045,17 @@ contains
           DD      = DD + DMAX(K)
        END DO
 
-       VAL = (1. - EXP ( - parameters%KDT * DT1))
+       VAL = (1.0 - EXP ( - parameters%KDT * DT1))
        DDT = DD * VAL
-       PX  = MAX(0.,QINSUR * DT)
+       PX  = MAX(0.0,QINSUR * DT)
        INFMAX = (PX * (DDT / (PX + DDT)))/ DT
 
 ! impermeable fraction due to frozen soil
 
-       FCR = 1.
+       FCR = 1.0
        IF (DICE >  1.E-2) THEN
           ACRT = CVFRZ * parameters%FRZX / DICE
-          SUM = 1.
+          SUM = 1.0
           IALP1 = CVFRZ - 1
           DO J = 1,IALP1
              K = 1
@@ -2067,7 +2064,7 @@ contains
              END DO
              SUM = SUM + (ACRT ** (CVFRZ - J)) / FLOAT(K)
           END DO
-          FCR = 1. - EXP (-ACRT) * SUM
+          FCR = 1.0 - EXP (-ACRT) * SUM
        END IF
 
 ! correction of infiltration limitation
@@ -2081,7 +2078,7 @@ contains
        INFMAX = MAX (INFMAX,WCND)
        INFMAX = MIN (INFMAX,PX)
 
-       RUNSRF= MAX(0., QINSUR - INFMAX)
+       RUNSRF= MAX(0.0, QINSUR - INFMAX)
        PDDUM = QINSUR - RUNSRF
 
     END IF
@@ -2178,7 +2175,7 @@ contains
        ELSE
           DENOM(K) = (ZSOIL(K-1) - ZSOIL(K))
           IF(OPT_RUN == 1 .or. OPT_RUN == 2) THEN
-             QDRAIN   = 0.
+             QDRAIN   = 0.0
           END IF
           IF(OPT_RUN == 3 .OR. OPT_RUN == 6 .OR. OPT_RUN == 7 .OR. OPT_RUN == 8) THEN
              QDRAIN   = parameters%SLOPE*WCND(K)
@@ -2190,7 +2187,7 @@ contains
              TEMP1    = 2.0 * DENOM(K)
              IF(ZWT < ZSOIL(NSOIL)-DENOM(NSOIL))THEN
 !gmm interpolate from below, midway to the water table, to the middle of the auxiliary layer below the soil bottom
-                SMXBOT = SMX(K) - (SMX(K)-SMXWTD) *  DENOM(K) * 2./ (DENOM(K) + ZSOIL(K) - ZWT)
+                SMXBOT = SMX(K) - (SMX(K)-SMXWTD) *  DENOM(K) * 2.0/ (DENOM(K) + ZSOIL(K) - ZWT)
              ELSE
                 SMXBOT = SMXWTD
              ENDIF
@@ -2275,7 +2272,7 @@ contains
     DO K = 1,NSOIL
        RHSTT (K) =   RHSTT(K) * DT
        AI (K)    =      AI(K) * DT
-       BI (K)    = 1. + BI(K) * DT
+       BI (K)    = 1.0 + BI(K) * DT
        CI (K)    =      CI(K) * DT
     END DO
 
@@ -2448,17 +2445,18 @@ contains
   TOP_MAX_MOIST = 0.0
   RUNSRF = 0.0
 
+
   DO IZ=1,NSOIL-2
-    TOP_MOIST     = TOP_MOIST + (SMC(IZ)*-1*ZSOIL(IZ)) ! m
-    TOP_MAX_MOIST = TOP_MAX_MOIST + (parameters%SMCMAX(IZ)*-1*ZSOIL(IZ)) ! m  
+    TOP_MOIST     = TOP_MOIST + (SMC(IZ)*-1.0*ZSOIL(IZ)) ! m
+    TOP_MAX_MOIST = TOP_MAX_MOIST + (parameters%SMCMAX(IZ)*-1.0*ZSOIL(IZ)) ! m  
   END DO
 
-
   ! Saturated area from soil moisture
-  EX    = parameters%BVIC/(1+parameters%BVIC)
-  ASAT  = 1.0 - (( 1.0 - (TOP_MOIST/TOP_MAX_MOIST))**EX)  ! 
+  EX    = parameters%BVIC/(1.0+parameters%BVIC)
+  ASAT  = 1.0 - (( max(0.0,(1.0 - (TOP_MOIST/TOP_MAX_MOIST))))**EX)  ! 
   ASAT  = MAX(0.0, ASAT)
   ASAT  = MIN(1.0, ASAT)
+
 
   ! Infiltration for the previous time-step soil moisture based on ASAT
   I_MAX = (1.0 + parameters%BVIC)*TOP_MAX_MOIST ! m
@@ -2473,14 +2471,13 @@ contains
      RUNSRF = (QINSUR*DT) - TOP_MAX_MOIST + TOP_MOIST
   ELSE
      BASIS  = 1.0 - ((I_0 + (QINSUR*DT))/I_MAX)
-
      RUNSRF = (QINSUR*DT) - TOP_MAX_MOIST + TOP_MOIST + &
               TOP_MAX_MOIST*(basis**(1.0+parameters%BVIC))
   END IF
 
   RUNSRF = RUNSRF/(DT) ! m/s
   IF (RUNSRF .LT. 0.0) RUNSRF = 0.0
-  IF (RUNSRF .GT. QINSUR)RUNSRF = QINSUR
+  IF (RUNSRF .GT. QINSUR) RUNSRF = QINSUR
 
   PDDUM = QINSUR - RUNSRF    ! m/s
 
@@ -2531,14 +2528,14 @@ contains
     RUNSRF  = 0.0
 
     DO IZ=1,NSOIL-2
-       IF ((SMC(IZ)-parameters%SMCREF(IZ)) .GT. 0.) THEN ! soil moisture greater than field capacity
-          SM     = SM + (SMC(IZ) - parameters%SMCREF(IZ) )*-1*ZSOIL(IZ) !m
-          WM     = WM + (parameters%SMCREF(IZ)*-1*ZSOIL(IZ))            !m  
+       IF ((SMC(IZ)-parameters%SMCREF(IZ)) .GT. 0.0) THEN ! soil moisture greater than field capacity
+          SM     = SM + (SMC(IZ) - parameters%SMCREF(IZ) )*-1.0*ZSOIL(IZ) !m
+          WM     = WM + (parameters%SMCREF(IZ)*-1.0*ZSOIL(IZ))            !m  
        ELSE
-          WM     = WM + (SMC(IZ)*-1*ZSOIL(IZ))
+          WM     = WM + (SMC(IZ)*-1.0*ZSOIL(IZ))
        END IF
-       WM_MAX = WM_MAX + (parameters%SMCREF(IZ)*-1*ZSOIL(IZ))
-       SM_MAX = SM_MAX + (parameters%SMCMAX(IZ) - parameters%SMCREF(IZ))*-1*ZSOIL(IZ)
+       WM_MAX = WM_MAX + (parameters%SMCREF(IZ)*-1.0*ZSOIL(IZ))
+       SM_MAX = SM_MAX + (parameters%SMCMAX(IZ) - parameters%SMCREF(IZ))*-1.0*ZSOIL(IZ)
     END DO
     WM = MIN(WM,WM_MAX) ! tension water (m) 
     SM = MIN(SM,SM_MAX) ! free water (m)
@@ -2548,16 +2545,16 @@ contains
 
 ! solve pervious surface runoff (m) based on Eq. (310)
     IF ((WM/WM_MAX) .LE. (0.5-parameters%AXAJ))THEN
-       PRUNOFF = (1-FCR(1))*QINSUR*DT*((0.5-parameters%AXAJ)**(1-parameters%BXAJ))*((WM/WM_MAX)**parameters%BXAJ)
+       PRUNOFF = (1.0-FCR(1))*QINSUR*DT*((0.5-parameters%AXAJ)**(1.0-parameters%BXAJ))*((WM/WM_MAX)**parameters%BXAJ)
     ELSE
-       PRUNOFF = (1-FCR(1))*QINSUR*DT*(1-(((0.5+parameters%AXAJ)**(1-parameters%BXAJ))*((1-(WM/WM_MAX))**parameters%BXAJ)))
+       PRUNOFF = (1.0-FCR(1))*QINSUR*DT*(1.0-(((0.5+parameters%AXAJ)**(1.0-parameters%BXAJ))*((1.0-(WM/WM_MAX))**parameters%BXAJ)))
     END IF
 
 ! estimate surface runoff based on Eq. (313)
     IF(QINSUR .EQ. 0.0) THEN
       RUNSRF  = 0.0
     ELSE
-      RUNSRF = PRUNOFF*(1-((1-(SM/SM_MAX))**parameters%XXAJ))+IRUNOFF
+      RUNSRF = PRUNOFF*(1.0-((1.0-(SM/SM_MAX))**parameters%XXAJ))+IRUNOFF
     END IF
     RUNSRF = RUNSRF/DT !m/s
     RUNSRF = MAX(0.0,    RUNSRF)
@@ -2635,16 +2632,16 @@ contains
   BB = parameters%BBVIC
 
   DO IZ=1,NSOIL-2
-    TOP_MOIST     = TOP_MOIST + (SMC(IZ)*-1*ZSOIL(IZ))                                   ! actual moisture in top layers, [m]
-    TOP_MAX_MOIST = TOP_MAX_MOIST + (parameters%SMCMAX(IZ)*-1*ZSOIL(IZ))                 ! maximum moisture in top layers, [m]  
+    TOP_MOIST     = TOP_MOIST + (SMC(IZ)*-1.0*ZSOIL(IZ))                                   ! actual moisture in top layers, [m]
+    TOP_MAX_MOIST = TOP_MAX_MOIST + (parameters%SMCMAX(IZ)*-1.0*ZSOIL(IZ))                 ! maximum moisture in top layers, [m]  
   END DO
-
   IF(TOP_MOIST .GT. TOP_MAX_MOIST) TOP_MOIST = TOP_MAX_MOIST
   DP     = QINSUR * DT                                                                   ! precipitation depth, [m]
   I_MAX  = TOP_MAX_MOIST * (parameters%BDVIC+1.0)                                         ! maximum infiltration capacity, im, [m], Eq. 14
-  I_0    = I_MAX * (1-(1-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))        ! infiltration capacity, i [m] in the Eq. 1
+  I_0    = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))        ! infiltration capacity, i [m] in the Eq. 1
   ! I_MAX = CAP_minf ; I_0 = A  
   INFLMAX = 0
+
 
   IF (OPT_INFDV .EQ. 1) THEN
      CALL PHILIP_INFIL(parameters,NSOIL,SMC,SICE,QINSUR,DT,FACC,FSUR,INFLMAX)
@@ -2670,13 +2667,13 @@ contains
       INFILTRTN = 0.0
       GOTO 2001
     ELSE
-      I_0 = I_MAX * (1-(1-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
+      I_0 = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
       IF((DP+I_0) .GT. I_MAX)THEN
         IF((FMAX*DT) .GE. DP) THEN
           YD     = I_MAX - I_0
           TEMPR1 = 0.0
           CALL RR1(parameters,I_0,I_MAX,YD,TEMPR1)
-          TEMP1  = I_MAX-I_0-TEMPR1-((FSUR*DT) * (1 - (1-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
+          TEMP1  = I_MAX-I_0-TEMPR1-((FSUR*DT) * (1.0 - (1.0-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
           IF(TEMP1 .LE. 0.0) THEN
             YD        = I_MAX - I_0
             INFILTRTN = TOP_MAX_MOIST - TOP_MOIST
@@ -2687,12 +2684,11 @@ contains
             GOTO 2001
           ELSE
             YD        = 0.0
-
             DO IZ = 1,IZMAX ! loop : IITERATION1
                YD_OLD = YD
                TEMPR1 = 0.0
                CALL RR1(parameters,I_0,I_MAX,YD,TEMPR1)
-               YD     = TEMPR1 + ((FSUR*DT) * (1 - (1-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
+               YD     = TEMPR1 + ((FSUR*DT) * (1.0 - (1.0-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
                IF ((ABS(YD-YD_OLD) .LE. ERROR) .OR. (IZ .EQ. IZMAX)) THEN
                   GOTO 1003
                END IF
@@ -2723,7 +2719,6 @@ contains
                  END IF
               END DO
             END IF
-
           ELSE
 
             YD = DP/2.0
@@ -2760,7 +2755,7 @@ contains
             YD        = I_0+YD
             IF (TOP_MOIST .LE. 0.0) TOP_MOIST=0.0
             IF (TOP_MOIST .GE. TOP_MAX_MOIST) TOP_MOIST = TOP_MAX_MOIST
-            I_0       = I_MAX * (1-(1-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
+            I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
             GOTO 2001
           END IF
         END IF
@@ -2772,7 +2767,7 @@ contains
              YD_OLD = YD
              TEMPR1 = 0.0
              CALL RR1(parameters,I_0,I_MAX,YD,TEMPR1)
-             YD = TEMPR1 + ((FSUR*DT) * (1 - (1-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
+             YD = TEMPR1 + ((FSUR*DT) * (1.0 - (1.0-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
              IF ((ABS(YD - YD_OLD) .LE. ERROR) .OR. (IZ .EQ. IZMAX)) THEN
                 GOTO 1004
              END IF
@@ -2830,7 +2825,7 @@ contains
         TOP_MOIST = TOP_MOIST + INFILTRTN
         IF (TOP_MOIST .LE. 0.0) TOP_MOIST=0.0
         IF (TOP_MOIST .GE. TOP_MAX_MOIST) TOP_MOIST = TOP_MAX_MOIST
-        I_0       = I_MAX * (1-(1-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
+        I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+parameters%BDVIC))))
       END IF
     END IF
   END IF
@@ -2861,8 +2856,8 @@ contains
    IF(TDEPTH .GT. I_MAX) TDEPTH = I_MAX
 
    !Saturation excess runoff , Eq 5.
-   R1 = YD - ( (I_MAX/(parameters%BDVIC+1.0)) * ( ((1 - (I_0/I_MAX))**(parameters%BDVIC+1.0)) &
-                                               - ((1 - (TDEPTH/I_MAX))**(parameters%BDVIC+1.0))))
+   R1 = YD - ( (I_MAX/(parameters%BDVIC+1.0)) * ( ((1.0 - (I_0/I_MAX))**(parameters%BDVIC+1.0)) &
+                                               - ((1.0 - (TDEPTH/I_MAX))**(parameters%BDVIC+1.0))))
 
    IF (R1 .LT. 0.0) R1 = 0.0
 
@@ -2881,7 +2876,7 @@ contains
 !------------------------------------------------------
 
    IF(YD .GE. Y0)THEN
-     R2 = DP - R1 - (FMAX*DT* (1 - ((1 - (DP-R1)/(FMAX*DT))**(BB+1.0))))
+     R2 = DP - R1 - (FMAX*DT* (1.0 - ((1.0 - (DP-R1)/(FMAX*DT))**(BB+1.0))))
    ELSE
      R2 = DP - R1 - (FMAX*DT)
    END IF
@@ -2933,12 +2928,8 @@ END SUBROUTINE RR2
       CALL WDFCND2 (parameters,WDF,WCND,parameters%SMCWLT(ISOIL),0.0,ISOIL)
 
       ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-      JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * -1 * ZSOIL(ISOIL)
-      IF(JJ .eq. 0)THEN ! infiltration at surface == saturated hydraulic conductivity
-        FSUR = WCND
-      ELSE
-        FSUR = parameters%DKSAT(ISOIL) + (GAM * (parameters%DKSAT(ISOIL) - WCND) / (EXP(GAM * 1E-05 / JJ) -1))
-      END IF
+      JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * -1.0 * ZSOIL(ISOIL)
+      FSUR = parameters%DKSAT(ISOIL) + (GAM * (parameters%DKSAT(ISOIL) - WCND) / (EXP(GAM * 1E-05 / JJ) -1.0))
 
       ! infiltration rate at surface
       IF(parameters%DKSAT(ISOIL) .LT. QINSUR)THEN
@@ -2954,11 +2945,11 @@ END SUBROUTINE RR2
       CALL WDFCND2 (parameters,WDF,WCND,SMC(ISOIL),SICE(ISOIL),ISOIL)
 
       ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-      JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - SMC(ISOIL)) * -1 * ZSOIL(ISOIL)
-      IF(JJ .eq. 0)THEN ! infiltration at surface == saturated hydraulic conductivity
+      JJ   = parameters%GDVIC * max(0.0,(parameters%SMCMAX(ISOIL) - SMC(ISOIL))) * -1.0 * ZSOIL(ISOIL)
+      IF(JJ .eq. 0.0)THEN ! infiltration at surface == saturated hydraulic conductivity
         FSUR = WCND
       ELSE
-        FSUR = parameters%DKSAT(ISOIL) + (GAM * (parameters%DKSAT(ISOIL) - WCND) / (EXP(GAM * FACC / JJ) -1))
+        FSUR = parameters%DKSAT(ISOIL) + (GAM * (parameters%DKSAT(ISOIL) - WCND) / (EXP(GAM * FACC / JJ) -1.0))
       END IF
 
       ! infiltration rate at surface  
@@ -3014,7 +3005,7 @@ END SUBROUTINE RR2
      CALL WDFCND2 (parameters,WDF,WCND,parameters%SMCWLT(ISOIL),0.0,ISOIL)
 
      ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-     JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * -1 * ZSOIL(ISOIL)
+     JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * -1.0 * ZSOIL(ISOIL)
      FSUR = parameters%DKSAT(ISOIL) + ((JJ/1E-05) * (parameters%DKSAT(ISOIL) - WCND))
 
      !maximum infiltration rate at surface
@@ -3026,7 +3017,7 @@ END SUBROUTINE RR2
      CALL WDFCND2 (parameters,WDF,WCND,SMC(ISOIL),SICE(ISOIL),ISOIL)
 
      ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-     JJ   = parameters%GDVIC * (parameters%SMCMAX(ISOIL) - SMC(ISOIL)) * -1 * ZSOIL(ISOIL)
+     JJ   = parameters%GDVIC * max(0.0,(parameters%SMCMAX(ISOIL) - SMC(ISOIL))) * -1.0 * ZSOIL(ISOIL)
      FSUR = parameters%DKSAT(ISOIL) + ((JJ/FACC) * (parameters%DKSAT(ISOIL) - WCND))
 
      ! infiltration rate at surface
@@ -3084,14 +3075,14 @@ END SUBROUTINE RR2
 
      ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986)
      ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-     SP = SQRT(2 * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * (parameters%DWSAT(ISOIL) - WDF))
+     SP = SQRT(2.0 * (parameters%SMCMAX(ISOIL) - parameters%SMCWLT(ISOIL)) * (parameters%DWSAT(ISOIL) - WDF))
 
      ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-     AP = MIN(WCND, (2/3)*parameters%DKSAT(ISOIL))
-     AP = MAX(AP,   (1/3)*parameters%DKSAT(ISOIL))
+     AP = MIN(WCND, (2.0/3.0)*parameters%DKSAT(ISOIL))
+     AP = MAX(AP,   (1.0/3.0)*parameters%DKSAT(ISOIL))
 
      ! Maximun infiltration rate, m
-     FSUR = (1/2)*SP*(DT**(-1/2))+AP ! m/s
+     FSUR = (1.0/2.0)*SP*(DT**(-1.0/2.0))+AP ! m/s
      IF(FSUR .LT. 0.0) FSUR = 0.0
 
    ELSE
@@ -3102,14 +3093,13 @@ END SUBROUTINE RR2
 
      ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986) 
      ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-     SP = SQRT(2 * (parameters%SMCMAX(ISOIL) - SMC(ISOIL)) * (parameters%DWSAT(ISOIL) - WDF))
-
+     SP = SQRT(2.0 * max(0.0,(parameters%SMCMAX(ISOIL) - SMC(ISOIL))) * (parameters%DWSAT(ISOIL) - WDF))
      ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-     AP = MIN(WCND, (2/3)*parameters%DKSAT(ISOIL))
-     AP = MAX(AP,   (1/3)*parameters%DKSAT(ISOIL))
+     AP = MIN(WCND, (2.0/3.0)*parameters%DKSAT(ISOIL))
+     AP = MAX(AP,   (1.0/3.0)*parameters%DKSAT(ISOIL))
 
      ! Maximun infiltration rate, m
-     FSUR = (1/2)*SP*(DT**(-1/2))+AP ! m/s
+     FSUR = (1.0/2.0)*SP*(DT**(-1.0/2.0)) + AP ! m/s
 
      ! infiltration rate at surface
      IF(parameters%DKSAT(ISOIL) .LT. QINSUR)THEN
@@ -3156,18 +3146,18 @@ END SUBROUTINE RR2
     REAL                                        :: TDSUM
 ! ----------------------------------------------------------------------
 
-    TDRVOL = 0.
-    OVRFC  = 0.
-    QTLDRN = 0.
-    ZLAYER = 0.
-    AVFC   = 0.
-    TDSUM  = 0.
-    TDFRAC = 0.
-    TDDC   = parameters%TD_DC * DT/(24*3600)
+    TDRVOL = 0.0
+    OVRFC  = 0.0
+    QTLDRN = 0.0
+    ZLAYER = 0.0
+    AVFC   = 0.0
+    TDSUM  = 0.0
+    TDFRAC = 0.0
+    TDDC   = parameters%TD_DC * DT/(24.0*3600.0)
 
     DO K = 1, NSOIL
       IF (K == 1) THEN
-         ZLAYER(K) = -1 * ZSOIL(K)
+         ZLAYER(K) = -1.0 * ZSOIL(K)
       ELSE
          ZLAYER(K) = (ZSOIL(K-1)-ZSOIL(K))
       END IF
@@ -3176,32 +3166,32 @@ END SUBROUTINE RR2
          !print*, "CASE = 1"
          K = parameters%TD_DEPTH
          AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-         OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-         IF (OVRFC(K) > 0.) THEN
+         OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+         IF (OVRFC(K) > 0.0) THEN
             IF (OVRFC(K) > TDDC) OVRFC(K) = TDDC
             TDRVOL   = TDRVOL  + OVRFC(K)
-            SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+            SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
             SMC(K)   = SH2O(K) + SICE (K)
          END IF
       ELSE IF (parameters%DRAIN_LAYER_OPT == 1) THEN
          !print*, "CASE = 2. Draining from layer 1 and 2"
          DO K = 1, 2
             AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-            IF(OVRFC(K) < 0.) OVRFC(K) = 0.
+            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+            IF(OVRFC(K) < 0.0) OVRFC(K) = 0.0
             TDSUM    = TDSUM + OVRFC(K)
          END DO
          DO K = 1, 2
-            IF(OVRFC(K) .NE. 0.) THEN
+            IF(OVRFC(K) .NE. 0.0) THEN
               TDFRAC(K)   = OVRFC(K)/TDSUM
             END IF
          END DO
-         IF (TDSUM > 0.) THEN
+         IF (TDSUM > 0.0) THEN
             IF (TDSUM > TDDC) TDSUM = TDDC
             TDRVOL   = TDRVOL  + TDSUM
             DO K = 1, 2
               OVRFC(K) = TDFRAC(K)*TDSUM
-              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
               SMC(K)   = SH2O(K) + SICE (K)
             END DO
          END IF
@@ -3209,21 +3199,21 @@ END SUBROUTINE RR2
          !print*, "CASE = 3.  Draining from layer 1 2 and 3"
          DO K = 1, 3
             AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-            IF(OVRFC(K) < 0.) OVRFC(K) = 0.
+            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+            IF(OVRFC(K) < 0.0) OVRFC(K) = 0.0
             TDSUM    = TDSUM + OVRFC(K)
          END DO
          DO K = 1, 3
-            IF(OVRFC(K) .NE. 0.) THEN
+            IF(OVRFC(K) .NE. 0.0) THEN
               TDFRAC(K)   = OVRFC(K)/TDSUM
             END IF
          END DO
-         IF (TDSUM > 0.) THEN
+         IF (TDSUM > 0.0) THEN
             IF (TDSUM > TDDC) TDSUM = TDDC
             TDRVOL   = TDRVOL  + TDSUM
             DO K = 1, 3
               OVRFC(K) = TDFRAC(K)*TDSUM
-              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
               SMC(K)   = SH2O(K) + SICE (K)
             END DO
          END IF
@@ -3232,21 +3222,21 @@ END SUBROUTINE RR2
          !print*, "CASE = 3.  Draining from layer 2 and 3"
          DO K = 2, 3
             AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-            IF(OVRFC(K) < 0.) OVRFC(K) = 0.
+            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+            IF(OVRFC(K) < 0.0) OVRFC(K) = 0.0
             TDSUM    = TDSUM + OVRFC(K)
          END DO
          DO K = 2, 3
-            IF(OVRFC(K) .NE. 0.) THEN
+            IF(OVRFC(K) .NE. 0.0) THEN
               TDFRAC(K)   = OVRFC(K)/TDSUM
             END IF
          END DO
-         IF (TDSUM > 0.) THEN
+         IF (TDSUM > 0.0) THEN
             IF (TDSUM > TDDC) TDSUM = TDDC
             TDRVOL   = TDRVOL  + TDSUM
             DO K = 2, 3
               OVRFC(K) = TDFRAC(K)*TDSUM
-              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
               SMC(K)   = SH2O(K) + SICE (K)
             END DO
          END IF
@@ -3255,24 +3245,24 @@ END SUBROUTINE RR2
          !print*, "CASE = 4.  Draining from layer 3 and 4"
          DO K = 3, 4
             AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-            IF(OVRFC(K) < 0.) OVRFC(K) = 0.
+            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+            IF(OVRFC(K) < 0.0) OVRFC(K) = 0.0
             TDSUM    = TDSUM + OVRFC(K)
          END DO
          DO K = 3, 4
-            IF(OVRFC(K) .NE. 0.) THEN
+            IF(OVRFC(K) .NE. 0.0) THEN
               TDFRAC(K)   = OVRFC(K)/TDSUM
             END IF
          END DO
 
 
-         IF (TDSUM > 0.) THEN
+         IF (TDSUM > 0.0) THEN
             IF (TDSUM > TDDC) TDSUM = TDDC
             TDRVOL   = TDRVOL  + TDSUM
 
             DO K = 3, 4
               OVRFC(K) = TDFRAC(K)*TDSUM
-              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
               SMC(K)   = SH2O(K) + SICE (K)
             END DO
          END IF
@@ -3282,22 +3272,22 @@ END SUBROUTINE RR2
          !print*, "CASE = 5  Draining from all four layers"
          DO K = 1, 4
             AVFC(K)  = parameters%SMCREF(K) - SICE (K)
-            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000. ! mm
-            IF(OVRFC(K) < 0.) OVRFC(K) = 0.
+            OVRFC(K) = (SH2O(K) - (parameters%TDSMC_FAC*AVFC(K))) * ZLAYER(K) * 1000.0 ! mm
+            IF(OVRFC(K) < 0.0) OVRFC(K) = 0.0
             TDSUM    = TDSUM + OVRFC(K)
          END DO
          DO K = 1, 4
-            IF(OVRFC(K) .NE. 0.) THEN
+            IF(OVRFC(K) .NE. 0.0) THEN
               TDFRAC(K)   = OVRFC(K)/TDSUM
             END IF
          END DO
 
-         IF (TDSUM > 0.) THEN
+         IF (TDSUM > 0.0) THEN
             IF (TDSUM > TDDC) TDSUM = TDDC
             TDRVOL   = TDRVOL  + TDSUM
             DO K = 1, 4
               OVRFC(K) = TDFRAC(K)*TDSUM
-              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.))
+              SH2O(K)  = SH2O(K) - (OVRFC(K)/(ZLAYER(K) * 1000.0))
               SMC(K)   = SH2O(K) + SICE (K)
             END DO
          END IF
@@ -3380,16 +3370,16 @@ END SUBROUTINE RR2
 #endif
 !----------------------------------------------------------------------------
 
-    TD_SATZ = 0.
-    DTOPL   = 0.
-    TD_LQ   = 0.
-    TD_TTSZ = 0.
-    TDDC    = parameters%TD_DCOEF* 1000. * DT/(24. * 3600.) ! m per day to mm per timestep
+    TD_SATZ = 0.0
+    DTOPL   = 0.0
+    TD_LQ   = 0.0
+    TD_TTSZ = 0.0
+    TDDC    = parameters%TD_DCOEF* 1000.0 * DT/(24.0 * 3600.0) ! m per day to mm per timestep
 
 ! Thickness of soil layers    
     DO K = 1, NSOIL
       IF (K == 1) THEN
-         ZLAYER(K) = -1 * ZSOIL(K)
+         ZLAYER(K) = -1.0 * ZSOIL(K)
       ELSE
          ZLAYER(K) = (ZSOIL(K-1)-ZSOIL(K))
       END IF
@@ -3408,25 +3398,25 @@ END SUBROUTINE RR2
 
 ! Depth of saturated zone
     DO K=1, NSOIL
-       IF (YY .GT. (-1*ZSOIL(K))) THEN
-          TD_SATZ(K) = 0.
+       IF (YY .GT. (-1.0*ZSOIL(K))) THEN
+          TD_SATZ(K) = 0.0
        ELSE
-          TD_SATZ(K) = (-1*ZSOIL(K)) - YY
-          XX =  (-1*ZSOIL(K)) - DTOPL
+          TD_SATZ(K) = (-1.0*ZSOIL(K)) - YY
+          XX =  (-1.0*ZSOIL(K)) - DTOPL
           IF(TD_SATZ(K) .GT. XX) TD_SATZ(K) = XX
        END IF
        !print*,"K = ", K
        !print*,"-1*ZSOIL(K)=",-1*ZSOIL(K)
        !print*,"TD_SATZ(K)=",TD_SATZ(K)
        !print*,"DTOPL=",DTOPL
-       DTOPL = -1*ZSOIL(K)
+       DTOPL = -1.0*ZSOIL(K)
     END DO
 
 ! amount of water over field capacity
-    OVRFCS = 0.
+    OVRFCS = 0.0
     DO K=1, NSOIL
-      OVRFC(K) = (SH2O(K) - (parameters%SMCREF(K)-SICE(K))) * ZLAYER(K) * 1000. !mm
-      IF(OVRFC(K) .LT. 0.)OVRFC(K) = 0.
+      OVRFC(K) = (SH2O(K) - (parameters%SMCREF(K)-SICE(K))) * ZLAYER(K) * 1000.0 !mm
+      IF(OVRFC(K) .LT. 0.0) OVRFC(K) = 0.0
       OVRFCS   = OVRFCS + OVRFC(K)
     END DO
 
@@ -3437,7 +3427,7 @@ END SUBROUTINE RR2
        TD_TTSZ = TD_TTSZ + TD_SATZ(K)
     END DO
     IF (TD_TTSZ .LT. 0.001) TD_TTSZ = 0.001 ! unit is m
-    IF (TD_LQ   .LT. 0.001) TD_LQ   = 0.    ! unit is m
+    IF (TD_LQ   .LT. 0.001) TD_LQ   = 0.0    ! unit is m
     KLAT = TD_LQ/TD_TTSZ ! lateral hydraulic conductivity per timestep
     TD_DD = parameters%TD_ADEPTH - parameters%TD_DDRAIN
 
@@ -3447,14 +3437,14 @@ END SUBROUTINE RR2
                               TD_HAIL)
     TD_DEPTH= TD_HAIL + parameters%TD_DDRAIN
     TD_HEMD = parameters%TD_DDRAIN - YY
-    IF (TD_HEMD .LE. 0.) THEN
-       QTLDRN = 0.
+    IF (TD_HEMD .LE. 0.0) THEN
+       QTLDRN = 0.0
     ELSE
-       QTLDRN = ((8.*KLAT*TD_HAIL*TD_HEMD) + (4.*KLAT*TD_HEMD*TD_HEMD))& ! m per timestep
+       QTLDRN = ((8.0*KLAT*TD_HAIL*TD_HEMD) + (4.0*KLAT*TD_HEMD*TD_HEMD))& ! m per timestep
                  /(parameters%TD_SPAC*parameters%TD_SPAC)
     END IF
     QTLDRN = QTLDRN * 1000.0 ! m per timestep to mm/timestep /one tile
-    IF(QTLDRN .LE. 0.) QTLDRN = 0.
+    IF(QTLDRN .LE. 0.0) QTLDRN = 0.0
     IF(QTLDRN .GT. TDDC) QTLDRN = TDDC
     NDRAINS = INT(DX/parameters%TD_SPAC)
     QTLDRN = QTLDRN * NDRAINS
@@ -3463,11 +3453,11 @@ END SUBROUTINE RR2
 ! update soil moisture after drainage: moisture drains from top to bottom
     QTLDRN1 = QTLDRN
     DO K=1, NSOIL
-      IF(QTLDRN1 .GT. 0.) THEN
-         IF((TD_SATZ(K) .GT. 0.) .AND. (OVRFC(K) .GT. 0.)) THEN
+      IF(QTLDRN1 .GT. 0.0) THEN
+         IF((TD_SATZ(K) .GT. 0.0) .AND. (OVRFC(K) .GT. 0.0)) THEN
            RMSH2O(K) = OVRFC(K) - QTLDRN1 ! remaining water after tile drain
-           IF (RMSH2O(K) .GT. 0.) THEN
-              SH2O(K) = (parameters%SMCREF(K) - SICE (K)) + RMSH2O(K)/(ZLAYER(K) * 1000.)
+           IF (RMSH2O(K) .GT. 0.0) THEN
+              SH2O(K) = (parameters%SMCREF(K) - SICE (K)) + RMSH2O(K)/(ZLAYER(K) * 1000.0)
               SMC(K)  = SH2O(K) + SICE (K)
               EXIT
            ELSE
@@ -3495,20 +3485,20 @@ END SUBROUTINE RR2
  REAL, INTENT(IN)  :: TD_L
  REAL, INTENT(IN)  :: TD_RD
  REAL, INTENT(OUT) :: TD_DE
- REAL              :: PII = 22./7.
+ REAL              :: PII = 22.0/7.0
  REAL              :: TD_X
  REAL              :: TD_FX, EX,TERM
  INTEGER           :: I
 !-------------------------------------
 
- TD_FX = 0.
- EX     = 0.
- TERM   = 0.
+ TD_FX = 0.0
+ EX     = 0.0
+ TERM   = 0.0
  TD_X = (2.0*PII*TD_D)/TD_L
  IF (TD_X .GT. 0.5) THEN
     DO I=1,45,2
        EX     = EXP(-2.0*I*TD_X)
-       TERM   = (4.0*EX)/(I*(1-EX))
+       TERM   = (4.0*EX)/(I*(1.0-EX))
        TD_FX = TD_FX + TERM
        IF(TERM .LT. 1.E-6) THEN
          TD_DE = ((PII*TD_L)/8.0)/(LOG(TD_L/(PII*TD_RD))+TD_FX)
@@ -3518,7 +3508,7 @@ END SUBROUTINE RR2
  ELSE IF (TD_X .LT. 1.E-8) THEN
     TD_DE  = TD_D
  ELSE
-    TD_FX = ((PII*PII)/(4*TD_X))+(LOG(TD_X/(2*PII)))
+    TD_FX = ((PII*PII)/(4.0*TD_X))+(LOG(TD_X/(2.0*PII)))
     TD_DE = ((PII*TD_L)/8.0)/(LOG(TD_L/(PII*TD_RD))+TD_FX)
  END IF
  IF (TD_DE .LT. 0. .AND. I .LE. 2) TD_DE = TD_D
@@ -3547,7 +3537,7 @@ END SUBROUTINE RR2
 !------------------------------------------------------------
 
         SATLYRCHK = 0  !set flag for sat. layers
-        CWATAVAIL = 0.  !set wat avail for subsfc rtng = 0.
+        CWATAVAIL = 0.0  !set wat avail for subsfc rtng = 0.
         DO K=NSOIL,1,-1
            IF ( (SMC(K).GE.parameters%SMCREF(K)).AND.&
            (parameters%SMCREF(K) .GT.parameters%SMCWLT(K)) ) THEN
@@ -3558,7 +3548,7 @@ END SUBROUTINE RR2
             IF (SATLYRCHK .NE. 1) then  ! soil column is partially sat.
                 WATBLED = -ZSOIL(SATLYRCHK-1)
             ELSE  ! soil column is fully saturated to sfc.
-                WATBLED = 0.
+                WATBLED = 0.0
             END IF
             DO K = SATLYRCHK,NSOIL
                CWATAVAIL = CWATAVAIL+(SMC(K)-parameters%SMCREF(K))*SLDPTH(K)
@@ -3644,8 +3634,8 @@ END SUBROUTINE RR2
     WDF   = parameters%DWSAT(ISOIL) * FACTR2 ** EXPON
 
     IF (SICE > 0.0) THEN
-    VKWGT = 1./ (1. + (500.* SICE)**3.)
-    WDF   = VKWGT * WDF + (1.-VKWGT)*parameters%DWSAT(ISOIL)*(FACTR1)**EXPON
+    VKWGT = 1.0/ (1.0 + (500.0* SICE)**3.0)
+    WDF   = VKWGT * WDF + (1.0-VKWGT)*parameters%DWSAT(ISOIL)*(FACTR1)**EXPON
     END IF
 
 ! hydraulic conductivity
@@ -3688,7 +3678,7 @@ END SUBROUTINE RR2
     ! estimate infiltration rate based on Philips Eq.
     CALL IRR_PHILIP_INFIL(parameters,SMC,SH2O,SICE,DT,NSOIL,FSUR)
     ! irrigation rate of micro irrigation
-    TEMP_RATE = parameters%MICIR_RATE*(1./1000.)*DT/3600.        !NRCS rate/time step - calibratable
+    TEMP_RATE = parameters%MICIR_RATE*(1.0/1000.0)*DT/3600.0        !NRCS rate/time step - calibratable
     IRMIRATE  = MIN(0.5*FSUR*DT,IRAMTMI,TEMP_RATE)               !Limit the application rate to minimum 
                                                                  !of 0.5*infiltration rate
                                                                  !and to the NRCS recommended rate, (m)
@@ -3788,7 +3778,7 @@ END SUBROUTINE RR2
 
   ! sorptivity based on Eq. 10b from Kutilek, Miroslav, and Jana Valentova (1986) 
   ! sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-   SP = SQRT(2.0 * (parameters%SMCMAX(ISOIL) - SMC(ISOIL)) * (parameters%DWSAT(ISOIL) - WDF))
+   SP = SQRT(2.0 * max(0.0,(parameters%SMCMAX(ISOIL) - SMC(ISOIL))) * (parameters%DWSAT(ISOIL) - WDF))
 
   ! parameter A in Eq. 9 of Valiantzas (2010) is given by
    AP = MIN(WCND,(2.0/3.0)*parameters%DKSAT(ISOIL))
@@ -3796,13 +3786,8 @@ END SUBROUTINE RR2
 
   ! maximun infiltration rate, m
    FSUR = 0.5*SP*((DT)**(-0.5))+AP ! m/s
-   !PRINT*,'SP=',SP
-   !PRINT*,'AP=',AP
-   !PRINT*,'FSUR=',FSUR
-   !PRINT*,'WCND=',WCND
    FSUR = MAX(0.0,FSUR)
    !FSUR = MIN(WCND,FSUR)
-
   END SUBROUTINE IRR_PHILIP_INFIL
 
 !=========end irrigation subroutines================================================================
@@ -3876,7 +3861,7 @@ END SUBROUTINE RR2
 
 ! Derive node (middle) depth in [m]
 !KWM:  Positive number, depth below ground surface in m
-      ZNODE(1) = -ZSOIL(1) / 2.
+      ZNODE(1) = -ZSOIL(1) / 2.0
       DO IZ = 2, NSOIL
          ZNODE(IZ)  = -ZSOIL(IZ-1) + 0.5 * (ZSOIL(IZ-1) - ZSOIL(IZ))
       ENDDO
@@ -3912,7 +3897,7 @@ END SUBROUTINE RR2
 
       S_NODE = MIN(1.0,SMC(IWT)/parameters%SMCMAX(IWT) )
       S_NODE = MAX(S_NODE,REAL(0.01,KIND=8))
-      SMPFZ  = -parameters%PSISAT(IWT)*1000.*S_NODE**(-parameters%BEXP(IWT))   ! m --> mm
+      SMPFZ  = -parameters%PSISAT(IWT)*1000.0*S_NODE**(-parameters%BEXP(IWT))   ! m --> mm
       SMPFZ  = MAX(-120000.0,CMIC*SMPFZ)
 
 ! Recharge rate qin to groundwater
@@ -3922,7 +3907,7 @@ END SUBROUTINE RR2
       WH_ZWT  = - ZWT * 1.E3                          !(mm)
       WH      = SMPFZ  - ZNODE(IWT)*1.E3              !(mm)
       QIN     = - KA * (WH_ZWT-WH)  /((ZWT-ZNODE(IWT))*1.E3)
-      QIN     = MAX(-10.0/DT,MIN(10./DT,QIN))
+      QIN     = MAX(-10.0/DT,MIN(10.0/DT,QIN))
 
 ! Water storage in the aquifer + saturated soil
 
@@ -3931,26 +3916,26 @@ END SUBROUTINE RR2
       IF(IWT.EQ.NSOIL) THEN
          WA          = WA + (QIN - QDIS) * DT     !(mm)
          WT          = WA
-         ZWT         = (-ZSOIL(NSOIL) + 25.) - WA/1000./ROUS      !(m)
+         ZWT         = (-ZSOIL(NSOIL) + 25.0) - WA/1000.0/ROUS      !(m)
          MLIQ(NSOIL) = MLIQ(NSOIL) - QIN * DT        ! [mm]
 
-         MLIQ(NSOIL) = MLIQ(NSOIL) + MAX(0.,(WA - 5000.))
-         WA          = MIN(WA, 5000.)
+         MLIQ(NSOIL) = MLIQ(NSOIL) + MAX(0.,(WA - 5000.0))
+         WA          = MIN(WA, 5000.0)
       ELSE
 
          IF (IWT.EQ.NSOIL-1) THEN
             ZWT = -ZSOIL(NSOIL)                   &
-                 - (WT-ROUS*1000*25.) / (EPORE(NSOIL))/1000.
+                 - (WT-ROUS*1000.0*25.0) / (EPORE(NSOIL))/1000.0
          ELSE
             WS = 0.   ! water used to fill soil air pores
             DO IZ = IWT+2,NSOIL
                WS = WS + EPORE(IZ) * DZMM(IZ)
             ENDDO
             ZWT = -ZSOIL(IWT+1)                  &
-                  - (WT-ROUS*1000.*25.-WS) /(EPORE(IWT+1))/1000.
+                  - (WT-ROUS*1000.0*25.0-WS) /(EPORE(IWT+1))/1000.0
          ENDIF
 
-         WTSUB = 0.
+         WTSUB = 0.0
          DO IZ = 1, NSOIL
            WTSUB = WTSUB + HK(IZ)*DZMM(IZ)
          END DO
@@ -3968,10 +3953,10 @@ END SUBROUTINE RR2
 !
       WATMIN = 0.01
       DO IZ = 1, NSOIL-1
-          IF (MLIQ(IZ) .LT. 0.) THEN
+          IF (MLIQ(IZ) .LT. 0.0) THEN
              XS = WATMIN-MLIQ(IZ)
           ELSE
-             XS = 0.
+             XS = 0.0
           END IF
           MLIQ(IZ  ) = MLIQ(IZ  ) + XS
           MLIQ(IZ+1) = MLIQ(IZ+1) - XS
@@ -3981,7 +3966,7 @@ END SUBROUTINE RR2
         IF (MLIQ(IZ) .LT. WATMIN) THEN
            XS = WATMIN-MLIQ(IZ)
         ELSE
-           XS = 0.
+           XS = 0.0
         END IF
         MLIQ(IZ) = MLIQ(IZ) + XS
         WA       = WA - XS
@@ -4033,7 +4018,7 @@ END SUBROUTINE RR2
 
 
 ZSOIL0(1:NSOIL) = ZSOIL(1:NSOIL)
-ZSOIL0(0) = 0.
+ZSOIL0(0) = 0.0
 
 !find the layer where the water table is
      DO IZ=NSOIL,1,-1
@@ -4093,7 +4078,7 @@ ZSOIL0(0) = 0.
 !                   QDRAIN = QDRAIN - 1000 * (SMCEQ(NSOIL)-SMC(NSOIL)) * DZSNSO(NSOIL) / DT
 !                   SMC(NSOIL)=SMCEQ(NSOIL)
 !adjust wtd in the ficticious layer below
-                   SMCEQDEEP = parameters%SMCMAX(NSOIL) * ( -parameters%PSISAT(NSOIL) / ( -parameters%PSISAT(NSOIL) - DZSNSO(NSOIL) ) ) ** (1./parameters%BEXP(NSOIL))
+                   SMCEQDEEP = parameters%SMCMAX(NSOIL) * ( -parameters%PSISAT(NSOIL) / ( -parameters%PSISAT(NSOIL) - DZSNSO(NSOIL) ) ) ** (1.0/parameters%BEXP(NSOIL))
                    WTD = MIN( ( SMCWTD*DZSNSO(NSOIL) &
                    - SMCEQDEEP*ZSOIL0(NSOIL) + parameters%SMCMAX(NSOIL)*(ZSOIL0(NSOIL)-DZSNSO(NSOIL)) ) / &
                        ( parameters%SMCMAX(NSOIL)-SMCEQDEEP ) , ZSOIL0(NSOIL) )
@@ -4105,7 +4090,7 @@ ZSOIL0(0) = 0.
         ELSEIF(WTD.GE.ZSOIL0(NSOIL)-DZSNSO(NSOIL))THEN
 !if wtd was already below the bottom of the resolved soil crust
            WTDOLD=WTD
-           SMCEQDEEP = parameters%SMCMAX(NSOIL) * ( -parameters%PSISAT(NSOIL) / ( -parameters%PSISAT(NSOIL) - DZSNSO(NSOIL) ) ) ** (1./parameters%BEXP(NSOIL))
+           SMCEQDEEP = parameters%SMCMAX(NSOIL) * ( -parameters%PSISAT(NSOIL) / ( -parameters%PSISAT(NSOIL) - DZSNSO(NSOIL) ) ) ** (1.0/parameters%BEXP(NSOIL))
            IF(SMCWTD.GT.SMCEQDEEP)THEN
                WTD = MIN( ( SMCWTD*DZSNSO(NSOIL) &
                  - SMCEQDEEP*ZSOIL0(NSOIL) + parameters%SMCMAX(NSOIL)*(ZSOIL0(NSOIL)-DZSNSO(NSOIL)) ) / &
