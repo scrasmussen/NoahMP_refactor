@@ -1,38 +1,34 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .f90
+.SUFFIXES: .o .F90
 
 include ../user_build_options
 
-OBJS = \
-        ../src/NamelistRead.o \
-        ../src/LevelsType.o \
-        ../src/DomainType.o \
-        ../src/OptionsType.o \
-        ../src/ParametersType.o \
-        ../src/ForcingType.o \
-        ../src/EnergyType.o \
-        ../src/WaterType.o \
-        ../src/WaterModule.o \
-        ../src/CanopyWaterModule.o \
-        ../src/SnowWaterModule.o \
-        ../src/SnowWaterRenew.o \
-        ../src/SnowLayerChange.o \
-        ../src/SoilWaterModule.o \
-        ../src/SoilWaterRetentionCoeff.o \
-        ../src/SurfaceRunoffInfiltration.o \
-        ../src/SurfaceRunoffModule.o \
-        ../src/SoilWaterMovement.o \
-        ../src/SubsurfaceRunoffModule.o \
-	../driver/water_output.o \
-	../driver/water_driver.o
+OBJS =\
+       ../driver/forcing_driver.o\
+       ../driver/forcing_output.o\
+       ../src/ConstantDefineMod.o\
+       ../src/ConfigType.o\
+       ../src/EnergyType.o\
+       ../src/ForcingType.o\
+       ../src/InputType.o\
+       ../src/WaterType.o\
+       ../src/NoahmpType.o\
+       ../src/ConfigInitMod.o\
+       ../src/EnergyInitMod.o\
+       ../src/ForcingInitMod.o\
+       ../src/InputInitMod.o\
+       ../src/WaterInitMod.o\
+       ../src/AtmosForcingMod.o\
+       ../utility/Machine.o
 
-CMD = water_refac.exe
+
+CMD = forcing.exe
 all:	$(CMD)
 
-water_refac.exe: $(OBJS)
-	$(COMPILERF90) -o $(@) -I../driver -I../src $(OBJS) $(NETCDFLIB)
+forcing.exe: $(OBJS)
+	$(COMPILERF90) -o $(@) -I../driver -I../src -I../utility $(OBJS) $(NETCDFLIB)
 
 # This command cleans up
 clean:

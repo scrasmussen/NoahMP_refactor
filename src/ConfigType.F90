@@ -12,7 +12,8 @@ module ConfigType
   type :: namelist_type
 
     ! define specific namelist variables
-    integer    :: runoff_option
+    integer    :: OPT_RUN
+    integer    :: OPT_SNF
 
   end type namelist_type
 
@@ -20,7 +21,10 @@ module ConfigType
   type :: domain_type
 
     ! define specific domain variables
-    real(kind=kind_noahmp) :: dt ! model timestep (unit: second)
+    real(kind=kind_noahmp) :: iloc
+    real(kind=kind_noahmp) :: jloc
+    real(kind=kind_noahmp) :: dt    ! model timestep (unit: second)
+    real(kind=kind_noahmp) :: COSZ  !cosine solar zenith angle [0-1]
 
   end type domain_type
 

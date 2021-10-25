@@ -12,7 +12,11 @@ module WaterType
   type :: flux_type
 
     ! define specific water flux variables
-    real(kind=kind_noahmp) :: QRAIN
+    real(kind=kind_noahmp) :: RAIN      !rainfall (mm/s) AJN
+    real(kind=kind_noahmp) :: SNOW      !liquid equivalent snowfall (mm/s) AJN
+    real(kind=kind_noahmp) :: PRCP      !total precipitation [mm/s] 
+    real(kind=kind_noahmp) :: QPRECC    !convective precipitation [mm/s]
+    real(kind=kind_noahmp) :: QPRECL    !large-scale precipitation [mm/s]
 
   end type flux_type
 
@@ -20,7 +24,9 @@ module WaterType
   type :: state_type
 
     ! define specific water state variables
-    real(kind=kind_noahmp) :: SMC
+    real(kind=kind_noahmp) :: BDFALL  !!bulk density of snowfall (kg/m3) AJN
+    real(kind=kind_noahmp) :: FP      !fraction of area receiving precipitation  AJN
+    real(kind=kind_noahmp) :: FPICE   !fraction of ice                AJN
 
   end type state_type
 

@@ -7,10 +7,10 @@ module Machine
   implicit none
   save
 
-  #ifdef DOUBLE_PREC
-    integer, parameter :: kind_noahmp = 8 ! double precision
-  #else
-    integer, parameter :: kind_noahmp = 4 ! single precision
-  #endif
+#ifdef DOUBLE_PREC
+   integer, parameter :: kind_noahmp = 8 ! double precision
+#else
+   integer, parameter :: kind_noahmp = 4 ! single precision
+#endif
 
 end module Machine
