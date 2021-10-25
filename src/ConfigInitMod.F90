@@ -1,4 +1,5 @@
-module ConfigInit
+module ConfigInitMod
+
 !!! Initialize column (1-D) Noah-MP configuration variables
 !!! Configuration variables should be first defined in ConfigType.f90
 
@@ -30,4 +31,4 @@ contains
 
   end subroutine ConfigInitTransfer
 
-end module ConfigInit
+end module ConfigInitMod

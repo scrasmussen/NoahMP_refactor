@@ -1,4 +1,5 @@
 module ConfigType
+
 !!! Define column (1-D) Noah-MP configuration variables
 !!! Configuration variable initialization is done in ConfigInit.f90
 

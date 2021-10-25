@@ -1,4 +1,5 @@
-module ForcingInit
+module ForcingInitMod
+
 !!! Initialize column (1-D) Noah-MP forcing variables
 !!! Forcing variables should be first defined in ForcingType.f90
 
@@ -28,4 +29,4 @@ contains
 
   end subroutine ForcingInitTransfer
 
-end module ForcingInit
+end module ForcingInitMod

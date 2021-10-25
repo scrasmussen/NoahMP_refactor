@@ -1,4 +1,5 @@
 module WaterType
+
 !!! Define column (1-D) Noah-MP Water variables
 !!! Water variable initialization is done in WaterInit.f90
 

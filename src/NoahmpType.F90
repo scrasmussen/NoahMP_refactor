@@ -1,7 +1,7 @@
 module NoahmpType
+
 !!! Define column (1-D) Noah-MP model variable data types
 
-  use ConstantType
   use ForcingType
   use ConfigType
   use EnergyType
@@ -15,7 +15,6 @@ module NoahmpType
   type, public :: noahmp_type
 
     ! define specific variable types for Noah-MP
-    type(constant_type) :: const
     type(forcing_type)  :: forcing
     type(config_type)   :: config
     type(energy_type)   :: energy

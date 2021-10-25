@@ -1,4 +1,5 @@
-module EnergyInit
+module EnergyInitMod
+
 !!! Initialize column (1-D) Noah-MP energy variables
 !!! Energy variables should be first defined in EnergyType.f90
 
@@ -28,4 +29,4 @@ contains
 
   end subroutine EnergyInitTransfer
 
-end module EnergyInit
+end module EnergyInitMod

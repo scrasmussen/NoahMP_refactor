@@ -1,4 +1,5 @@
 module ForcingType
+
 !!! Define column (1-D) Noah-MP forcing variables
 !!! Forcing variable initialization is done in ForcingInit.f90
 

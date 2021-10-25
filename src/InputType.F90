@@ -1,4 +1,5 @@
 module InputType
+
 !!! Define Noah-MP Input variables (2D forcing, namelist, table, static)
 !!! Input variable initialization is done in InputInit.f90
 

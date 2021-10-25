@@ -1,4 +1,5 @@
-module WaterInit
+module WaterInitMod
+
 !!! Initialize column (1-D) Noah-MP water variables
 !!! Water variables should be first defined in WaterType.f90
 
@@ -28,4 +29,4 @@ contains
 
   end subroutine WaterInitTransfer
 
-end module WaterInit
+end module WaterInitMod
