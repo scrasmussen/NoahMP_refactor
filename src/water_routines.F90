@@ -2937,7 +2937,7 @@ END SUBROUTINE RR2
       ELSE
         FSUR = QINSUR
       END IF
-      IF(FSUR .LT. 0.0) FSUR = 0.0
+      IF(FSUR .LT. 0.0) FSUR = WCND
 
    ELSE
 
@@ -3009,7 +3009,7 @@ END SUBROUTINE RR2
      FSUR = parameters%DKSAT(ISOIL) + ((JJ/1E-05) * (parameters%DKSAT(ISOIL) - WCND))
 
      !maximum infiltration rate at surface
-     IF(FSUR .LT. 0.0) FSUR = 0.0
+     IF(FSUR .LT. 0.0) FSUR = WCND
 
    ELSE
 
@@ -3083,7 +3083,7 @@ END SUBROUTINE RR2
 
      ! Maximun infiltration rate, m
      FSUR = (1.0/2.0)*SP*(DT**(-1.0/2.0))+AP ! m/s
-     IF(FSUR .LT. 0.0) FSUR = 0.0
+     IF(FSUR .LT. 0.0) FSUR = WCND
 
    ELSE
 

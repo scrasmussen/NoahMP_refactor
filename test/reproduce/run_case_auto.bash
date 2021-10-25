@@ -5,12 +5,12 @@
 #  runoff= 1~8 no 5
 # infdv=1~3 only for runoff=8
 
- snowopt=.true.
+ snowopt=.false.
  irri=0
  irrim=0
  tdrn=0
 
- outdir=waterall_snow_default
+ outdir=waterall_base_default
 
  mkdir -p ./results/${outdir}
  rm -rf ./results/${outdir}/*
