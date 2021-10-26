@@ -1,4 +1,4 @@
-module ErrorHandleModule
+module ErrorHandleMod
 
 !!! define subroutines handling Noah-MP model errors
 
@@ -19,4 +19,4 @@ contains
 
   end subroutine ErrorHandle
 
-end module ErrorHandleModule
+end module ErrorHandleMod
