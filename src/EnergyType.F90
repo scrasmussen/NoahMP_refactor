@@ -3,6 +3,11 @@ module EnergyType
 !!! Define column (1-D) Noah-MP Energy variables
 !!! Energy variable initialization is done in EnergyInit.f90
 
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
   use Machine, only : kind_noahmp
 
   implicit none
@@ -13,7 +18,8 @@ module EnergyType
   type :: flux_type
 
     ! define specific energy flux variables
-    real(kind=kind_noahmp) :: SAV
+    real(kind=kind_noahmp) :: FCEV            ! canopy evaporation (w/m2) [+ = to atm] 
+    real(kind=kind_noahmp) :: FCTR            ! transpiration (w/m2) [+ = to atm]
 
   end type flux_type
 
@@ -21,7 +27,12 @@ module EnergyType
   type :: state_type
 
     ! define specific energy state variables
-    real(kind=kind_noahmp) :: TAH
+    real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
+    real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
+    real(kind=kind_noahmp) :: FVEG            ! greeness vegetation fraction
+    real(kind=kind_noahmp) :: TG              ! ground temperature (k)
+    real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
+    logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
 
   end type state_type
 
@@ -29,7 +40,6 @@ module EnergyType
   type :: parameter_type
 
     ! define specific energy parameter variables
-    real(kind=kind_noahmp) :: RAHC
 
   end type parameter_type
 
@@ -37,7 +47,6 @@ module EnergyType
   type :: diagnose_type
 
     ! define specific energy diagnose variables
-    real(kind=kind_noahmp) :: xxx
 
   end type diagnose_type
 

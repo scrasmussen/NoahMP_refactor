@@ -2,6 +2,11 @@ module NoahmpType
 
 !!! Define column (1-D) Noah-MP model variable data types
 
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
   use ForcingType
   use ConfigType
   use EnergyType

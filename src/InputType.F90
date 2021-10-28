@@ -3,6 +3,11 @@ module InputType
 !!! Define Noah-MP Input variables (2D forcing, namelist, table, static)
 !!! Input variable initialization is done in InputInit.f90
 
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
   use Machine, only : kind_noahmp
 
   implicit none

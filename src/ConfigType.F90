@@ -3,6 +3,11 @@ module ConfigType
 !!! Define column (1-D) Noah-MP configuration variables
 !!! Configuration variable initialization is done in ConfigInit.f90
 
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
   use Machine, only : kind_noahmp
 
   implicit none
@@ -13,7 +18,7 @@ module ConfigType
   type :: namelist_type
 
     ! define specific namelist variables
-    integer    :: runoff_option
+    
 
   end type namelist_type
 
@@ -21,7 +26,10 @@ module ConfigType
   type :: domain_type
 
     ! define specific domain variables
-    real(kind=kind_noahmp) :: dt ! model timestep (unit: second)
+    integer                   :: ILOC     ! model grid index
+    integer                   :: JLOC     ! model grid index
+    integer                   :: VEGTYP   !vegetation type
+    real(kind=kind_noahmp)    :: DT       ! noahmp timestep (s)
 
   end type domain_type
 

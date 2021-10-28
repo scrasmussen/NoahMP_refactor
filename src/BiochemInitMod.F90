@@ -3,6 +3,11 @@ module BiochemInitMod
 !!! Initialize column (1-D) Noah-MP biochemistry (carbon,nitrogen,etc) variables
 !!! Biochemistry variables should be first defined in BiochemType.f90
 
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
   use InputType
   use NoahmpType
 
