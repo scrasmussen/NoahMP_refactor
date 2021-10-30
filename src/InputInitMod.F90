@@ -19,6 +19,8 @@ contains
 !=== read Noahmp Table values
   subroutine ReadNoahmpTable(input)
 
+    implicit none
+
     type(input_type), intent(inout)  :: input
 
   !=== declare temporary variable to store NoahmpTable values
@@ -73,6 +75,8 @@ contains
 !=== read namelist values
   subroutine ReadNamelist(input)
 
+    implicit none
+
     type(input_type), intent(inout)  :: input
 
   !=== declare temporary variable to store namelist values
@@ -120,6 +124,8 @@ contains
     use netcdf
     use error_handling, only : handle_err
 
+    implicit none
+
     type(input_type), intent(inout)  :: input
 
     integer :: ncid, dimid, varid, status
@@ -155,6 +161,8 @@ contains
 
     use netcdf
     use error_handling, only : handle_err
+
+    implicit none
 
     type(input_type), intent(inout)  :: input
 
@@ -192,6 +200,8 @@ contains
     use netcdf
     use error_handling, only : handle_err
 
+    implicit none
+
     type(input_type), intent(inout)  :: input
 
     integer :: ncid, dimid, varid, status
@@ -224,6 +234,8 @@ contains
 
 !=== initialize with default values
   subroutine InputInitDefault(input)
+
+    implicit none
 
     type(input_type), intent(inout) :: input
 

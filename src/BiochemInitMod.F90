@@ -18,7 +18,9 @@ contains
 !=== initialize with default values
   subroutine BiochemInitDefault(noahmp)
 
-    type(noahmp_type) :: noahmp
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
 
     noahmp%biochem%flux%xxx = huge(1.0)
 
@@ -27,8 +29,10 @@ contains
 !=== initialize with input data or table values
   subroutine BiochemInitTransfer(noahmp, input)
 
-    type(noahmp_type) :: noahmp
-    type(input_type)  :: input
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
+    type(input_type) , intent(in)    :: input
 
     noahmp%biochem%flux%xxx = input%xxx2D(noahmp%config%domain%iloc,noahmp%config%domain%jloc)
 

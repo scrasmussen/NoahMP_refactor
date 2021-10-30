@@ -367,7 +367,13 @@
   BATS_NIR_DIR  = 0.4   !cosz factor for direct NIR snow albedo Yang97 eqn. 16
   RSURF_SNOW = 50.0     !surface resistence for snow [s/m]
   RSURF_EXP = 5.0       !exponent in the shape parameter for soil resistance option 1
-
+  C2_SNOWCOMPACT = 21.e-3 !overburden snow compaction parameter (m3/kg) cenlin
+  C3_SNOWCOMPACT = 2.5e-6 !snow desctructive metamorphism compaction parameter1 [1/s] cenlin 
+  C4_SNOWCOMPACT = 0.04   !snow desctructive metamorphism compaction parameter2 [1/k] cenlin
+  C5_SNOWCOMPACT = 2.0    !snow desctructive metamorphism compaction parameter3  cenlin
+  DM_SNOWCOMPACT = 100.0  !upper Limit on destructive metamorphism compaction [kg/m3] cenlin
+  ETA0_SNOWCOMPACT = 0.8e+6 !snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6 cenlin
+  SNLIQMAXFRAC   = 0.4    !maximum liquid water fraction in snow
 /
 
 &noahmp_irrigation_parameters

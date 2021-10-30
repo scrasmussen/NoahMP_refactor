@@ -17,7 +17,7 @@ module ForcingType
   type, public :: forcing_type
 
     ! define specific forcing variables
-    real(kind=kind_noahmp) :: UU
+    real(kind=kind_noahmp) :: SFCTMP          ! surface air temperature [k]
 
   end type forcing_type
 

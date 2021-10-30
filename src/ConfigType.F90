@@ -28,8 +28,15 @@ module ConfigType
     ! define specific domain variables
     integer                   :: ILOC     ! model grid index
     integer                   :: JLOC     ! model grid index
-    integer                   :: VEGTYP   !vegetation type
+    integer                   :: VEGTYP   ! vegetation type
+    integer                   :: NSOIL    ! number of soil layers
+    integer                   :: NSNOW    ! maximum number of snow layers
+    integer                   :: ISNOW    ! actual number of snow layers
     real(kind=kind_noahmp)    :: DT       ! noahmp timestep (s)
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSO   ! depth of snow/soil layer-bottom (m)
 
   end type domain_type
 

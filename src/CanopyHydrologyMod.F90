@@ -25,9 +25,6 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
-              VEGTYP          => noahmp%config%domain%VEGTYP         ,& ! in,    vegetation type
               DT              => noahmp%config%domain%DT             ,& ! in,    noahmp time step (s)
               FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
               FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
@@ -76,23 +73,23 @@ contains
 
     ! canopy evaporation, transpiration, and dew
     if ( FROZEN_CANOPY .eqv. .true. ) then    ! Barlage: change to frozen_canopy
-       ETRAN = MAX( FCTR/HVAP, 0.0 )
-       QEVAC = MAX( FCEV/HVAP, 0.0 )
-       QDEWC = ABS( MIN( FCEV/HVAP, 0.0 ) )
+       ETRAN = max( FCTR/HVAP, 0.0 )
+       QEVAC = max( FCEV/HVAP, 0.0 )
+       QDEWC = abs( min( FCEV/HVAP, 0.0 ) )
        QSUBC = 0.0
        QFROC = 0.0
     else
-       ETRAN = MAX( FCTR/HSUB, 0.0 )
+       ETRAN = max( FCTR/HSUB, 0.0 )
        QEVAC = 0.0
        QDEWC = 0.0
-       QSUBC = MAX( FCEV/HSUB, 0.0 )
-       QFROC = ABS( MIN( FCEV/HSUB, 0.0 ) )
+       QSUBC = max( FCEV/HSUB, 0.0 )
+       QFROC = abs( min( FCEV/HSUB, 0.0 ) )
     endif
 
     ! canopy water balance. for convenience allow dew to bring CANLIQ above
     ! maxh2o or else would have to re-adjust drip
-    QEVAC   = MIN( CANLIQ/DT, QEVAC )
-    CANLIQ  = MAX( 0.0, CANLIQ+(QDEWC-QEVAC)*DT )
+    QEVAC   = min( CANLIQ/DT, QEVAC )
+    CANLIQ  = max( 0.0, CANLIQ+(QDEWC-QEVAC)*DT )
     if ( CANLIQ <= 1.0e-06 ) CANLIQ = 0.0
 
 !=== canopy ice 
@@ -100,32 +97,32 @@ contains
     MAXSNO = 6.6 * (0.27 + 46.0/BDFALL) * (ELAI + ESAI)
 
     ! canopy sublimation and frost
-    QSUBC = MIN( CANICE/DT, QSUBC )
-    CANICE= MAX( 0.0, CANICE+(QFROC-QSUBC)*DT )
+    QSUBC = min( CANICE/DT, QSUBC )
+    CANICE= max( 0.0, CANICE+(QFROC-QSUBC)*DT )
     if ( CANICE <= 1.0e-6 ) CANICE = 0.0
 
 !=== wetted fraction of canopy
     if ( CANICE > 0.0 ) then
-       FWET = MAX(0.0,CANICE) / MAX(MAXSNO,1.0e-06)
+       FWET = max(0.0,CANICE) / max(MAXSNO,1.0e-06)
     else
-       FWET = MAX(0.0,CANLIQ) / MAX(MAXLIQ,1.0e-06)
+       FWET = max(0.0,CANLIQ) / max(MAXLIQ,1.0e-06)
     endif
-    FWET = MIN(FWET, 1.0) ** 0.667
+    FWET = min(FWET, 1.0) ** 0.667
 
 !=== phase change
     ! canopy ice melting
     if ( CANICE > 1.0e-6 .and. TV > TFRZ) then
-       QMELTC = MIN( CANICE/DT, (TV-TFRZ)*CICE*CANICE/DENICE/(DT*HFUS) )
-       CANICE = MAX( 0.0, CANICE - QMELTC*DT )
-       CANLIQ = MAX( 0.0, CANLIQ + QMELTC*DT )
+       QMELTC = min( CANICE/DT, (TV-TFRZ)*CICE*CANICE/DENICE/(DT*HFUS) )
+       CANICE = max( 0.0, CANICE - QMELTC*DT )
+       CANLIQ = max( 0.0, CANLIQ + QMELTC*DT )
        TV     = FWET*TFRZ + (1.0 - FWET)*TV
     endif
 
     ! canopy water refreeezing
     if ( CANLIQ > 1.0e-6 .and. TV < TFRZ) then
-       QFRZC  = MIN( CANLIQ/DT, (TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS) )
-       CANLIQ = MAX( 0.0, CANLIQ - QFRZC*DT )
-       CANICE = MAX( 0.0, CANICE + QFRZC*DT )
+       QFRZC  = min( CANLIQ/DT, (TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS) )
+       CANLIQ = min( 0.0, CANLIQ - QFRZC*DT )
+       CANICE = min( 0.0, CANICE + QFRZC*DT )
        TV     = FWET*TFRZ + (1.0 - FWET)*TV
     ENDIF
 
@@ -134,6 +131,8 @@ contains
 
 !=== total canopy evaporation
     ECAN = QEVAC + QSUBC - QDEWC - QFROC
+
+    end associate
 
   end subroutine CanopyHydrology
 

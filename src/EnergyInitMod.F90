@@ -18,7 +18,14 @@ contains
 !=== initialize with default values
   subroutine EnergyInitDefault(noahmp)
 
-    type(noahmp_type) :: noahmp
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
+
+    associate(                                      &
+              NSNOW => noahmp%config%domain%NSNOW  ,&
+              NSOIL => noahmp%config%domain%NSOIL   &
+             )
 
     ! energy state variable
     noahmp%energy%state%ELAI            = huge(1.0)
@@ -28,29 +35,44 @@ contains
     noahmp%energy%state%TV              = huge(1.0)
     noahmp%energy%state%FROZEN_CANOPY   = .false.
 
+    allocate( noahmp%energy%state%STC (-NSNOW+1:NSOIL) )
+
+    noahmp%energy%state%STC(:)          = huge(1.0)
+
     ! energy flux variable
     noahmp%energy%flux%FCEV             = huge(1.0)
     noahmp%energy%flux%FCTR             = huge(1.0)
 
+    end associate
 
   end subroutine EnergyInitDefault
 
 !=== initialize with input data or table values
   subroutine EnergyInitTransfer(noahmp, input)
 
-    type(noahmp_type) :: noahmp
-    type(input_type)  :: input
+    implicit none
 
-    associate (                                   &
-               ILOC => noahmp%config%domain%ILOC ,&
-               JLOC => noahmp%config%domain%JLOC  &
-              )
+    type(noahmp_type), intent(inout) :: noahmp
+    type(input_type) , intent(in)    :: input
+
+    associate(                                      &
+              ILOC  => noahmp%config%domain%ILOC   ,&
+              JLOC  => noahmp%config%domain%JLOC   ,&
+              NSNOW => noahmp%config%domain%NSNOW  ,&
+              NSOIL => noahmp%config%domain%NSOIL   &
+             )
 
     ! energy state variable
+    noahmp%energy%state%TG  = input%TGIn(ILOC,JLOC)
+    noahmp%energy%state%TV  = input%TVIn(ILOC,JLOC)
+
+    noahmp%energy%state%STC(-NSNOW+1:NSOIL) = input%STCIn(ILOC,-NSNOW+1:NSOIL,JLOC)
 
     ! energy flux variable
     noahmp%energy%flux%FCEV = input%FCEVIn(ILOC,JLOC)
     noahmp%energy%flux%FCTR = input%FCTRIn(ILOC,JLOC)
+
+    end associate
 
   end subroutine EnergyInitTransfer
 

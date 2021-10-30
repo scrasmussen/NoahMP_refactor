@@ -18,19 +18,33 @@ contains
 !=== initialize with default values
   subroutine ForcingInitDefault(noahmp)
 
-    type(noahmp_type) :: noahmp
+    implicit none
 
-    noahmp%forcing%UU = huge(1.0)
+    type(noahmp_type), intent(inout) :: noahmp
+
+    noahmp%forcing%SFCTMP   = huge(1.0)
+
 
   end subroutine ForcingInitDefault
 
 !=== initialize with input data or table values
   subroutine ForcingInitTransfer(noahmp, input)
 
-    type(noahmp_type) :: noahmp
-    type(input_type)  :: input
+    implicit none
 
-    noahmp%forcing%UU = input%U2D(noahmp%config%domain%iloc,noahmp%config%domain%jloc)
+    type(noahmp_type), intent(inout) :: noahmp
+    type(input_type) , intent(in)    :: input
+
+    associate(                                   &
+              iloc => noahmp%config%domain%iloc ,&
+              jloc => noahmp%config%domain%jloc ,&   
+              KTS  => input%KTS                 ,&
+              KTE  => input%KTE                  &
+             )
+
+    noahmp%forcing%SFCTMP   = input%T3D (iloc,1,jloc)
+
+    end associate
 
   end subroutine ForcingInitTransfer
 
