@@ -18,21 +18,25 @@ module WaterType
   type :: flux_type
 
     ! define specific water flux variables
-    real(kind=kind_noahmp) :: ECAN      ! evaporation of intercepted water (mm/s) [+]
-    real(kind=kind_noahmp) :: ETRAN     ! transpiration rate (mm/s) [+]
-    real(kind=kind_noahmp) :: QEVAC     ! canopy water evaporation rate (mm/s)
-    real(kind=kind_noahmp) :: QDEWC     ! canopy water dew rate (mm/s)
-    real(kind=kind_noahmp) :: QFROC     ! canopy ice frost rate (mm/s)
-    real(kind=kind_noahmp) :: QSUBC     ! canopy ice sublimation rate (mm/s)
-    real(kind=kind_noahmp) :: QMELTC    ! canopy ice melting rate (mm/s)
-    real(kind=kind_noahmp) :: QFRZC     ! canopy water refreezing rate (mm/s)
-    real(kind=kind_noahmp) :: QSNOW     ! snow at ground surface (mm/s) [+]
-    real(kind=kind_noahmp) :: SNOWHIN   ! snow depth increasing rate (m/s)
-    real(kind=kind_noahmp) :: QSNFRO    ! snow surface frost rate[mm/s]
-    real(kind=kind_noahmp) :: QSNSUB    ! snow surface sublimation rate[mm/s]
-    real(kind=kind_noahmp) :: QRAIN     ! snow surface rain rate[mm/s]
-    real(kind=kind_noahmp) :: QSNBOT    ! melting water out of snow bottom [mm/s]
-    real(kind=kind_noahmp) :: SNOFLOW   ! glacier flow [mm]
+    real(kind=kind_noahmp) :: ECAN          ! evaporation of intercepted water (mm/s) [+]
+    real(kind=kind_noahmp) :: ETRAN         ! transpiration rate (mm/s) [+]
+    real(kind=kind_noahmp) :: QEVAC         ! canopy water evaporation rate (mm/s)
+    real(kind=kind_noahmp) :: QDEWC         ! canopy water dew rate (mm/s)
+    real(kind=kind_noahmp) :: QFROC         ! canopy ice frost rate (mm/s)
+    real(kind=kind_noahmp) :: QSUBC         ! canopy ice sublimation rate (mm/s)
+    real(kind=kind_noahmp) :: QMELTC        ! canopy ice melting rate (mm/s)
+    real(kind=kind_noahmp) :: QFRZC         ! canopy water refreezing rate (mm/s)
+    real(kind=kind_noahmp) :: QSNOW         ! snow at ground surface (mm/s) [+]
+    real(kind=kind_noahmp) :: SNOWHIN       ! snow depth increasing rate (m/s)
+    real(kind=kind_noahmp) :: QSNFRO        ! snow surface frost rate[mm/s]
+    real(kind=kind_noahmp) :: QSNSUB        ! snow surface sublimation rate[mm/s]
+    real(kind=kind_noahmp) :: QRAIN         ! snow surface rain rate[mm/s]
+    real(kind=kind_noahmp) :: QSNBOT        ! melting water out of snow bottom [mm/s]
+    real(kind=kind_noahmp) :: SNOFLOW       ! glacier flow [mm/s]
+    real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: FloodIrriFSUR ! flood irrigation infiltration rate [m/s]
+    real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: MicroIrriFSUR ! micro irrigation infiltration rate [m/s]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
@@ -56,6 +60,10 @@ module WaterType
     real(kind=kind_noahmp) :: SNEQV     ! snow water equivalent [mm]
     real(kind=kind_noahmp) :: PONDING1  ! surface ponding 1 (mm)
     real(kind=kind_noahmp) :: PONDING2  ! surface ponding 2 (mm)
+    real(kind=kind_noahmp) :: FIFAC     ! fraction of grid under flood irrigation (0 to 1)
+    real(kind=kind_noahmp) :: IRAMTFI   ! flood irrigation water amount [m]
+    real(kind=kind_noahmp) :: MIFAC     ! fraction of grid under micro irrigation (0 to 1)
+    real(kind=kind_noahmp) :: IRAMTMI   ! micro irrigation water amount [m]
 
     integer               , allocatable, dimension(:) :: IMELT     ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE     ! snow layer ice [mm]
@@ -64,6 +72,7 @@ module WaterType
     real(kind=kind_noahmp), allocatable, dimension(:) :: FICE      ! ice fraction at current timestep
     real(kind=kind_noahmp), allocatable, dimension(:) :: SH2O      ! soil liquid moisture (m3/m3)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SICE      ! soil ice moisture (m3/m3)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMC       ! total soil moisture [m3/m3]
 
   end type state_type
 
@@ -81,6 +90,13 @@ module WaterType
     real(kind=kind_noahmp) :: SNLIQMAXFRAC     ! maximum liquid water fraction in snow
     real(kind=kind_noahmp) :: SSI              ! liquid water holding capacity for snowpack (m3/m3)
     real(kind=kind_noahmp) :: SNOW_RET_FAC     ! snowpack water release timescale factor (1/s)
+    real(kind=kind_noahmp) :: FIRTFAC          ! flood application rate factor
+    real(kind=kind_noahmp) :: MICIR_RATE       ! micro irrigation rate (mm/hr)
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DWSAT   ! saturated soil hydraulic diffusivity (m2/s)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter
 
   end type parameter_type
 
@@ -88,14 +104,19 @@ module WaterType
   type :: diagnose_type
 
     ! define specific water diagnose variables
-    real(kind=kind_noahmp) :: DZ2_COMBO    ! nodal thickness of 2 elements being combined [m]
-    real(kind=kind_noahmp) :: WLIQ2_COMBO  ! liquid water of element 2 [kg/m2]
-    real(kind=kind_noahmp) :: WICE2_COMBO  ! ice of element 2 [kg/m2]
-    real(kind=kind_noahmp) :: T2_COMBO     ! nodal temperature of element 2 [k]
-    real(kind=kind_noahmp) :: DZ_COMBO     ! nodal thickness of 1 elements being combined [m]
-    real(kind=kind_noahmp) :: WLIQ_COMBO   ! liquid water of element 1
-    real(kind=kind_noahmp) :: WICE_COMBO   ! ice of element 1 [kg/m2]
-    real(kind=kind_noahmp) :: T_COMBO      ! node temperature of element 1 [k]
+    integer                :: ISOIL_local      ! soil layer index used as local variable
+    real(kind=kind_noahmp) :: DZ2_COMBO        ! nodal thickness of 2 elements being combined [m]
+    real(kind=kind_noahmp) :: WLIQ2_COMBO      ! liquid water of element 2 [kg/m2]
+    real(kind=kind_noahmp) :: WICE2_COMBO      ! ice of element 2 [kg/m2]
+    real(kind=kind_noahmp) :: T2_COMBO         ! nodal temperature of element 2 [k]
+    real(kind=kind_noahmp) :: DZ_COMBO         ! nodal thickness of 1 elements being combined [m]
+    real(kind=kind_noahmp) :: WLIQ_COMBO       ! liquid water of element 1
+    real(kind=kind_noahmp) :: WICE_COMBO       ! ice of element 1 [kg/m2]
+    real(kind=kind_noahmp) :: T_COMBO          ! node temperature of element 1 [k]
+    real(kind=kind_noahmp) :: WCND_local       ! soil water conductivity [m/s] used as local variable
+    real(kind=kind_noahmp) :: WDF_local        ! soil water diffusivity (m2/s) used as local variable
+    real(kind=kind_noahmp) :: SICEMAX_local    ! maximum soil ice content (m3/m3) used as local variable
+    real(kind=kind_noahmp) :: FCR_local        ! impermeable fraction due to frozen soil used as local variable
 
   end type diagnose_type
 
