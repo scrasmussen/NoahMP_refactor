@@ -26,22 +26,24 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
+! local variable
+    real(kind=kind_noahmp) :: FSUR     ! surface infiltration rate (m/s)
+
 ! --------------------------------------------------------------------
     associate(                                                        &
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               FIFAC           => noahmp%water%state%FIFAC            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
               FIRTFAC         => noahmp%water%param%FIRTFAC          ,& ! in,     flood application rate factor
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
-              IRFIRATE        => noahmp%water%flux%IRFIRATE          ,& ! inout,  flood irrigation water rate [m/timestep]
-              FSUR            => noahmp%water%flux%FloodIrriFSUR      & ! out,    flood irrigation infiltration rate [m/s]
+              IRFIRATE        => noahmp%water%flux%IRFIRATE           & ! inout,  flood irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
 
-    ! initialize out-only variables
+    ! initialize local variables
     FSUR = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationPhilipInfil(noahmp)  
+    call IrrigationPhilipInfil(noahmp, FSUR)  
 
     ! irrigation rate of flood irrigation. It should be
     ! greater than infiltration rate to get infiltration

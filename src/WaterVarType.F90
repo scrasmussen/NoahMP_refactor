@@ -34,9 +34,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: QSNBOT        ! melting water out of snow bottom [mm/s]
     real(kind=kind_noahmp) :: SNOFLOW       ! glacier flow [mm/s]
     real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
-    real(kind=kind_noahmp) :: FloodIrriFSUR ! flood irrigation infiltration rate [m/s]
     real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
-    real(kind=kind_noahmp) :: MicroIrriFSUR ! micro irrigation infiltration rate [m/s]
     real(kind=kind_noahmp) :: QINSUR        ! water input on soil surface [mm/s]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]

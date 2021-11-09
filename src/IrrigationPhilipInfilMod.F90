@@ -13,7 +13,7 @@ module IrrigationPhilipInfilMod
 
 contains
 
-  subroutine IrrigationPhilipInfil(noahmp)
+  subroutine IrrigationPhilipInfil(noahmp, FSUR)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: IRR_PHILIP_INFIL
@@ -23,7 +23,8 @@ contains
 
     implicit none
 
-    type(noahmp_type), intent(inout) :: noahmp
+    type(noahmp_type)     , intent(in)  :: noahmp
+    real(kind=kind_noahmp), intent(out) :: FSUR
 
 ! local variable
     integer                :: K         ! do loop/array indices
@@ -43,13 +44,11 @@ contains
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
-              DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
-              FSUR            => noahmp%water%flux%FloodIrriFSUR      & ! out,    flood irrigation surface infiltration rate [m/s]
+              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
     ! initialize out-only and local variables
-    FSUR    = 0.0
     WCND    = 0.0
     WDF     = 0.0
     SICEMAX = 0.0

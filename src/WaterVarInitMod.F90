@@ -81,9 +81,7 @@ contains
     noahmp%water%flux%QSNBOT          = huge(1.0)
     noahmp%water%flux%SNOFLOW         = huge(1.0)
     noahmp%water%flux%IRFIRATE        = huge(1.0)
-    noahmp%water%flux%FloodIrriFSUR   = huge(1.0)
     noahmp%water%flux%IRMIRATE        = huge(1.0)
-    noahmp%water%flux%MicroIrriFSUR   = huge(1.0)
     noahmp%water%flux%QINSUR          = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)  )

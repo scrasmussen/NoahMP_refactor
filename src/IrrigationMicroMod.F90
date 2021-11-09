@@ -27,7 +27,8 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    real(kind=kind_noahmp) :: TEMP_RATE     ! temporary micro irrigation rate m/timestep
+    real(kind=kind_noahmp) :: FSUR         ! surface infiltration rate (m/s)
+    real(kind=kind_noahmp) :: TEMP_RATE    ! temporary micro irrigation rate m/timestep
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -35,17 +36,16 @@ contains
               MIFAC           => noahmp%water%state%MIFAC            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
               MICIR_RATE      => noahmp%water%param%MICIR_RATE       ,& ! in,     micro irrigation rate (mm/hr)
               IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
-              IRMIRATE        => noahmp%water%flux%IRMIRATE          ,& ! inout,  micro irrigation water rate [m/timestep]
-              FSUR            => noahmp%water%flux%MicroIrriFSUR      & ! out,    micro irrigation infiltration rate [m/s]
+              IRMIRATE        => noahmp%water%flux%IRMIRATE           & ! inout,  micro irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
     
-    ! initialize out-only and local variables
+    ! initialize local variables
     FSUR      = 0.0
     TEMP_RATE = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationPhilipInfil(noahmp)
+    call IrrigationPhilipInfil(noahmp, FSUR)
 
     ! irrigation rate of micro irrigation
     TEMP_RATE = MICIR_RATE * (1.0/1000.0) * DT/ 3600.0   ! NRCS rate/time step - calibratable
