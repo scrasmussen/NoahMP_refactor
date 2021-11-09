@@ -4,7 +4,7 @@ module SnowLayerDivideMod
 !!! Update snow ice, snow water, snow thickness, snow temperature
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use SnowLayerWaterComboMod, only: SnowLayerWaterCombo
 
@@ -45,26 +45,10 @@ contains
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
-              DZ2_TMP         => noahmp%water%diag%DZ2_COMBO         ,& ! out,    nodal thickness of 2 elements being combined [m]
-              WLIQ2_TMP       => noahmp%water%diag%WLIQ2_COMBO       ,& ! out,    liquid water of element 2 [kg/m2]
-              WICE2_TMP       => noahmp%water%diag%WICE2_COMBO       ,& ! out,    ice of element 2 [kg/m2]
-              T2_TMP          => noahmp%water%diag%T2_COMBO          ,& ! out,    nodal temperature of element 2 [k]
-              DZ_TMP          => noahmp%water%diag%DZ_COMBO          ,& ! out,    nodal thickness of 1 elements being combined [m]
-              WLIQ_TMP        => noahmp%water%diag%WLIQ_COMBO        ,& ! out,    liquid water of element 1
-              WICE_TMP        => noahmp%water%diag%WICE_COMBO        ,& ! out,    ice of element 1 [kg/m2]
-              T_TMP           => noahmp%water%diag%T_COMBO            & ! out,    node temperature of element 1 [k]
              )
 ! ----------------------------------------------------------------------
 
 ! initialization
-    DZ2_TMP    = 0.0
-    WLIQ2_TMP  = 0.0
-    WICE2_TMP  = 0.0
-    T2_TMP     = 0.0
-    DZ_TMP     = 0.0
-    WLIQ_TMP   = 0.0
-    WICE_TMP   = 0.0
-    T_TMP      = 0.0
     allocate( SWICE (1:NSNOW) )
     allocate( SWLIQ (1:NSNOW) )
     allocate( TSNO  (1:NSNOW) )
@@ -111,23 +95,9 @@ contains
           SWLIQ(1) = PROPOR*SWLIQ(1)
           DZ(1)    = 0.05
 
-          ! transfer value to variables passed to SnowLayerWaterCombo
-          DZ_TMP    = DZ(2) 
-          WLIQ_TMP  = SWLIQ(2)
-          WICE_TMP  = SWICE(2)
-          T_TMP     = TSNO(2)
-          DZ2_TMP   = DRR
-          WLIQ2_TMP = ZWLIQ
-          WICE2_TMP = ZWICE
-          T2_TMP    = TSNO(1)
-
-          call SnowLayerWaterCombo(noahmp) ! update combined snow water & temperature
-
-          DZ(2)    = DZ_TMP
-          SWLIQ(2) = WLIQ_TMP
-          SWICE(2) = WICE_TMP
-          TSNO(2)  = T_TMP
-          ! value transfer completed
+          ! update combined snow water & temperature
+          call SnowLayerWaterCombo(DZ(2), SWLIQ(2), SWICE(2), TSNO(2), &
+                                   DRR  , ZWLIQ   , ZWICE   , TSNO(1) )
 
           ! subdivide a new layer, maximum allowed thickness (20cm) for second snow layer
           if ( MSNO <= 2 .and. DZ(2) > 0.20 ) then  ! MB: change limit
@@ -160,23 +130,11 @@ contains
           SWICE(2) = PROPOR * SWICE(2)
           SWLIQ(2) = PROPOR * SWLIQ(2)
           DZ(2)    = 0.2
-          ! transfer value to variables passed to SnowLayerWaterCombo
-          DZ_TMP    = DZ(3)
-          WLIQ_TMP  = SWLIQ(3)
-          WICE_TMP  = SWICE(3)
-          T_TMP     = TSNO(3)
-          DZ2_TMP   = DRR
-          WLIQ2_TMP = ZWLIQ
-          WICE2_TMP = ZWICE
-          T2_TMP    = TSNO(2)
 
-          call SnowLayerWaterCombo(noahmp) ! update combined snow water & temperature
+          ! update combined snow water & temperature
+          call SnowLayerWaterCombo(DZ(3), SWLIQ(3), SWICE(3), TSNO(3), &
+                                   DRR  , ZWLIQ   , ZWICE   , TSNO(2) )
 
-          DZ(3)    = DZ_TMP
-          SWLIQ(3) = WLIQ_TMP
-          SWICE(3) = WICE_TMP
-          TSNO(3)  = T_TMP
-          ! value transfer completed
        endif
     endif
 

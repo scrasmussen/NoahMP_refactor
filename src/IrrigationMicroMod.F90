@@ -6,7 +6,7 @@ module IrrigationMicroMod
 !!! (at ~5 cm depth) considering current soil moisture
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use IrrigationPhilipInfilMod, only: IrrigationPhilipInfil
 

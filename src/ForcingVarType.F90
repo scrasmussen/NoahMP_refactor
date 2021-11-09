@@ -1,7 +1,7 @@
-module InputType
+module ForcingVarType
 
-!!! Define Noah-MP Input variables (2D forcing, namelist, table, static)
-!!! Input variable initialization is done in InputInit.f90
+!!! Define column (1-D) Noah-MP forcing variables
+!!! Forcing variable initialization is done in ForcingInit.f90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
@@ -14,11 +14,11 @@ module InputType
   save
   private
 
-  type, public :: input_type
+  type, public :: forcing_type
 
-    ! define specific input variables
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: U2D  ! U wind component 2-D forcing
+    ! define specific forcing variables
+    real(kind=kind_noahmp) :: SFCTMP          ! surface air temperature [k]
 
-  end type input_type
+  end type forcing_type
 
-end module InputType
+end module ForcingVarType

@@ -5,7 +5,7 @@ module IrrigationPhilipInfilMod
 !!! determination of conductivity and sorptivity, J. Hydrology.
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use SoilHydraulicPropertyMod, only : SoilDiffusivityConductivityOpt2
 
@@ -27,8 +27,12 @@ contains
 
 ! local variable
     integer                :: K         ! do loop/array indices
+    integer                :: ISOIL     ! soil layer index
     real(kind=kind_noahmp) :: SP        ! sorptivity (LT^-1/2)
     real(kind=kind_noahmp) :: AP        ! intial hydraulic conductivity (m/s,L/T)
+    real(kind=kind_noahmp) :: WCND      ! soil water conductivity [m/s]
+    real(kind=kind_noahmp) :: WDF       ! soil water diffusivity (m2/s)
+    real(kind=kind_noahmp) :: SICEMAX   ! maximum soil ice content (m3/m3)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -40,11 +44,7 @@ contains
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
               DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
-              FSUR            => noahmp%water%flux%FloodIrriFSUR     ,& ! out,    flood irrigation surface infiltration rate [m/s]
-              WCND            => noahmp%water%diag%WCND_local        ,& ! out,    soil water conductivity [m/s] used as local variable
-              WDF             => noahmp%water%diag%WDF_local         ,& ! out,    soil water diffusivity (m2/s) used as local variable
-              SICEMAX         => noahmp%water%diag%SICEMAX_local     ,& ! out,    maximum soil ice content (m3/m3) used as local variable
-              ISOIL           => noahmp%water%diag%ISOIL_local        & ! out,    soil layer index used as local variable
+              FSUR            => noahmp%water%flux%FloodIrriFSUR      & ! out,    flood irrigation surface infiltration rate [m/s]
              )
 ! ----------------------------------------------------------------------
 
@@ -53,7 +53,8 @@ contains
     WCND    = 0.0
     WDF     = 0.0
     SICEMAX = 0.0
-    ISOIL   = 0
+    SP      = 0.0
+    AP      = 0.0
 
     ! maximum ice fraction
     do K = 1, NSOIL
@@ -62,7 +63,7 @@ contains
 
     ! estimate initial soil hydraulic conductivty and diffusivity (Ki, D(theta) in the equation)
     ISOIL = 1
-    call SoilDiffusivityConductivityOpt2(noahmp)
+    call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SH2O(ISOIL), SICEMAX, ISOIL)
 
     ! sorptivity based on Eq. 10b from Kutilek, Miroslav, and Jana Valentova (1986) 
     ! sorptivity approximations. Transport in Porous Media 1.1, 57-62.

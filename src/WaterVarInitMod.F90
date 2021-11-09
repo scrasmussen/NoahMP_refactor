@@ -1,4 +1,4 @@
-module WaterInitMod
+module WaterVarInitMod
 
 !!! Initialize column (1-D) Noah-MP water variables
 !!! Water variables should be first defined in WaterType.f90
@@ -8,15 +8,15 @@ module WaterInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use InputType
-  use NoahmpType
+  use InputVarType
+  use NoahmpVarType
 
   implicit none
 
 contains
 
 !=== initialize with default values
-  subroutine WaterInitDefault(noahmp)
+  subroutine WaterVarInitDefault(noahmp)
 
     implicit none
 
@@ -43,6 +43,8 @@ contains
     noahmp%water%state%IRAMTFI        = huge(1.0)
     noahmp%water%state%MIFAC          = huge(1.0)
     noahmp%water%state%IRAMTMI        = huge(1.0)
+    noahmp%water%state%ZWT            = huge(1.0)
+    noahmp%water%diag%SICEMAX         = huge(1.0)
 
     allocate( noahmp%water%state%SNICE   (-NSNOW+1:0)     )
     allocate( noahmp%water%state%SNLIQ   (-NSNOW+1:0)     )
@@ -82,6 +84,7 @@ contains
     noahmp%water%flux%FloodIrriFSUR   = huge(1.0)
     noahmp%water%flux%IRMIRATE        = huge(1.0)
     noahmp%water%flux%MicroIrriFSUR   = huge(1.0)
+    noahmp%water%flux%QINSUR          = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)  )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)  )
@@ -111,33 +114,23 @@ contains
     allocate( noahmp%water%param%DWSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%DKSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%BEXP     (       1:NSOIL) )
+    allocate( noahmp%water%param%PSISAT   (       1:NSOIL) )
 
     noahmp%water%param%SMCMAX(:)        = huge(1.0)
     noahmp%water%param%DWSAT (:)        = huge(1.0)
     noahmp%water%param%DKSAT (:)        = huge(1.0)
     noahmp%water%param%BEXP  (:)        = huge(1.0)
+    noahmp%water%param%PSISAT(:)        = huge(1.0)
 
     ! water diagnostic variable
-    noahmp%water%diag%DZ2_COMBO         = huge(1.0)
-    noahmp%water%diag%WLIQ2_COMBO       = huge(1.0)
-    noahmp%water%diag%WICE2_COMBO       = huge(1.0)
-    noahmp%water%diag%T2_COMBO          = huge(1.0)
-    noahmp%water%diag%DZ_COMBO          = huge(1.0)
-    noahmp%water%diag%WLIQ_COMBO        = huge(1.0)
-    noahmp%water%diag%WICE_COMBO        = huge(1.0)
-    noahmp%water%diag%T_COMBO           = huge(1.0)
-    noahmp%water%diag%WCND_local        = huge(1.0)
-    noahmp%water%diag%WDF_local         = huge(1.0)
-    noahmp%water%diag%SICEMAX_local     = huge(1.0)
-    noahmp%water%diag%FCR_local         = huge(1.0)
-    noahmp%water%diag%ISOIL_local       = huge(1)
+
 
     end associate
 
-  end subroutine WaterInitDefault
+  end subroutine WaterVarInitDefault
 
 !=== initialize with input data or table values
-  subroutine WaterInitTransfer(noahmp, input)
+  subroutine WaterVarInitTransfer(noahmp, input)
 
     implicit none
 
@@ -166,6 +159,7 @@ contains
     noahmp%water%state%IRAMTFI             = input%IRAMTFIIn(ILOC,JLOC)
     noahmp%water%state%MIFAC               = input%MIFACIn(ILOC,JLOC)
     noahmp%water%state%IRAMTMI             = input%IRAMTMIIn(ILOC,JLOC)
+    noahmp%water%state%ZWT                 = input%ZWTIn(ILOC,JLOC)
 
     ! water parameter variable
     noahmp%water%param%CH2OP             = input%CH2OPIn
@@ -185,9 +179,10 @@ contains
     noahmp%water%param%DWSAT(1:NSOIL)    = input%DWSATIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%DKSAT(1:NSOIL)    = input%DKSATIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%BEXP(1:NSOIL)     = input%BEXPIn(ILOC,1:NSOIL,JLOC)
+    noahmp%water%param%PSISAT(1:NSOIL)   = input%PSISATIn(ILOC,1:NSOIL,JLOC)
 
     end associate
 
-  end subroutine WaterInitTransfer
+  end subroutine WaterVarInitTransfer
 
-end module WaterInitMod
+end module WaterVarInitMod

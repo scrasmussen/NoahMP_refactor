@@ -4,14 +4,14 @@ module SoilHydraulicPropertyMod
 !!! Option 1: linear effects (more permeable, Niu and Yang,2006); Option 2: nonlinear effects (less permeable)
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
 
   implicit none
 
 contains
 
-  subroutine SoilDiffusivityConductivityOpt1(noahmp)
+  subroutine SoilDiffusivityConductivityOpt1(noahmp, WDF, WCND, SMC, FCR, ISOIL)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND1
@@ -21,23 +21,24 @@ contains
 
     implicit none
 
-    type(noahmp_type), intent(inout) :: noahmp
+! IN and OUT variables
+    type(noahmp_type)     , intent(in)    :: noahmp
+    real(kind=kind_noahmp), intent(in)    :: SMC      ! soil moisture [m3/m3]
+    real(kind=kind_noahmp), intent(in)    :: FCR      ! impermeable fraction due to frozen soil
+    integer               , intent(in)    :: ISOIL    ! soil layer index
+    real(kind=kind_noahmp), intent(out)   :: WCND     ! soil water conductivity [m/s]
+    real(kind=kind_noahmp), intent(out)   :: WDF      ! soil water diffusivity (m2/s)
 
 ! local variable
-    real(kind=kind_noahmp) :: EXPON    ! exponential local factor
-    real(kind=kind_noahmp) :: FACTR    ! pre-factor
+    real(kind=kind_noahmp)                :: EXPON    ! exponential local factor
+    real(kind=kind_noahmp)                :: FACTR    ! pre-factor
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              FCR             => noahmp%water%diag%FCR_local         ,& ! in,     impermeable fraction due to frozen soil used as local variable
-              ISOIL           => noahmp%water%diag%ISOIL_local       ,& ! in,     soil layer index used as local variable
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
               DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
-              DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
-              WCND            => noahmp%water%diag%WCND_local        ,& ! out,    soil water conductivity [m/s] used as local variable
-              WDF             => noahmp%water%diag%WDF_local          & ! out,    soil water diffusivity (m2/s) used as local variable
+              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ contains
   end subroutine SoilDiffusivityConductivityOpt1
 
 
-  subroutine SoilDiffusivityConductivityOpt2(noahmp)
+  subroutine SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMC, SICE, ISOIL)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND2
@@ -68,25 +69,26 @@ contains
 
     implicit none
 
-    type(noahmp_type), intent(inout) :: noahmp
+! IN and OUT variables
+    type(noahmp_type)     , intent(in)    :: noahmp
+    real(kind=kind_noahmp), intent(in)    :: SMC      ! soil moisture [m3/m3]
+    real(kind=kind_noahmp), intent(in)    :: SICE     ! soil ice content [m3/m3]
+    integer               , intent(in)    :: ISOIL    ! soil layer index
+    real(kind=kind_noahmp), intent(out)   :: WCND     ! soil water conductivity [m/s]
+    real(kind=kind_noahmp), intent(out)   :: WDF      ! soil water diffusivity (m2/s)
 
 ! local variable
-    real(kind=kind_noahmp) :: EXPON     ! exponential local factor
-    real(kind=kind_noahmp) :: FACTR1    ! pre-factor
-    real(kind=kind_noahmp) :: FACTR2    ! pre-factor
-    real(kind=kind_noahmp) :: VKWGT     ! weights
+    real(kind=kind_noahmp)                :: EXPON    ! exponential local factor
+    real(kind=kind_noahmp)                :: FACTR1   ! pre-factor
+    real(kind=kind_noahmp)                :: FACTR2   ! pre-factor
+    real(kind=kind_noahmp)                :: VKWGT    ! weights
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              ISOIL           => noahmp%water%diag%ISOIL_local       ,& ! in,     soil layer index used as local variable
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
               DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
               DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
-              WCND            => noahmp%water%diag%WCND_local        ,& ! out,    soil water conductivity [m/s] used as local variable
-              WDF             => noahmp%water%diag%WDF_local          & ! out,    soil water diffusivity (m2/s) used as local variable
              )
 ! ----------------------------------------------------------------------
 

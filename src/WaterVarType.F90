@@ -1,4 +1,4 @@
-module WaterType
+module WaterVarType
 
 !!! Define column (1-D) Noah-MP Water variables
 !!! Water variable initialization is done in WaterInit.f90
@@ -37,6 +37,7 @@ module WaterType
     real(kind=kind_noahmp) :: FloodIrriFSUR ! flood irrigation infiltration rate [m/s]
     real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
     real(kind=kind_noahmp) :: MicroIrriFSUR ! micro irrigation infiltration rate [m/s]
+    real(kind=kind_noahmp) :: QINSUR        ! water input on soil surface [mm/s]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
@@ -64,6 +65,8 @@ module WaterType
     real(kind=kind_noahmp) :: IRAMTFI   ! flood irrigation water amount [m]
     real(kind=kind_noahmp) :: MIFAC     ! fraction of grid under micro irrigation (0 to 1)
     real(kind=kind_noahmp) :: IRAMTMI   ! micro irrigation water amount [m]
+    real(kind=kind_noahmp) :: ZWT       ! water table depth [m]
+    real(kind=kind_noahmp) :: SICEMAX   ! maximum soil ice content (m3/m3)
 
     integer               , allocatable, dimension(:) :: IMELT     ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE     ! snow layer ice [mm]
@@ -97,6 +100,7 @@ module WaterType
     real(kind=kind_noahmp), allocatable, dimension(:) :: DWSAT   ! saturated soil hydraulic diffusivity (m2/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter
+    real(kind=kind_noahmp), allocatable, dimension(:) :: PSISAT  ! saturated soil matric potential (m)
 
   end type parameter_type
 
@@ -104,19 +108,6 @@ module WaterType
   type :: diagnose_type
 
     ! define specific water diagnose variables
-    integer                :: ISOIL_local      ! soil layer index used as local variable
-    real(kind=kind_noahmp) :: DZ2_COMBO        ! nodal thickness of 2 elements being combined [m]
-    real(kind=kind_noahmp) :: WLIQ2_COMBO      ! liquid water of element 2 [kg/m2]
-    real(kind=kind_noahmp) :: WICE2_COMBO      ! ice of element 2 [kg/m2]
-    real(kind=kind_noahmp) :: T2_COMBO         ! nodal temperature of element 2 [k]
-    real(kind=kind_noahmp) :: DZ_COMBO         ! nodal thickness of 1 elements being combined [m]
-    real(kind=kind_noahmp) :: WLIQ_COMBO       ! liquid water of element 1
-    real(kind=kind_noahmp) :: WICE_COMBO       ! ice of element 1 [kg/m2]
-    real(kind=kind_noahmp) :: T_COMBO          ! node temperature of element 1 [k]
-    real(kind=kind_noahmp) :: WCND_local       ! soil water conductivity [m/s] used as local variable
-    real(kind=kind_noahmp) :: WDF_local        ! soil water diffusivity (m2/s) used as local variable
-    real(kind=kind_noahmp) :: SICEMAX_local    ! maximum soil ice content (m3/m3) used as local variable
-    real(kind=kind_noahmp) :: FCR_local        ! impermeable fraction due to frozen soil used as local variable
 
   end type diagnose_type
 
@@ -131,4 +122,4 @@ module WaterType
 
   end type water_type
 
-end module WaterType
+end module WaterVarType

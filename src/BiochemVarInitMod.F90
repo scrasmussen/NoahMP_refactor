@@ -1,4 +1,4 @@
-module BiochemInitMod
+module BiochemVarInitMod
 
 !!! Initialize column (1-D) Noah-MP biochemistry (carbon,nitrogen,etc) variables
 !!! Biochemistry variables should be first defined in BiochemType.f90
@@ -8,15 +8,15 @@ module BiochemInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use InputType
-  use NoahmpType
+  use InputVarType
+  use NoahmpVarType
 
   implicit none
 
 contains
 
 !=== initialize with default values
-  subroutine BiochemInitDefault(noahmp)
+  subroutine BiochemVarInitDefault(noahmp)
 
     implicit none
 
@@ -24,10 +24,10 @@ contains
 
     noahmp%biochem%flux%xxx = huge(1.0)
 
-  end subroutine BiochemInitDefault
+  end subroutine BiochemVarInitDefault
 
 !=== initialize with input data or table values
-  subroutine BiochemInitTransfer(noahmp, input)
+  subroutine BiochemVarInitTransfer(noahmp, input)
 
     implicit none
 
@@ -36,6 +36,6 @@ contains
 
     noahmp%biochem%flux%xxx = input%xxx2D(noahmp%config%domain%iloc,noahmp%config%domain%jloc)
 
-  end subroutine BiochemInitTransfer
+  end subroutine BiochemVarInitTransfer
 
-end module BiochemInitMod
+end module BiochemVarInitMod

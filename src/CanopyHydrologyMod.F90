@@ -4,7 +4,7 @@ module CanopyHydrologyMod
 !!! Canopy liquid water evaporation and dew; canopy ice water sublimation and frost
   
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
 
   implicit none

@@ -1,4 +1,4 @@
-module EnergyType
+module EnergyVarType
 
 !!! Define column (1-D) Noah-MP Energy variables
 !!! Energy variable initialization is done in EnergyInit.f90
@@ -63,4 +63,4 @@ module EnergyType
 
   end type energy_type
 
-end module EnergyType
+end module EnergyVarType

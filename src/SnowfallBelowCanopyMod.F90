@@ -4,7 +4,7 @@ module SnowfallBelowCanopyMod
 !!! Update snow water equivalent and snow depth
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
 
   implicit none

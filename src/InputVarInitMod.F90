@@ -1,4 +1,4 @@
-module InputInitMod
+module InputVarInitMod
 
 !!! Initialize Noah-MP input variables (2D forcing, namelist, table, static)
 !!! Input variables should be first defined in InputType.f90
@@ -10,7 +10,7 @@ module InputInitMod
 
   use Machine, only : kind_noahmp
   use ErrorHandleModule
-  use InputType
+  use InputVarType
 
   implicit none
 
@@ -233,7 +233,7 @@ contains
   end subroutine ReadInputRestart
 
 !=== initialize with default values
-  subroutine InputInitDefault(input)
+  subroutine InputVarInitDefault(input)
 
     implicit none
 
@@ -241,6 +241,6 @@ contains
 
     allocate( input%U2D(input%nx,input%ny) ) ; input%U2D (:,:) = huge(1.0)
 
-  end subroutine InputInitDefault
+  end subroutine InputVarInitDefault
 
-end module InputInitMod
+end module InputVarInitMod

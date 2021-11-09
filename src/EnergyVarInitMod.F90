@@ -1,4 +1,4 @@
-module EnergyInitMod
+module EnergyVarInitMod
 
 !!! Initialize column (1-D) Noah-MP energy variables
 !!! Energy variables should be first defined in EnergyType.f90
@@ -8,15 +8,15 @@ module EnergyInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use InputType
-  use NoahmpType
+  use InputVarType
+  use NoahmpVarType
 
   implicit none
 
 contains
 
 !=== initialize with default values
-  subroutine EnergyInitDefault(noahmp)
+  subroutine EnergyVarInitDefault(noahmp)
 
     implicit none
 
@@ -45,10 +45,10 @@ contains
 
     end associate
 
-  end subroutine EnergyInitDefault
+  end subroutine EnergyVarInitDefault
 
 !=== initialize with input data or table values
-  subroutine EnergyInitTransfer(noahmp, input)
+  subroutine EnergyVarInitTransfer(noahmp, input)
 
     implicit none
 
@@ -74,6 +74,6 @@ contains
 
     end associate
 
-  end subroutine EnergyInitTransfer
+  end subroutine EnergyVarInitTransfer
 
-end module EnergyInitMod
+end module EnergyVarInitMod

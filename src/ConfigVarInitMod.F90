@@ -1,4 +1,4 @@
-module ConfigInitMod
+module ConfigVarInitMod
 
 !!! Initialize column (1-D) Noah-MP configuration variables
 !!! Configuration variables should be first defined in ConfigType.f90
@@ -8,15 +8,15 @@ module ConfigInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use InputType
-  use NoahmpType
+  use InputVarType
+  use NoahmpVarType
 
   implicit none
 
 contains
 
 !=== initialize with default values
-  subroutine ConfigInitDefault(noahmp)
+  subroutine ConfigVarInitDefault(noahmp)
 
     implicit none
 
@@ -48,10 +48,10 @@ contains
 
     end associate
 
-  end subroutine ConfigInitDefault
+  end subroutine ConfigVarInitDefault
 
 !=== initialize with input/restart data or table values
-  subroutine ConfigInitTransfer(noahmp, input)
+  subroutine ConfigVarInitTransfer(noahmp, input)
 
     implicit none
 
@@ -82,6 +82,6 @@ contains
 
     end associate
 
-  end subroutine ConfigInitTransfer
+  end subroutine ConfigVarInitTransfer
 
-end module ConfigInitMod
+end module ConfigVarInitMod

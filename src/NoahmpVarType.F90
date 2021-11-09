@@ -1,4 +1,4 @@
-module NoahmpType
+module NoahmpVarType
 
 !!! Define column (1-D) Noah-MP model variable data types
 
@@ -7,11 +7,11 @@ module NoahmpType
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use ForcingType
-  use ConfigType
-  use EnergyType
-  use WaterType
-  use BiochemType
+  use ForcingVarType
+  use ConfigVarType
+  use EnergyVarType
+  use WaterVarType
+  use BiochemVarType
 
   implicit none
   save
@@ -28,4 +28,4 @@ module NoahmpType
 
   end type noahmp_type
 
-end module NoahmpType
+end module NoahmpVarType

@@ -4,7 +4,7 @@ module SnowLayerCombineMod
 !!! Update snow ice, snow water, snow thickness, snow temperature
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use SnowLayerWaterComboMod, only: SnowLayerWaterCombo
 
@@ -47,27 +47,9 @@ contains
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               PONDING1        => noahmp%water%state%PONDING1         ,& ! out,    surface ponding 1 (mm)
-              PONDING2        => noahmp%water%state%PONDING2         ,& ! out,    surface ponding 2 (mm)
-              DZ2             => noahmp%water%diag%DZ2_COMBO         ,& ! out,    nodal thickness of 2 elements being combined [m]
-              WLIQ2           => noahmp%water%diag%WLIQ2_COMBO       ,& ! out,    liquid water of element 2 [kg/m2]
-              WICE2           => noahmp%water%diag%WICE2_COMBO       ,& ! out,    ice of element 2 [kg/m2]
-              T2              => noahmp%water%diag%T2_COMBO          ,& ! out,    nodal temperature of element 2 [k]
-              DZ              => noahmp%water%diag%DZ_COMBO          ,& ! out,    nodal thickness of 1 elements being combined [m]
-              WLIQ            => noahmp%water%diag%WLIQ_COMBO        ,& ! out,    liquid water of element 1
-              WICE            => noahmp%water%diag%WICE_COMBO        ,& ! out,    ice of element 1 [kg/m2]
-              T               => noahmp%water%diag%T_COMBO            & ! out,    node temperature of element 1 [k]
+              PONDING2        => noahmp%water%state%PONDING2          & ! out,    surface ponding 2 (mm)
              )
 ! ----------------------------------------------------------------------
-
-! initialization for out-only variables
-    DZ2    = 0.0
-    WLIQ2  = 0.0
-    WICE2  = 0.0
-    T2     = 0.0
-    DZ     = 0.0
-    WLIQ   = 0.0
-    WICE   = 0.0
-    T      = 0.0
 
 ! check and combine small ice content layer
     ISNOW_OLD = ISNOW
@@ -172,23 +154,9 @@ contains
                 L = NEIBOR
              endif
 
-             ! transfer value to variables passed to SnowLayerWaterCombo
-             DZ    = DZSNSO(J) 
-             WLIQ  = SNLIQ(J)
-             WICE  = SNICE(J)
-             T     = STC(J)
-             DZ2   = DZSNSO(L)
-             WLIQ2 = SNLIQ(L)
-             WICE2 = SNICE(L)
-             T2    = STC(L)
-
-             call SnowLayerWaterCombo(noahmp) ! update combined snow water & temperature
-
-             DZSNSO(J) = DZ
-             SNLIQ(J)  = WLIQ
-             SNICE(J)  = WICE
-             STC(J)    = T
-             ! value transfer completed
+             ! update combined snow water & temperature
+             call SnowLayerWaterCombo(DZSNSO(J), SNLIQ(J), SNICE(J), STC(J), &
+                                      DZSNSO(L), SNLIQ(L), SNICE(L), STC(L) )
 
              ! Now shift all elements above this down one.
              if ( J-1 > ISNOW+1 ) then

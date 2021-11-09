@@ -4,7 +4,7 @@ module SnowWaterMainMod
 !!! Snowfall -> Snowpack compaction -> Snow layer combination -> Snow layer division -> Snow Hydrology
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use SnowfallBelowCanopyMod, only : SnowfallAfterCanopyIntercept
   use SnowpackCompactionMod,  only : SnowpackCompaction

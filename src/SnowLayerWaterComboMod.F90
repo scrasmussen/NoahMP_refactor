@@ -3,14 +3,13 @@ module SnowLayerWaterComboMod
 !!! Update snow water and temperature for combined snowpack layer
 
   use Machine, only : kind_noahmp
-  use NoahmpType
   use ConstantDefineMod
 
   implicit none
 
 contains
 
-  subroutine SnowLayerWaterCombo(noahmp)
+  subroutine SnowLayerWaterCombo(DZ, WLIQ, WICE, T, DZ2, WLIQ2, WICE2, T2)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: COMBO
@@ -20,35 +19,32 @@ contains
 
     implicit none
 
-    type(noahmp_type), intent(inout) :: noahmp
+! IN and OUT variables
+    real(kind=kind_noahmp), intent(in)    :: DZ2      ! nodal thickness of 2 elements being combined [m]
+    real(kind=kind_noahmp), intent(in)    :: WLIQ2    ! liquid water of element 2 [kg/m2]
+    real(kind=kind_noahmp), intent(in)    :: WICE2    ! ice of element 2 [kg/m2]
+    real(kind=kind_noahmp), intent(in)    :: T2       ! nodal temperature of element 2 [k]
+    real(kind=kind_noahmp), intent(inout) :: DZ       ! nodal thickness of 1 elements being combined [m]
+    real(kind=kind_noahmp), intent(inout) :: WLIQ     ! liquid water of element 1
+    real(kind=kind_noahmp), intent(inout) :: WICE     ! ice of element 1 [kg/m2]
+    real(kind=kind_noahmp), intent(inout) :: T        ! node temperature of element 1 [k]
 
 ! local variable
-    real(kind=kind_noahmp) :: DZC       ! total thickness of nodes 1 and 2 (DZC=DZ+DZ2)
-    real(kind=kind_noahmp) :: WLIQC     ! combined liquid water [kg/m2]
-    real(kind=kind_noahmp) :: WICEC     ! combined ice [kg/m2]
-    real(kind=kind_noahmp) :: TC        ! combined node temperature [k]
-    real(kind=kind_noahmp) :: H         ! enthalpy of element 1 [J/m2]
-    real(kind=kind_noahmp) :: H2        ! enthalpy of element 2 [J/m2]
-    real(kind=kind_noahmp) :: HC        ! temporary
+    real(kind=kind_noahmp)                :: DZC      ! total thickness of nodes 1 and 2 (DZC=DZ+DZ2)
+    real(kind=kind_noahmp)                :: WLIQC    ! combined liquid water [kg/m2]
+    real(kind=kind_noahmp)                :: WICEC    ! combined ice [kg/m2]
+    real(kind=kind_noahmp)                :: TC       ! combined node temperature [k]
+    real(kind=kind_noahmp)                :: H        ! enthalpy of element 1 [J/m2]
+    real(kind=kind_noahmp)                :: H2       ! enthalpy of element 2 [J/m2]
+    real(kind=kind_noahmp)                :: HC       ! temporary
 
 ! ----------------------------------------------------------------------
-    associate(                                                        &
-              DZ2       => noahmp%water%diag%DZ2_COMBO               ,& ! in,    nodal thickness of 2 elements being combined [m]
-              WLIQ2     => noahmp%water%diag%WLIQ2_COMBO             ,& ! in,    liquid water of element 2 [kg/m2]
-              WICE2     => noahmp%water%diag%WICE2_COMBO             ,& ! in,    ice of element 2 [kg/m2]
-              T2        => noahmp%water%diag%T2_COMBO                ,& ! in,    nodal temperature of element 2 [k]
-              DZ        => noahmp%water%diag%DZ_COMBO                ,& ! inout, nodal thickness of 1 elements being combined [m]
-              WLIQ      => noahmp%water%diag%WLIQ_COMBO              ,& ! inout, liquid water of element 1
-              WICE      => noahmp%water%diag%WICE_COMBO              ,& ! inout, ice of element 1 [kg/m2]
-              T         => noahmp%water%diag%T_COMBO                  & ! inout, node temperature of element 1 [k]
-             )
-! ----------------------------------------------------------------------
 
-    DZC   = DZ+DZ2
-    WICEC = (WICE+WICE2)
-    WLIQC = (WLIQ+WLIQ2)
-    H     = (CICE*WICE + CWAT*WLIQ) * (T-TFRZ) + HFUS*WLIQ
-    H2    = (CICE*WICE2 + CWAT*WLIQ2) * (T2-TFRZ) + HFUS*WLIQ2
+    DZC   = DZ + DZ2
+    WICEC = WICE + WICE2
+    WLIQC = WLIQ + WLIQ2
+    H     = (CICE*WICE  + CWAT*WLIQ)  * (T  - TFRZ) + HFUS * WLIQ
+    H2    = (CICE*WICE2 + CWAT*WLIQ2) * (T2 - TFRZ) + HFUS * WLIQ2
 
     HC = H + H2
     if ( HC < 0.0 ) then
@@ -63,8 +59,6 @@ contains
     WICE = WICEC
     WLIQ = WLIQC
     T    = TC
-
-    end associate
 
   end subroutine SnowLayerWaterCombo
 

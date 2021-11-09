@@ -6,7 +6,7 @@ module IrrigationFloodMod
 !!! infiltration rate of the soil. Flooding or overland flow is based on infiltration excess
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use IrrigationPhilipInfilMod, only: IrrigationPhilipInfil
 

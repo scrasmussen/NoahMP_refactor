@@ -1,4 +1,4 @@
-module ForcingInitMod
+module ForcingVarInitMod
 
 !!! Initialize column (1-D) Noah-MP forcing variables
 !!! Forcing variables should be first defined in ForcingType.f90
@@ -8,15 +8,15 @@ module ForcingInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use InputType
-  use NoahmpType
+  use InputVarType
+  use NoahmpVarType
 
   implicit none
 
 contains
 
 !=== initialize with default values
-  subroutine ForcingInitDefault(noahmp)
+  subroutine ForcingVarInitDefault(noahmp)
 
     implicit none
 
@@ -25,10 +25,10 @@ contains
     noahmp%forcing%SFCTMP   = huge(1.0)
 
 
-  end subroutine ForcingInitDefault
+  end subroutine ForcingVarInitDefault
 
 !=== initialize with input data or table values
-  subroutine ForcingInitTransfer(noahmp, input)
+  subroutine ForcingVarInitTransfer(noahmp, input)
 
     implicit none
 
@@ -46,6 +46,6 @@ contains
 
     end associate
 
-  end subroutine ForcingInitTransfer
+  end subroutine ForcingVarInitTransfer
 
-end module ForcingInitMod
+end module ForcingVarInitMod

@@ -1,4 +1,4 @@
-module BiochemType
+module BiochemVarType
 
 !!! Define column (1-D) Noah-MP Biochemistry (carbon,nitrogen,etc) variables
 !!! Biochemistry variable initialization is done in BiochemInit.f90
@@ -56,4 +56,4 @@ module BiochemType
 
   end type biochem_type
 
-end module BiochemType
+end module BiochemVarType

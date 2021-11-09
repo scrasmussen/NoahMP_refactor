@@ -4,7 +4,7 @@ module SnowpackHydrologyMod
 !!! Update snowpack ice and liquid water content
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
   use SnowLayerCombineMod, only : SnowLayerCombine
 

@@ -4,7 +4,7 @@ module SnowpackCompactionMod
 !!! Update snow depth via compaction due to destructive metamorphism, overburden, & melt
 
   use Machine, only : kind_noahmp
-  use NoahmpType
+  use NoahmpVarType
   use ConstantDefineMod
 
   implicit none
