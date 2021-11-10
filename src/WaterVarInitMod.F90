@@ -44,7 +44,9 @@ contains
     noahmp%water%state%MIFAC          = huge(1.0)
     noahmp%water%state%IRAMTMI        = huge(1.0)
     noahmp%water%state%ZWT            = huge(1.0)
-    noahmp%water%diag%SICEMAX         = huge(1.0)
+    noahmp%water%state%SICEMAX        = huge(1.0)
+    noahmp%water%state%FSAT           = huge(1.0)
+    noahmp%water%state%FCR            = huge(1.0)
 
     allocate( noahmp%water%state%SNICE   (-NSNOW+1:0)     )
     allocate( noahmp%water%state%SNLIQ   (-NSNOW+1:0)     )
@@ -83,6 +85,9 @@ contains
     noahmp%water%flux%IRFIRATE        = huge(1.0)
     noahmp%water%flux%IRMIRATE        = huge(1.0)
     noahmp%water%flux%QINSUR          = huge(1.0)
+    noahmp%water%flux%RUNSRF          = huge(1.0)
+    noahmp%water%flux%PDDUM           = huge(1.0)
+    noahmp%water%flux%FACC            = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)  )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)  )
@@ -107,14 +112,27 @@ contains
     noahmp%water%param%SNOW_RET_FAC     = huge(1.0)
     noahmp%water%param%FIRTFAC          = huge(1.0)
     noahmp%water%param%MICIR_RATE       = huge(1.0)
+    noahmp%water%param%KDT              = huge(1.0)
+    noahmp%water%param%FRZX             = huge(1.0)
+    noahmp%water%param%BVIC             = huge(1.0)
+    noahmp%water%param%AXAJ             = huge(1.0)
+    noahmp%water%param%BXAJ             = huge(1.0)
+    noahmp%water%param%XXAJ             = huge(1.0)
+    noahmp%water%param%BBVIC            = huge(1.0)
+    noahmp%water%param%GDVIC            = huge(1.0)
+    noahmp%water%param%BDVIC            = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
+    allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
+    allocate( noahmp%water%param%SMCREF   (       1:NSOIL) )
     allocate( noahmp%water%param%DWSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%DKSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%BEXP     (       1:NSOIL) )
     allocate( noahmp%water%param%PSISAT   (       1:NSOIL) )
 
     noahmp%water%param%SMCMAX(:)        = huge(1.0)
+    noahmp%water%param%SMCWLT(:)        = huge(1.0)
+    noahmp%water%param%SMCREF(:)        = huge(1.0)
     noahmp%water%param%DWSAT (:)        = huge(1.0)
     noahmp%water%param%DKSAT (:)        = huge(1.0)
     noahmp%water%param%BEXP  (:)        = huge(1.0)
@@ -172,8 +190,19 @@ contains
     noahmp%water%param%SNOW_RET_FAC      = input%SNOW_RET_FACIn
     noahmp%water%param%FIRTFAC           = input%FIRTFACIn
     noahmp%water%param%MICIR_RATE        = input%MICIR_RATEIn
+    noahmp%water%param%KDT               = input%KDTIn
+    noahmp%water%param%FRZX              = input%FRZXIn
+    noahmp%water%param%BVIC              = input%BVICIn
+    noahmp%water%param%AXAJ              = input%AXAJIn
+    noahmp%water%param%BXAJ              = input%BXAJIn
+    noahmp%water%param%XXAJ              = input%XXAJIn
+    noahmp%water%param%BBVIC             = input%BBVICIn
+    noahmp%water%param%GDVIC             = input%GDVICIn
+    noahmp%water%param%BDVIC             = input%BDVICIn
 
     noahmp%water%param%SMCMAX(1:NSOIL)   = input%SMCMAXIn(ILOC,1:NSOIL,JLOC)
+    noahmp%water%param%SMCWLT(1:NSOIL)   = input%SMCWLTIn(ILOC,1:NSOIL,JLOC)
+    noahmp%water%param%SMCREF(1:NSOIL)   = input%SMCREFIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%DWSAT(1:NSOIL)    = input%DWSATIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%DKSAT(1:NSOIL)    = input%DKSATIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%BEXP(1:NSOIL)     = input%BEXPIn(ILOC,1:NSOIL,JLOC)

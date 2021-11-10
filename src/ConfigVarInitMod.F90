@@ -28,6 +28,7 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_INFDV  = 1
 
     ! config domain variable
     NSNOW                           = 3
@@ -66,6 +67,7 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
 
     ! config domain variable
     ILOC                         = input%LonIndex

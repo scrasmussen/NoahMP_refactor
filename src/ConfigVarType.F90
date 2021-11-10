@@ -18,7 +18,8 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
-    
+    integer                   :: OPT_INFDV   ! options for infiltration in dynamic VIC runoff scheme
+                                             ! 1 -> Philip scheme (default); 2 -> Green-Ampt scheme; 3 -> Smith-Parlange scheme    
 
   end type namelist_type
 

@@ -1,4 +1,4 @@
-module IrrigationPhilipInfilMod
+module IrrigationInfilPhilipMod
 
 !!! Estimate infiltration rate based on Philip's two parameter equation
 !!! Reference: Eq.2 in Valiantzas (2010): New linearized two-parameter infiltration equation for direct
@@ -13,7 +13,7 @@ module IrrigationPhilipInfilMod
 
 contains
 
-  subroutine IrrigationPhilipInfil(noahmp, FSUR)
+  subroutine IrrigationInfilPhilip(noahmp, DT, FSUR)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: IRR_PHILIP_INFIL
@@ -23,7 +23,9 @@ contains
 
     implicit none
 
+! IN & OUT variables
     type(noahmp_type)     , intent(in)  :: noahmp
+    real(kind=kind_noahmp), intent(in)  :: DT
     real(kind=kind_noahmp), intent(out) :: FSUR
 
 ! local variable
@@ -38,7 +40,6 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
               SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
@@ -78,6 +79,6 @@ contains
 
     end associate
 
-  end subroutine IrrigationPhilipInfil
+  end subroutine IrrigationInfilPhilip
 
-end module IrrigationPhilipInfilMod
+end module IrrigationInfilPhilipMod

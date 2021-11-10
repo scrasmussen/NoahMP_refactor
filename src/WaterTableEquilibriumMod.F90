@@ -30,7 +30,7 @@ contains
     real(kind=kind_noahmp) :: DZFINE      ! layer thickness of the 100-L soil layers to 6.0 m
     real(kind=kind_noahmp) :: TEMP        ! temporary variable
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZFINE ! layer-bottom depth of the 100-L soil layers to 6.0 m
-    allocate( ZFINE(1:NFINE) ) ; ZFINE(:) = 0.0
+    allocate( ZFINE(1:NFINE) )
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -45,6 +45,7 @@ contains
              )
 ! ----------------------------------------------------------------------
 
+    ZFINE(1:NFINE) = 0.0
     WD1 = 0.0
     do K = 1, NSOIL
        WD1 = WD1 + (SMCMAX(1) - SH2O(K)) * DZSNSO(K) ! [m]

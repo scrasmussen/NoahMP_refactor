@@ -8,7 +8,7 @@ module IrrigationFloodMod
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
-  use IrrigationPhilipInfilMod, only: IrrigationPhilipInfil
+  use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
 
   implicit none
 
@@ -43,7 +43,7 @@ contains
     FSUR = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationPhilipInfil(noahmp, FSUR)  
+    call IrrigationInfilPhilip(noahmp, DT, FSUR)  
 
     ! irrigation rate of flood irrigation. It should be
     ! greater than infiltration rate to get infiltration

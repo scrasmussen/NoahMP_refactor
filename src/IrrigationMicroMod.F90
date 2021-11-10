@@ -8,7 +8,7 @@ module IrrigationMicroMod
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
-  use IrrigationPhilipInfilMod, only: IrrigationPhilipInfil
+  use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
 
   implicit none
 
@@ -45,7 +45,7 @@ contains
     TEMP_RATE = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationPhilipInfil(noahmp, FSUR)
+    call IrrigationInfilPhilip(noahmp, DT, FSUR)
 
     ! irrigation rate of micro irrigation
     TEMP_RATE = MICIR_RATE * (1.0/1000.0) * DT/ 3600.0   ! NRCS rate/time step - calibratable

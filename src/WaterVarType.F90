@@ -36,6 +36,9 @@ module WaterVarType
     real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
     real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
     real(kind=kind_noahmp) :: QINSUR        ! water input on soil surface [mm/s]
+    real(kind=kind_noahmp) :: RUNSRF        ! surface runoff [mm/s]
+    real(kind=kind_noahmp) :: PDDUM         ! infiltration rate at surface (mm/s)
+    real(kind=kind_noahmp) :: FACC          ! accumulated infiltration rate (m/s)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
@@ -65,6 +68,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: IRAMTMI   ! micro irrigation water amount [m]
     real(kind=kind_noahmp) :: ZWT       ! water table depth [m]
     real(kind=kind_noahmp) :: SICEMAX   ! maximum soil ice content (m3/m3)
+    real(kind=kind_noahmp) :: FSAT      ! fractional saturated area for soil moisture
+    real(kind=kind_noahmp) :: FCR       ! fraction of imperviousness due to frozen soil
 
     integer               , allocatable, dimension(:) :: IMELT     ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE     ! snow layer ice [mm]
@@ -93,8 +98,19 @@ module WaterVarType
     real(kind=kind_noahmp) :: SNOW_RET_FAC     ! snowpack water release timescale factor (1/s)
     real(kind=kind_noahmp) :: FIRTFAC          ! flood application rate factor
     real(kind=kind_noahmp) :: MICIR_RATE       ! micro irrigation rate (mm/hr)
+    real(kind=kind_noahmp) :: KDT              ! parameter to calculate maximum infiltration rate
+    real(kind=kind_noahmp) :: FRZX             ! parameter to calculate frozen soil impermeable fraction
+    real(kind=kind_noahmp) :: BVIC             ! VIC model infiltration parameter
+    real(kind=kind_noahmp) :: AXAJ             ! Tension water distribution inflection parameter
+    real(kind=kind_noahmp) :: BXAJ             ! Tension water distribution shape parameter
+    real(kind=kind_noahmp) :: XXAJ             ! Free water distribution shape parameter
+    real(kind=kind_noahmp) :: BBVIC            ! DVIC heterogeniety parameter for infiltration
+    real(kind=kind_noahmp) :: GDVIC            ! DVIC Mean Capillary Drive (m) for infiltration models
+    real(kind=kind_noahmp) :: BDVIC            ! DVIC model infiltration parameter
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCREF  ! reference soil moisture (field capacity) (m3/m3)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DWSAT   ! saturated soil hydraulic diffusivity (m2/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter
