@@ -33,7 +33,6 @@ contains
     real(kind=kind_noahmp) :: TEMP      ! temporary SWE
     real(kind=kind_noahmp), allocatable, dimension(:) :: VOL_LIQ   ! partial volume of liquid water in layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: VOL_ICE   ! partial volume of ice lens in layer
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE     ! effective porosity = 1 - VOL_ICE
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -56,6 +55,7 @@ contains
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               PONDING1        => noahmp%water%state%PONDING1         ,& ! out,    surface ponding 1 (mm)
               PONDING2        => noahmp%water%state%PONDING2         ,& ! out,    surface ponding 2 (mm)
+              EPORE           => noahmp%water%state%EPORE_SNOW       ,& ! out,    snow effective porosity (m3/m3)
               QSNBOT          => noahmp%water%flux%QSNBOT             & ! out,    melting water out of snow bottom [mm/s]
              )
 ! ----------------------------------------------------------------------
@@ -63,7 +63,6 @@ contains
 ! initialization
     allocate( VOL_LIQ(-NSNOW+1:0) )
     allocate( VOL_ICE(-NSNOW+1:0) )
-    allocate( EPORE  (-NSNOW+1:0) )
     VOL_LIQ(:) = 0.0
     VOL_ICE(:) = 0.0
     EPORE  (:) = 0.0

@@ -28,6 +28,8 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_RUN    = 1
+    noahmp%config%nmlist%OPT_INF    = 1
     noahmp%config%nmlist%OPT_INFDV  = 1
 
     ! config domain variable
@@ -38,12 +40,15 @@ contains
     noahmp%config%domain%VEGTYP     = huge(1)
     noahmp%config%domain%ISNOW      = huge(1)
     noahmp%config%domain%DT         = huge(1.0)
+    noahmp%config%domain%DX         = huge(1.0)
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
+    allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
     allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
     allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
 
     noahmp%config%domain%ZSOIL (:)    = huge(1.0)
+    noahmp%config%domain%ZLAYER(:)    = huge(1.0)
     noahmp%config%domain%DZSNSO(:)    = huge(1.0)
     noahmp%config%domain%ZSNSO (:)    = huge(1.0)
 
@@ -67,14 +72,16 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
 
     ! config domain variable
-    ILOC                         = input%LonIndex
-    JLOC                         = input%LatIndex
+    ILOC                         = input%ILOCIn
+    JLOC                         = input%JLOCIn
     NSNOW                        = input%NSNOWIn
     NSOIL                        = input%NSOILIn
-    noahmp%config%domain%DT      = input%TimeStep
+    noahmp%config%domain%DT      = input%DTIn
+    noahmp%config%domain%DX      = input%DXIn
     noahmp%config%domain%ISNOW   = input%ISNOWIn(ILOC,JLOC)
     noahmp%config%domain%VEGTYP  = input%VegTypeIn(ILOC,JLOC)
 
