@@ -11,7 +11,7 @@ module RunoffSurfaceFreeDrainMod
 
 contains
 
-  subroutine SurfaceRunoffFreeDrain(noahmp, DT)
+  subroutine RunoffSurfaceFreeDrain(noahmp, DT)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: INFIL
@@ -121,6 +121,6 @@ contains
 
     end associate
 
-  end subroutine SurfaceRunoffFreeDrain
+  end subroutine RunoffSurfaceFreeDrain
 
 end module RunoffSurfaceFreeDrainMod

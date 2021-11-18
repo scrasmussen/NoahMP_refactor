@@ -11,7 +11,7 @@ module RunoffSurfaceVicMod
 
 contains
 
-  subroutine SurfaceRunoffVIC(noahmp, DT)
+  subroutine RunoffSurfaceVIC(noahmp, DT)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: COMPUTE_VIC_SURFRUNOFF
@@ -91,6 +91,6 @@ contains
 
     end associate
 
-  end subroutine SurfaceRunoffVIC
+  end subroutine RunoffSurfaceVIC
 
 end module RunoffSurfaceVicMod

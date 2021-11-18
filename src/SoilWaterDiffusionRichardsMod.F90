@@ -48,7 +48,7 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
               OPT_INF         => noahmp%config%nmlist%OPT_INF        ,& ! in,     options for frozen soil permeability
-              OPT_RUN         => noahmp%config%nmlist%OPT_RUN        ,& ! in,     options for surface runoff
+              OPT_RUNSUB      => noahmp%config%nmlist%OPT_RUNSUB     ,& ! in,     options for drainage and subsurface runoff
               SLOPE           => noahmp%water%param%SLOPE            ,& ! in,     slope index for soil drainage
               PDDUM           => noahmp%water%flux%PDDUM             ,& ! in,     infiltration rate at surface (mm/s)
               QSEVA           => noahmp%water%flux%QSEVA             ,& ! in,     evaporation from soil surface [mm/s]
@@ -92,7 +92,7 @@ contains
           call SoilDiffusivityConductivityOpt1(noahmp,WDF(K),WCND(K),SMC(K),FCR(K),K) 
           SMX(K) = SMC(K)
        enddo
-       if ( OPT_RUN == 5 ) SMXWTD = SMCWTD
+       if ( OPT_RUNSUB == 5 ) SMXWTD = SMCWTD
     endif
 
     if ( OPT_INF == 2 ) then
@@ -100,7 +100,7 @@ contains
           call SoilDiffusivityConductivityOpt2(noahmp,WDF(K),WCND(K),SH2O(K),SICEMAX,K)
           SMX(K) = SH2O(K)
        enddo
-       if ( OPT_RUN == 5 ) SMXWTD = SMCWTD * SH2O(NSOIL) / SMC(NSOIL)  !same liquid fraction as in the bottom layer
+       if ( OPT_RUNSUB == 5 ) SMXWTD = SMCWTD * SH2O(NSOIL) / SMC(NSOIL)  !same liquid fraction as in the bottom layer
     endif
 
     ! compute right hand side of time tendency term of soil water diffusion equation
@@ -120,16 +120,16 @@ contains
                    - WDF(K-1) * DSMDZ(K-1) - WCND(K-1) + ETRANI(K)
        else
           DENOM(K) = (ZSOIL(K-1) - ZSOIL(K))
-          if ( OPT_RUN == 1 .or. OPT_RUN == 2 ) then
+          if ( OPT_RUNSUB == 1 .or. OPT_RUNSUB == 2 ) then
              QDRAIN = 0.0
           endif
-          if ( OPT_RUN == 3 .or. OPT_RUN == 6 .or. OPT_RUN == 7 .or. OPT_RUN == 8 ) then
+          if ( OPT_RUNSUB == 3 .or. OPT_RUNSUB == 6 .or. OPT_RUNSUB == 7 .or. OPT_RUNSUB == 8 ) then
              QDRAIN = SLOPE * WCND(K)
           endif
-          if ( OPT_RUN == 4 ) then
+          if ( OPT_RUNSUB == 4 ) then
              QDRAIN = (1.0 - FCRMAX) * WCND(K)
           endif
-          if ( OPT_RUN == 5 ) then   !gmm new m-m&f water table dynamics formulation
+          if ( OPT_RUNSUB == 5 ) then   !gmm new m-m&f water table dynamics formulation
              TEMP1  = 2.0 * DENOM(K)
              if ( ZWT < ZSOIL(NSOIL)-DENOM(NSOIL) ) then
                 ! gmm interpolate from below, midway to the water table, 

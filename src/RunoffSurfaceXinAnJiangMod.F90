@@ -13,7 +13,7 @@ module RunoffSurfaceXinAnJiangMod
 
 contains
 
-  subroutine SurfaceRunoffXinAnJiang(noahmp, DT)
+  subroutine RunoffSurfaceXinAnJiang(noahmp, DT)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: COMPUTE_XAJ_SURFRUNOFF
@@ -95,6 +95,6 @@ contains
 
     end associate
 
-  end subroutine SurfaceRunoffXinAnJiang
+  end subroutine RunoffSurfaceXinAnJiang
 
 end module RunoffSurfaceXinAnJiangMod

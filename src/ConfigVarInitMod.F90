@@ -28,13 +28,16 @@ contains
              )
 
     ! config namelist variable
-    noahmp%config%nmlist%OPT_RUN    = 1
+    noahmp%config%nmlist%OPT_RUNSRF = 1
+    noahmp%config%nmlist%OPT_RUNSUB = 1
     noahmp%config%nmlist%OPT_INF    = 1
     noahmp%config%nmlist%OPT_INFDV  = 1
+    noahmp%config%nmlist%OPT_TDRN   = 0
 
     ! config domain variable
     NSNOW                           = 3
     NSOIL                           = 4
+    noahmp%config%domain%urban_flag = .false.
     noahmp%config%domain%ILOC       = huge(1)
     noahmp%config%domain%JLOC       = huge(1)
     noahmp%config%domain%VEGTYP     = huge(1)
@@ -72,8 +75,15 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
+    noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
+    if (input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn) then
+       noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSRFIn
+       print*,'reset OPT_RUNSUB to be the same as OPT_RUNSRF ...'
+    endif
     noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
+    noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
 
     ! config domain variable
     ILOC                         = input%ILOCIn
@@ -84,6 +94,7 @@ contains
     noahmp%config%domain%DX      = input%DXIn
     noahmp%config%domain%ISNOW   = input%ISNOWIn(ILOC,JLOC)
     noahmp%config%domain%VEGTYP  = input%VegTypeIn(ILOC,JLOC)
+    noahmp%config%domain%urban_flag = input%urban_flagIn(ILOC,JLOC)
 
     noahmp%config%domain%ZSOIL (       1:NSOIL) = input%ZSOILIn(ILOC,1:NSOIL,JLOC)
     noahmp%config%domain%DZSNSO(-NSNOW+1:NSOIL) = input%DZSNSOIn(ILOC,-NSNOW+1:NSOIL,JLOC)

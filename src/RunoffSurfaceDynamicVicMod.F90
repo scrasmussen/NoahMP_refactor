@@ -16,7 +16,7 @@ module RunoffSurfaceDynamicVicMod
 
 contains
 
-  subroutine SurfaceRunoffDynamicVic(noahmp, DT)
+  subroutine RunoffSurfaceDynamicVic(noahmp, DT, FACC)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: DYNAMIC_VIC
@@ -29,6 +29,7 @@ contains
 ! IN & OUT variabls
      type(noahmp_type)     , intent(inout) :: noahmp
      real(kind=kind_noahmp), intent(in)    :: DT       ! timestep (may not be the same as model timestep)
+     real(kind=kind_noahmp), intent(inout) :: FACC     ! accumulated infiltration rate (m/s)
 
 ! local variable
      integer                :: IZ, IZMAX, INFLMAX      ! do-loop index
@@ -66,7 +67,6 @@ contains
                BBVIC           => noahmp%water%param%BBVIC            ,& ! in,     DVIC heterogeniety parameter for infiltration
                GDVIC           => noahmp%water%param%GDVIC            ,& ! in,     DVIC Mean Capillary Drive (m) for infiltration models
                BDVIC           => noahmp%water%param%BDVIC            ,& ! in,     DVIC model infiltration parameter
-               FACC            => noahmp%water%flux%FACC              ,& ! inout,  accumulated infiltration rate (m/s)
                RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
                PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
               )
@@ -102,11 +102,11 @@ contains
 
      ! compute surface infiltration
      if ( OPT_INFDV == 1 ) then
-        call SoilWaterInfilPhilip(noahmp, DT, INFLMAX, FSUR)
+        call SoilWaterInfilPhilip(noahmp, DT, INFLMAX, FACC, FSUR)
      else if ( OPT_INFDV == 2 ) then
-        call SoilWaterInfilGreenAmpt(noahmp, INFLMAX, FSUR)
+        call SoilWaterInfilGreenAmpt(noahmp, INFLMAX, FACC, FSUR)
      else if ( OPT_INFDV == 3 ) then
-        call SoilWaterInfilSmithParlange(noahmp, INFLMAX, FSUR)
+        call SoilWaterInfilSmithParlange(noahmp, INFLMAX, FACC, FSUR)
      endif
 
      ! I_MM = FSUR; I_M = FMAX  
@@ -292,6 +292,6 @@ contains
 
     end associate
 
-  end subroutine SurfaceRunoffDynamicVic
+  end subroutine RunoffSurfaceDynamicVic
 
 end module RunoffSurfaceDynamicVicMod

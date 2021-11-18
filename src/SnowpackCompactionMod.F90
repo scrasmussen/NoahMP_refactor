@@ -39,7 +39,7 @@ contains
               SNICE           => noahmp%water%state%SNICE            ,& ! in,     snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! in,     snow layer liquid water [mm]
               IMELT           => noahmp%water%state%IMELT            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
-              FICEOLD         => noahmp%water%state%FICEOLD          ,& ! in,     ice fraction at last timestep
+              FICEOLD         => noahmp%water%state%FICEOLD_SNOW     ,& ! in,     ice fraction in snow layers at last timestep
               C2              => noahmp%water%param%C2_SnowCompact   ,& ! in,     snow overburden compaction parameter (m3/kg)
               C3              => noahmp%water%param%C3_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter1 [1/s]
               C4              => noahmp%water%param%C4_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter2 [1/k]
@@ -52,7 +52,7 @@ contains
               DDZ2            => noahmp%water%flux%DDZ2              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
               DDZ3            => noahmp%water%flux%DDZ3              ,& ! out,    rate of compaction of snowpack due to melt [1/s]
               PDZDTC          => noahmp%water%flux%PDZDTC            ,& ! out,    rate of change in fractional-thickness due to compaction [fraction/s]
-              FICE            => noahmp%water%state%FICE              & ! out,    fraction of ice at current time step 
+              FICE            => noahmp%water%state%FICE_SNOW         & ! out,    fraction of ice in snow layers at current time step 
              )
 ! ----------------------------------------------------------------------
 

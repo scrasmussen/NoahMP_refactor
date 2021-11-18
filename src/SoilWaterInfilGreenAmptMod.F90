@@ -13,7 +13,7 @@ module SoilWaterInfilGreenAmptMod
 
 contains
 
-  subroutine SoilWaterInfilGreenAmpt(noahmp, INFLMAX, FSUR)
+  subroutine SoilWaterInfilGreenAmpt(noahmp, INFLMAX, FACC, FSUR)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: GREEN_AMPT_INFIL
@@ -26,6 +26,7 @@ contains
 ! in & out variabls
     type(noahmp_type)     , intent(inout) :: noahmp
     integer               , intent(in)    :: INFLMAX  ! check for maximum infiltration at SMCWLT 
+    real(kind=kind_noahmp), intent(inout) :: FACC     ! accumulated infiltration rate (m/s)
     real(kind=kind_noahmp), intent(out)   :: FSUR     ! surface infiltration rate (m/s)
 
 ! local variable
@@ -43,8 +44,7 @@ contains
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
               DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
-              GDVIC           => noahmp%water%param%GDVIC            ,& ! in,     DVIC Mean Capillary Drive (m) for infiltration models
-              FACC            => noahmp%water%flux%FACC               & ! inout,  accumulated infiltration rate (m/s)
+              GDVIC           => noahmp%water%param%GDVIC             & ! in,     DVIC Mean Capillary Drive (m) for infiltration models
               )
 ! ----------------------------------------------------------------------
 
