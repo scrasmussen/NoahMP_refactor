@@ -99,6 +99,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: WCND          ! soil hydraulic conductivity (m/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: WDF           ! soil water diffusivity (m2/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SOIL    ! soil effective porosity (m3/m3) 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCEQ         ! equilibrium soil water  content [m3/m3]
 
   end type state_type
 

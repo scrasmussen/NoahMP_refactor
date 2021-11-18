@@ -70,6 +70,7 @@ contains
     allocate( noahmp%water%state%WDF          (       1:NSOIL) )
     allocate( noahmp%water%state%EPORE_SOIL   (       1:NSOIL) )
     allocate( noahmp%water%state%FICE_SOIL    (       1:NSOIL) )
+    allocate( noahmp%water%state%SMCEQ        (       1:NSOIL) )
 
     noahmp%water%state%IMELT(:)       = huge(1)
     noahmp%water%state%SNICE(:)       = huge(1.0)
@@ -85,6 +86,7 @@ contains
     noahmp%water%state%WCND(:)        = huge(1.0)
     noahmp%water%state%WDF(:)         = huge(1.0)
     noahmp%water%state%EPORE_SOIL(:)  = huge(1.0)
+    noahmp%water%state%SMCEQ(:)       = huge(1.0)
 
     ! water flux variable
     noahmp%water%flux%ECAN            = huge(1.0)
@@ -215,6 +217,7 @@ contains
     noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(ILOC,1:NSOIL,JLOC)
+    noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%state%FIFAC                    = input%FIFACIn(ILOC,JLOC)
     noahmp%water%state%IRAMTFI                  = input%IRAMTFIIn(ILOC,JLOC)
     noahmp%water%state%MIFAC                    = input%MIFACIn(ILOC,JLOC)
