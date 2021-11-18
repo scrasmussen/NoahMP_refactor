@@ -559,6 +559,12 @@ BIO2LAI    =  0.015,  0.030,  0.015,  0.015,  0.015,  ! leaf are per living leaf
 
 /
 
+&noahmp_groundwater_parameters
+  ROUS = 0.20   ! specific yield [-] for Niu et al. 2007 groundwater scheme (OPT_RUNSUB=1)
+  CMIC = 0.20   ! microprore content (0.0-1.0), 0.0: close to free drainage
+
+/
+
 &noahmp_tiledrain_parameters
 !-----------------------------------!
 ! For simple drainage model         !

@@ -43,6 +43,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: ETRANI        ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp) :: QDRAIN        ! soil bottom drainage (m/s)
     real(kind=kind_noahmp) :: QTLDRN        ! tile drainage (mm/s)
+    real(kind=kind_noahmp) :: QIN           ! groundwater recharge [mm/s]
+    real(kind=kind_noahmp) :: QDIS          ! groundwater discharge [mm/s]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
@@ -80,6 +82,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: WPLUS     ! saturation excess of the total soil [m]
     real(kind=kind_noahmp) :: WATBLED   ! water table depth estimated in WRF-Hydro fine grids
     real(kind=kind_noahmp) :: TDFRACMP  ! tile drainage map(fraction)
+    real(kind=kind_noahmp) :: WA        ! water storage in aquifer [mm]
+    real(kind=kind_noahmp) :: WT        ! water storage in aquifer + saturated soil [mm] 
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -139,6 +143,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: RSBMX            ! baseflow coefficient [mm/s]
     real(kind=kind_noahmp) :: TIMEAN           ! gridcell mean topgraphic index (global mean)
     real(kind=kind_noahmp) :: FSATMX           ! maximum surface saturated fraction (global mean)
+    real(kind=kind_noahmp) :: ROUS             ! specific yield [-] for Niu et al. 2007 groundwater scheme
+    real(kind=kind_noahmp) :: CMIC             ! microprore content (0.0-1.0), 0.0: close to free drainage
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

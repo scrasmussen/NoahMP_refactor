@@ -53,6 +53,8 @@ contains
     noahmp%water%state%WPLUS          = huge(1.0)
     noahmp%water%state%WATBLED        = huge(1.0)
     noahmp%water%state%TDFRACMP       = huge(1.0)
+    noahmp%water%state%WA             = huge(1.0)
+    noahmp%water%state%WT             = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
@@ -110,6 +112,8 @@ contains
     noahmp%water%flux%ETRANI          = huge(1.0)
     noahmp%water%flux%QDRAIN          = huge(1.0)
     noahmp%water%flux%QTLDRN          = huge(1.0)
+    noahmp%water%flux%QIN             = huge(1.0)
+    noahmp%water%flux%QDIS            = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)  )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)  )
@@ -159,6 +163,8 @@ contains
     noahmp%water%param%RSBMX            = huge(1.0)
     noahmp%water%param%TIMEAN           = huge(1.0)
     noahmp%water%param%FSATMX           = huge(1.0)
+    noahmp%water%param%ROUS             = huge(1.0)
+    noahmp%water%param%CMIC             = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -218,6 +224,8 @@ contains
     noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn(ILOC,JLOC)
     noahmp%water%state%WATBLED                  = input%WATBLEDIn(ILOC,JLOC)
     noahmp%water%state%TDFRACMP                 = input%TDFRACMPIn(ILOC,JLOC)
+    noahmp%water%state%WA                       = input%WAIn(ILOC,JLOC)
+    noahmp%water%state%WT                       = input%WTIn(ILOC,JLOC)
 
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPTIn
@@ -237,6 +245,8 @@ contains
     noahmp%water%param%FRZX              = input%FRZXIn
     noahmp%water%param%TIMEAN            = input%TIMEANIn
     noahmp%water%param%FSATMX            = input%FSATMXIn
+    noahmp%water%param%ROUS              = input%ROUSIn
+    noahmp%water%param%CMIC              = input%CMICIn
     noahmp%water%param%BVIC              = input%BVICIn(ILOC,JLOC)
     noahmp%water%param%AXAJ              = input%AXAJIn(ILOC,JLOC)
     noahmp%water%param%BXAJ              = input%BXAJIn(ILOC,JLOC)
