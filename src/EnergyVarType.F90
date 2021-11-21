@@ -33,6 +33,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
+    logical                :: FROZEN_GROUND   ! used to define latent heat pathway
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: STC  ! snow and soil layer temperature [k]
 

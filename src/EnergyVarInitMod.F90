@@ -34,6 +34,7 @@ contains
     noahmp%energy%state%TG              = huge(1.0)
     noahmp%energy%state%TV              = huge(1.0)
     noahmp%energy%state%FROZEN_CANOPY   = .false.
+    noahmp%energy%state%FROZEN_GROUND   = .false.
 
     allocate( noahmp%energy%state%STC (-NSNOW+1:NSOIL) )
 
@@ -68,9 +69,6 @@ contains
 
     noahmp%energy%state%STC(-NSNOW+1:NSOIL) = input%STCIn(ILOC,-NSNOW+1:NSOIL,JLOC)
 
-    ! energy flux variable
-    noahmp%energy%flux%FCEV = input%FCEVIn(ILOC,JLOC)
-    noahmp%energy%flux%FCTR = input%FCTRIn(ILOC,JLOC)
 
     end associate
 

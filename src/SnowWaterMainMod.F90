@@ -38,6 +38,7 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              SWEMAXGLA       => noahmp%water%param%SWEMAXGLA        ,& ! in,     Maximum SWE allowed at glaciers (mm)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
@@ -84,9 +85,9 @@ contains
     enddo
 
 ! to obtain equilibrium state of snow in glacier region
-    if ( SNEQV > 5000.0 ) then  ! 5000 mm -> maximum water depth
+    if ( SNEQV > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
        BDSNOW      = SNICE(0) / DZSNSO(0)
-       SNOFLOW     = SNEQV - 5000.0
+       SNOFLOW     = SNEQV - SWEMAXGLA
        SNICE(0)    = SNICE(0)  - SNOFLOW
        DZSNSO(0)   = DZSNSO(0) - SNOFLOW / BDSNOW
        SNOFLOW     = SNOFLOW / DT

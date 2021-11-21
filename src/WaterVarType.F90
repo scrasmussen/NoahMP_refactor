@@ -40,12 +40,15 @@ module WaterVarType
     real(kind=kind_noahmp) :: RUNSUB        ! subsurface runoff [mm/s]
     real(kind=kind_noahmp) :: PDDUM         ! infiltration rate at surface (mm/s)
     real(kind=kind_noahmp) :: QSEVA         ! evaporation from soil surface [mm/s]
-    real(kind=kind_noahmp) :: ETRANI        ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp) :: QDRAIN        ! soil bottom drainage (m/s)
     real(kind=kind_noahmp) :: QTLDRN        ! tile drainage (mm/s)
     real(kind=kind_noahmp) :: QIN           ! groundwater recharge [mm/s]
     real(kind=kind_noahmp) :: QDIS          ! groundwater discharge [mm/s]
+    real(kind=kind_noahmp) :: QVAP          ! soil surface evaporation rate[mm/s]
+    real(kind=kind_noahmp) :: QDEW          ! soil surface dew rate[mm/s]
+    real(kind=kind_noahmp) :: QSDEW         ! soil surface dew rate [mm/s]
 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ3      ! rate of compaction of snowpack due to melt [1/s]
@@ -66,6 +69,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: MAXLIQ    ! canopy capacity for rain interception (mm)
     real(kind=kind_noahmp) :: SNOWH     ! snow depth [m]
     real(kind=kind_noahmp) :: SNEQV     ! snow water equivalent [mm]
+    real(kind=kind_noahmp) :: PONDING   ! surface ponding (mm)
     real(kind=kind_noahmp) :: PONDING1  ! surface ponding 1 (mm)
     real(kind=kind_noahmp) :: PONDING2  ! surface ponding 2 (mm)
     real(kind=kind_noahmp) :: FIFAC     ! fraction of grid under flood irrigation (0 to 1)
@@ -83,7 +87,9 @@ module WaterVarType
     real(kind=kind_noahmp) :: WATBLED   ! water table depth estimated in WRF-Hydro fine grids
     real(kind=kind_noahmp) :: TDFRACMP  ! tile drainage map(fraction)
     real(kind=kind_noahmp) :: WA        ! water storage in aquifer [mm]
-    real(kind=kind_noahmp) :: WT        ! water storage in aquifer + saturated soil [mm] 
+    real(kind=kind_noahmp) :: WT        ! water storage in aquifer + saturated soil [mm]
+    real(kind=kind_noahmp) :: WSLAKE    ! water storage in lake (can be -) (mm) 
+    real(kind=kind_noahmp) :: sfcheadrt ! surface water head (mm)
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -100,6 +106,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: WDF           ! soil water diffusivity (m2/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SOIL    ! soil effective porosity (m3/m3) 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCEQ         ! equilibrium soil water  content [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: BTRANI        ! soil water transpiration factor (0 to 1)
 
   end type state_type
 
@@ -109,6 +116,7 @@ module WaterVarType
     ! define specific water parameter variables
     integer                :: DRAIN_LAYER_OPT  ! starting soil layer for drainage
     integer                :: TD_DEPTH         ! depth of drain tube from the soil surface
+    integer                :: NROOT            ! number of soil layers with root present
     real(kind=kind_noahmp) :: CH2OP            ! maximum canopy intercepted water per unit lai+sai (mm)
     real(kind=kind_noahmp) :: C2_SnowCompact   ! overburden snow compaction parameter (m3/kg) default 21.e-3
     real(kind=kind_noahmp) :: C3_SnowCompact   ! snow desctructive metamorphism compaction parameter1 [1/s]
@@ -146,6 +154,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: FSATMX           ! maximum surface saturated fraction (global mean)
     real(kind=kind_noahmp) :: ROUS             ! specific yield [-] for Niu et al. 2007 groundwater scheme
     real(kind=kind_noahmp) :: CMIC             ! microprore content (0.0-1.0), 0.0: close to free drainage
+    real(kind=kind_noahmp) :: WSLMAX           ! maximum lake water storage (mm)
+    real(kind=kind_noahmp) :: SWEMAXGLA        ! Maximum SWE allowed at glaciers (mm)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

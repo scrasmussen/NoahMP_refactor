@@ -15,6 +15,9 @@ module SoilWaterMainMod
   use RunoffSurfaceXinAnJiangMod,        only : RunoffSurfaceXinAnJiang
   use RunoffSurfaceDynamicVicMod,        only : RunoffSurfaceDynamicVic
   use RunoffSubSurfaceEquiWaterTableMod, only : RunoffSubSurfaceEquiWaterTable
+  use RunoffSubSurfaceGroundWaterMod,    only : RunoffSubSurfaceGroundWater
+  use RunoffSubSurfaceDrainageMod,       only : RunoffSubSurfaceDrainage
+  use RunoffSubSurfaceShallowMmfMod,     only : RunoffSubSurfaceShallowWaterMMF
   use SoilWaterDiffusionRichardsMod,     only : SoilWaterDiffusionRichards
   use SoilMoistureSolverMod,             only : SoilMoistureSolver
   use TileDrainageSimpleMod,             only : TileDrainageSimple
@@ -220,7 +223,24 @@ contains
        do IZ = 1, NSOIL
           SH2O(IZ) = MLIQ(IZ) / (DZSNSO(IZ)*1000.0)
        enddo
+    endif ! OPT_RUNSUB /= 1
+
+    ! compute groundwater and subsurface runoff
+    if ( OPT_RUNSUB == 1 ) call RunoffSubSurfaceGroundWater(noahmp)
+
+    ! compute subsurface runoff based on drainage rate
+    if ( OPT_RUNSUB == 3 .or. OPT_RUNSUB == 4 .or. OPT_RUNSUB == 6 .or. &
+         OPT_RUNSUB == 7 .or. OPT_RUNSUB == 8) then
+         call RunoffSubSurfaceDrainage(noahmp)
     endif
+
+    ! update soil moisture
+    do IZ = 1, NSOIL
+        SMC(IZ) = SH2O(IZ) + SICE(IZ)
+    enddo
+
+    ! compute subsurface runoff and shallow water table for MMF scheme
+    if ( OPT_RUNSUB == 5 ) call RunoffSubSurfaceShallowWaterMMF(noahmp)
 
     end associate
 

@@ -374,6 +374,10 @@
   DM_SNOWCOMPACT = 100.0  !upper Limit on destructive metamorphism compaction [kg/m3] cenlin
   ETA0_SNOWCOMPACT = 0.8e+6 !snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6 cenlin
   SNLIQMAXFRAC   = 0.4    !maximum liquid water fraction in snow
+  SWEMAXGLA    = 5000.0 ! Maximum SWE allowed at glaciers (mm)
+
+! other processes
+  WSLMAX = 5000.0      ! maximum lake water storage (mm)
 /
 
 &noahmp_irrigation_parameters

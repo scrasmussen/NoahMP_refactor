@@ -37,6 +37,7 @@ contains
     noahmp%water%state%MAXLIQ         = huge(1.0)
     noahmp%water%state%SNOWH          = huge(1.0)
     noahmp%water%state%SNEQV          = huge(1.0)
+    noahmp%water%state%PONDING        = huge(1.0)
     noahmp%water%state%PONDING1       = huge(1.0)
     noahmp%water%state%PONDING2       = huge(1.0)
     noahmp%water%state%FIFAC          = huge(1.0)
@@ -55,6 +56,8 @@ contains
     noahmp%water%state%TDFRACMP       = huge(1.0)
     noahmp%water%state%WA             = huge(1.0)
     noahmp%water%state%WT             = huge(1.0)
+    noahmp%water%state%WSLAKE         = huge(1.0)
+    noahmp%water%state%sfcheadrt      = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
@@ -71,6 +74,7 @@ contains
     allocate( noahmp%water%state%EPORE_SOIL   (       1:NSOIL) )
     allocate( noahmp%water%state%FICE_SOIL    (       1:NSOIL) )
     allocate( noahmp%water%state%SMCEQ        (       1:NSOIL) )
+    allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
 
     noahmp%water%state%IMELT(:)       = huge(1)
     noahmp%water%state%SNICE(:)       = huge(1.0)
@@ -87,6 +91,7 @@ contains
     noahmp%water%state%WDF(:)         = huge(1.0)
     noahmp%water%state%EPORE_SOIL(:)  = huge(1.0)
     noahmp%water%state%SMCEQ(:)       = huge(1.0)
+    noahmp%water%state%BTRANI(:)      = huge(1.0)
 
     ! water flux variable
     noahmp%water%flux%ECAN            = huge(1.0)
@@ -111,25 +116,30 @@ contains
     noahmp%water%flux%RUNSUB          = huge(1.0)
     noahmp%water%flux%PDDUM           = huge(1.0)
     noahmp%water%flux%QSEVA           = huge(1.0)
-    noahmp%water%flux%ETRANI          = huge(1.0)
     noahmp%water%flux%QDRAIN          = huge(1.0)
     noahmp%water%flux%QTLDRN          = huge(1.0)
     noahmp%water%flux%QIN             = huge(1.0)
     noahmp%water%flux%QDIS            = huge(1.0)
+    noahmp%water%flux%QVAP            = huge(1.0)
+    noahmp%water%flux%QDEW            = huge(1.0)
+    noahmp%water%flux%QSDEW           = huge(1.0)
 
-    allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)  )
-    allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)  )
-    allocate( noahmp%water%flux%DDZ3     (-NSNOW+1:0)  )
-    allocate( noahmp%water%flux%PDZDTC   (-NSNOW+1:0)  )
+    allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
+    allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )
+    allocate( noahmp%water%flux%DDZ3     (-NSNOW+1:0)     )
+    allocate( noahmp%water%flux%PDZDTC   (-NSNOW+1:0)     )
+    allocate( noahmp%water%flux%ETRANI   (       1:NSOIL) )
 
     noahmp%water%flux%DDZ1(:)           = huge(1.0)
     noahmp%water%flux%DDZ2(:)           = huge(1.0)
     noahmp%water%flux%DDZ3(:)           = huge(1.0)
     noahmp%water%flux%PDZDTC(:)         = huge(1.0)
+    noahmp%water%flux%ETRANI(:)         = huge(1.0)
 
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT  = huge(1  )
     noahmp%water%param%TD_DEPTH         = huge(1  )
+    noahmp%water%param%NROOT            = huge(1  )
     noahmp%water%param%CH2OP            = huge(1.0)
     noahmp%water%param%C2_SnowCompact   = huge(1.0)
     noahmp%water%param%C3_SnowCompact   = huge(1.0)
@@ -167,6 +177,8 @@ contains
     noahmp%water%param%FSATMX           = huge(1.0)
     noahmp%water%param%ROUS             = huge(1.0)
     noahmp%water%param%CMIC             = huge(1.0)
+    noahmp%water%param%WSLMAX           = huge(1.0)
+    noahmp%water%param%SWEMAXGLA        = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -229,6 +241,9 @@ contains
     noahmp%water%state%TDFRACMP                 = input%TDFRACMPIn(ILOC,JLOC)
     noahmp%water%state%WA                       = input%WAIn(ILOC,JLOC)
     noahmp%water%state%WT                       = input%WTIn(ILOC,JLOC)
+    noahmp%water%state%WSLAKE                   = input%WSLAKEIn(ILOC,JLOC)
+    noahmp%water%state%PONDING                  = input%PONDINGIn(ILOC,JLOC)
+    noahmp%water%state%sfcheadrt                = input%sfcheadrtIn(ILOC,JLOC)
 
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPTIn
@@ -250,6 +265,8 @@ contains
     noahmp%water%param%FSATMX            = input%FSATMXIn
     noahmp%water%param%ROUS              = input%ROUSIn
     noahmp%water%param%CMIC              = input%CMICIn
+    noahmp%water%param%WSLMAX            = input%WSLMAXIn
+    noahmp%water%param%SWEMAXGLA         = input%SWEMAXGLAIn
     noahmp%water%param%BVIC              = input%BVICIn(ILOC,JLOC)
     noahmp%water%param%AXAJ              = input%AXAJIn(ILOC,JLOC)
     noahmp%water%param%BXAJ              = input%BXAJIn(ILOC,JLOC)
@@ -268,6 +285,7 @@ contains
     noahmp%water%param%TD_SPAC           = input%TD_SPACIn(ILOC,JLOC)
     noahmp%water%param%TD_RADI           = input%TD_RADIIn(ILOC,JLOC)
     noahmp%water%param%TD_D              = input%TD_DIn(ILOC,JLOC)
+    noahmp%water%param%NROOT             = input%NROOTIn(ILOC,JLOC)
 
     noahmp%water%param%SMCMAX(1:NSOIL)   = input%SMCMAXIn(ILOC,1:NSOIL,JLOC)
     noahmp%water%param%SMCWLT(1:NSOIL)   = input%SMCWLTIn(ILOC,1:NSOIL,JLOC)

@@ -45,14 +45,16 @@ module ConfigVarType
 
     ! define specific domain variables
     logical                   :: urban_flag  ! flag for urban grid
-    integer                   :: ILOC     ! model grid index
-    integer                   :: JLOC     ! model grid index
-    integer                   :: VEGTYP   ! vegetation type
-    integer                   :: NSOIL    ! number of soil layers
-    integer                   :: NSNOW    ! maximum number of snow layers
-    integer                   :: ISNOW    ! actual number of snow layers
-    real(kind=kind_noahmp)    :: DT       ! noahmp timestep (s)
-    real(kind=kind_noahmp)    :: DX       ! noahmp model grid spacing (m)
+    logical                   :: CROPLU      ! flag to identify croplands
+    integer                   :: ILOC        ! model grid index
+    integer                   :: JLOC        ! model grid index
+    integer                   :: VEGTYP      ! vegetation type
+    integer                   :: NSOIL       ! number of soil layers
+    integer                   :: NSNOW       ! maximum number of snow layers
+    integer                   :: ISNOW       ! actual number of snow layers
+    integer                   :: IST         ! surface type 1-soil; 2-lake
+    real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
+    real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)

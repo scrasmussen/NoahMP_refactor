@@ -38,10 +38,12 @@ contains
     NSNOW                           = 3
     NSOIL                           = 4
     noahmp%config%domain%urban_flag = .false.
+    noahmp%config%domain%CROPLU     = .false.
     noahmp%config%domain%ILOC       = huge(1)
     noahmp%config%domain%JLOC       = huge(1)
     noahmp%config%domain%VEGTYP     = huge(1)
     noahmp%config%domain%ISNOW      = huge(1)
+    noahmp%config%domain%IST        = huge(1)
     noahmp%config%domain%DT         = huge(1.0)
     noahmp%config%domain%DX         = huge(1.0)
 
@@ -93,6 +95,7 @@ contains
     noahmp%config%domain%DT      = input%DTIn
     noahmp%config%domain%DX      = input%DXIn
     noahmp%config%domain%ISNOW   = input%ISNOWIn(ILOC,JLOC)
+    noahmp%config%domain%IST     = input%ISTIn(ILOC,JLOC)
     noahmp%config%domain%VEGTYP  = input%VegTypeIn(ILOC,JLOC)
     noahmp%config%domain%urban_flag = input%urban_flagIn(ILOC,JLOC)
 
