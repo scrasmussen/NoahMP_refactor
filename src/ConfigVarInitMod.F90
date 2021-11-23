@@ -22,21 +22,18 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    associate(                                      &
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL   &
-             )
-
     ! config namelist variable
-    noahmp%config%nmlist%OPT_RUNSRF = 1
-    noahmp%config%nmlist%OPT_RUNSUB = 1
-    noahmp%config%nmlist%OPT_INF    = 1
-    noahmp%config%nmlist%OPT_INFDV  = 1
-    noahmp%config%nmlist%OPT_TDRN   = 0
+    noahmp%config%nmlist%OPT_RUNSRF = huge(1)
+    noahmp%config%nmlist%OPT_RUNSUB = huge(1)
+    noahmp%config%nmlist%OPT_INF    = huge(1)
+    noahmp%config%nmlist%OPT_INFDV  = huge(1)
+    noahmp%config%nmlist%OPT_TDRN   = huge(1)
+    noahmp%config%nmlist%OPT_IRR    = huge(1)
+    noahmp%config%nmlist%OPT_IRRM   = huge(1)
 
     ! config domain variable
-    NSNOW                           = 3
-    NSOIL                           = 4
+    noahmp%config%domain%NSNOW      = 3
+    noahmp%config%domain%NSOIL      = 4
     noahmp%config%domain%urban_flag = .false.
     noahmp%config%domain%CROPLU     = .false.
     noahmp%config%domain%ILOC       = huge(1)
@@ -46,18 +43,6 @@ contains
     noahmp%config%domain%IST        = huge(1)
     noahmp%config%domain%DT         = huge(1.0)
     noahmp%config%domain%DX         = huge(1.0)
-
-    allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
-    allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
-    allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
-    allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
-
-    noahmp%config%domain%ZSOIL (:)    = huge(1.0)
-    noahmp%config%domain%ZLAYER(:)    = huge(1.0)
-    noahmp%config%domain%DZSNSO(:)    = huge(1.0)
-    noahmp%config%domain%ZSNSO (:)    = huge(1.0)
-
-    end associate
 
   end subroutine ConfigVarInitDefault
 
@@ -77,15 +62,17 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
+    noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
+    noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
+    noahmp%config%nmlist%OPT_IRR    = input%OPT_IRRIn
+    noahmp%config%nmlist%OPT_IRRM   = input%OPT_IRRMIn
     noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
     noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
     if (input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn) then
        noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSRFIn
        print*,'reset OPT_RUNSUB to be the same as OPT_RUNSRF ...'
     endif
-    noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
-    noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
-    noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
 
     ! config domain variable
     ILOC                         = input%ILOCIn
@@ -98,6 +85,15 @@ contains
     noahmp%config%domain%IST     = input%ISTIn(ILOC,JLOC)
     noahmp%config%domain%VEGTYP  = input%VegTypeIn(ILOC,JLOC)
     noahmp%config%domain%urban_flag = input%urban_flagIn(ILOC,JLOC)
+
+    allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
+    allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
+    allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
+    allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
+    noahmp%config%domain%ZSOIL (       1:NSOIL) = huge(1.0)
+    noahmp%config%domain%ZLAYER(       1:NSOIL) = huge(1.0)
+    noahmp%config%domain%DZSNSO(-NSNOW+1:NSOIL) = huge(1.0)
+    noahmp%config%domain%ZSNSO (-NSNOW+1:NSOIL) = huge(1.0)
 
     noahmp%config%domain%ZSOIL (       1:NSOIL) = input%ZSOILIn(ILOC,1:NSOIL,JLOC)
     noahmp%config%domain%DZSNSO(-NSNOW+1:NSOIL) = input%DZSNSOIn(ILOC,-NSNOW+1:NSOIL,JLOC)

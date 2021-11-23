@@ -43,6 +43,7 @@ contains
     ! energy flux variable
     noahmp%energy%flux%FCEV             = huge(1.0)
     noahmp%energy%flux%FCTR             = huge(1.0)
+    noahmp%energy%flux%FGEV             = huge(1.0)
 
     end associate
 

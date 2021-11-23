@@ -119,128 +119,128 @@ contains
   end subroutine ReadNamelist
 
 !=== read input forcing data
-  subroutine ReadInputForcing(input)
-
-    use netcdf
-    use error_handling, only : handle_err
-
-    implicit none
-
-    type(input_type), intent(inout)  :: input
-
-    integer :: ncid, dimid, varid, status
-
-  !=== read in forcing netcdf files
-    status = nf90_open(input%forcfilename, NF90_NOWRITE, ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "time", varid)
-    status = nf90_get_var(ncid, varid , now_time)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "west_east", varid)
-    status = nf90_get_var(ncid, varid , input%nx)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "south_north", varid)
-    status = nf90_get_var(ncid, varid , input%ny)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    allocate( input%U2D(input%nx,input%ny) )
-    status = nf90_inq_varid(ncid, "U2D", varid)
-    status = nf90_get_var(ncid, varid , input%U2D, start=(/1,1/), count=(/input%nx,input%ny/))
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_close(ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-
-  end subroutine ReadInputForcing
+!  subroutine ReadInputForcing(input)
+!
+!    use netcdf
+!    use error_handling, only : handle_err
+!
+!    implicit none
+!
+!    type(input_type), intent(inout)  :: input
+!
+!    integer :: ncid, dimid, varid, status
+!
+!  !=== read in forcing netcdf files
+!    status = nf90_open(input%forcfilename, NF90_NOWRITE, ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "time", varid)
+!    status = nf90_get_var(ncid, varid , now_time)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "west_east", varid)
+!    status = nf90_get_var(ncid, varid , input%nx)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "south_north", varid)
+!    status = nf90_get_var(ncid, varid , input%ny)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    allocate( input%U2D(input%nx,input%ny) )
+!    status = nf90_inq_varid(ncid, "U2D", varid)
+!    status = nf90_get_var(ncid, varid , input%U2D, start=(/1,1/), count=(/input%nx,input%ny/))
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_close(ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!  end subroutine ReadInputForcing
 
 !=== read input setup data (static & initial)
-  subroutine ReadInputSetup(input)
-
-    use netcdf
-    use error_handling, only : handle_err
-
-    implicit none
-
-    type(input_type), intent(inout)  :: input
-
-    integer :: ncid, dimid, varid, status
-
-  !=== read in setup netcdf files (including static & initial data)
-    status = nf90_open(input%setupfilename, NF90_NOWRITE, ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-    
-    status = nf90_inq_varid(ncid, "time", varid)
-    status = nf90_get_var(ncid, varid , now_time)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "west_east", varid)
-    status = nf90_get_var(ncid, varid , input%nx)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "south_north", varid)
-    status = nf90_get_var(ncid, varid , input%ny)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    allocate( input%SHDMAX(input%nx,input%ny) )
-    status = nf90_inq_varid(ncid, "SHDMAX", varid)
-    status = nf90_get_var(ncid, varid , input%SHDMAX, start=(/1,1/), count=(/input%nx,input%ny/))
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_close(ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-
-  end subroutine ReadInputSetup
+!  subroutine ReadInputSetup(input)
+!
+!    use netcdf
+!    use error_handling, only : handle_err
+!
+!    implicit none
+!
+!    type(input_type), intent(inout)  :: input
+!
+!    integer :: ncid, dimid, varid, status
+!
+!  !=== read in setup netcdf files (including static & initial data)
+!    status = nf90_open(input%setupfilename, NF90_NOWRITE, ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!    
+!    status = nf90_inq_varid(ncid, "time", varid)
+!    status = nf90_get_var(ncid, varid , now_time)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "west_east", varid)
+!    status = nf90_get_var(ncid, varid , input%nx)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "south_north", varid)
+!    status = nf90_get_var(ncid, varid , input%ny)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    allocate( input%SHDMAX(input%nx,input%ny) )
+!    status = nf90_inq_varid(ncid, "SHDMAX", varid)
+!    status = nf90_get_var(ncid, varid , input%SHDMAX, start=(/1,1/), count=(/input%nx,input%ny/))
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_close(ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!  end subroutine ReadInputSetup
 
 !=== read input restart data
-  subroutine ReadInputRestart(input)
-
-    use netcdf
-    use error_handling, only : handle_err
-
-    implicit none
-
-    type(input_type), intent(inout)  :: input
-
-    integer :: ncid, dimid, varid, status
-
-  !=== read in restart netcdf files
-    status = nf90_open(input%restartfilename, NF90_NOWRITE, ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "time", varid)
-    status = nf90_get_var(ncid, varid , now_time)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "west_east", varid)
-    status = nf90_get_var(ncid, varid , input%nx)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_inq_varid(ncid, "south_north", varid)
-    status = nf90_get_var(ncid, varid , input%ny)
-    if (status /= nf90_noerr) call handle_err(status)
-
-    allocate( input%SWE(input%nx,input%ny) )
-    status = nf90_inq_varid(ncid, "SWE", varid)
-    status = nf90_get_var(ncid, varid , input%SWE, start=(/1,1/), count=(/input%nx,input%ny/))
-    if (status /= nf90_noerr) call handle_err(status)
-
-    status = nf90_close(ncid)
-    if (status /= nf90_noerr) call handle_err(status)
-
-  end subroutine ReadInputRestart
+!  subroutine ReadInputRestart(input)
+!
+!    use netcdf
+!    use error_handling, only : handle_err
+!
+!    implicit none
+!
+!    type(input_type), intent(inout)  :: input
+!
+!    integer :: ncid, dimid, varid, status
+!
+!  !=== read in restart netcdf files
+!    status = nf90_open(input%restartfilename, NF90_NOWRITE, ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "time", varid)
+!    status = nf90_get_var(ncid, varid , now_time)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "west_east", varid)
+!    status = nf90_get_var(ncid, varid , input%nx)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_inq_varid(ncid, "south_north", varid)
+!    status = nf90_get_var(ncid, varid , input%ny)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    allocate( input%SWE(input%nx,input%ny) )
+!    status = nf90_inq_varid(ncid, "SWE", varid)
+!    status = nf90_get_var(ncid, varid , input%SWE, start=(/1,1/), count=(/input%nx,input%ny/))
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!    status = nf90_close(ncid)
+!    if (status /= nf90_noerr) call handle_err(status)
+!
+!  end subroutine ReadInputRestart
 
 !=== initialize with default values
-  subroutine InputVarInitDefault(input)
-
-    implicit none
-
-    type(input_type), intent(inout) :: input
-
-    allocate( input%U2D(input%nx,input%ny) ) ; input%U2D (:,:) = huge(1.0)
-
-  end subroutine InputVarInitDefault
+!  subroutine InputVarInitDefault(input)
+!
+!    implicit none
+!
+!    type(input_type), intent(inout) :: input
+!
+!    allocate( input%U2D(input%nx,input%ny) ) ; input%U2D (:,:) = huge(1.0)
+!
+!  end subroutine InputVarInitDefault
 
 end module InputVarInitMod

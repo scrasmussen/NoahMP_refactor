@@ -20,6 +20,7 @@ module EnergyVarType
     ! define specific energy flux variables
     real(kind=kind_noahmp) :: FCEV            ! canopy evaporation (w/m2) [+ = to atm] 
     real(kind=kind_noahmp) :: FCTR            ! transpiration (w/m2) [+ = to atm]
+    real(kind=kind_noahmp) :: FGEV            ! soil evap heat (w/m2) [+ to atm]
 
   end type flux_type
 

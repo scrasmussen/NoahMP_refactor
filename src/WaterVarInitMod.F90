@@ -44,6 +44,7 @@ contains
     noahmp%water%state%IRAMTFI        = huge(1.0)
     noahmp%water%state%MIFAC          = huge(1.0)
     noahmp%water%state%IRAMTMI        = huge(1.0)
+    noahmp%water%state%SIFAC          = huge(1.0)
     noahmp%water%state%ZWT            = huge(1.0)
     noahmp%water%state%SICEMAX        = huge(1.0)
     noahmp%water%state%SH2OMIN        = huge(1.0)
@@ -58,6 +59,7 @@ contains
     noahmp%water%state%WT             = huge(1.0)
     noahmp%water%state%WSLAKE         = huge(1.0)
     noahmp%water%state%sfcheadrt      = huge(1.0)
+    noahmp%water%state%IRRFRA         = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
@@ -234,6 +236,7 @@ contains
     noahmp%water%state%IRAMTFI                  = input%IRAMTFIIn(ILOC,JLOC)
     noahmp%water%state%MIFAC                    = input%MIFACIn(ILOC,JLOC)
     noahmp%water%state%IRAMTMI                  = input%IRAMTMIIn(ILOC,JLOC)
+    noahmp%water%state%SIFAC                    = input%SIFACIn(ILOC,JLOC)
     noahmp%water%state%ZWT                      = input%ZWTIn(ILOC,JLOC)
     noahmp%water%state%SMCWTD                   = input%SMCWTDIn(ILOC,JLOC)
     noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn(ILOC,JLOC)
@@ -244,6 +247,7 @@ contains
     noahmp%water%state%WSLAKE                   = input%WSLAKEIn(ILOC,JLOC)
     noahmp%water%state%PONDING                  = input%PONDINGIn(ILOC,JLOC)
     noahmp%water%state%sfcheadrt                = input%sfcheadrtIn(ILOC,JLOC)
+    noahmp%water%state%IRRFRA                   = input%IRRFRAIn(ILOC,JLOC)
 
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPTIn
