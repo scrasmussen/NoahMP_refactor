@@ -45,6 +45,7 @@ program WaterDriverMod
 !---------------------------------------------------------------------
 !  read in input data from table and initial file
 !---------------------------------------------------------------------
+  call InputVarInitDefault(input)
   call ReadNamelist(input)
   call ReadNoahmpTable(input)
 
@@ -145,13 +146,14 @@ program WaterDriverMod
             OPT_TDRN        => noahmp%config%nmlist%OPT_TDRN       ,& ! in,     options for tile drainage
             TDFRACMP        => noahmp%water%state%TDFRACMP         ,& ! in,     tile drainage map(fraction)
             SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
+            DZSNSO          => noahmp%config%domain%DZSNSO          & ! in,     thickness of snow/soil layers (m)
             )
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 ! start with a default value at time 0
 
 ! input used to adjust for snow and non-snow cases
-  if (input%runsnow) then
+  if ( input%runsnow .eqv. .true. ) then
      SFCTMP    = 265.0 
      FB_snow   = 0.5
      TV        = 265.0
@@ -180,16 +182,16 @@ program WaterDriverMod
 ! others
   IST     = 1                     ! surface type 1-soil; 2-lake
   DX      = 4000.0                ! grid spacing 4km
-  FCEV    = input%fcev_e          ! canopy evaporation (w/m2) [+ to atm ]
-  FCTR    = input%fctr_e          ! transpiration (w/m2) [+ to atm]
-  FGEV    = input%fgev_e          ! soil evap heat (w/m2) [+ to atm]
+  FCEV    = input%FCEVIn          ! canopy evaporation (w/m2) [+ to atm ]
+  FCTR    = input%FCTRIn          ! transpiration (w/m2) [+ to atm]
+  FGEV    = input%FGEVIn          ! soil evap heat (w/m2) [+ to atm]
   LAI     = input%LAIM(6)         ! June LAI as an example
   SAI     = input%SAIM(6)         ! June SAI
   ELAI    = LAI * (1.0 - FB_snow) ! leaf area index, after burying by snow
   ESAI    = SAI * (1.0 - FB_snow) ! stem area index, after burying by snow 
   PONDING = 0.0
   FICEOLD = 0.0
-  FVEG    = input%shdmax / 100.0  ! yearly max vegetation fraction
+  FVEG    = input%SHDMAXIn / 100.0  ! yearly max vegetation fraction
   if ( FVEG <= 0.05 ) FVEG = 0.05
   SMCEQ(1:4) = 0.3                ! used only for MMF, so set to fixed value
   BDFALL     = 120.0              ! bulk density of snowfall (kg/m3)
@@ -305,11 +307,8 @@ program WaterDriverMod
       TDFRACMP = 0.0
   endif
 
-!  ZSNSO(-2:0) = 0.0
-!  ZSNSO(1:4) = input%zsoil(1:4)
-
 ! for other variables
-    DT         = input%timestep
+    DT         = input%DTIn
     ntime      = nint(input%maxtime * 3600.0 / DT)
     rain_steps = input%rain_duration * 3600.0 / DT
     dry_steps  = input%dry_duration * 3600.0 / DT
@@ -331,53 +330,74 @@ program WaterDriverMod
 !---------------------------------------------------------------------
 
   call initialize_output(noahmp, input, ntime+1)
-  call add_to_output(0,noahmp)
+  call add_to_output(0, noahmp, errwat)
 
 !---------------------------------------------------------------------
 ! start the time loop
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
-   
+
+    tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA ! [mm] 
+
+    IRFIRATE = 0.0
+    IRMIRATE = 0.0
+ 
   !---------------------------------------------------------------------
   ! calculate the input water
   !---------------------------------------------------------------------
 
-    if(raining) then
-      water%rain    = namelist%rainrate/3600.0    ! input water [m/s]
-      rain_step = rain_step + 1
-      if(rain_step == rain_steps) then            ! event length met
-        rain_step = 0
-        raining   = .false.
-      end if
+    if ( raining .eqv. .true. ) then
+       RAIN      = input%rainrate / 3600.0    ! input water [m/s]
+       rain_step = rain_step + 1
+       if ( rain_step == rain_steps ) then            ! event length met
+          rain_step = 0
+          raining   = .false.
+      endif
     else
-      water%rain   = 0.0                        ! stop water input [m/s]
+      RAIN     = 0.0                        ! stop water input [m/s]
       dry_step = dry_step + 1
-      if(dry_step == dry_steps) then              ! between event length met
+      if ( dry_step == dry_steps ) then              ! between event length met
         dry_step = 0
         raining  = .true.
-      end if
-    end if
+      endif
+    endif
 
-   ! water%SNOW = water%rain * 0.9
-   ! water%rain = water%rain * 0.1
+    if ( input%runsnow .eqv. .true. ) then
+       SNOW = RAIN * 1.0
+       RAIN = 0.0
+    else
+       SNOW = 0.0
+    endif
 
+    QRAIN = RAIN * 0.99
+    QSNOW = SNOW * 0.9
+    SNOWHIN = QSNOW / BDFALL
 
-  !---------------------------------------------------------------------
-  ! call the main water routines (canopy + snow + soil water components
-  !--------------------------------------------------------------------- 
+    !---------------------------------------------------------------------
+    ! call the main water routines
+    !--------------------------------------------------------------------- 
 
-    call WaterMain (domain, levels, options, parameters, forcing, energy, water)
+    call WaterMain(noahmp)
 
-  !---------------------------------------------------------------------
-  ! add to output file
-  !---------------------------------------------------------------------
+! some updates from last time step for use in next step (from drv)
 
-    call add_to_output(itime,levels%soil,levels%snow,domain%dzsnso,domain%dt,domain%zsnso,water,energy)
+    FICEOLD(ISNOW+1:0) = SNICE(ISNOW+1:0) /(SNICE(ISNOW+1:0) + SNLIQ(ISNOW+1:0))
+
+! balance check for soil and snow layers  
+    totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA      ! total soil+snow water [mm]
+    errwat   = (QRAIN+QSNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! water balance error [mm]
+
+    !---------------------------------------------------------------------
+    ! add to output file
+    !---------------------------------------------------------------------
+
+    call add_to_output(itime, noahmp, errwat)
    
   end do ! time loop
 
   call finalize_output()
    
   end associate
+
 end program WaterDriverMod
