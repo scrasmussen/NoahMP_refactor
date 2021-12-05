@@ -35,14 +35,6 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
     type(input_type) , intent(in)    :: input
 
-    associate(                                   &
-              iloc => noahmp%config%domain%iloc ,&
-              jloc => noahmp%config%domain%jloc ,&   
-              KTS  => input%KTS                 ,&
-              KTE  => input%KTE                  &
-             )
-
-    noahmp%forcing%SFCTMP   = input%T3D (iloc,1,jloc)
 
     end associate
 

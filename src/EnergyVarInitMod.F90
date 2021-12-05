@@ -65,10 +65,10 @@ contains
              )
 
     ! energy state variable
-    noahmp%energy%state%TG  = input%TGIn(ILOC,JLOC)
-    noahmp%energy%state%TV  = input%TVIn(ILOC,JLOC)
+    !noahmp%energy%state%TG  = input%TGIn
+    !noahmp%energy%state%TV  = input%TVIn
 
-    noahmp%energy%state%STC(-NSNOW+1:NSOIL) = input%STCIn(ILOC,-NSNOW+1:NSOIL,JLOC)
+    !noahmp%energy%state%STC(-NSNOW+1:NSOIL) = input%STCIn(-NSNOW+1:NSOIL)
 
 
     end associate

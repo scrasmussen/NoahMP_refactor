@@ -567,6 +567,7 @@ BIO2LAI    =  0.015,  0.030,  0.015,  0.015,  0.015,  ! leaf are per living leaf
 !-----------------------------------!
 ! For simple drainage model         !
 !-----------------------------------!
+NSOILTYPE = 19  ! num_soil_types
 DRAIN_LAYER_OPT  =  4
     ! 0 - from one specified layer by TD_DEPTH,
     ! 1 - from layers 1 & 2,

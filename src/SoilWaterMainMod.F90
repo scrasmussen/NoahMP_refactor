@@ -63,7 +63,7 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              urban_flag      => noahmp%config%domain%urban_flag     ,& ! in,     logical flag for urban grid
+              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
               OPT_RUNSRF      => noahmp%config%nmlist%OPT_RUNSRF     ,& ! in,     options for surface runoff
               OPT_RUNSUB      => noahmp%config%nmlist%OPT_RUNSUB     ,& ! in,     options for subsurface runoff
               OPT_TDRN        => noahmp%config%nmlist%OPT_TDRN       ,& ! in,     options for tile drainage
@@ -130,7 +130,7 @@ contains
 
     !!! surface runoff and infiltration rate using different schemes
     ! jref impermable surface at urban
-    if ( urban_flag ) FCR(1) = 0.95
+    if ( URBAN_FLAG .eqv. .true. ) FCR(1) = 0.95
 
     if ( OPT_RUNSRF == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
     if ( OPT_RUNSRF == 2 ) call RunoffSurfaceTopModelEqui(noahmp)

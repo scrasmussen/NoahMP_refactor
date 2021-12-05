@@ -59,7 +59,7 @@ module ConfigVarType
   type :: domain_type
 
     ! define specific domain variables
-    logical                   :: urban_flag  ! flag for urban grid
+    logical                   :: URBAN_FLAG  ! flag for urban grid
     logical                   :: CROPLU      ! flag to identify croplands
     integer                   :: ILOC        ! model grid index
     integer                   :: JLOC        ! model grid index
@@ -71,6 +71,7 @@ module ConfigVarType
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
 
+    integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSO   ! depth of snow/soil layer-bottom (m)

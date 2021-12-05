@@ -51,10 +51,10 @@ module InputVarType
     real(kind=kind_noahmp)   :: VEGMAXIn
     real(kind=kind_noahmp)   :: SHDMAXIn
     ! state variables
+    integer               , allocatable, dimension(:) :: SOILTYPEIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOILIn 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSOIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSOIn
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SOILTYPEIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: SH2OIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: SICEIn
     ! namelist options
@@ -225,46 +225,46 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: KLAT_FAC_TABLE
 
     ! original MPTABLE.TBL optional parameters
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_a      ! sand coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_b      ! clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_c      ! orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_d      ! sand*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_e      ! clay*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_f      ! sand*clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_g      ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500_a       ! theta_1500t coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_1500_b       ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_a        ! sand coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_b        ! clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_c        ! orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_d        ! sand*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_e        ! clay*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_f        ! sand*clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33t_g        ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_theta_33_a         ! theta_33t*theta_33t coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33_b         ! theta_33t coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_33_c         ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_a       ! sand coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_b       ! clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_c       ! orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_d       ! sand*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_e       ! clay*orgm coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_f       ! sand*clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_g       ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33_a        ! theta_s33t coefficient
-    real(kind=kind_noahmp)                              :: sr2006_theta_s33_b        ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_a           ! sand coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_b           ! clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_c           ! theta_s33 coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_d           ! sand*theta_s33 coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_e           ! clay*theta_s33 coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_f           ! sand*clay coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_et_g           ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_psi_e_a            ! psi_et*psi_et coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_e_b            ! psi_et coefficient
-    real(kind=kind_noahmp)                              :: sr2006_psi_e_c            ! constant adjustment
-    real(kind=kind_noahmp)                              :: sr2006_smcmax_a           ! sand adjustment
-    real(kind=kind_noahmp)                              :: sr2006_smcmax_b           ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_a_TABLE      ! sand coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_b_TABLE      ! clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_c_TABLE      ! orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_d_TABLE      ! sand*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_e_TABLE      ! clay*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_f_TABLE      ! sand*clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500t_g_TABLE      ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500_a_TABLE       ! theta_1500t coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_1500_b_TABLE       ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_a_TABLE        ! sand coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_b_TABLE        ! clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_c_TABLE        ! orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_d_TABLE        ! sand*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_e_TABLE        ! clay*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_f_TABLE        ! sand*clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33t_g_TABLE        ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_33_a_TABLE         ! theta_33t*theta_33t coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33_b_TABLE         ! theta_33t coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_33_c_TABLE         ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_a_TABLE       ! sand coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_b_TABLE       ! clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_c_TABLE       ! orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_d_TABLE       ! sand*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_e_TABLE       ! clay*orgm coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_f_TABLE       ! sand*clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33t_g_TABLE       ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33_a_TABLE        ! theta_s33t coefficient
+    real(kind=kind_noahmp)                              :: sr2006_theta_s33_b_TABLE        ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_a_TABLE           ! sand coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_b_TABLE           ! clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_c_TABLE           ! theta_s33 coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_d_TABLE           ! sand*theta_s33 coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_e_TABLE           ! clay*theta_s33 coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_f_TABLE           ! sand*clay coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_et_g_TABLE           ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_psi_e_a_TABLE            ! psi_et*psi_et coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_e_b_TABLE            ! psi_et coefficient
+    real(kind=kind_noahmp)                              :: sr2006_psi_e_c_TABLE            ! constant adjustment
+    real(kind=kind_noahmp)                              :: sr2006_smcmax_a_TABLE           ! sand adjustment
+    real(kind=kind_noahmp)                              :: sr2006_smcmax_b_TABLE           ! constant adjustment
 
     ! original MPTABLE.TBL crop parameters
     integer                                             :: DEFAULT_CROP_TABLE        ! Default crop index
@@ -350,6 +350,42 @@ module InputVarType
     real(kind=kind_noahmp)                              :: ZBOT_TABLE        !Depth [m] of lower boundary soil temperature
     real(kind=kind_noahmp)                              :: CZIL_TABLE        !Parameter used in the calculation of the roughness length for heat
 
+    !----------------------------------------------------------------
+    ! Noahmp State variables from restart or initial input files
+    !----------------------------------------------------------------
+    integer                                             :: ISNOWIn           ! snow layer index (0 : no snow, -1~-3 : 1~3 snow layers)
+    integer                                             :: ISTIn             ! surface type 1-soil; 2-lake
+    logical                                             :: URBAN_FLAGIn      ! urban point flag
+    real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
+    real(kind=kind_noahmp)                              :: TVIn              ! leaf temperature (K)
+    real(kind=kind_noahmp)                              :: CANLIQIn
+    real(kind=kind_noahmp)                              :: CANICEIn
+    real(kind=kind_noahmp)                              :: SNEQVIn
+    real(kind=kind_noahmp)                              :: SNOWHIn
+    real(kind=kind_noahmp)                              :: FIFACIn
+    real(kind=kind_noahmp)                              :: IRAMTFIIn
+    real(kind=kind_noahmp)                              :: MIFACIn
+    real(kind=kind_noahmp)                              :: IRAMTMIIn
+    real(kind=kind_noahmp)                              :: SIFACIn
+    real(kind=kind_noahmp)                              :: ZWTIn
+    real(kind=kind_noahmp)                              :: SMCWTDIn
+    real(kind=kind_noahmp)                              :: DEEPRECHIn
+    real(kind=kind_noahmp)                              :: WATBLEDIn
+    real(kind=kind_noahmp)                              :: TDFRACMPIn
+    real(kind=kind_noahmp)                              :: WAIn
+    real(kind=kind_noahmp)                              :: WTIn
+    real(kind=kind_noahmp)                              :: WSLAKEIn
+    real(kind=kind_noahmp)                              :: PONDINGIn
+    real(kind=kind_noahmp)                              :: sfcheadrtIn
+    real(kind=kind_noahmp)                              :: IRRFRAIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: FICEOLDIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SH2OIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SICEIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCIn
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCEQIn
 
   end type input_type
 

@@ -158,6 +158,9 @@ module WaterVarType
     real(kind=kind_noahmp) :: CMIC             ! microprore content (0.0-1.0), 0.0: close to free drainage
     real(kind=kind_noahmp) :: WSLMAX           ! maximum lake water storage (mm)
     real(kind=kind_noahmp) :: SWEMAXGLA        ! Maximum SWE allowed at glaciers (mm)
+    real(kind=kind_noahmp) :: REFDK            ! Parameter in the surface runoff parameterization
+    real(kind=kind_noahmp) :: REFKDT           ! Parameter in the surface runoff parameterization
+    real(kind=kind_noahmp) :: FRZK             ! Frozen ground parameter
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

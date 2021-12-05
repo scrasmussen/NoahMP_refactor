@@ -181,6 +181,9 @@ contains
     noahmp%water%param%CMIC             = huge(1.0)
     noahmp%water%param%WSLMAX           = huge(1.0)
     noahmp%water%param%SWEMAXGLA        = huge(1.0)
+    noahmp%water%param%REFDK            = huge(1.0)
+    noahmp%water%param%REFKDT           = huge(1.0)
+    noahmp%water%param%FRZK             = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -213,91 +216,114 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
     type(input_type) , intent(in)    :: input
 
-    associate(                                      &
-              ILOC  => noahmp%config%domain%ILOC   ,&
-              JLOC  => noahmp%config%domain%JLOC   ,&
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL   &
+    ! local loop index
+    integer                          :: ISOIL
+
+    associate(                                                  &
+              ILOC        => noahmp%config%domain%ILOC         ,&
+              JLOC        => noahmp%config%domain%JLOC         ,&
+              NSNOW       => noahmp%config%domain%NSNOW        ,&
+              NSOIL       => noahmp%config%domain%NSOIL        ,&
+              VEGTYP      => noahmp%config%domain%VEGTYP       ,&
+              SOILTYP     => noahmp%config%domain%SOILTYPE     ,&
+              URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG    &
              )
 
     ! water state variable
-    noahmp%water%state%CANLIQ                   = input%CANLIQIn(ILOC,JLOC)
-    noahmp%water%state%CANICE                   = input%CANICEIn(ILOC,JLOC)
-    noahmp%water%state%SNEQV                    = input%SNEQVIn(ILOC,JLOC)
-    noahmp%water%state%SNOWH                    = input%SNOWHIn(ILOC,JLOC)
-    noahmp%water%state%SNICE(-NSNOW+1:0)        = input%SNICEIn(ILOC,-NSNOW+1:0,JLOC)
-    noahmp%water%state%SNLIQ(-NSNOW+1:0)        = input%SNLIQIn(ILOC,-NSNOW+1:0,JLOC)
-    noahmp%water%state%FICEOLD_SNOW(-NSNOW+1:0) = input%FICEOLDIn(ILOC,-NSNOW+1:0,JLOC)
-    noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%state%FIFAC                    = input%FIFACIn(ILOC,JLOC)
-    noahmp%water%state%IRAMTFI                  = input%IRAMTFIIn(ILOC,JLOC)
-    noahmp%water%state%MIFAC                    = input%MIFACIn(ILOC,JLOC)
-    noahmp%water%state%IRAMTMI                  = input%IRAMTMIIn(ILOC,JLOC)
-    noahmp%water%state%SIFAC                    = input%SIFACIn(ILOC,JLOC)
-    noahmp%water%state%ZWT                      = input%ZWTIn(ILOC,JLOC)
-    noahmp%water%state%SMCWTD                   = input%SMCWTDIn(ILOC,JLOC)
-    noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn(ILOC,JLOC)
-    noahmp%water%state%WATBLED                  = input%WATBLEDIn(ILOC,JLOC)
-    noahmp%water%state%TDFRACMP                 = input%TDFRACMPIn(ILOC,JLOC)
-    noahmp%water%state%WA                       = input%WAIn(ILOC,JLOC)
-    noahmp%water%state%WT                       = input%WTIn(ILOC,JLOC)
-    noahmp%water%state%WSLAKE                   = input%WSLAKEIn(ILOC,JLOC)
-    noahmp%water%state%PONDING                  = input%PONDINGIn(ILOC,JLOC)
-    noahmp%water%state%sfcheadrt                = input%sfcheadrtIn(ILOC,JLOC)
-    noahmp%water%state%IRRFRA                   = input%IRRFRAIn(ILOC,JLOC)
+    !noahmp%water%state%CANLIQ                   = input%CANLIQIn
+    !noahmp%water%state%CANICE                   = input%CANICEIn
+    !noahmp%water%state%SNEQV                    = input%SNEQVIn
+    !noahmp%water%state%SNOWH                    = input%SNOWHIn
+    !noahmp%water%state%SNICE(-NSNOW+1:0)        = input%SNICEIn(-NSNOW+1:0)
+    !noahmp%water%state%SNLIQ(-NSNOW+1:0)        = input%SNLIQIn(-NSNOW+1:0)
+    !noahmp%water%state%FICEOLD_SNOW(-NSNOW+1:0) = input%FICEOLDIn(-NSNOW+1:0)
+    !noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(1:NSOIL)
+    !noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(1:NSOIL)
+    !noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(1:NSOIL)
+    !noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(1:NSOIL)
+    !noahmp%water%state%FIFAC                    = input%FIFACIn
+    !noahmp%water%state%IRAMTFI                  = input%IRAMTFIIn
+    !noahmp%water%state%MIFAC                    = input%MIFACIn
+    !noahmp%water%state%IRAMTMI                  = input%IRAMTMIIn
+    !noahmp%water%state%SIFAC                    = input%SIFACIn
+    !noahmp%water%state%ZWT                      = input%ZWTIn
+    !noahmp%water%state%SMCWTD                   = input%SMCWTDIn
+    !noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn
+    !noahmp%water%state%WATBLED                  = input%WATBLEDIn
+    !noahmp%water%state%TDFRACMP                 = input%TDFRACMPIn
+    !noahmp%water%state%WA                       = input%WAIn
+    !noahmp%water%state%WT                       = input%WTIn
+    !noahmp%water%state%WSLAKE                   = input%WSLAKEIn
+    !noahmp%water%state%PONDING                  = input%PONDINGIn
+    !noahmp%water%state%sfcheadrt                = input%sfcheadrtIn
+    !noahmp%water%state%IRRFRA                   = input%IRRFRAIn
 
     ! water parameter variable
-    noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPTIn
-    noahmp%water%param%CH2OP             = input%CH2OPIn
-    noahmp%water%param%C2_SnowCompact    = input%C2_SnowCompactIn
-    noahmp%water%param%C3_SnowCompact    = input%C3_SnowCompactIn
-    noahmp%water%param%C4_SnowCompact    = input%C4_SnowCompactIn
-    noahmp%water%param%C5_SnowCompact    = input%C5_SnowCompactIn
-    noahmp%water%param%DM_SnowCompact    = input%DM_SnowCompactIn
-    noahmp%water%param%ETA0_SnowCompact  = input%ETA0_SnowCompactIn
-    noahmp%water%param%SNLIQMAXFRAC      = input%SNLIQMAXFRACIn
-    noahmp%water%param%SSI               = input%SSIIn
-    noahmp%water%param%SNOW_RET_FAC      = input%SNOW_RET_FACIn
-    noahmp%water%param%FIRTFAC           = input%FIRTFACIn
-    noahmp%water%param%MICIR_RATE        = input%MICIR_RATEIn
-    noahmp%water%param%KDT               = input%KDTIn
-    noahmp%water%param%FRZX              = input%FRZXIn
-    noahmp%water%param%TIMEAN            = input%TIMEANIn
-    noahmp%water%param%FSATMX            = input%FSATMXIn
-    noahmp%water%param%ROUS              = input%ROUSIn
-    noahmp%water%param%CMIC              = input%CMICIn
-    noahmp%water%param%WSLMAX            = input%WSLMAXIn
-    noahmp%water%param%SWEMAXGLA         = input%SWEMAXGLAIn
-    noahmp%water%param%BVIC              = input%BVICIn(ILOC,JLOC)
-    noahmp%water%param%AXAJ              = input%AXAJIn(ILOC,JLOC)
-    noahmp%water%param%BXAJ              = input%BXAJIn(ILOC,JLOC)
-    noahmp%water%param%XXAJ              = input%XXAJIn(ILOC,JLOC)
-    noahmp%water%param%BBVIC             = input%BBVICIn(ILOC,JLOC)
-    noahmp%water%param%GDVIC             = input%GDVICIn(ILOC,JLOC)
-    noahmp%water%param%BDVIC             = input%BDVICIn(ILOC,JLOC)
-    noahmp%water%param%SLOPE             = input%SLOPEIn(ILOC,JLOC)
-    noahmp%water%param%TD_DC             = input%TD_DCIn(ILOC,JLOC)
-    noahmp%water%param%TD_DEPTH          = input%TD_DEPTHIn(ILOC,JLOC)
-    noahmp%water%param%TDSMC_FAC         = input%TD_TDSMC_FACIn(ILOC,JLOC)
-    noahmp%water%param%TD_DCOEF          = input%TD_DCOEFIn(ILOC,JLOC)
-    noahmp%water%param%TD_ADEPTH         = input%TD_ADEPTHIn(ILOC,JLOC)
-    noahmp%water%param%KLAT_FAC          = input%KLAT_FACIn(ILOC,JLOC)
-    noahmp%water%param%TD_DDRAIN         = input%TD_DDRAINIn(ILOC,JLOC)
-    noahmp%water%param%TD_SPAC           = input%TD_SPACIn(ILOC,JLOC)
-    noahmp%water%param%TD_RADI           = input%TD_RADIIn(ILOC,JLOC)
-    noahmp%water%param%TD_D              = input%TD_DIn(ILOC,JLOC)
-    noahmp%water%param%NROOT             = input%NROOTIn(ILOC,JLOC)
+    noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPT_TABLE
+    noahmp%water%param%CH2OP             = input%CH2OP_TABLE(VEGTYP)
+    noahmp%water%param%C2_SnowCompact    = input%C2_SNOWCOMPACT_TABLE
+    noahmp%water%param%C3_SnowCompact    = input%C3_SNOWCOMPACT_TABLE
+    noahmp%water%param%C4_SnowCompact    = input%C4_SNOWCOMPACT_TABLE
+    noahmp%water%param%C5_SnowCompact    = input%C5_SNOWCOMPACT_TABLE
+    noahmp%water%param%DM_SnowCompact    = input%DM_SNOWCOMPACT_TABLE
+    noahmp%water%param%ETA0_SnowCompact  = input%ETA0_SNOWCOMPACT_TABLE
+    noahmp%water%param%SNLIQMAXFRAC      = input%SNLIQMAXFRAC_TABLE
+    noahmp%water%param%SSI               = input%SSI_TABLE
+    noahmp%water%param%SNOW_RET_FAC      = input%SNOW_RET_FAC_TABLE
+    noahmp%water%param%FIRTFAC           = input%FIRTFAC_TABLE
+    noahmp%water%param%MICIR_RATE        = input%MICIR_RATE_TABLE
+    noahmp%water%param%REFDK             = input%REFDK_TABLE
+    noahmp%water%param%REFKDT            = input%REFKDT_TABLE
+    noahmp%water%param%FRZK              = input%FRZK_TABLE
+    noahmp%water%param%TIMEAN            = input%TIMEAN_TABLE
+    noahmp%water%param%FSATMX            = input%FSATMX_TABLE
+    noahmp%water%param%ROUS              = input%ROUS_TABLE
+    noahmp%water%param%CMIC              = input%CMIC_TABLE
+    noahmp%water%param%WSLMAX            = input%WSLMAX_TABLE
+    noahmp%water%param%SWEMAXGLA         = input%SWEMAXGLA_TABLE
+    noahmp%water%param%BVIC              = input%BVIC_TABLE(SOILTYP(1))
+    noahmp%water%param%AXAJ              = input%AXAJ_TABLE(SOILTYP(1))
+    noahmp%water%param%BXAJ              = input%BXAJ_TABLE(SOILTYP(1))
+    noahmp%water%param%XXAJ              = input%XXAJ_TABLE(SOILTYP(1))
+    noahmp%water%param%BBVIC             = input%BBVIC_TABLE(SOILTYP(1))
+    noahmp%water%param%GDVIC             = input%GDVIC_TABLE(SOILTYP(1))
+    noahmp%water%param%BDVIC             = input%BDVIC_TABLE(SOILTYP(1))
+    noahmp%water%param%SLOPE             = input%SLOPE_TABLE(input%SLOPETYPEIn)
+    noahmp%water%param%TD_DC             = input%TD_DC_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_DEPTH          = input%TD_DEPTH_TABLE(SOILTYP(1))
+    noahmp%water%param%TDSMC_FAC         = input%TDSMC_FAC_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_DCOEF          = input%TD_DCOEF_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_ADEPTH         = input%TD_ADEPTH_TABLE(SOILTYP(1))
+    noahmp%water%param%KLAT_FAC          = input%KLAT_FAC_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_DDRAIN         = input%TD_DDRAIN_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_SPAC           = input%TD_SPAC_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_RADI           = input%TD_RADI_TABLE(SOILTYP(1))
+    noahmp%water%param%TD_D              = input%TD_D_TABLE(SOILTYP(1))
+    noahmp%water%param%NROOT             = input%NROOT_TABLE(VEGTYP)
 
-    noahmp%water%param%SMCMAX(1:NSOIL)   = input%SMCMAXIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%SMCWLT(1:NSOIL)   = input%SMCWLTIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%SMCREF(1:NSOIL)   = input%SMCREFIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%DWSAT(1:NSOIL)    = input%DWSATIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%DKSAT(1:NSOIL)    = input%DKSATIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%BEXP(1:NSOIL)     = input%BEXPIn(ILOC,1:NSOIL,JLOC)
-    noahmp%water%param%PSISAT(1:NSOIL)   = input%PSISATIn(ILOC,1:NSOIL,JLOC)
+    do ISOIL = 1, size(SOILTYP)
+       noahmp%water%param%SMCMAX(ISOIL)   = input%SMCMAX_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%SMCWLT(ISOIL)   = input%SMCWLT_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%SMCREF(ISOIL)   = input%SMCREF_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%DWSAT(ISOIL)    = input%DWSAT_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%DKSAT(ISOIL)    = input%DKSAT_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%BEXP(ISOIL)     = input%BEXP_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%PSISAT(ISOIL)   = input%PSISAT_TABLE(SOILTYP(ISOIL))
+    enddo
+
+    ! derived parameters
+    noahmp%water%param%KDT  = noahmp%water%param%REFKDT * noahmp%water%param%DKSAT(1) / &
+                              noahmp%water%param%REFDK
+    if ( URBAN_FLAG .eqv. .true. ) then
+       noahmp%water%param%SMCMAX = 0.45
+       noahmp%water%param%SMCREF = 0.42
+       noahmp%water%param%SMCWLT = 0.40
+    endif
+    if ( SOILTYP(1) /= 14 ) then
+       noahmp%water%param%FRZX = noahmp%water%param%FRZK * &
+            ((noahmp%water%param%SMCMAX(1) / noahmp%water%param%SMCREF(1)) * (0.412/0.468))
+    endif
+
 
     end associate
 

@@ -114,7 +114,11 @@ contains
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
                                                 WSLMAX, ROUS, CMIC
 
-
+    ! MPTABLE.TBL irrigation parameters
+    integer                                  :: IRR_HAR
+    real(kind=kind_noahmp)                   :: IRR_FRAC, IRR_LAI, IRR_MAD, FILOSS, SPRIR_RATE, MICIR_RATE, FIRTFAC, IR_RAIN
+    namelist / noahmp_irrigation_parameters /   IRR_FRAC, IRR_HAR, IRR_LAI, IRR_MAD, FILOSS, SPRIR_RATE, MICIR_RATE, FIRTFAC,&
+                                                IR_RAIN
 
     ! MPTABLE.TBL crop parameters
     integer                                  :: DEFAULT_CROP
@@ -137,26 +141,61 @@ contains
                                                 LFCT_S5, LFCT_S6, LFCT_S7, LFCT_S8, STCT_S1, STCT_S2, STCT_S3, STCT_S4,      &
                                                 STCT_S5, STCT_S6, STCT_S7, STCT_S8, RTCT_S1, RTCT_S2, RTCT_S3, RTCT_S4,      &
                                                 RTCT_S5, RTCT_S6, RTCT_S7, RTCT_S8, BIO2LAI
-    namelist / noahmp_crop_parameters /         DEFAULT_CROP, PLTDAY, HSDAY, PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1,  GDDS2,  GDDS3,     GDDS4,     GDDS5, & !
-                                              C3PSN,     KC25,       AKC,      KO25,       AKO,     AVCMX,    VCMX25,        BP,     MP, FOLNMX,      QE25, &  ! parameters added from stomata
-                                               C3C4,     AREF,     PSNRF,     I2PAR,   TASSIM0,                                               &
-                                        TASSIM1,   TASSIM2,         K,      EPSI,     Q10MR,   FOLN_MX,   LEFREEZ,               &
-                                        DILE_FC_S1,DILE_FC_S2,DILE_FC_S3,DILE_FC_S4,DILE_FC_S5,DILE_FC_S6,DILE_FC_S7,DILE_FC_S8, &
-                                        DILE_FW_S1,DILE_FW_S2,DILE_FW_S3,DILE_FW_S4,DILE_FW_S5,DILE_FW_S6,DILE_FW_S7,DILE_FW_S8, &
-                                            FRA_GR,                                                                              &
-                                        LF_OVRC_S1,LF_OVRC_S2,LF_OVRC_S3,LF_OVRC_S4,LF_OVRC_S5,LF_OVRC_S6,LF_OVRC_S7,LF_OVRC_S8, &
-                                        ST_OVRC_S1,ST_OVRC_S2,ST_OVRC_S3,ST_OVRC_S4,ST_OVRC_S5,ST_OVRC_S6,ST_OVRC_S7,ST_OVRC_S8, &
-                                        RT_OVRC_S1,RT_OVRC_S2,RT_OVRC_S3,RT_OVRC_S4,RT_OVRC_S5,RT_OVRC_S6,RT_OVRC_S7,RT_OVRC_S8, &
-                                            LFMR25,    STMR25,    RTMR25, GRAINMR25,                                             &
-                                           LFPT_S1,   LFPT_S2,   LFPT_S3,   LFPT_S4,   LFPT_S5,   LFPT_S6,   LFPT_S7,   LFPT_S8, &
-                                           STPT_S1,   STPT_S2,   STPT_S3,   STPT_S4,   STPT_S5,   STPT_S6,   STPT_S7,   STPT_S8, &
-                                           RTPT_S1,   RTPT_S2,   RTPT_S3,   RTPT_S4,   RTPT_S5,   RTPT_S6,   RTPT_S7,   RTPT_S8, &
-                                        GRAINPT_S1,GRAINPT_S2,GRAINPT_S3,GRAINPT_S4,GRAINPT_S5,GRAINPT_S6,GRAINPT_S7,GRAINPT_S8, &
-                                           LFCT_S1,LFCT_S2,LFCT_S3,LFCT_S4,LFCT_S5,LFCT_S6,LFCT_S7,LFCT_S8,                      &
-                                           STCT_S1,STCT_S2,STCT_S3,STCT_S4,STCT_S5,STCT_S6,STCT_S7,STCT_S8,                      &
-                                           RTCT_S1,RTCT_S2,RTCT_S3,RTCT_S4,RTCT_S5,RTCT_S6,RTCT_S7,RTCT_S8,                      &
-                                           BIO2LAI
+    namelist / noahmp_crop_parameters /         DEFAULT_CROP, PLTDAY, HSDAY, PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2,&
+                                                GDDS3, GDDS4, GDDS5, C3PSN, KC25, AKC, KO25, AKO, AVCMX, VCMX25, BP, MP,     &
+                                                FOLNMX, QE25, C3C4, AREF, PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI,  &
+                                                Q10MR, FOLN_MX, LEFREEZ, DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4,     &
+                                                DILE_FC_S5, DILE_FC_S6, DILE_FC_S7, DILE_FC_S8, DILE_FW_S1, DILE_FW_S2,      &
+                                                DILE_FW_S3, DILE_FW_S4, DILE_FW_S5, DILE_FW_S6, DILE_FW_S7, DILE_FW_S8,      &
+                                                FRA_GR, LF_OVRC_S1, LF_OVRC_S2, LF_OVRC_S3, LF_OVRC_S4, LF_OVRC_S5,          &
+                                                LF_OVRC_S6, LF_OVRC_S7, LF_OVRC_S8, ST_OVRC_S1, ST_OVRC_S2, ST_OVRC_S3,      &
+                                                ST_OVRC_S4, ST_OVRC_S5, ST_OVRC_S6, ST_OVRC_S7, ST_OVRC_S8, RT_OVRC_S1,      &
+                                                RT_OVRC_S2, RT_OVRC_S3, RT_OVRC_S4, RT_OVRC_S5, RT_OVRC_S6, RT_OVRC_S7,      &
+                                                RT_OVRC_S8, LFMR25, STMR25, RTMR25, GRAINMR25, LFPT_S1, LFPT_S2, LFPT_S3,    &
+                                                LFPT_S4, LFPT_S5, LFPT_S6, LFPT_S7, LFPT_S8, STPT_S1, STPT_S2, STPT_S3,      &
+                                                STPT_S4, STPT_S5, STPT_S6, STPT_S7, STPT_S8, RTPT_S1, RTPT_S2, RTPT_S3,      &
+                                                RTPT_S4, RTPT_S5, RTPT_S6, RTPT_S7, RTPT_S8, GRAINPT_S1, GRAINPT_S2,         &
+                                                GRAINPT_S3, GRAINPT_S4, GRAINPT_S5, GRAINPT_S6, GRAINPT_S7, GRAINPT_S8,      &
+                                                LFCT_S1, LFCT_S2, LFCT_S3, LFCT_S4, LFCT_S5, LFCT_S6, LFCT_S7, LFCT_S8,      &
+                                                STCT_S1, STCT_S2, STCT_S3, STCT_S4, STCT_S5, STCT_S6, STCT_S7, STCT_S8,      &
+                                                RTCT_S1, RTCT_S2, RTCT_S3, RTCT_S4, RTCT_S5, RTCT_S6, RTCT_S7, RTCT_S8,      &
+                                                BIO2LAI
 
+    ! MPTABLE.TBL tile drainage parameters
+    integer                                        :: NSOILTYPE, DRAIN_LAYER_OPT
+    integer               , dimension(MAX_SOILTYP) :: TD_DEPTH
+    real(kind=kind_noahmp), dimension(MAX_SOILTYP) :: TDSMC_FAC, TD_DC, TD_DCOEF, TD_D, TD_ADEPTH, TD_RADI, TD_SPAC,         &
+                                                      TD_DDRAIN, KLAT_FAC
+    namelist / noahmp_tiledrain_parameters /          NSOILTYPE, DRAIN_LAYER_OPT, TDSMC_FAC, TD_DEPTH, TD_DC, TD_DCOEF, TD_D,&
+                                                      TD_ADEPTH, TD_RADI, TD_SPAC, TD_DDRAIN, KLAT_FAC
+
+    ! MPTABLE.TBL optional parameters
+    real(kind=kind_noahmp)                         :: sr2006_theta_1500t_a, sr2006_theta_1500t_b, sr2006_theta_1500t_c,      &
+                                                      sr2006_theta_1500t_d, sr2006_theta_1500t_e, sr2006_theta_1500t_f,      &
+                                                      sr2006_theta_1500t_g, sr2006_theta_1500_a , sr2006_theta_1500_b,       &
+                                                      sr2006_theta_33t_a, sr2006_theta_33t_b, sr2006_theta_33t_c,            &
+                                                      sr2006_theta_33t_d, sr2006_theta_33t_e, sr2006_theta_33t_f,            &
+                                                      sr2006_theta_33t_g, sr2006_theta_33_a, sr2006_theta_33_b,              &
+                                                      sr2006_theta_33_c, sr2006_theta_s33t_a, sr2006_theta_s33t_b,           &
+                                                      sr2006_theta_s33t_c, sr2006_theta_s33t_d, sr2006_theta_s33t_e,         &
+                                                      sr2006_theta_s33t_f, sr2006_theta_s33t_g, sr2006_theta_s33_a,          &
+                                                      sr2006_theta_s33_b, sr2006_psi_et_a, sr2006_psi_et_b, sr2006_psi_et_c, &
+                                                      sr2006_psi_et_d, sr2006_psi_et_e, sr2006_psi_et_f, sr2006_psi_et_g,    &
+                                                      sr2006_psi_e_a, sr2006_psi_e_b, sr2006_psi_e_c, sr2006_smcmax_a,       &
+                                                      sr2006_smcmax_b
+    namelist / noahmp_optional_parameters /           sr2006_theta_1500t_a, sr2006_theta_1500t_b, sr2006_theta_1500t_c,      &
+                                                      sr2006_theta_1500t_d, sr2006_theta_1500t_e, sr2006_theta_1500t_f,      &
+                                                      sr2006_theta_1500t_g, sr2006_theta_1500_a, sr2006_theta_1500_b,        &
+                                                      sr2006_theta_33t_a, sr2006_theta_33t_b, sr2006_theta_33t_c,            &
+                                                      sr2006_theta_33t_d, sr2006_theta_33t_e, sr2006_theta_33t_f,            &
+                                                      sr2006_theta_33t_g, sr2006_theta_33_a, sr2006_theta_33_b,              &
+                                                      sr2006_theta_33_c, sr2006_theta_s33t_a, sr2006_theta_s33t_b,           &
+                                                      sr2006_theta_s33t_c, sr2006_theta_s33t_d, sr2006_theta_s33t_e,         &
+                                                      sr2006_theta_s33t_f, sr2006_theta_s33t_g, sr2006_theta_s33_a,          &
+                                                      sr2006_theta_s33_b, sr2006_psi_et_a, sr2006_psi_et_b, sr2006_psi_et_c, &
+                                                      sr2006_psi_et_d, sr2006_psi_et_e, sr2006_psi_et_f, sr2006_psi_et_g,    &
+                                                      sr2006_psi_e_a, sr2006_psi_e_b, sr2006_psi_e_c, sr2006_smcmax_a,       &
+                                                      sr2006_smcmax_b
 
     !--------------------------------------------------
     !=== allocate multi-dim input table variables
@@ -458,6 +497,126 @@ contains
     input%ROUS_TABLE             = -1.0e36
     input%CMIC_TABLE             = -1.0e36
 
+    ! MPTABLE.TBL irrigation parameters
+    input%IRR_HAR_TABLE          = -99999
+    input%IRR_FRAC_TABLE         = -1.0e36
+    input%IRR_LAI_TABLE          = -1.0e36
+    input%IRR_MAD_TABLE          = -1.0e36
+    input%FILOSS_TABLE           = -1.0e36
+    input%SPRIR_RATE_TABLE       = -1.0e36
+    input%MICIR_RATE_TABLE       = -1.0e36
+    input%FIRTFAC_TABLE          = -1.0e36
+    input%IR_RAIN_TABLE          = -1.0e36
+
+    ! MPTABLE.TBL crop parameters
+    input%DEFAULT_CROP_TABLE     = -99999
+    input%PLTDAY_TABLE           = -99999
+    input%HSDAY_TABLE            = -99999
+    input%PLANTPOP_TABLE         = -1.0e36
+    input%IRRI_TABLE             = -1.0e36
+    input%GDDTBASE_TABLE         = -1.0e36
+    input%GDDTCUT_TABLE          = -1.0e36
+    input%GDDS1_TABLE            = -1.0e36
+    input%GDDS2_TABLE            = -1.0e36
+    input%GDDS3_TABLE            = -1.0e36
+    input%GDDS4_TABLE            = -1.0e36
+    input%GDDS5_TABLE            = -1.0e36
+    input%C3PSNI_TABLE           = -1.0e36
+    input%KC25I_TABLE            = -1.0e36
+    input%AKCI_TABLE             = -1.0e36
+    input%KO25I_TABLE            = -1.0e36
+    input%AKOI_TABLE             = -1.0e36
+    input%AVCMXI_TABLE           = -1.0e36
+    input%VCMX25I_TABLE          = -1.0e36
+    input%BPI_TABLE              = -1.0e36
+    input%MPI_TABLE              = -1.0e36
+    input%FOLNMXI_TABLE          = -1.0e36
+    input%QE25I_TABLE            = -1.0e36
+    input%C3C4_TABLE             = -99999
+    input%AREF_TABLE             = -1.0e36
+    input%PSNRF_TABLE            = -1.0e36
+    input%I2PAR_TABLE            = -1.0e36
+    input%TASSIM0_TABLE          = -1.0e36
+    input%TASSIM1_TABLE          = -1.0e36
+    input%TASSIM2_TABLE          = -1.0e36
+    input%K_TABLE                = -1.0e36
+    input%EPSI_TABLE             = -1.0e36
+    input%Q10MR_TABLE            = -1.0e36
+    input%FOLN_MX_TABLE          = -1.0e36
+    input%LEFREEZ_TABLE          = -1.0e36
+    input%DILE_FC_TABLE          = -1.0e36
+    input%DILE_FW_TABLE          = -1.0e36
+    input%FRA_GR_TABLE           = -1.0e36
+    input%LF_OVRC_TABLE          = -1.0e36
+    input%ST_OVRC_TABLE          = -1.0e36
+    input%RT_OVRC_TABLE          = -1.0e36
+    input%LFMR25_TABLE           = -1.0e36
+    input%STMR25_TABLE           = -1.0e36
+    input%RTMR25_TABLE           = -1.0e36
+    input%GRAINMR25_TABLE        = -1.0e36
+    input%LFPT_TABLE             = -1.0e36
+    input%STPT_TABLE             = -1.0e36
+    input%RTPT_TABLE             = -1.0e36
+    input%GRAINPT_TABLE          = -1.0e36
+    input%LFCT_TABLE             = -1.0e36
+    input%STCT_TABLE             = -1.0e36
+    input%RTCT_TABLE             = -1.0e36
+    input%BIO2LAI_TABLE          = -1.0e36
+
+    ! MPTABLE.TBL tile drainage parameters
+    input%DRAIN_LAYER_OPT_TABLE  = -99999
+    input%TD_DEPTH_TABLE         = -99999
+    input%TDSMC_FAC_TABLE        = -1.0e36
+    input%TD_DC_TABLE            = -1.0e36
+    input%TD_DCOEF_TABLE         = -1.0e36
+    input%TD_D_TABLE             = -1.0e36
+    input%TD_ADEPTH_TABLE        = -1.0e36
+    input%TD_RADI_TABLE          = -1.0e36
+    input%TD_SPAC_TABLE          = -1.0e36
+    input%TD_DDRAIN_TABLE        = -1.0e36
+    input%KLAT_FAC_TABLE         = -1.0e36
+
+    ! MPTABLE.TBL optional parameters
+    input%sr2006_theta_1500t_a_TABLE = -1.0e36
+    input%sr2006_theta_1500t_b_TABLE = -1.0e36
+    input%sr2006_theta_1500t_c_TABLE = -1.0e36
+    input%sr2006_theta_1500t_d_TABLE = -1.0e36
+    input%sr2006_theta_1500t_e_TABLE = -1.0e36
+    input%sr2006_theta_1500t_f_TABLE = -1.0e36
+    input%sr2006_theta_1500t_g_TABLE = -1.0e36
+    input%sr2006_theta_1500_a_TABLE  = -1.0e36
+    input%sr2006_theta_1500_b_TABLE  = -1.0e36
+    input%sr2006_theta_33t_a_TABLE   = -1.0e36
+    input%sr2006_theta_33t_b_TABLE   = -1.0e36
+    input%sr2006_theta_33t_c_TABLE   = -1.0e36
+    input%sr2006_theta_33t_d_TABLE   = -1.0e36
+    input%sr2006_theta_33t_e_TABLE   = -1.0e36
+    input%sr2006_theta_33t_f_TABLE   = -1.0e36
+    input%sr2006_theta_33t_g_TABLE   = -1.0e36
+    input%sr2006_theta_33_a_TABLE    = -1.0e36
+    input%sr2006_theta_33_b_TABLE    = -1.0e36
+    input%sr2006_theta_33_c_TABLE    = -1.0e36
+    input%sr2006_theta_s33t_a_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_b_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_c_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_d_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_e_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_f_TABLE  = -1.0e36
+    input%sr2006_theta_s33t_g_TABLE  = -1.0e36
+    input%sr2006_theta_s33_a_TABLE   = -1.0e36
+    input%sr2006_theta_s33_b_TABLE   = -1.0e36
+    input%sr2006_psi_et_a_TABLE      = -1.0e36
+    input%sr2006_psi_et_b_TABLE      = -1.0e36
+    input%sr2006_psi_et_c_TABLE      = -1.0e36
+    input%sr2006_psi_et_d_TABLE      = -1.0e36
+    input%sr2006_psi_et_e_TABLE      = -1.0e36
+    input%sr2006_psi_et_f_TABLE      = -1.0e36
+    input%sr2006_psi_et_g_TABLE      = -1.0e36
+    input%sr2006_psi_e_a_TABLE       = -1.0e36
+    input%sr2006_psi_e_b_TABLE       = -1.0e36
+    input%sr2006_psi_e_c_TABLE       = -1.0e36
+    input%sr2006_smcmax_a_TABLE      = -1.0e36
+    input%sr2006_smcmax_b_TABLE      = -1.0e36
 
     !---------------------------------------------------------------
     ! transfer values from table to input variables
@@ -712,8 +871,258 @@ contains
     input%ROUS_TABLE             = ROUS
     input%CMIC_TABLE             = CMIC
 
-    !---------------- 
+    !---------------- MPTABLE.TBL irrigation parameters
+    inquire( file='NoahmpTable.TBL', exist=file_named )
+    if ( file_named ) then
+      open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
+    else
+      open(15, status='old', form='formatted', action='read', iostat=ierr)
+    end if
+    if (ierr /= 0) then
+       write(*,'("WARNING: Cannot find file NoahmpTable.TBL")')
+    endif
+    read(15,noahmp_irrigation_parameters)
+    close(15)
+    ! assign values
+    input%IRR_FRAC_TABLE         = IRR_FRAC
+    input%IRR_HAR_TABLE          = IRR_HAR
+    input%IRR_LAI_TABLE          = IRR_LAI
+    input%IRR_MAD_TABLE          = IRR_MAD
+    input%FILOSS_TABLE           = FILOSS  
+    input%SPRIR_RATE_TABLE       = SPRIR_RATE
+    input%MICIR_RATE_TABLE       = MICIR_RATE
+    input%FIRTFAC_TABLE          = FIRTFAC
+    input%IR_RAIN_TABLE          = IR_RAIN 
 
+    !---------------- MPTABLE.TBL crop parameters
+    inquire( file='NoahmpTable.TBL', exist=file_named )
+    if ( file_named ) then
+      open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
+    else
+      open(15, status='old', form='formatted', action='read', iostat=ierr)
+    end if
+    if (ierr /= 0) then
+       write(*,'("WARNING: Cannot find file NoahmpTable.TBL")')
+    endif
+    read(15,noahmp_crop_parameters)
+    close(15)
+    ! assign values
+    input%DEFAULT_CROP_TABLE     = DEFAULT_CROP
+    input%PLTDAY_TABLE           = PLTDAY
+    input%HSDAY_TABLE            = HSDAY
+    input%PLANTPOP_TABLE         = PLANTPOP
+    input%IRRI_TABLE             = IRRI
+    input%GDDTBASE_TABLE         = GDDTBASE
+    input%GDDTCUT_TABLE          = GDDTCUT
+    input%GDDS1_TABLE            = GDDS1
+    input%GDDS2_TABLE            = GDDS2
+    input%GDDS3_TABLE            = GDDS3
+    input%GDDS4_TABLE            = GDDS4
+    input%GDDS5_TABLE            = GDDS5
+    input%C3PSNI_TABLE(1:5)      = C3PSN(1:5)
+    input%KC25I_TABLE(1:5)       = KC25(1:5)
+    input%AKCI_TABLE(1:5)        = AKC(1:5)
+    input%KO25I_TABLE(1:5)       = KO25(1:5)
+    input%AKOI_TABLE(1:5)        = AKO(1:5)
+    input%AVCMXI_TABLE(1:5)      = AVCMX(1:5)
+    input%VCMX25I_TABLE(1:5)     = VCMX25(1:5)
+    input%BPI_TABLE(1:5)         = BP(1:5)
+    input%MPI_TABLE(1:5)         = MP(1:5)
+    input%FOLNMXI_TABLE(1:5)     = FOLNMX(1:5)
+    input%QE25I_TABLE(1:5)       = QE25(1:5)
+    input%C3C4_TABLE             = C3C4
+    input%AREF_TABLE             = AREF
+    input%PSNRF_TABLE            = PSNRF
+    input%I2PAR_TABLE            = I2PAR
+    input%TASSIM0_TABLE          = TASSIM0
+    input%TASSIM1_TABLE          = TASSIM1
+    input%TASSIM2_TABLE          = TASSIM2
+    input%K_TABLE                = K
+    input%EPSI_TABLE             = EPSI
+    input%Q10MR_TABLE            = Q10MR
+    input%FOLN_MX_TABLE          = FOLN_MX
+    input%LEFREEZ_TABLE          = LEFREEZ
+    input%DILE_FC_TABLE(:,1)     = DILE_FC_S1
+    input%DILE_FC_TABLE(:,2)     = DILE_FC_S2
+    input%DILE_FC_TABLE(:,3)     = DILE_FC_S3
+    input%DILE_FC_TABLE(:,4)     = DILE_FC_S4
+    input%DILE_FC_TABLE(:,5)     = DILE_FC_S5
+    input%DILE_FC_TABLE(:,6)     = DILE_FC_S6
+    input%DILE_FC_TABLE(:,7)     = DILE_FC_S7
+    input%DILE_FC_TABLE(:,8)     = DILE_FC_S8
+    input%DILE_FW_TABLE(:,1)     = DILE_FW_S1
+    input%DILE_FW_TABLE(:,2)     = DILE_FW_S2
+    input%DILE_FW_TABLE(:,3)     = DILE_FW_S3
+    input%DILE_FW_TABLE(:,4)     = DILE_FW_S4
+    input%DILE_FW_TABLE(:,5)     = DILE_FW_S5
+    input%DILE_FW_TABLE(:,6)     = DILE_FW_S6
+    input%DILE_FW_TABLE(:,7)     = DILE_FW_S7
+    input%DILE_FW_TABLE(:,8)     = DILE_FW_S8
+    input%FRA_GR_TABLE           = FRA_GR
+    input%LF_OVRC_TABLE(:,1)     = LF_OVRC_S1
+    input%LF_OVRC_TABLE(:,2)     = LF_OVRC_S2
+    input%LF_OVRC_TABLE(:,3)     = LF_OVRC_S3
+    input%LF_OVRC_TABLE(:,4)     = LF_OVRC_S4
+    input%LF_OVRC_TABLE(:,5)     = LF_OVRC_S5
+    input%LF_OVRC_TABLE(:,6)     = LF_OVRC_S6
+    input%LF_OVRC_TABLE(:,7)     = LF_OVRC_S7
+    input%LF_OVRC_TABLE(:,8)     = LF_OVRC_S8
+    input%ST_OVRC_TABLE(:,1)     = ST_OVRC_S1
+    input%ST_OVRC_TABLE(:,2)     = ST_OVRC_S2
+    input%ST_OVRC_TABLE(:,3)     = ST_OVRC_S3
+    input%ST_OVRC_TABLE(:,4)     = ST_OVRC_S4
+    input%ST_OVRC_TABLE(:,5)     = ST_OVRC_S5
+    input%ST_OVRC_TABLE(:,6)     = ST_OVRC_S6
+    input%ST_OVRC_TABLE(:,7)     = ST_OVRC_S7
+    input%ST_OVRC_TABLE(:,8)     = ST_OVRC_S8
+    input%RT_OVRC_TABLE(:,1)     = RT_OVRC_S1
+    input%RT_OVRC_TABLE(:,2)     = RT_OVRC_S2
+    input%RT_OVRC_TABLE(:,3)     = RT_OVRC_S3
+    input%RT_OVRC_TABLE(:,4)     = RT_OVRC_S4
+    input%RT_OVRC_TABLE(:,5)     = RT_OVRC_S5
+    input%RT_OVRC_TABLE(:,6)     = RT_OVRC_S6
+    input%RT_OVRC_TABLE(:,7)     = RT_OVRC_S7
+    input%RT_OVRC_TABLE(:,8)     = RT_OVRC_S8
+    input%LFMR25_TABLE           = LFMR25
+    input%STMR25_TABLE           = STMR25
+    input%RTMR25_TABLE           = RTMR25
+    input%GRAINMR25_TABLE        = GRAINMR25
+    input%LFPT_TABLE(:,1)        = LFPT_S1
+    input%LFPT_TABLE(:,2)        = LFPT_S2
+    input%LFPT_TABLE(:,3)        = LFPT_S3
+    input%LFPT_TABLE(:,4)        = LFPT_S4
+    input%LFPT_TABLE(:,5)        = LFPT_S5
+    input%LFPT_TABLE(:,6)        = LFPT_S6
+    input%LFPT_TABLE(:,7)        = LFPT_S7
+    input%LFPT_TABLE(:,8)        = LFPT_S8
+    input%STPT_TABLE(:,1)        = STPT_S1
+    input%STPT_TABLE(:,2)        = STPT_S2
+    input%STPT_TABLE(:,3)        = STPT_S3
+    input%STPT_TABLE(:,4)        = STPT_S4
+    input%STPT_TABLE(:,5)        = STPT_S5
+    input%STPT_TABLE(:,6)        = STPT_S6
+    input%STPT_TABLE(:,7)        = STPT_S7
+    input%STPT_TABLE(:,8)        = STPT_S8
+    input%RTPT_TABLE(:,1)        = RTPT_S1
+    input%RTPT_TABLE(:,2)        = RTPT_S2
+    input%RTPT_TABLE(:,3)        = RTPT_S3
+    input%RTPT_TABLE(:,4)        = RTPT_S4
+    input%RTPT_TABLE(:,5)        = RTPT_S5
+    input%RTPT_TABLE(:,6)        = RTPT_S6
+    input%RTPT_TABLE(:,7)        = RTPT_S7
+    input%RTPT_TABLE(:,8)        = RTPT_S8
+    input%GRAINPT_TABLE(:,1)     = GRAINPT_S1
+    input%GRAINPT_TABLE(:,2)     = GRAINPT_S2
+    input%GRAINPT_TABLE(:,3)     = GRAINPT_S3
+    input%GRAINPT_TABLE(:,4)     = GRAINPT_S4
+    input%GRAINPT_TABLE(:,5)     = GRAINPT_S5
+    input%GRAINPT_TABLE(:,6)     = GRAINPT_S6
+    input%GRAINPT_TABLE(:,7)     = GRAINPT_S7
+    input%GRAINPT_TABLE(:,8)     = GRAINPT_S8
+    input%LFCT_TABLE(:,1)        = LFCT_S1
+    input%LFCT_TABLE(:,2)        = LFCT_S2
+    input%LFCT_TABLE(:,3)        = LFCT_S3
+    input%LFCT_TABLE(:,4)        = LFCT_S4
+    input%LFCT_TABLE(:,5)        = LFCT_S5
+    input%LFCT_TABLE(:,6)        = LFCT_S6
+    input%LFCT_TABLE(:,7)        = LFCT_S7
+    input%LFCT_TABLE(:,8)        = LFCT_S8
+    input%STCT_TABLE(:,1)        = STCT_S1
+    input%STCT_TABLE(:,2)        = STCT_S2
+    input%STCT_TABLE(:,3)        = STCT_S3
+    input%STCT_TABLE(:,4)        = STCT_S4
+    input%STCT_TABLE(:,5)        = STCT_S5
+    input%STCT_TABLE(:,6)        = STCT_S6
+    input%STCT_TABLE(:,7)        = STCT_S7
+    input%STCT_TABLE(:,8)        = STCT_S8
+    input%RTCT_TABLE(:,1)        = RTCT_S1
+    input%RTCT_TABLE(:,2)        = RTCT_S2
+    input%RTCT_TABLE(:,3)        = RTCT_S3
+    input%RTCT_TABLE(:,4)        = RTCT_S4
+    input%RTCT_TABLE(:,5)        = RTCT_S5
+    input%RTCT_TABLE(:,6)        = RTCT_S6
+    input%RTCT_TABLE(:,7)        = RTCT_S7
+    input%RTCT_TABLE(:,8)        = RTCT_S8
+    input%BIO2LAI_TABLE          = BIO2LAI
+
+    !---------------- MPTABLE.TBL tile drainage parameters
+    inquire( file='NoahmpTable.TBL', exist=file_named )
+    if ( file_named ) then
+      open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
+    else
+      open(15, status='old', form='formatted', action='read', iostat=ierr)
+    end if
+    if (ierr /= 0) then
+       write(*,'("WARNING: Cannot find file NoahmpTable.TBL")')
+    endif
+    read(15,noahmp_tiledrain_parameters)
+    close(15)
+    ! assign values
+    input%TDSMCFAC_TABLE(1:NSOILTYPE)    = TDSMC_FAC(1:NSOILTYPE)
+    input%TD_DEPTH_TABLE(1:NSOILTYPE)    = TD_DEPTH(1:NSOILTYPE)
+    input%DRAIN_LAYER_OPT_TABLE          = DRAIN_LAYER_OPT
+    input%TD_DC_TABLE(1:NSOILTYPE)       = TD_DC(1:NSOILTYPE)
+    input%TD_DCOEF_TABLE(1:NSOILTYPE)    = TD_DCOEF(1:NSOILTYPE)
+    input%TD_D_TABLE(1:NSOILTYPE)        = TD_D(1:NSOILTYPE)
+    input%TD_ADEPTH_TABLE(1:NSOILTYPE)   = TD_ADEPTH(1:NSOILTYPE)
+    input%TD_RADI_TABLE(1:NSOILTYPE)     = TD_RADI(1:NSOILTYPE)
+    input%TD_SPAC_TABLE(1:NSOILTYPE)     = TD_SPAC(1:NSOILTYPE)
+    input%TD_DDRAIN_TABLE(1:NSOILTYPE)   = TD_DDRAIN(1:NSOILTYPE)
+    input%KLAT_FAC_TABLE(1:NSOILTYPE)    = KLAT_FAC(1:NSOILTYPE)
+
+    !---------------- MPTABLE.TBL optional parameters
+    inquire( file='NoahmpTable.TBL', exist=file_named )
+    if ( file_named ) then
+      open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
+    else
+      open(15, status='old', form='formatted', action='read', iostat=ierr)
+    end if
+    if (ierr /= 0) then
+       write(*,'("WARNING: Cannot find file NoahmpTable.TBL")')
+    endif
+    read(15,noahmp_optional_parameters)
+    close(15)
+    ! assign values
+    input%sr2006_theta_1500t_a_TABLE = sr2006_theta_1500t_a
+    input%sr2006_theta_1500t_b_TABLE = sr2006_theta_1500t_b
+    input%sr2006_theta_1500t_c_TABLE = sr2006_theta_1500t_c
+    input%sr2006_theta_1500t_d_TABLE = sr2006_theta_1500t_d
+    input%sr2006_theta_1500t_e_TABLE = sr2006_theta_1500t_e
+    input%sr2006_theta_1500t_f_TABLE = sr2006_theta_1500t_f
+    input%sr2006_theta_1500t_g_TABLE = sr2006_theta_1500t_g
+    input%sr2006_theta_1500_a_TABLE  = sr2006_theta_1500_a
+    input%sr2006_theta_1500_b_TABLE  = sr2006_theta_1500_b
+    input%sr2006_theta_33t_a_TABLE   = sr2006_theta_33t_a
+    input%sr2006_theta_33t_b_TABLE   = sr2006_theta_33t_b
+    input%sr2006_theta_33t_c_TABLE   = sr2006_theta_33t_c
+    input%sr2006_theta_33t_d_TABLE   = sr2006_theta_33t_d
+    input%sr2006_theta_33t_e_TABLE   = sr2006_theta_33t_e
+    input%sr2006_theta_33t_f_TABLE   = sr2006_theta_33t_f
+    input%sr2006_theta_33t_g_TABLE   = sr2006_theta_33t_g
+    input%sr2006_theta_33_a_TABLE    = sr2006_theta_33_a
+    input%sr2006_theta_33_b_TABLE    = sr2006_theta_33_b
+    input%sr2006_theta_33_c_TABLE    = sr2006_theta_33_c
+    input%sr2006_theta_s33t_a_TABLE  = sr2006_theta_s33t_a
+    input%sr2006_theta_s33t_b_TABLE  = sr2006_theta_s33t_b
+    input%sr2006_theta_s33t_c_TABLE  = sr2006_theta_s33t_c
+    input%sr2006_theta_s33t_d_TABLE  = sr2006_theta_s33t_d
+    input%sr2006_theta_s33t_e_TABLE  = sr2006_theta_s33t_e
+    input%sr2006_theta_s33t_f_TABLE  = sr2006_theta_s33t_f
+    input%sr2006_theta_s33t_g_TABLE  = sr2006_theta_s33t_g
+    input%sr2006_theta_s33_a_TABLE   = sr2006_theta_s33_a
+    input%sr2006_theta_s33_b_TABLE   = sr2006_theta_s33_b
+    input%sr2006_psi_et_a_TABLE      = sr2006_psi_et_a
+    input%sr2006_psi_et_b_TABLE      = sr2006_psi_et_b
+    input%sr2006_psi_et_c_TABLE      = sr2006_psi_et_c
+    input%sr2006_psi_et_d_TABLE      = sr2006_psi_et_d
+    input%sr2006_psi_et_e_TABLE      = sr2006_psi_et_e
+    input%sr2006_psi_et_f_TABLE      = sr2006_psi_et_f
+    input%sr2006_psi_et_g_TABLE      = sr2006_psi_et_g
+    input%sr2006_psi_e_a_TABLE       = sr2006_psi_e_a
+    input%sr2006_psi_e_b_TABLE       = sr2006_psi_e_b
+    input%sr2006_psi_e_c_TABLE       = sr2006_psi_e_c
+    input%sr2006_smcmax_a_TABLE      = sr2006_smcmax_a
+    input%sr2006_smcmax_b_TABLE      = sr2006_smcmax_b
 
 
   end subroutine ReadNoahmpTable

@@ -22,7 +22,6 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    noahmp%biochem%flux%xxx = huge(1.0)
 
   end subroutine BiochemVarInitDefault
 
@@ -34,7 +33,6 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
     type(input_type) , intent(in)    :: input
 
-    noahmp%biochem%flux%xxx = input%xxx2D(noahmp%config%domain%iloc,noahmp%config%domain%jloc)
 
   end subroutine BiochemVarInitTransfer
 
