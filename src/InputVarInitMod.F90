@@ -9,7 +9,7 @@ module InputVarInitMod
 ! -------------------------------------------------------------------------
 
   use Machine, only : kind_noahmp
-  use ErrorHandleModule
+  use ErrorHandleMod
   use InputVarType
 
   implicit none
