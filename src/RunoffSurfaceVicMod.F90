@@ -56,8 +56,8 @@ contains
     PDDUM         = 0.0
 
     do IZ = 1, NSOIL-2
-       TOP_MOIST     = TOP_MOIST + SMC(IZ) * -1.0 * ZSOIL(IZ)  ! m
-       TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * -1.0 * ZSOIL(IZ) ! m  
+       TOP_MOIST     = TOP_MOIST + SMC(IZ) * (-1.0) * ZSOIL(IZ)  ! m
+       TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * ZSOIL(IZ) ! m  
     enddo
 
     ! fractional saturated area from soil moisture

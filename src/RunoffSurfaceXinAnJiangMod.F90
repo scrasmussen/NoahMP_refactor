@@ -61,13 +61,13 @@ contains
 
     do IZ = 1, NSOIL-2
        if ( (SMC(IZ) - SMCREF(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
-          SM  = SM + ( SMC(IZ) - SMCREF(IZ) ) * -1.0 * ZSOIL(IZ)   !m
-          WM  = WM + SMCREF(IZ) * -1.0 * ZSOIL(IZ)                 !m  
+          SM  = SM + ( SMC(IZ) - SMCREF(IZ) ) * (-1.0) * ZSOIL(IZ)   !m
+          WM  = WM + SMCREF(IZ) * (-1.0) * ZSOIL(IZ)                 !m  
        else
-          WM  = WM + SMC(IZ) * -1.0 * ZSOIL(IZ)
+          WM  = WM + SMC(IZ) * (-1.0) * ZSOIL(IZ)
        endif
-       WM_MAX = WM_MAX + SMCREF(IZ) * -1.0 * ZSOIL(IZ)
-       SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * -1.0 * ZSOIL(IZ)
+       WM_MAX = WM_MAX + SMCREF(IZ) * (-1.0) * ZSOIL(IZ)
+       SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * (-1.0) * ZSOIL(IZ)
     enddo
     WM = min( WM, WM_MAX ) ! tension water (m) 
     SM = min( SM, SM_MAX ) ! free water (m)

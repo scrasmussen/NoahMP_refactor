@@ -1,10 +1,4 @@
-Module WaterDriverMod
-
-  implicit none
-
-  contains
-
-    subroutine WaterDriver(noahmp, input)
+program WaterDriverMod
 
   use Machine, only : kind_noahmp
   use ConstantDefineMod
@@ -19,6 +13,7 @@ Module WaterDriverMod
   use WaterOutputMod
 
   implicit none
+
 !---------------------------------------------------------------------
 !  types
 !---------------------------------------------------------------------
@@ -451,6 +446,4 @@ Module WaterDriverMod
    
   end associate
 
-  end subroutine WaterDriver
-
-end module WaterDriverMod
+end program WaterDriverMod

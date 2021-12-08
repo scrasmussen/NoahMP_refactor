@@ -5,7 +5,8 @@
 
 include ../user_build_options
 
-OBJS = ../driver/WaterDriverMod.o \
+OBJS = ../driver/NoahMPDriverMod.o \
+       ../driver/WaterDriverMod.o \
        ../driver/WaterOutputMod.o \
        ../utility/Machine.o \
        ../src/ConstantDefineMod.o \

@@ -7,7 +7,7 @@
 /
 
 &forcing
-  rainrate      = 0.0    ! rain rate, when raining [mm/hr]
+  rainrate      = 20.0    ! rain rate, when raining [mm/hr]
   rain_duration = 3       ! duration of rain events [hours]
   dry_duration  = 3     ! duration of no-rain events [hours]
   raining       = .true.  ! start with rain
@@ -21,7 +21,7 @@
 
 &structure
  isltyp           = 1       ! soil texture class
- vegtype          = 12       ! vegetation type modis
+ vegtype          = 1       ! vegetation type modis
  soilcolor        = 4       ! color to decide soil albedo
  slopetype        = 1       ! slope factor for underground runoff
  croptype         = 0       ! no crop
@@ -49,8 +49,8 @@
 idveg = 4
 iopt_crs = 1
 iopt_btr = 1
-iopt_runsrf = 8  ! surface runoff
-iopt_runsub = 8  ! subsurface runoff
+iopt_runsrf = 1  ! surface runoff
+iopt_runsub = 1  ! subsurface runoff
 iopt_sfc = 1
 iopt_frz = 1
 iopt_inf = 1
@@ -63,8 +63,8 @@ iopt_rsf = 1
 iopt_soil = 1
 iopt_pedo = 1
 iopt_crop = 0
-iopt_irr = 1  ! irrigation
-iopt_irrm = 3 ! irri method
+iopt_irr = 0  ! irrigation
+iopt_irrm = 0 ! irri method
 iopt_infdv = 1 ! only for runoff=8
 iopt_tdrn = 0 ! drainage only for runoff=3
 

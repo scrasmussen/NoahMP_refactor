@@ -89,8 +89,8 @@ contains
      BB            = BBVIC
 
      do IZ = 1, NSOIL-2
-        TOP_MOIST     = TOP_MOIST + SMC(IZ) * -1.0 * ZSOIL(IZ)            ! actual moisture in top layers, [m]
-        TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * -1.0 * ZSOIL(IZ)     ! maximum moisture in top layers, [m]  
+        TOP_MOIST     = TOP_MOIST + SMC(IZ) * (-1.0) * ZSOIL(IZ)            ! actual moisture in top layers, [m]
+        TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * ZSOIL(IZ)     ! maximum moisture in top layers, [m]  
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
 

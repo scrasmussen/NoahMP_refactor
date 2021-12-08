@@ -1265,7 +1265,7 @@ contains
     allocate( input%ZSNSOIn   (-nsnow+1:nsoil))
     allocate( input%DZSNSOIn  (-nsnow+1:nsoil))
     input%ZSOILIn(1:nsoil)         = zsoil(1:nsoil)
-    input%DZSNSOIn(-nsnow+1:nsnow) = dzsnso(-nsnow+1:nsoil)
+    input%DZSNSOIn(-nsnow+1:nsoil) = dzsnso(-nsnow+1:nsoil)
     input%ZSNSOIn(-nsnow+1:0)      = 0.0
     input%ZSNSOIn(1:nsoil)         = zsoil(1:nsoil)
     input%SOILTYPEIn(1:nsoil)      = isltyp    

@@ -59,7 +59,7 @@ contains
        call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMCWLT(ISOIL), 0.0, ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-       JJ   = GDVIC * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * -1.0 * ZSOIL(ISOIL)
+       JJ   = GDVIC * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (-1.0) * ZSOIL(ISOIL)
        FSUR = DKSAT(ISOIL) + (GAM * (DKSAT(ISOIL) - WCND) / (exp(GAM*1.0e-05/JJ) - 1.0) )
 
        ! infiltration rate at surface
@@ -76,7 +76,7 @@ contains
        call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMC(ISOIL), SICE(ISOIL), ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * -1.0 * ZSOIL(ISOIL)
+       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * (-1.0) * ZSOIL(ISOIL)
        if ( JJ == 0.0 ) then ! infiltration at surface == saturated hydraulic conductivity
           FSUR = WCND
        else

@@ -5,7 +5,7 @@
 
 include ../user_build_options
 
-OBJS = WaterDriverMod.o WaterOutputMod.o
+OBJS = NoahMPDriverMod.o WaterDriverMod.o WaterOutputMod.o
 
 all:	$(OBJS)
 
@@ -34,4 +34,8 @@ WaterDriverMod.o: ../utility/Machine.o \
                   ../src/WaterVarInitMod.o \
                   ../src/WaterMainMod.o \
                   WaterOutputMod.o
+
+NoahMPDriverMod.o: ../src/NoahmpVarType.o \
+                   ../src/InputVarType.o \
+                   WaterDriverMod.o
 
