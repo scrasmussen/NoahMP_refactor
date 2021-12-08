@@ -72,7 +72,7 @@ contains
     MAXLIQ =  CH2OP * (ELAI + ESAI)
 
     ! canopy evaporation, transpiration, and dew
-    if ( FROZEN_CANOPY .eqv. .true. ) then    ! Barlage: change to frozen_canopy
+    if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy
        ETRAN = max( FCTR/HVAP, 0.0 )
        QEVAC = max( FCEV/HVAP, 0.0 )
        QDEWC = abs( min( FCEV/HVAP, 0.0 ) )
@@ -121,8 +121,8 @@ contains
     ! canopy water refreeezing
     if ( CANLIQ > 1.0e-6 .and. TV < TFRZ) then
        QFRZC  = min( CANLIQ/DT, (TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS) )
-       CANLIQ = min( 0.0, CANLIQ - QFRZC*DT )
-       CANICE = min( 0.0, CANICE + QFRZC*DT )
+       CANLIQ = max( 0.0, CANLIQ - QFRZC*DT )
+       CANICE = max( 0.0, CANICE + QFRZC*DT )
        TV     = FWET*TFRZ + (1.0 - FWET)*TV
     ENDIF
 

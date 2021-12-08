@@ -117,7 +117,7 @@ contains
     ! impermeable fraction due to frozen soil
     do K = 1, NSOIL
        FICE(K) = min( 1.0, SICE(K) / SMCMAX(K) )
-       FCR(K)  = min( 0.0, exp(-A*(1.0-FICE(K))) - exp(-A) ) / (1.0 - exp(-A))
+       FCR(K)  = max( 0.0, exp(-A*(1.0-FICE(K))) - exp(-A) ) / (1.0 - exp(-A))
     enddo
 
     ! maximum soil ice content and minimum liquid water of all layers

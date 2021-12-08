@@ -3,7 +3,7 @@
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
   output_filename = 'output.nc'
-  runsnow         = .false. ! true or false whether to run snow cases
+  runsnow         = .true. ! true or false whether to run snow cases
 /
 
 &forcing
@@ -21,7 +21,7 @@
 
 &structure
  isltyp           = 1       ! soil texture class
- vegtype          = 12       ! vegetation type modis
+ vegtype          = 1       ! vegetation type modis
  soilcolor        = 4       ! color to decide soil albedo
  slopetype        = 1       ! slope factor for underground runoff
  croptype         = 0       ! no crop
@@ -49,8 +49,8 @@
 idveg = 4
 iopt_crs = 1
 iopt_btr = 1
-iopt_runsrf = 3  ! runoff
-iopt_runsub = 3
+iopt_runsrf = 1  ! runoff
+iopt_runsub = 1
 iopt_sfc = 1
 iopt_frz = 1
 iopt_inf = 1
@@ -66,7 +66,7 @@ iopt_crop = 0
 iopt_irr = 0  ! irrigation
 iopt_irrm = 0 ! irri method
 iopt_infdv = 1 ! only for runoff=8
-iopt_tdrn = 2 ! drainage only for runoff=3
+iopt_tdrn = 0 ! drainage only for runoff=3
 
 /
 

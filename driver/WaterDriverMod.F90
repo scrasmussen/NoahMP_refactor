@@ -47,7 +47,25 @@ Module WaterDriverMod
   real(kind=kind_noahmp) :: LATHEAG            ! latent heat vap./sublimation (j/kg) for ground
   logical                :: raining            ! .true. if raining
 
-  print*, 'driver: local variable defined ....'
+!---------------------------------------------------------------------
+!  read in input data from table and initial file
+!---------------------------------------------------------------------
+  call InputVarInitDefault(input)
+  call ReadNamelist(input)
+  call ReadNoahmpTable(input)
+
+!---------------------------------------------------------------------
+!  initialize
+!---------------------------------------------------------------------
+  call ConfigVarInitDefault(noahmp)
+  call ConfigVarInitTransfer(noahmp, input)
+  call ForcingVarInitDefault(noahmp)
+  call ForcingVarInitTransfer(noahmp, input)
+  call EnergyVarInitDefault(noahmp)
+  call EnergyVarInitTransfer(noahmp, input)
+  call WaterVarInitDefault(noahmp)
+  call WaterVarInitTransfer(noahmp, input)
+!---------------------------------------------------------------------
 
 !---------------------------------------------------------------------
   associate(                                                        &
@@ -140,38 +158,6 @@ Module WaterDriverMod
             )
 !---------------------------------------------------------------------
 
-  print*, 'driver: associate done ....'
-!---------------------------------------------------------------------
-!  read in input data from table and initial file
-!---------------------------------------------------------------------
-  call InputVarInitDefault(input)
-  print*, 'driver: InputVarInitDefault done ...'
-  call ReadNamelist(input)
-  print*, 'driver: ReadNamelist done ...'
-  call ReadNoahmpTable(input)
-  print*, 'driver: ReadNoahmpTable done ...'
-
-!---------------------------------------------------------------------
-!  initialize
-!---------------------------------------------------------------------
-  call ConfigVarInitDefault(noahmp)
-  print*, 'driver: ConfigVarInitDefault done ...'
-  call ConfigVarInitTransfer(noahmp, input)
-  print*, 'driver: ConfigVarInitTransfer done ...'
-
-  call ForcingVarInitDefault(noahmp)
-  print*, 'driver: ForcingVarInitDefault done ...'
-  call ForcingVarInitTransfer(noahmp, input)
-  print*, 'driver: ForcingVarInitTransfer done ...'
-  call EnergyVarInitDefault(noahmp)
-  print*, 'driver: EnergyVarInitDefault done ...'
-  call EnergyVarInitTransfer(noahmp, input)
-  print*, 'driver: EnergyVarInitTransfer done ...'
-  call WaterVarInitDefault(noahmp)
-  print*, 'driver: WaterVarInitDefault done ...'
-  call WaterVarInitTransfer(noahmp, input)
-  print*, 'driver: WaterVarInitTransfer done ...'
-!---------------------------------------------------------------------
 ! start with a default value at time 0
 
 ! input used to adjust for snow and non-snow cases
@@ -191,29 +177,15 @@ Module WaterDriverMod
      SFCTMP    = 298.0
      FB_snow   = 0.0
      TV        = 298.0
-  print*, 'TV1 = ', noahmp%energy%state%TV
-  print*, 'TV2 = ', TV
      TG        = 298.0
-  print*, 'TG1 = ', noahmp%energy%state%TG
-  print*, 'TG2 = ', TG
-  print*, 'IMELT1 = ', noahmp%water%state%IMELT
-  print*, 'IMELT2 = ', IMELT
      IMELT     = 1
      CANLIQ    = 0.4
      CANICE    = 0.0
-  print*, 'STC1 = ', noahmp%energy%state%STC
-  print*, 'size STC1 = ', size(noahmp%energy%state%STC)
-  print*, 'STC2 = ', STC
-  print*, 'size STC2 = ', size(STC) 
      STC(1:4)  = 298.0
      STC(-2:0) = 0.0
-  print*, 'initialization checkpoint 01 ...'
      SH2O(1:4) = 0.3
      SICE(1:4) = 0.03
   end if
-
-  print*, 'initialization checkpoint 1 ...'
-
 
 ! others
   IST     = 1                     ! surface type 1-soil; 2-lake
@@ -274,7 +246,6 @@ Module WaterDriverMod
   sfcheadrt  = 0.0
   WATBLED    = 0.0
 
-  print*, 'initialization checkpoint 2 ...'
 
 ! set psychrometric constant
   if ( TV > TFRZ ) then           
@@ -296,7 +267,6 @@ Module WaterDriverMod
   QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
 
-  print*, 'initialization checkpoint 3 ...'
 
   if ( OPT_IRR > 0) then
      IRRFRA = 0.5  ! irrigation fraction
@@ -340,7 +310,6 @@ Module WaterDriverMod
      IRMIRATE = 0.0
   endif
 
-  print*, 'initialization checkpoint 4 ...'
 
   if ( OPT_TDRN > 0 ) then
       TDFRACMP = 0.5
@@ -349,7 +318,6 @@ Module WaterDriverMod
       TDFRACMP = 0.0
   endif
 
-  print*,'initialization done ...'
 
 ! for other variables
     DT         = input%DTIn
@@ -376,7 +344,6 @@ Module WaterDriverMod
   call initialize_output(noahmp, input, ntime+1)
   call add_to_output(0, noahmp, errwat)
 
-  print*, 'driver: add output at time 0 ...'
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -384,7 +351,6 @@ Module WaterDriverMod
 
   do itime = 1, ntime
 
-    print*, 'itime = ',itime
 
     tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA ! [mm] 
 
@@ -428,7 +394,6 @@ Module WaterDriverMod
 
     call WaterMain(noahmp)
 
-    print*, 'driver: watermain done ...'
 
 ! some updates from last time step for use in next step (from drv)
 
@@ -443,13 +408,14 @@ Module WaterDriverMod
     !---------------------------------------------------------------------
 
     call add_to_output(itime, noahmp, errwat)
-    print*, 'add output done ...'
    
   end do ! time loop
 
   call finalize_output()
    
   end associate
+
+  print*, 'model run successfully completed ...'
 
   end subroutine WaterDriver
 

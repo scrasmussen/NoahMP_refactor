@@ -1,21 +1,22 @@
-
 #=============================================================================================
-#  Options for Cheyenne with gfortran for series not parallel 
+#  Options for Cheyenne intel ifort compiler
 #=============================================================================================
 
- COMPILERF90    =       gfortran
- FREESOURCE     =       -ffree-form  -ffree-line-length-none
- F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check
+ COMPILERF90    =       ifort
+ FREESOURCE     =       -free
+ F90FLAGS       =       -convert big_endian -g -O0 -fpe0
  MODFLAG        =       -I
- LDFLAGS        =       
- LIBS           =       
- LIBJASPER      =       -ljpeg -L/usr/lib64 -ljasper
- INCJASPER      =       -I/usr/include
- NETCDFMOD      =      -I/glade/u/apps/ch/opt/netcdf/4.7.4/gnu/9.1.0/include
- NETCDFLIB      =      -L/glade/u/apps/ch/opt/netcdf/4.7.4/gnu/9.1.0/lib -lnetcdf -lnetcdff
+ LDFLAGS        =
+ CPP            =       cpp
+ CPPFLAGS       =       -P -traditional
+ LIBS           =
+ LIBJASPER      =       -ljasper
+ INCJASPER      =       -I/usr/include/jasper
+ NETCDFMOD      =      -I/glade/u/apps/ch/opt/netcdf/4.7.4/intel/19.0.5/include
+ NETCDFLIB      =      -L/glade/u/apps/ch/opt/netcdf/4.7.4/intel/19.0.5/lib -lnetcdf -lnetcdff
  BZIP2          =       NO
  BZIP2_INCLUDE  =       -I/usr/include
  BZIP2_LIB      =       -L/usr/lib64 -lbz2
  RM             =       rm -f
- CC             =       gcc
+ CC             =       cc
 

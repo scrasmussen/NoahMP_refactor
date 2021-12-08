@@ -7,7 +7,7 @@
 /
 
 &forcing
-  rainrate      = 20.0    ! rain rate, when raining [mm/hr]
+  rainrate      = 0.0    ! rain rate, when raining [mm/hr]
   rain_duration = 3       ! duration of rain events [hours]
   dry_duration  = 3     ! duration of no-rain events [hours]
   raining       = .true.  ! start with rain
@@ -49,8 +49,8 @@
 idveg = 4
 iopt_crs = 1
 iopt_btr = 1
-iopt_runsrf = 3  ! runoff
-iopt_runsub = 3
+iopt_runsrf = 1  ! runoff
+iopt_runsub = 1
 iopt_sfc = 1
 iopt_frz = 1
 iopt_inf = 1
@@ -63,10 +63,10 @@ iopt_rsf = 1
 iopt_soil = 1
 iopt_pedo = 1
 iopt_crop = 0
-iopt_irr = 0  ! irrigation
-iopt_irrm = 0 ! irri method
+iopt_irr = 1  ! irrigation
+iopt_irrm = 3 ! irri method
 iopt_infdv = 1 ! only for runoff=8
-iopt_tdrn = 2 ! drainage only for runoff=3
+iopt_tdrn = 0 ! drainage only for runoff=3
 
 /
 

@@ -115,7 +115,7 @@ contains
        INFMAX = min( INFMAX, PX   )
 
        ! compute surface runoff and infiltration rate
-       RUNSRF = min( 0.0, QINSUR - INFMAX )
+       RUNSRF = max( 0.0, QINSUR - INFMAX )
        PDDUM  = QINSUR - RUNSRF
 
     endif ! QINSUR > 0.0
