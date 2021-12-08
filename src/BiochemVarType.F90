@@ -18,7 +18,6 @@ module BiochemVarType
   type :: flux_type
 
     ! define specific biochem flux variables
-    real(kind=kind_noahmp) :: xxx
 
   end type flux_type
 
@@ -26,7 +25,6 @@ module BiochemVarType
   type :: state_type
 
     ! define specific biochem state variables
-    real(kind=kind_noahmp) :: TOTLB
 
   end type state_type
 
@@ -34,7 +32,6 @@ module BiochemVarType
   type :: parameter_type
 
     ! define specific biochem parameter variables
-    real(kind=kind_noahmp) :: PLTDAY
 
   end type parameter_type
 
@@ -42,7 +39,6 @@ module BiochemVarType
   type :: diagnose_type
 
     ! define specific biochem diagnose variables
-    real(kind=kind_noahmp) :: xxx
 
   end type diagnose_type
 

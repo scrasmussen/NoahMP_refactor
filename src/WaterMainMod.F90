@@ -75,7 +75,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialize
-    ETRANI(:) = 0.0
+    ETRANI    = 0.0
     SNOFLOW   = 0.0
     RUNSUB    = 0.0
     QINSUR    = 0.0

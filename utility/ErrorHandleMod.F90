@@ -2,13 +2,13 @@ module ErrorHandleMod
 
 !!! define subroutines handling Noah-MP model errors
 
+  use netcdf
+
   implicit none
 
 contains
 
   subroutine ErrorHandle(status)
-
-    use netcdf
 
     integer, intent (in) :: status
  

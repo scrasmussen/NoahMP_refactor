@@ -5,8 +5,8 @@
 
 include ../user_build_options
 
-OBJS = Machine.o \
-       ErrorHandleMod.o
+OBJS = Machine.o
+#      ErrorHandleMod.o
 
 all:	$(OBJS)
 

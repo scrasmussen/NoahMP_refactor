@@ -53,11 +53,12 @@ contains
     allocate( TDFRAC(1:NSOIL) )
     allocate( AVFC  (1:NSOIL) )
     allocate( OVRFC (1:NSOIL) )
+    TDFRAC = 0.0
+    AVFC   = 0.0
     TDRVOL = 0.0
     OVRFC  = 0.0
     QTLDRN = 0.0
     ZLAYER = 0.0
-    AVFC   = 0.0
     TDSUM  = 0.0
     TDFRAC = 0.0
     TDDC   = TD_DC * DT / (24.0 * 3600.0)

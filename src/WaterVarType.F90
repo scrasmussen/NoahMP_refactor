@@ -84,6 +84,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: FCRMAX      ! maximum fraction of imperviousness (FCR)
     real(kind=kind_noahmp) :: SMCWTD      ! soil moisture between bottom of the soil and the water table
     real(kind=kind_noahmp) :: DEEPRECH    ! recharge to or from the water table when deep [m]
+    real(kind=kind_noahmp) :: RECH        ! groundwater recharge (net vertical flux across the water table), positive up
     real(kind=kind_noahmp) :: WPLUS       ! saturation excess of the total soil [m]
     real(kind=kind_noahmp) :: WATBLED     ! water table depth estimated in WRF-Hydro fine grids
     real(kind=kind_noahmp) :: TDFRACMP    ! tile drainage map(fraction)

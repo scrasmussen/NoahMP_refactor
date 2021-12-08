@@ -94,7 +94,7 @@ contains
 
           ! Time rate of fractional change in DZ (units of s-1)
           PDZDTC(J) = ( DDZ1(J) + DDZ2(J) + DDZ3(J) ) * DT
-          PDZDTC(J) = max( -0.5, PDZDTC )
+          PDZDTC(J) = max( -0.5, PDZDTC(J) )
 
           ! The change in DZ due to compaction
           DZSNSO(J) = DZSNSO(J) * ( 1.0 + PDZDTC(J) )

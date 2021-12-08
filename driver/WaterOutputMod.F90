@@ -73,9 +73,9 @@ contains
 
     implicit none
 
-    integer          , intent(in) :: ntime
-    type(input_type) , intent(in) :: input
-    type(noahmp_type), intent(in) :: noahmp
+    integer          , intent(in)    :: ntime
+    type(input_type) , intent(inout) :: input
+    type(noahmp_type), intent(inout) :: noahmp
 
 ! --------------------------------------------------------------------
  
@@ -148,10 +148,15 @@ contains
 
     implicit none
 
-    integer               , intent(in) :: itime
-    type(noahmp_type)     , intent(in) :: noahmp
-    real(kind=kind_noahmp), intent(in) :: errwat
+    integer               , intent(in)    :: itime
+    type(noahmp_type)     , intent(inout) :: noahmp
+    real(kind=kind_noahmp), intent(in)    :: errwat
 
+! --------------------------------------------------------------------
+    associate(                                           &
+              nsnow     =>  noahmp%config%domain%NSNOW  ,&
+              nsoil     =>  noahmp%config%domain%NSOIL   &
+             ) 
 ! --------------------------------------------------------------------
 
     iret = nf90_put_var(ncid, ISNOW_id,    noahmp%config%domain%ISNOW,       start=(/itime+1/))
@@ -206,6 +211,8 @@ contains
     iret = nf90_put_var(ncid, QRAIN_id,    noahmp%water%flux%QRAIN,          start=(/itime+1/))
     iret = nf90_put_var(ncid, QSNOW_id,    noahmp%water%flux%QSNOW,          start=(/itime+1/))
     iret = nf90_put_var(ncid, QVAP_id,     noahmp%water%flux%QVAP,           start=(/itime+1/))
+
+    end associate
 
   end subroutine add_to_output
 

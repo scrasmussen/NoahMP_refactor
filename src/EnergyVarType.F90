@@ -45,6 +45,9 @@ module EnergyVarType
   type :: parameter_type
 
     ! define specific energy parameter variables
+    real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM   ! monthly leaf area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM   ! monthly stem area index, one-sided
+
 
   end type parameter_type
 

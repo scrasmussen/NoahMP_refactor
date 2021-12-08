@@ -8,7 +8,6 @@ include ../user_build_options
 OBJS = ../driver/WaterDriverMod.o \
        ../driver/WaterOutputMod.o \
        ../utility/Machine.o \
-       ../utility/ErrorHandleMod.o \
        ../src/ConstantDefineMod.o \
        ../src/InputVarType.o \
        ../src/ConfigVarType.o \

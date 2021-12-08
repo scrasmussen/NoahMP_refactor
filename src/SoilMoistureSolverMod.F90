@@ -56,12 +56,10 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTT  (1:NSOIL) )
-    allocate( AI     (1:NSOIL) )
-    allocate( BI     (1:NSOIL) )
-    allocate( CI     (1:NSOIL) )
     allocate( RHSTTIN(1:NSOIL) )
     allocate( CIIN   (1:NSOIL) )
+    RHSTTIN  = 0.0
+    CIIN     = 0.0
     WPLUS    = 0.0
     EPORE(:) = 0.0
 

@@ -29,7 +29,7 @@ contains
 
     ! energy state variable
     noahmp%energy%state%ELAI            = huge(1.0)
-    noahmp%energy%state%SLAI            = huge(1.0)
+    noahmp%energy%state%ESAI            = huge(1.0)
     noahmp%energy%state%FVEG            = huge(1.0)
     noahmp%energy%state%TG              = huge(1.0)
     noahmp%energy%state%TV              = huge(1.0)
@@ -45,6 +45,13 @@ contains
     noahmp%energy%flux%FCTR             = huge(1.0)
     noahmp%energy%flux%FGEV             = huge(1.0)
 
+    ! energy parameter variable
+    allocate( noahmp%energy%param%LAIM (12) )
+    allocate( noahmp%energy%param%SAIM (12) )
+
+    noahmp%energy%param%LAIM(:)         = huge(1.0)
+    noahmp%energy%param%SAIM(:)         = huge(1.0)
+
     end associate
 
   end subroutine EnergyVarInitDefault
@@ -54,22 +61,22 @@ contains
 
     implicit none
 
+    type(input_type) , intent(inout) :: input
     type(noahmp_type), intent(inout) :: noahmp
-    type(input_type) , intent(in)    :: input
 
-    associate(                                      &
-              ILOC  => noahmp%config%domain%ILOC   ,&
-              JLOC  => noahmp%config%domain%JLOC   ,&
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL   &
+    associate(                                                  &
+              ILOC        => noahmp%config%domain%ILOC         ,&
+              JLOC        => noahmp%config%domain%JLOC         ,&
+              VEGTYP      => noahmp%config%domain%VEGTYP       ,&
+              NSNOW       => noahmp%config%domain%NSNOW        ,&
+              NSOIL       => noahmp%config%domain%NSOIL         &
              )
 
     ! energy state variable
-    !noahmp%energy%state%TG  = input%TGIn
-    !noahmp%energy%state%TV  = input%TVIn
 
-    !noahmp%energy%state%STC(-NSNOW+1:NSOIL) = input%STCIn(-NSNOW+1:NSOIL)
-
+    ! energy parameter variable
+    noahmp%energy%param%LAIM = input%LAIM_TABLE(VEGTYP,:)
+    noahmp%energy%param%SAIM = input%SAIM_TABLE(VEGTYP,:)
 
     end associate
 

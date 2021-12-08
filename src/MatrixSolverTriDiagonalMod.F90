@@ -38,20 +38,12 @@ contains
 ! in & out variables
     integer               , intent(in)    :: NTOP          ! top layer index: soil layer starts from NTOP = 1
     integer               , intent(in)    :: NSOIL,NSNOW   ! soil and snow layers
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(in)    :: A, B, D
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: C,P,DELTA
+    real(kind=kind_noahmp), dimension(-NSNOW+1:NSOIL), intent(in)    :: A, B, D
+    real(kind=kind_noahmp), dimension(-NSNOW+1:NSOIL), intent(inout) :: C,P,DELTA
 
 ! local variables
     integer  :: K, KK   ! loop indices
 ! ----------------------------------------------------------------------
-
-    ! initialization
-    allocate( A    (-NSNOW+1:NSOIL) )
-    allocate( B    (-NSNOW+1:NSOIL) )
-    allocate( D    (-NSNOW+1:NSOIL) )
-    allocate( C    (-NSNOW+1:NSOIL) )
-    allocate( P    (-NSNOW+1:NSOIL) )
-    allocate( DELTA(-NSNOW+1:NSOIL) )
 
     ! INITIALIZE EQN COEF C FOR THE LOWEST SOIL LAYER
     C (NSOIL) = 0.0

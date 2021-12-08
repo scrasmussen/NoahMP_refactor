@@ -22,10 +22,10 @@ contains
     implicit none
 
 ! IN and OUT variables
-    type(noahmp_type)     , intent(in)    :: noahmp
+    type(noahmp_type)     , intent(inout) :: noahmp
+    integer               , intent(in)    :: ISOIL    ! soil layer index
     real(kind=kind_noahmp), intent(in)    :: SMC      ! soil moisture [m3/m3]
     real(kind=kind_noahmp), intent(in)    :: FCR      ! impermeable fraction due to frozen soil
-    integer               , intent(in)    :: ISOIL    ! soil layer index
     real(kind=kind_noahmp), intent(out)   :: WCND     ! soil water conductivity [m/s]
     real(kind=kind_noahmp), intent(out)   :: WDF      ! soil water diffusivity (m2/s)
 
@@ -70,10 +70,10 @@ contains
     implicit none
 
 ! IN and OUT variables
-    type(noahmp_type)     , intent(in)    :: noahmp
+    type(noahmp_type)     , intent(inout) :: noahmp
+    integer               , intent(in)    :: ISOIL    ! soil layer index
     real(kind=kind_noahmp), intent(in)    :: SMC      ! soil moisture [m3/m3]
     real(kind=kind_noahmp), intent(in)    :: SICE     ! soil ice content [m3/m3]
-    integer               , intent(in)    :: ISOIL    ! soil layer index
     real(kind=kind_noahmp), intent(out)   :: WCND     ! soil water conductivity [m/s]
     real(kind=kind_noahmp), intent(out)   :: WDF      ! soil water diffusivity (m2/s)
 

@@ -96,6 +96,11 @@ contains
     allocate( BI    (1:NSOIL) )
     allocate( CI    (1:NSOIL) )
     allocate( MLIQ  (1:NSOIL) )
+    RHSTT  = 0.0
+    AI     = 0.0
+    BI     = 0.0
+    CI     = 0.0
+    MLIQ   = 0.0
     RUNSRF = 0.0
     RUNSUB = 0.0
     PDDUM  = 0.0

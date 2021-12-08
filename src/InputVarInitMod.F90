@@ -9,7 +9,7 @@ module InputVarInitMod
 ! -------------------------------------------------------------------------
 
   use Machine, only : kind_noahmp
-  use ErrorHandleMod
+!  use ErrorHandleMod
   use InputVarType
 
   implicit none
@@ -26,13 +26,13 @@ contains
     !-------------------------------------------------------
     !=== define key dimensional variables
     !-------------------------------------------------------
-    integer, private, parameter :: MVT         = 27   ! number of vegetation types
-    integer, private, parameter :: MBAND       = 2    ! number of radiation bands
-    integer, private, parameter :: MSC         = 8    ! number of soil texture
-    integer, private, parameter :: MAX_SOILTYP = 30   ! max number of soil types
-    integer, private, parameter :: NCROP       = 5    ! number of crop types
-    integer, private, parameter :: NSTAGE      = 8    ! number of crop growth stages
-    integer, private, parameter :: NUM_SLOPE   = 9    ! number of slope
+    integer, parameter :: MVT         = 27   ! number of vegetation types
+    integer, parameter :: MBAND       = 2    ! number of radiation bands
+    integer, parameter :: MSC         = 8    ! number of soil texture
+    integer, parameter :: MAX_SOILTYP = 30   ! max number of soil types
+    integer, parameter :: NCROP       = 5    ! number of crop types
+    integer, parameter :: NSTAGE      = 8    ! number of crop growth stages
+    integer, parameter :: NUM_SLOPE   = 9    ! number of slope
 
     !-------------------------------------------------------
     !=== define local variables to store NoahmpTable values
@@ -85,6 +85,8 @@ contains
     namelist / noahmp_stas_soil_categories /          SLTYPE, SLCATS
     namelist / noahmp_soil_stas_parameters /          BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
                                                       BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
+    namelist / noahmp_soil_stas_ruc_parameters /      BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
+                                                      BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
 
     ! GENPARM.TBL general parameters
     real(kind=kind_noahmp)                       :: CSOIL_DATA, REFDK_DATA, REFKDT_DATA, FRZK_DATA, ZBOT_DATA, CZIL_DATA
@@ -94,7 +96,7 @@ contains
 
     ! MPTABLE.TBL radiation parameters
     real(kind=kind_noahmp)                   :: BETADS, BETAIS
-    real(kind=kind_noahmp), dimension(MBAND) :: ALBICE, ALBLAK, OMEGAS, 
+    real(kind=kind_noahmp), dimension(MBAND) :: ALBICE, ALBLAK, OMEGAS 
     real(kind=kind_noahmp), dimension(2)     :: EG
     real(kind=kind_noahmp), dimension(MSC)   :: ALBSAT_VIS, ALBSAT_NIR, ALBDRY_VIS, ALBDRY_NIR
     namelist / noahmp_rad_parameters /          ALBSAT_VIS, ALBSAT_NIR, ALBDRY_VIS, ALBDRY_NIR, ALBICE, ALBLAK, OMEGAS,      &
@@ -123,9 +125,9 @@ contains
     ! MPTABLE.TBL crop parameters
     integer                                  :: DEFAULT_CROP
     integer               , dimension(NCROP) :: PLTDAY, HSDAY, C3C4
-    real(kind=kind_noahmp), dimension(NCROP) :: PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2, GDDS3, GDDS4, GDDS5, C3PSN, &
-                                                KC25, AKC, KO25, AKO, AVCMX, VCMX25, BP, MP, FOLNMX, QE25, AREF, PSNRF,      &
-                                                I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI, Q10MR, FOLN_MX, LEFREEZ,          &
+    real(kind=kind_noahmp), dimension(NCROP) :: PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2, GDDS3, GDDS4, GDDS5, C3PSNI,&
+                                                KC25I, AKCI, KO25I, AKOI, AVCMXI, VCMX25I, BPI, MPI, FOLNMXI, QE25I, AREF,   &
+                                                PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI, Q10MR, FOLN_MX, LEFREEZ,   &
                                                 DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4, DILE_FC_S5, DILE_FC_S6,      &
                                                 DILE_FC_S7, DILE_FC_S8, DILE_FW_S1, DILE_FW_S2, DILE_FW_S3, DILE_FW_S4,      &
                                                 DILE_FW_S5, DILE_FW_S6, DILE_FW_S7, DILE_FW_S8, FRA_GR, LF_OVRC_S1,          &
@@ -142,9 +144,9 @@ contains
                                                 STCT_S5, STCT_S6, STCT_S7, STCT_S8, RTCT_S1, RTCT_S2, RTCT_S3, RTCT_S4,      &
                                                 RTCT_S5, RTCT_S6, RTCT_S7, RTCT_S8, BIO2LAI
     namelist / noahmp_crop_parameters /         DEFAULT_CROP, PLTDAY, HSDAY, PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2,&
-                                                GDDS3, GDDS4, GDDS5, C3PSN, KC25, AKC, KO25, AKO, AVCMX, VCMX25, BP, MP,     &
-                                                FOLNMX, QE25, C3C4, AREF, PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI,  &
-                                                Q10MR, FOLN_MX, LEFREEZ, DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4,     &
+                                                GDDS3, GDDS4, GDDS5, C3PSNI, KC25I, AKCI, KO25I, AKOI, AVCMXI, VCMX25I, BPI, &
+                                                MPI, FOLNMXI, QE25I, C3C4, AREF, PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, &
+                                                EPSI,Q10MR, FOLN_MX, LEFREEZ, DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4,&
                                                 DILE_FC_S5, DILE_FC_S6, DILE_FC_S7, DILE_FC_S8, DILE_FW_S1, DILE_FW_S2,      &
                                                 DILE_FW_S3, DILE_FW_S4, DILE_FW_S5, DILE_FW_S6, DILE_FW_S7, DILE_FW_S8,      &
                                                 FRA_GR, LF_OVRC_S1, LF_OVRC_S2, LF_OVRC_S3, LF_OVRC_S4, LF_OVRC_S5,          &
@@ -213,7 +215,7 @@ contains
     allocate( input%SCFFAC_TABLE(MVT) )
     allocate( input%SAIM_TABLE(MVT,12) )
     allocate( input%LAIM_TABLE(MVT,12) )
-    allocate( input%SLA_TABLE(MVT )
+    allocate( input%SLA_TABLE(MVT )   )
     allocate( input%DILEFC_TABLE(MVT) )
     allocate( input%DILEFW_TABLE(MVT) )
     allocate( input%FRAGR_TABLE(MVT) )
@@ -283,7 +285,7 @@ contains
     allocate( input%EG_TABLE(2) )
 
     ! MPTABLE.TBL tile drainage parameters
-    allocate( input%TDSMCFAC_TABLE(MAX_SOILTYP) )
+    allocate( input%TDSMC_FAC_TABLE(MAX_SOILTYP) )
     allocate( input%TD_DC_TABLE(MAX_SOILTYP) )
     allocate( input%TD_DEPTH_TABLE(MAX_SOILTYP) )
     allocate( input%TD_DCOEF_TABLE(MAX_SOILTYP) )
@@ -919,17 +921,17 @@ contains
     input%GDDS3_TABLE            = GDDS3
     input%GDDS4_TABLE            = GDDS4
     input%GDDS5_TABLE            = GDDS5
-    input%C3PSNI_TABLE(1:5)      = C3PSN(1:5)
-    input%KC25I_TABLE(1:5)       = KC25(1:5)
-    input%AKCI_TABLE(1:5)        = AKC(1:5)
-    input%KO25I_TABLE(1:5)       = KO25(1:5)
-    input%AKOI_TABLE(1:5)        = AKO(1:5)
-    input%AVCMXI_TABLE(1:5)      = AVCMX(1:5)
-    input%VCMX25I_TABLE(1:5)     = VCMX25(1:5)
-    input%BPI_TABLE(1:5)         = BP(1:5)
-    input%MPI_TABLE(1:5)         = MP(1:5)
-    input%FOLNMXI_TABLE(1:5)     = FOLNMX(1:5)
-    input%QE25I_TABLE(1:5)       = QE25(1:5)
+    input%C3PSNI_TABLE(1:5)      = C3PSNI(1:5)
+    input%KC25I_TABLE(1:5)       = KC25I(1:5)
+    input%AKCI_TABLE(1:5)        = AKCI(1:5)
+    input%KO25I_TABLE(1:5)       = KO25I(1:5)
+    input%AKOI_TABLE(1:5)        = AKOI(1:5)
+    input%AVCMXI_TABLE(1:5)      = AVCMXI(1:5)
+    input%VCMX25I_TABLE(1:5)     = VCMX25I(1:5)
+    input%BPI_TABLE(1:5)         = BPI(1:5)
+    input%MPI_TABLE(1:5)         = MPI(1:5)
+    input%FOLNMXI_TABLE(1:5)     = FOLNMXI(1:5)
+    input%QE25I_TABLE(1:5)       = QE25I(1:5)
     input%C3C4_TABLE             = C3C4
     input%AREF_TABLE             = AREF
     input%PSNRF_TABLE            = PSNRF
@@ -1058,7 +1060,7 @@ contains
     read(15,noahmp_tiledrain_parameters)
     close(15)
     ! assign values
-    input%TDSMCFAC_TABLE(1:NSOILTYPE)    = TDSMC_FAC(1:NSOILTYPE)
+    input%TDSMC_FAC_TABLE(1:NSOILTYPE)    = TDSMC_FAC(1:NSOILTYPE)
     input%TD_DEPTH_TABLE(1:NSOILTYPE)    = TD_DEPTH(1:NSOILTYPE)
     input%DRAIN_LAYER_OPT_TABLE          = DRAIN_LAYER_OPT
     input%TD_DC_TABLE(1:NSOILTYPE)       = TD_DC(1:NSOILTYPE)

@@ -77,7 +77,7 @@ ForcingVarType.o:       ../utility/Machine.o
 EnergyVarType.o:        ../utility/Machine.o
 WaterVarType.o:         ../utility/Machine.o
 NoahmpVarType.o:        ConfigVarType.o ForcingVarType.o EnergyVarType.o WaterVarType.o
-InputVarInitMod.o:      ../utility/Machine.o ../utility/ErrorHandleMod InputVarType.o
+InputVarInitMod.o:      ../utility/Machine.o InputVarType.o
 ConfigVarInitMod.o:     InputVarType.o NoahmpVarType.o
 ForcingVarInitMod.o:    InputVarType.o NoahmpVarType.o
 EnergyVarInitMod.o:     InputVarType.o NoahmpVarType.o

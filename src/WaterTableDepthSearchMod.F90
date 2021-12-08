@@ -21,7 +21,7 @@ contains
     implicit none
 
 ! in & out variables
-    type(noahmp_type)     , intent(in)    :: noahmp
+    type(noahmp_type)     , intent(inout)    :: noahmp
 
 ! local variable
     integer                :: K, i, j        ! loop index 

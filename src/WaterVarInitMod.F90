@@ -52,6 +52,7 @@ contains
     noahmp%water%state%FCRMAX         = huge(1.0)
     noahmp%water%state%SMCWTD         = huge(1.0)
     noahmp%water%state%DEEPRECH       = huge(1.0)
+    noahmp%water%state%RECH           = huge(1.0)
     noahmp%water%state%WPLUS          = huge(1.0)
     noahmp%water%state%WATBLED        = huge(1.0)
     noahmp%water%state%TDFRACMP       = huge(1.0)
@@ -214,7 +215,7 @@ contains
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
-    type(input_type) , intent(in)    :: input
+    type(input_type) , intent(inout) :: input
 
     ! local loop index
     integer                          :: ISOIL
@@ -225,7 +226,7 @@ contains
               NSNOW       => noahmp%config%domain%NSNOW        ,&
               NSOIL       => noahmp%config%domain%NSOIL        ,&
               VEGTYP      => noahmp%config%domain%VEGTYP       ,&
-              SOILTYP     => noahmp%config%domain%SOILTYPE     ,&
+              SOILTYP     => noahmp%config%domain%SOILTYP      ,&
               URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG    &
              )
 
@@ -249,6 +250,7 @@ contains
     !noahmp%water%state%ZWT                      = input%ZWTIn
     !noahmp%water%state%SMCWTD                   = input%SMCWTDIn
     !noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn
+    !noahmp%water%state%RECH                     = input%RECHIn
     !noahmp%water%state%WATBLED                  = input%WATBLEDIn
     !noahmp%water%state%TDFRACMP                 = input%TDFRACMPIn
     !noahmp%water%state%WA                       = input%WAIn

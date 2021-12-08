@@ -29,8 +29,7 @@ contains
     real(kind=kind_noahmp) :: WD2         ! water deficit from fine (100-L) soil moisture profile
     real(kind=kind_noahmp) :: DZFINE      ! layer thickness of the 100-L soil layers to 6.0 m
     real(kind=kind_noahmp) :: TEMP        ! temporary variable
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ZFINE ! layer-bottom depth of the 100-L soil layers to 6.0 m
-    allocate( ZFINE(1:NFINE) )
+    real(kind=kind_noahmp), dimension(1:NFINE) :: ZFINE ! layer-bottom depth of the 100-L soil layers to 6.0 m
 
 ! --------------------------------------------------------------------
     associate(                                                        &

@@ -27,10 +27,10 @@ contains
 ! in & out variables
     type(noahmp_type)     , intent(inout) :: noahmp
     real(kind=kind_noahmp), intent(in)    :: DT       ! timestep (may not be the same as model timestep)
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(out) :: RHSTT  ! right-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(out) :: AI     ! left-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(out) :: BI     ! left-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(out) :: CI     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: RHSTT  ! right-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: AI     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: BI     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: CI     ! left-hand side term of the matrix
 
 ! local variable
     integer                :: K         ! loop index
@@ -67,10 +67,6 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTT(1:NSOIL) )
-    allocate( AI   (1:NSOIL) )
-    allocate( BI   (1:NSOIL) )
-    allocate( CI   (1:NSOIL) )
     allocate( DDZ  (1:NSOIL) )
     allocate( DENOM(1:NSOIL) )
     allocate( DSMDZ(1:NSOIL) )

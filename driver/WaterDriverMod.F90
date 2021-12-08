@@ -17,8 +17,8 @@ program WaterDriverMod
 !---------------------------------------------------------------------
 !  types
 !---------------------------------------------------------------------
-  type(input_type) , intent(inout) :: input
-  type(noahmp_type), intent(inout) :: noahmp
+  type(input_type)    :: input
+  type(noahmp_type)   :: noahmp
 
 !---------------------------------------------------------------------
 !  local variables
@@ -43,27 +43,6 @@ program WaterDriverMod
   logical                :: raining            ! .true. if raining
 
 !---------------------------------------------------------------------
-!  read in input data from table and initial file
-!---------------------------------------------------------------------
-  call InputVarInitDefault(input)
-  call ReadNamelist(input)
-  call ReadNoahmpTable(input)
-
-!---------------------------------------------------------------------
-!  initialize
-!---------------------------------------------------------------------
-  call ConfigVarInitDefault(noahmp)
-  call ConfigVarInitTransfer(noahmp, input)
-
-  call ForcingVarInitDefault(noahmp)
-  call ForcingVarInitTransfer(noahmp, input)
-
-  call EnergyVarInitDefault(noahmp)
-  call EnergyVarInitTransfer(noahmp, input)
-
-  call WaterVarInitDefault(noahmp)
-  call WaterVarInitTransfer(noahmp, input)
-
   associate(                                                        &
             DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
             NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
@@ -146,9 +125,36 @@ program WaterDriverMod
             OPT_TDRN        => noahmp%config%nmlist%OPT_TDRN       ,& ! in,     options for tile drainage
             TDFRACMP        => noahmp%water%state%TDFRACMP         ,& ! in,     tile drainage map(fraction)
             SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-            DZSNSO          => noahmp%config%domain%DZSNSO          & ! in,     thickness of snow/soil layers (m)
+            DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
+            LAIM            => noahmp%energy%param%LAIM            ,& ! in,     monthly LAI from table
+            SAIM            => noahmp%energy%param%SAIM            ,& ! in,     monthly SAI from table
+            ELAI            => noahmp%energy%state%ELAI            ,& ! out,    leaf area index, after burying by snow
+            ESAI            => noahmp%energy%state%ESAI             & ! out,    stem area index, after burying by snow
             )
 !---------------------------------------------------------------------
+
+!---------------------------------------------------------------------
+!  read in input data from table and initial file
+!---------------------------------------------------------------------
+  call InputVarInitDefault(input)
+  call ReadNamelist(input)
+  call ReadNoahmpTable(input)
+
+!---------------------------------------------------------------------
+!  initialize
+!---------------------------------------------------------------------
+  call ConfigVarInitDefault(noahmp)
+  call ConfigVarInitTransfer(noahmp, input)
+
+  call ForcingVarInitDefault(noahmp)
+  call ForcingVarInitTransfer(noahmp, input)
+
+  call EnergyVarInitDefault(noahmp)
+  call EnergyVarInitTransfer(noahmp, input)
+
+  call WaterVarInitDefault(noahmp)
+  call WaterVarInitTransfer(noahmp, input)
+
 !---------------------------------------------------------------------
 ! start with a default value at time 0
 
@@ -185,8 +191,8 @@ program WaterDriverMod
   FCEV    = input%FCEVIn          ! canopy evaporation (w/m2) [+ to atm ]
   FCTR    = input%FCTRIn          ! transpiration (w/m2) [+ to atm]
   FGEV    = input%FGEVIn          ! soil evap heat (w/m2) [+ to atm]
-  LAI     = input%LAIM(6)         ! June LAI as an example
-  SAI     = input%SAIM(6)         ! June SAI
+  LAI     = LAIM(6)               ! June LAI as an example
+  SAI     = SAIM(6)               ! June SAI
   ELAI    = LAI * (1.0 - FB_snow) ! leaf area index, after burying by snow
   ESAI    = SAI * (1.0 - FB_snow) ! stem area index, after burying by snow 
   PONDING = 0.0

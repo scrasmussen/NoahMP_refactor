@@ -23,11 +23,13 @@ contains
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variables
+    integer                :: K             ! loop index
     real(kind=kind_noahmp) :: SMCTOT        ! 2-m averaged soil moisture (m3/m3)
     real(kind=kind_noahmp) :: DZTOT         ! 2-m soil depth (m)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
+              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil water content [m3/m3]
               FCR             => noahmp%water%state%FCR              ,& ! in,     impermeable fraction due to frozen soil

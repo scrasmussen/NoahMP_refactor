@@ -55,8 +55,6 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOILIn 
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSOIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSOIn
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SH2OIn
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SICEIn
     ! namelist options
     integer                  :: OPT_DVEGIn
     integer                  :: OPT_CRSIn

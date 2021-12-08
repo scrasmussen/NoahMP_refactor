@@ -32,11 +32,9 @@ contains
 
     implicit none
 
+    type(input_type) , intent(inout) :: input
     type(noahmp_type), intent(inout) :: noahmp
-    type(input_type) , intent(in)    :: input
 
-
-    end associate
 
   end subroutine ForcingVarInitTransfer
 

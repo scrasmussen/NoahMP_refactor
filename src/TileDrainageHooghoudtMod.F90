@@ -77,6 +77,9 @@ contains
     allocate( OVRFC  (1:NSOIL) )
     allocate( RMSH2O (1:NSOIL) )
     TD_SATZ = 0.0
+    KLATK   = 0.0
+    OVRFC   = 0.0
+    RMSH2O  = 0.0
     DTOPL   = 0.0
     TD_LQ   = 0.0
     TD_TTSZ = 0.0

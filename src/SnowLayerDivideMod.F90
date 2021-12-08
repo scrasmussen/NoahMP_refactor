@@ -44,7 +44,7 @@ contains
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              DZSNSO          => noahmp%config%domain%DZSNSO          & ! inout,  thickness of snow/soil layers (m)
              )
 ! ----------------------------------------------------------------------
 

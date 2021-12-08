@@ -31,7 +31,7 @@ contains
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
-    type(input_type) , intent(in)    :: input
+    type(input_type) , intent(inout) :: input
 
 
   end subroutine BiochemVarInitTransfer

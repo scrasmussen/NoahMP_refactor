@@ -61,7 +61,6 @@ contains
     implicit none
 
 ! IN & OUT variabls
-    type(noahmp_type)     , intent(inout) :: noahmp
     real(kind=kind_noahmp), intent(in)    :: YD      ! initial depth Y (m)
     real(kind=kind_noahmp), intent(in)    :: Y0      ! initial depth Y (m)
     real(kind=kind_noahmp), intent(in)    :: R1      ! saturation excess runoff (m/s)

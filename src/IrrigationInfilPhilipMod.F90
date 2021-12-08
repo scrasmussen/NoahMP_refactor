@@ -24,9 +24,9 @@ contains
     implicit none
 
 ! IN & OUT variables
-    type(noahmp_type)     , intent(in)  :: noahmp
-    real(kind=kind_noahmp), intent(in)  :: DT
-    real(kind=kind_noahmp), intent(out) :: FSUR
+    type(noahmp_type)     , intent(inout)  :: noahmp
+    real(kind=kind_noahmp), intent(in)     :: DT
+    real(kind=kind_noahmp), intent(out)    :: FSUR
 
 ! local variable
     integer                :: K         ! do loop/array indices
