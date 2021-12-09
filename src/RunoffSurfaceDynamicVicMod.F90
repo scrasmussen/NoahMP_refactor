@@ -89,8 +89,8 @@ contains
      BB            = BBVIC
 
      do IZ = 1, NSOIL-2
-        TOP_MOIST     = TOP_MOIST + SMC(IZ) * (-1.0) * ZSOIL(IZ)            ! actual moisture in top layers, [m]
-        TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * ZSOIL(IZ)     ! maximum moisture in top layers, [m]  
+        TOP_MOIST     = TOP_MOIST + (SMC(IZ) * (-1.0) * ZSOIL(IZ))            ! actual moisture in top layers, [m]
+        TOP_MAX_MOIST = TOP_MAX_MOIST + (SMCMAX(IZ) * (-1.0) * ZSOIL(IZ))     ! maximum moisture in top layers, [m]  
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
 
@@ -146,7 +146,7 @@ contains
                        YD_OLD = YD
                        TEMPR1 = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,I_0,I_MAX,YD,TEMPR1)
-                       YD     = TEMPR1 + (FSUR*DT) * (1.0-(1.0-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0)))
+                       YD     = TEMPR1 + ((FSUR*DT) * (1.0-(1.0-((DP-TEMPR1)/(FMAX*DT))**(BB+1.0))))
                        if ( (abs(YD-YD_OLD) <= ERROR) .or. (IZ == IZMAX) ) then
                           goto 1003
                        endif
@@ -208,7 +208,7 @@ contains
                     RUNOFFINF = DP - YD
                     INFILTRTN = YD - RUNOFFSAT
                     TOP_MOIST = TOP_MOIST + INFILTRTN
-                    YD        = I_0+YD
+                    YD        = I_0 + YD
                     if ( TOP_MOIST <= 0.0 ) TOP_MOIST = 0.0
                     if ( TOP_MOIST >= TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
                     I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+BDVIC))))
@@ -287,7 +287,7 @@ contains
 
 2001 RUNSRF = (RUNOFFSAT + RUNOFFINF) / DT
      RUNSRF = min( RUNSRF, QINSUR )
-     RUNSRF = min( RUNSRF, 0.0    )
+     RUNSRF = max( RUNSRF, 0.0    )
      PDDUM  = QINSUR - RUNSRF
 
     end associate

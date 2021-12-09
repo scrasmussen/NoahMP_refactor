@@ -778,8 +778,8 @@ contains
     input%BXAJ_TABLE(1:SLCATS)     = BXAJ(1:SLCATS)
     input%XXAJ_TABLE(1:SLCATS)     = XXAJ(1:SLCATS)
     input%BDVIC_TABLE(1:SLCATS)    = BDVIC(1:SLCATS)
-    input%GDVIC_TABLE(1:SLCATS)    = BBVIC(1:SLCATS)
-    input%BBVIC_TABLE(1:SLCATS)    = GDVIC(1:SLCATS)
+    input%GDVIC_TABLE(1:SLCATS)    = GDVIC(1:SLCATS)
+    input%BBVIC_TABLE(1:SLCATS)    = BBVIC(1:SLCATS)
 
     !---------------- GENPARM.TBL general parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
