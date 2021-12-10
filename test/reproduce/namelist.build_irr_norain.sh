@@ -5,6 +5,7 @@ export namelist_input="
   maxtime         = 30      ! total simulation time [hours]
   output_filename = 'output.nc'
   runsnow         = ${snowopt} ! true or false whether to run snow cases
+  JULIAN          = ${julianday}
 /
 
 &forcing
@@ -18,6 +19,7 @@ export namelist_input="
   fcev_e        = 5.0       ! constant canopy evaporation heat (w/m2) [+ to atm ]
   fctr_e        = 5.0       ! constant transpiration heat (w/m2) [+ to atm]
   fgev_e        = 15.0      ! evaporation/sublimation heat (w/m2) [+ to atm]
+  Q2            = 0.01
 /
 
 &structure

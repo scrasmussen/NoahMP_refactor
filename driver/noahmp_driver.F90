@@ -1,7 +1,7 @@
-program water_driver
+program noahmp_driver
 
-use water_output
-use water_routines
+use noahmp_output
+use noahmp_routines
 USE NOAHMP_TABLES
 
   implicit none
@@ -14,6 +14,7 @@ USE NOAHMP_TABLES
   integer       :: maxtime
   character*256 :: output_filename
   logical       :: runsnow
+  real          :: JULIAN
 ! forcing
   real          :: rainrate
   integer       :: rain_duration
@@ -25,6 +26,7 @@ USE NOAHMP_TABLES
   real          :: fcev_e
   real          :: fctr_e
   real          :: fgev_e
+  real          :: Q2
 ! structure
   integer       :: isltyp
   integer       :: vegtype
@@ -53,9 +55,9 @@ USE NOAHMP_TABLES
   !--------------------!
   !  namelist structure   !
   !--------------------!
-  namelist / timing          / dt,maxtime,output_filename,runsnow
+  namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
   namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e
+                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2
   namelist / structure       / isltyp,VEGTYPE,soilcolor,slopetype,croptype,nsoil,nsnow,structure_option,soil_depth,&
                                vegfra,vegmax,shdmax
   namelist / fixed_initial   / zsoil,dzsnso
@@ -148,8 +150,10 @@ USE NOAHMP_TABLES
   real                            :: RECH !recharge to or from the water table when shallow [m] (diagnostic)
   real                            :: IRAMTFI  ! irrigation water amount [m] to be applied, flood
   real                            :: IRAMTMI  ! irrigation water amount [m] to be applied, Micro
+  real                            :: IRAMTSI     !total irrigation water amount [m]
   real                            :: IRFIRATE ! rate of irrigation by flood [m/timestep]
   real                            :: IRMIRATE ! rate of irrigation by micro [m/timestep]
+  real                            :: IRSIRATE !rate of irrigation by sprinkler [m/timestep]
   real                           :: CMC     !intercepted water per ground area (mm)
   real                           :: ECAN    !evap of intercepted water (mm/s) [+]
   real                           :: ETRAN   !transpiration rate (mm/s) [+]
@@ -172,6 +176,15 @@ USE NOAHMP_TABLES
   real                            :: QDRAIN      !soil-bottom free drainage [mm/s] 
   real                            :: FCRMAX      !maximum of fcr (-)
   real, allocatable, dimension(:) :: WCND        !hydraulic conductivity (m/s)
+
+  integer                         :: IRCNTSI !irrigation event number, Sprinkler
+  integer                         :: IRCNTMI !irrigation event number, Micro
+  integer                         :: IRCNTFI !irrigation event number, Flood 
+  real                            :: EAIR    !vapor pressure air (pa)
+  real                            :: QAIR    !specific humidity (kg/kg)
+  real                            :: IREVPLOS    !loss of irrigation water to evaporation,sprinkler [m/timestep]
+  real                            :: FIRR           ! irrigation:latent heating due to sprinkler evaporation [w/m2]
+  real                            :: EIRR           ! evaporation of irrigation water to evaporation,sprinkler [mm/s]
 
 #ifdef WRF_HYDRO
   REAL                           :: sfcheadrt, WATBLED
@@ -465,7 +478,7 @@ if (runsnow) then
   STC(1:4) = 265.0
   STC(-2:0) = 0.0
   SH2O(1:4) = 0.03
-  SICE(1:4) = 0.3
+  SICE(1:4) = 0.2
 else
   SFCTMP = 298.0 !model-level temperature (k)
   FB_snow = 0.0
@@ -476,7 +489,7 @@ else
   CANICE = 0.0
   STC(1:4) = 298.0
   STC(-2:0) = 0.0
-  SH2O(1:4) = 0.3
+  SH2O(1:4) = 0.2
   SICE(1:4) = 0.03
 end if
 ! others
@@ -567,7 +580,7 @@ end if
   QDEW = ABS( MIN(FGEV/LATHEAG, 0.))  ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
   IF (OPT_IRR .gt. 0) then
-     IRRFRA = 0.5  ! irrigation fraction
+     IRRFRA = 1.0  ! irrigation fraction
      CROPLU = .true.
   ELSE
      IRRFRA = 0.0
@@ -580,33 +593,50 @@ end if
       FIFAC = 0.4
      IRAMTFI = 0.25
      IRAMTMI = 0.25
+     IRAMTSI = 0.5
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   ELSE IF(OPT_IRRM .EQ. 1) THEN
       SIFAC = 1.
       MIFAC = 0
       FIFAC = 0.
      IRAMTFI = 0.0
      IRAMTMI = 0.0
+     IRAMTSI = 0.5
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   ELSE IF(OPT_IRRM .EQ. 2) THEN ! micro
       SIFAC = 0.
       MIFAC = 1.
       FIFAC = 0.
      IRAMTFI = 0.0
      IRAMTMI = 0.5
+     IRAMTSI = 0.0
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   ELSE IF(OPT_IRRM .EQ. 3) THEN ! flood
       SIFAC = 0.
       MIFAC = 0.
       FIFAC = 1.
      IRAMTFI = 0.5
      IRAMTMI = 0.0
+     IRAMTSI = 0.0
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   END IF
+
+  IRCNTSI = 0
+  IRCNTMI = 0
+  IRCNTFI = 0
+  QAIR = Q2
+  EAIR   = QAIR*SFCPRS / (0.622+0.378*QAIR)
+  IREVPLOS = 0.0
+  FIRR = 0.0
+  EIRR = 0.0
 
   IF(OPT_TDRN .gt. 0) THEN
       TDFRACMP = 0.5
@@ -641,7 +671,8 @@ end if
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
                      CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
-                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP)
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
+                     IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -653,6 +684,10 @@ end if
 
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
+     IREVPLOS = 0.0 
+     FIRR     = 0.0
+     EIRR     = 0.0
 
   !---------------------------------------------------------------------
   ! calculate the input water
@@ -681,14 +716,54 @@ end if
      SNOW = 0.0
    end if 
 
+!   QRAIN = RAIN * 0.99
+!   QSNOW = SNOW * 0.9
+!   SNOWHIN = QSNOW / BDFALL
+
+!!!============================================= Start the original NoahMP Subroutine ==========================================
+
+
+
+!!!============================ Irrigation trigger and sprinkler 
+! Call triggering function
+     IF((CROPLU .EQV. .TRUE.) .AND. (IRRFRA .GE. parameters%IRR_FRAC) .AND. &
+       (RAIN .LT. (parameters%IR_RAIN/3600.0)) .AND. ((IRAMTSI+IRAMTMI+IRAMTFI) .EQ. 0.0) )THEN
+
+        CALL TRIGGER_IRRIGATION(parameters,NSOIL,ZSOIL,SH2O,FVEG,JULIAN,IRRFRA,LAI, & !in
+                                  SIFAC,MIFAC,FIFAC,                                & !in
+                                  IRCNTSI,IRCNTMI,IRCNTFI,                          & !inout
+                                  IRAMTSI,IRAMTMI,IRAMTFI)                            !inout
+     END IF
+
+! set irrigation off if parameters%IR_RAIN mm/h for this time step and irr triggered last time step
+     IF((RAIN .GE. (parameters%IR_RAIN/3600.0)) .OR. (IRRFRA .LT. parameters%IRR_FRAC))THEN
+        IRAMTSI = 0.0
+        IRAMTMI = 0.0
+        IRAMTFI = 0.0
+     END IF
+
+! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
+     IF((CROPLU .EQV. .TRUE.) .AND. (IRAMTSI .GT. 0.0)) THEN
+
+        CALL SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,SICE,& !in
+                                  SFCTMP,UU,VV,EAIR,SIFAC,          & !in
+                                  IRAMTSI,IREVPLOS,IRSIRATE)          !inout
+        RAIN = RAIN + (IRSIRATE*1000.0/DT) ![mm/s]
+        ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
+        FIRR     = IREVPLOS*1000.0*HVAP/DT                              ! heat used for evaporation (W/m2)
+        EIRR     = IREVPLOS*1000.0/DT                                   ! sprinkler evaporation (mm/s)
+     END IF
+! call for micro irrigation and flood irrigation are implemented in WATER subroutine
+! end irrigation call-prasanth
+!!!============================
+
    QRAIN = RAIN * 0.99
    QSNOW = SNOW * 0.9
    SNOWHIN = QSNOW / BDFALL
 
-!!!============================================= Start the original Water Subroutine ==========================================
 
-! compute water budgets (water storages, ET components, and runoff)
 
+!!!============================ Water module all
      CALL WATER (parameters,VEGTYPE ,NSNOW  ,NSOIL  ,IMELT  ,DT     ,UU     , & !in
                  VV     ,FCEV   ,FCTR   ,QPRECC ,QPRECL ,ELAI   , & !in
                  ESAI   ,SFCTMP ,QVAP   ,QDEW   ,ZSOIL  ,BTRANI , & !in
@@ -710,20 +785,28 @@ end if
                         ,sfcheadrt, WATBLED                       &
 #endif
                  )  !out
+!!!============================
 
 
+
+
+!!!============================ 
 ! some updates from last time step for use in next step (from drv)
 
    FICEOLD(ISNOW+1:0) = SNICE(ISNOW+1:0) &  ! snow ice fraction  
        /(SNICE(ISNOW+1:0)+SNLIQ(ISNOW+1:0))
 
  
+!!!============================ Error balance check
 ! balance check for soil and snow layers  
     totalwat = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA      ! total soil+snow water [mm]
     errwat = (QRAIN+QSNOW+IRMIRATE*1000/DT+IRFIRATE*1000/DT+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! accum error [mm]
+!!!============================
+
+   if (abs(errwat) > 0.1) print*,'water not balanced ....'
 
 
-   
+
   !---------------------------------------------------------------------
   ! add to output file
   !---------------------------------------------------------------------
@@ -733,11 +816,13 @@ end if
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
                      CMC,ECAN,ETRAN,FWET,RUNSRF,RUNSUB,QIN,QDIS,PONDING1,PONDING2,&
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
-                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP)
+                     WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
+                     IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR)
 
  
   end do ! time loop
 
   call finalize_output()
-   
+  
+  print*, ' model run successfully completed ...' 
 end program

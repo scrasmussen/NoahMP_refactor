@@ -5,12 +5,12 @@
 
 include ../user_build_options
 
-OBJS = water_routines.o
+OBJS = noahmp_routines.o
 
 all:	$(OBJS)
 
 .F90.o:
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(*).F90
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).F90
 
 #
 # This command cleans up object (etc) files:

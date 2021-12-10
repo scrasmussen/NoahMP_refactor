@@ -6,17 +6,18 @@
 include ../user_build_options
 
 OBJS = \
-	../src/water_routines.o \
-	../driver/water_output.o \
-	../driver/water_driver.o
+	../src/noahmp_routines.o \
+	../driver/noahmp_output.o \
+	../driver/noahmp_driver.o
 
-CMD = water.exe
+CMD = noahmp.exe
 all:	$(CMD)
 
-water.exe: $(OBJS)
-	$(COMPILERF90) -o $(@) -I../driver -I../src $(OBJS) $(NETCDFLIB)
+noahmp.exe: $(OBJS)
+	$(COMPILERF90) -o $(@) $(F90FLAGS) $(FREESOURCE) \
+        -I../driver -I../src $(NETCDFMOD) $(OBJS) $(NETCDFLIB)
 
 # This command cleans up
 clean:
-	rm -f $(CMD)
+	rm -f *.exe
 
