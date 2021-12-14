@@ -11,12 +11,14 @@ OBJS = ConstantDefineMod.o \
        ForcingVarType.o \
        EnergyVarType.o \
        WaterVarType.o \
+       BiochemVarType.o \
        NoahmpVarType.o \
        InputVarInitMod.o \
        ConfigVarInitMod.o \
        ForcingVarInitMod.o \
        EnergyVarInitMod.o \
        WaterVarInitMod.o \
+       BiochemVarInitMod.o \
        CanopyHydrologyMod.o \
        GroundWaterTopModelMod.o \
        IrrigationFloodMod.o \
@@ -78,12 +80,15 @@ ConfigVarType.o:        ../utility/Machine.o
 ForcingVarType.o:       ../utility/Machine.o
 EnergyVarType.o:        ../utility/Machine.o
 WaterVarType.o:         ../utility/Machine.o
-NoahmpVarType.o:        ConfigVarType.o ForcingVarType.o EnergyVarType.o WaterVarType.o
+BiochemVarType.o:       ../utility/Machine.o
+NoahmpVarType.o:        ConfigVarType.o ForcingVarType.o EnergyVarType.o \
+                        WaterVarType.o BiochemVarType.o
 InputVarInitMod.o:      ../utility/Machine.o InputVarType.o
 ConfigVarInitMod.o:     InputVarType.o NoahmpVarType.o
 ForcingVarInitMod.o:    InputVarType.o NoahmpVarType.o
 EnergyVarInitMod.o:     InputVarType.o NoahmpVarType.o
 WaterVarInitMod.o:      InputVarType.o NoahmpVarType.o
+BiochemVarInitMod.o:    InputVarType.o NoahmpVarType.o
 CanopyHydrologyMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GroundWaterTopModelMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 IrrigationFloodMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \

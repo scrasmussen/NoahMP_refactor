@@ -11,7 +11,7 @@ module NoahmpVarType
   use ConfigVarType
   use EnergyVarType
   use WaterVarType
-  !use BiochemVarType
+  use BiochemVarType
 
   implicit none
   save

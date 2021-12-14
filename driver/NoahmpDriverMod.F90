@@ -9,6 +9,7 @@ Program NoahmpDriverMod
   use EnergyVarInitMod
   use ForcingVarInitMod
   use WaterVarInitMod
+  use BiochemVarInitMod
   use WaterMainMod
   use NoahmpOutputMod
   use IrrigationTriggerMod
@@ -62,6 +63,9 @@ Program NoahmpDriverMod
   call EnergyVarInitTransfer(noahmp, input)
   call WaterVarInitDefault(noahmp)
   call WaterVarInitTransfer(noahmp, input)
+  call BiochemVarInitDefault(noahmp)
+  call BiochemVarInitTransfer(noahmp, input)
+
 !---------------------------------------------------------------------
 
 !---------------------------------------------------------------------

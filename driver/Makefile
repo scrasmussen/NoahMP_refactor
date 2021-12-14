@@ -32,8 +32,9 @@ NoahmpDriverMod.o: ../utility/Machine.o \
                   ../src/EnergyVarInitMod.o \
                   ../src/ForcingVarInitMod.o \
                   ../src/WaterVarInitMod.o \
+                  ../src/BiochemVarInitMod.o \
                   ../src/WaterMainMod.o \
-                  ../src/IrrigationTriggerMod \
-                  ../src/IrrigationSprinklerMod \
+                  ../src/IrrigationTriggerMod.o \
+                  ../src/IrrigationSprinklerMod.o \
                   NoahmpOutputMod.o
 

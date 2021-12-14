@@ -47,6 +47,8 @@ contains
     noahmp%biochem%param%PLTDAY      = input%PLTDAY_TABLE(CROPTYP)
     noahmp%biochem%param%HSDAY       = input%HSDAY_TABLE (CROPTYP)
 
+    end associate
+
   end subroutine BiochemVarInitTransfer
 
 end module BiochemVarInitMod

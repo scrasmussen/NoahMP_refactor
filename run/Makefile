@@ -15,12 +15,14 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/ForcingVarType.o \
        ../src/EnergyVarType.o \
        ../src/WaterVarType.o \
+       ../src/BiochemVarType.o \
        ../src/NoahmpVarType.o \
        ../src/InputVarInitMod.o \
        ../src/ConfigVarInitMod.o \
        ../src/ForcingVarInitMod.o \
        ../src/EnergyVarInitMod.o \
        ../src/WaterVarInitMod.o \
+       ../src/BiochemVarInitMod.o \
        ../src/CanopyHydrologyMod.o \
        ../src/GroundWaterTopModelMod.o \
        ../src/IrrigationFloodMod.o \
@@ -68,7 +70,7 @@ OBJS = ../driver/NoahmpDriverMod.o \
 CMD = noahmp_refac.exe
 all:	$(CMD)
 
-water_refac.exe: $(OBJS)
+noahmp_refac.exe: $(OBJS)
 	$(COMPILERF90) -o $(@) $(F90FLAGS) $(FREESOURCE) \
         -I../driver -I../utility -I../src $(NETCDFMOD) $(OBJS) $(NETCDFLIB)
 
