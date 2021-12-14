@@ -1,4 +1,4 @@
-module WaterOutputMod
+module NoahmpOutputMod
 
   use netcdf
   use NoahmpVarType
@@ -66,6 +66,16 @@ module WaterOutputMod
   integer           :: QRAIN_id
   integer           :: QSNOW_id
   integer           :: QVAP_id
+  integer           :: IRAMTSI_id
+  integer           :: IRSIRATE_id
+  integer           :: IRCNTSI_id
+  integer           :: IRCNTMI_id
+  integer           :: IRCNTFI_id
+  integer           :: RAIN_id
+  integer           :: SNOW_id
+  integer           :: IREVPLOS_id
+  integer           :: FIRR_id
+  integer           :: EIRR_id
 
 contains
 
@@ -139,6 +149,17 @@ contains
     iret = nf90_def_var(ncid, "QRAIN",       NF90_FLOAT, (/time_dim/)         , QRAIN_id    )
     iret = nf90_def_var(ncid, "QSNOW",       NF90_FLOAT, (/time_dim/)         , QSNOW_id    )
     iret = nf90_def_var(ncid, "QVAP",        NF90_FLOAT, (/time_dim/)         , QVAP_id     )
+    iret = nf90_def_var(ncid, "IRAMTSI",     NF90_FLOAT, (/time_dim/)         , IRAMTSI_id  )
+    iret = nf90_def_var(ncid, "IRSIRATE",    NF90_FLOAT, (/time_dim/)         , IRSIRATE_id )
+    iret = nf90_def_var(ncid, "IRCNTSI",     NF90_FLOAT, (/time_dim/)         , IRCNTSI_id  )
+    iret = nf90_def_var(ncid, "IRCNTMI",     NF90_FLOAT, (/time_dim/)         , IRCNTMI_id  )
+    iret = nf90_def_var(ncid, "IRCNTFI",     NF90_FLOAT, (/time_dim/)         , IRCNTFI_id  )
+    iret = nf90_def_var(ncid, "RAIN",        NF90_FLOAT, (/time_dim/)         , RAIN_id     )
+    iret = nf90_def_var(ncid, "SNOW",        NF90_FLOAT, (/time_dim/)         , SNOW_id     )
+    iret = nf90_def_var(ncid, "IREVPLOS",    NF90_FLOAT, (/time_dim/)         , IREVPLOS_id )
+    iret = nf90_def_var(ncid, "FIRR",        NF90_FLOAT, (/time_dim/)         , FIRR_id     )
+    iret = nf90_def_var(ncid, "EIRR",        NF90_FLOAT, (/time_dim/)         , EIRR_id     )
+
 
     iret = nf90_enddef(ncid)
   
@@ -211,6 +232,18 @@ contains
     iret = nf90_put_var(ncid, QRAIN_id,    noahmp%water%flux%QRAIN,          start=(/itime+1/))
     iret = nf90_put_var(ncid, QSNOW_id,    noahmp%water%flux%QSNOW,          start=(/itime+1/))
     iret = nf90_put_var(ncid, QVAP_id,     noahmp%water%flux%QVAP,           start=(/itime+1/))
+    iret = nf90_put_var(ncid, IRAMTSI_id,  noahmp%water%state%IRAMTSI,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, IRSIRATE_id, noahmp%water%flux%IRSIRATE,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, IRCNTSI_id,  noahmp%water%state%IRCNTSI,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, IRCNTMI_id,  noahmp%water%state%IRCNTMI,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, IRCNTFI_id,  noahmp%water%state%IRCNTFI,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, RAIN_id,     noahmp%water%flux%RAIN,           start=(/itime+1/))
+    iret = nf90_put_var(ncid, SNOW_id,     noahmp%water%flux%SNOW,           start=(/itime+1/))
+    iret = nf90_put_var(ncid, IREVPLOS_id, noahmp%water%flux%IREVPLOS,       start=(/itime+1/))
+    iret = nf90_put_var(ncid, FIRR_id,     noahmp%energy%flux%FIRR,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, EIRR_id,     noahmp%water%flux%EIRR,           start=(/itime+1/))
+
+
 
     end associate
 
@@ -222,5 +255,5 @@ contains
 
   end subroutine finalize_output
    
-end module WaterOutputMod
+end module NoahmpOutputMod
 

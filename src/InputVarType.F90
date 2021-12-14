@@ -29,6 +29,7 @@ module InputVarType
     real(kind=kind_noahmp)   :: DTIn
     character(len=256)       :: output_filename
     logical                  :: runsnow
+    real(kind=kind_noahmp)   :: JULIANIn
     ! forcing
     integer                  :: rain_duration
     integer                  :: dry_duration
@@ -39,7 +40,8 @@ module InputVarType
     real(kind=kind_noahmp)   :: SFCPRSIn
     real(kind=kind_noahmp)   :: FCEVIn
     real(kind=kind_noahmp)   :: FCTRIn
-    real(kind=kind_noahmp)   :: FGEVIn 
+    real(kind=kind_noahmp)   :: FGEVIn
+    real(kind=kind_noahmp)   :: Q2In 
     ! structure
     integer                  :: VEGTYPEIn
     integer                  :: SOILCOLORIn
@@ -353,6 +355,9 @@ module InputVarType
     !----------------------------------------------------------------
     integer                                             :: ISNOWIn           ! snow layer index (0 : no snow, -1~-3 : 1~3 snow layers)
     integer                                             :: ISTIn             ! surface type 1-soil; 2-lake
+    integer                                             :: IRCNTSIIn
+    integer                                             :: IRCNTMIIn
+    integer                                             :: IRCNTFIIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
     real(kind=kind_noahmp)                              :: TVIn              ! leaf temperature (K)
@@ -365,6 +370,7 @@ module InputVarType
     real(kind=kind_noahmp)                              :: MIFACIn
     real(kind=kind_noahmp)                              :: IRAMTMIIn
     real(kind=kind_noahmp)                              :: SIFACIn
+    real(kind=kind_noahmp)                              :: IRAMTSIIn
     real(kind=kind_noahmp)                              :: ZWTIn
     real(kind=kind_noahmp)                              :: SMCWTDIn
     real(kind=kind_noahmp)                              :: DEEPRECHIn
@@ -376,6 +382,9 @@ module InputVarType
     real(kind=kind_noahmp)                              :: PONDINGIn
     real(kind=kind_noahmp)                              :: sfcheadrtIn
     real(kind=kind_noahmp)                              :: IRRFRAIn
+    real(kind=kind_noahmp)                              :: LAIIn
+    real(kind=kind_noahmp)                              :: SAIIn
+    real(kind=kind_noahmp)                              :: FVEGIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

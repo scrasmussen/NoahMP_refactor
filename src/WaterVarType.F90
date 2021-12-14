@@ -18,6 +18,8 @@ module WaterVarType
   type :: flux_type
 
     ! define specific water flux variables
+    real(kind=kind_noahmp) :: RAIN          ! liquid rainfall rate (mm/s)
+    real(kind=kind_noahmp) :: SNOW          ! snowfall rate (mm/s)
     real(kind=kind_noahmp) :: ECAN          ! evaporation of intercepted water (mm/s) [+]
     real(kind=kind_noahmp) :: ETRAN         ! transpiration rate (mm/s) [+]
     real(kind=kind_noahmp) :: QEVAC         ! canopy water evaporation rate (mm/s)
@@ -35,6 +37,8 @@ module WaterVarType
     real(kind=kind_noahmp) :: SNOFLOW       ! glacier flow [mm/s]
     real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
     real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: IRSIRATE      ! rate of irrigation by sprinkler [m/timestep]
+    real(kind=kind_noahmp) :: IREVPLOS      ! loss of irrigation water to evaporation,sprinkler [m/timestep]
     real(kind=kind_noahmp) :: QINSUR        ! water input on soil surface [mm/s]
     real(kind=kind_noahmp) :: RUNSRF        ! surface runoff [mm/s]
     real(kind=kind_noahmp) :: RUNSUB        ! subsurface runoff [mm/s]
@@ -47,6 +51,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: QVAP          ! soil surface evaporation rate[mm/s]
     real(kind=kind_noahmp) :: QDEW          ! soil surface dew rate[mm/s]
     real(kind=kind_noahmp) :: QSDEW         ! soil surface dew rate [mm/s]
+    real(kind=kind_noahmp) :: EIRR          ! evaporation of irrigation water to evaporation,sprinkler [mm/s]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
@@ -60,6 +65,9 @@ module WaterVarType
   type :: state_type
 
     ! define specific water state variables
+    integer                :: IRCNTSI     ! irrigation event number, Sprinkler
+    integer                :: IRCNTMI     ! irrigation event number, Micro
+    integer                :: IRCNTFI     ! irrigation event number, Flood
     real(kind=kind_noahmp) :: CMC         ! total canopy intercepted water (mm)
     real(kind=kind_noahmp) :: FWET        ! wetted or snowed fraction of the canopy
     real(kind=kind_noahmp) :: BDFALL      ! bulk density of snowfall (kg/m3)
@@ -77,6 +85,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: MIFAC       ! fraction of grid under micro irrigation (0 to 1)
     real(kind=kind_noahmp) :: IRAMTMI     ! micro irrigation water amount [m]
     real(kind=kind_noahmp) :: SIFAC       ! sprinkler irrigation fraction (0 to 1)
+    real(kind=kind_noahmp) :: IRAMTSI     ! sprinkler irrigation water amount [m]
     real(kind=kind_noahmp) :: ZWT         ! water table depth [m]
     real(kind=kind_noahmp) :: SICEMAX     ! maximum soil ice content (m3/m3)
     real(kind=kind_noahmp) :: SH2OMIN     ! minimum soil liquid water content (m3/m3)
@@ -93,6 +102,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: WSLAKE      ! water storage in lake (can be -) (mm) 
     real(kind=kind_noahmp) :: sfcheadrt   ! surface water head (mm)
     real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
+
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -120,6 +130,7 @@ module WaterVarType
     integer                :: DRAIN_LAYER_OPT  ! starting soil layer for drainage
     integer                :: TD_DEPTH         ! depth of drain tube from the soil surface
     integer                :: NROOT            ! number of soil layers with root present
+    integer                :: IRR_HAR          ! number of days before harvest date to stop irrigation
     real(kind=kind_noahmp) :: CH2OP            ! maximum canopy intercepted water per unit lai+sai (mm)
     real(kind=kind_noahmp) :: C2_SnowCompact   ! overburden snow compaction parameter (m3/kg) default 21.e-3
     real(kind=kind_noahmp) :: C3_SnowCompact   ! snow desctructive metamorphism compaction parameter1 [1/s]
@@ -162,6 +173,12 @@ module WaterVarType
     real(kind=kind_noahmp) :: REFDK            ! Parameter in the surface runoff parameterization
     real(kind=kind_noahmp) :: REFKDT           ! Parameter in the surface runoff parameterization
     real(kind=kind_noahmp) :: FRZK             ! Frozen ground parameter
+    real(kind=kind_noahmp) :: IRR_LAI          ! minimum lai to trigger irrigation
+    real(kind=kind_noahmp) :: IRR_MAD          ! management allowable deficit (0-1)
+    real(kind=kind_noahmp) :: FILOSS           ! fraction of flood irrigation loss (0-1)
+    real(kind=kind_noahmp) :: SPRIR_RATE       ! sprinkler irrigation rate (mm/h)
+    real(kind=kind_noahmp) :: IRR_FRAC         ! irrigation Fraction
+    real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

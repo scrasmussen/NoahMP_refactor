@@ -1142,6 +1142,7 @@ contains
     integer                :: maxtime
     character(len=256)     :: output_filename
     logical                :: runsnow
+    real(kind=kind_noahmp) :: JULIAN
     ! forcing
     real(kind=kind_noahmp) :: rainrate
     integer                :: rain_duration
@@ -1153,6 +1154,7 @@ contains
     real(kind=kind_noahmp) :: fcev_e
     real(kind=kind_noahmp) :: fctr_e
     real(kind=kind_noahmp) :: fgev_e
+    real(kind=kind_noahmp) :: Q2
     ! structure
     integer                :: isltyp
     integer                :: vegtype
@@ -1179,9 +1181,9 @@ contains
                               iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn
 
     !=== arrange structures for reading namelist.input
-    namelist / timing          / dt,maxtime,output_filename,runsnow
+    namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e
+                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
                                  nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax
     namelist / fixed_initial   / zsoil,dzsnso
@@ -1257,6 +1259,8 @@ contains
     input%VEGFRAIn         = vegfra
     input%VEGMAXIn         = vegmax
     input%SHDMAXIn         = shdmax
+    input%JULIANIn         = JULIAN
+    input%Q2In             = Q2
 
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))

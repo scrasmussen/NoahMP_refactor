@@ -5,7 +5,7 @@
 
 include ../user_build_options
 
-OBJS = NoahMPDriverMod.o WaterDriverMod.o WaterOutputMod.o
+OBJS = NoahmpDriverMod.o NoahmpOutputMod.o
 
 all:	$(OBJS)
 
@@ -19,11 +19,11 @@ clean:
 # Dependencies:
 #
 
-WaterOutputMod.o: ../utility/Machine.o \
+NoahmpOutputMod.o: ../utility/Machine.o \
                   ../src/NoahmpVarType.o \
                   ../src/InputVarType.o
 
-WaterDriverMod.o: ../utility/Machine.o \
+NoahmpDriverMod.o: ../utility/Machine.o \
                   ../src/NoahmpVarType.o \
                   ../src/InputVarType.o \
                   ../src/ConstantDefineMod.o \
@@ -33,9 +33,7 @@ WaterDriverMod.o: ../utility/Machine.o \
                   ../src/ForcingVarInitMod.o \
                   ../src/WaterVarInitMod.o \
                   ../src/WaterMainMod.o \
-                  WaterOutputMod.o
-
-NoahMPDriverMod.o: ../src/NoahmpVarType.o \
-                   ../src/InputVarType.o \
-                   WaterDriverMod.o
+                  ../src/IrrigationTriggerMod \
+                  ../src/IrrigationSprinklerMod \
+                  NoahmpOutputMod.o
 

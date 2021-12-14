@@ -23,6 +23,11 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 
+
+    ! biochem parameter variables
+    noahmp%biochem%param%PLTDAY      = huge(1  )
+    noahmp%biochem%param%HSDAY       = huge(1  )
+
   end subroutine BiochemVarInitDefault
 
 !=== initialize with input data or table values
@@ -33,6 +38,14 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
     type(input_type) , intent(inout) :: input
 
+    associate(                                                  &
+              CROPTYP     => noahmp%config%domain%CROPTYP       &
+             )
+
+
+    ! biochem parameter variables
+    noahmp%biochem%param%PLTDAY      = input%PLTDAY_TABLE(CROPTYP)
+    noahmp%biochem%param%HSDAY       = input%HSDAY_TABLE (CROPTYP)
 
   end subroutine BiochemVarInitTransfer
 

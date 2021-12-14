@@ -39,10 +39,12 @@ contains
     noahmp%config%domain%ILOC       = huge(1)
     noahmp%config%domain%JLOC       = huge(1)
     noahmp%config%domain%VEGTYP     = huge(1)
+    noahmp%config%domain%CROPTYP    = huge(1)
     noahmp%config%domain%ISNOW      = huge(1)
     noahmp%config%domain%IST        = huge(1)
     noahmp%config%domain%DT         = huge(1.0)
     noahmp%config%domain%DX         = huge(1.0)
+    noahmp%config%domain%JULIAN     = huge(1.0)
 
   end subroutine ConfigVarInitDefault
 
@@ -84,7 +86,10 @@ contains
     !noahmp%config%domain%ISNOW   = input%ISNOWIn
     !noahmp%config%domain%IST     = input%ISTIn
     noahmp%config%domain%VEGTYP  = input%VEGTYPEIn
+    noahmp%config%domain%CROPTYP = input%CROPTYPEIn
     !noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
+    noahmp%config%domain%JULIAN  = input%JULIANIn
+
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
     allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )

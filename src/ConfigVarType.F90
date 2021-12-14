@@ -64,12 +64,14 @@ module ConfigVarType
     integer                   :: ILOC        ! model grid index
     integer                   :: JLOC        ! model grid index
     integer                   :: VEGTYP      ! vegetation type
+    integer                   :: CROPTYP     ! crop type
     integer                   :: NSOIL       ! number of soil layers
     integer                   :: NSNOW       ! maximum number of snow layers
     integer                   :: ISNOW       ! actual number of snow layers
     integer                   :: IST         ! surface type 1-soil; 2-lake
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
+    real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

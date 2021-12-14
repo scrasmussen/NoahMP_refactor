@@ -30,9 +30,12 @@ contains
     ! energy state variable
     noahmp%energy%state%ELAI            = huge(1.0)
     noahmp%energy%state%ESAI            = huge(1.0)
+    noahmp%energy%state%LAI             = huge(1.0)
+    noahmp%energy%state%SAI             = huge(1.0)
     noahmp%energy%state%FVEG            = huge(1.0)
     noahmp%energy%state%TG              = huge(1.0)
     noahmp%energy%state%TV              = huge(1.0)
+    noahmp%energy%state%EAIR            = huge(1.0)
     noahmp%energy%state%FROZEN_CANOPY   = .false.
     noahmp%energy%state%FROZEN_GROUND   = .false.
 
@@ -44,6 +47,7 @@ contains
     noahmp%energy%flux%FCEV             = huge(1.0)
     noahmp%energy%flux%FCTR             = huge(1.0)
     noahmp%energy%flux%FGEV             = huge(1.0)
+    noahmp%energy%flux%FIRR             = huge(1.0)
 
     ! energy parameter variable
     allocate( noahmp%energy%param%LAIM (12) )
@@ -73,10 +77,14 @@ contains
              )
 
     ! energy state variable
+    !noahmp%energy%state%LAI   = input%LAIIn
+    !noahmp%energy%state%SAI   = input%SAIIn
+    !noahmp%energy%state%FVEG  = input%FVEGIn
 
     ! energy parameter variable
     noahmp%energy%param%LAIM = input%LAIM_TABLE(VEGTYP,:)
     noahmp%energy%param%SAIM = input%SAIM_TABLE(VEGTYP,:)
+
 
     end associate
 

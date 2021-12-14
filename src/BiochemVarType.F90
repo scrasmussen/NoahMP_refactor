@@ -32,6 +32,8 @@ module BiochemVarType
   type :: parameter_type
 
     ! define specific biochem parameter variables
+    integer                :: PLTDAY       ! Planting date
+    integer                :: HSDAY        ! Harvest date
 
   end type parameter_type
 

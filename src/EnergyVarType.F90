@@ -21,6 +21,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FCEV            ! canopy evaporation (w/m2) [+ = to atm] 
     real(kind=kind_noahmp) :: FCTR            ! transpiration (w/m2) [+ = to atm]
     real(kind=kind_noahmp) :: FGEV            ! soil evap heat (w/m2) [+ to atm]
+    real(kind=kind_noahmp) :: FIRR            ! latent heating due to sprinkler irrigation evaporation [w/m2]
 
   end type flux_type
 
@@ -30,9 +31,12 @@ module EnergyVarType
     ! define specific energy state variables
     real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
     real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
+    real(kind=kind_noahmp) :: LAI             ! leaf area index
+    real(kind=kind_noahmp) :: SAI             ! stem area index
     real(kind=kind_noahmp) :: FVEG            ! greeness vegetation fraction
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
+    real(kind=kind_noahmp) :: EAIR            ! vapor pressure air (pa)
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
     logical                :: FROZEN_GROUND   ! used to define latent heat pathway
 

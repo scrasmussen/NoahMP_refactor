@@ -56,7 +56,9 @@ OBJS = ConstantDefineMod.o \
        TileDrainageSimpleMod.o \
        WaterMainMod.o \
        WaterTableDepthSearchMod.o \
-       WaterTableEquilibriumMod.o
+       WaterTableEquilibriumMod.o \
+       IrrigationTriggerMod.o \
+       IrrigationSprinklerMod.o
 
 all:	$(OBJS)
 
@@ -153,4 +155,6 @@ WaterMainMod.o:  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationMicroMod.o SoilWaterMainMod.o
 WaterTableDepthSearchMod.o:  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 WaterTableEquilibriumMod.o:  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-
+IrrigationTriggerMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+IrrigationSprinklerMod.o: ../utility/Machine.o ../utility/CheckNanMod.o \
+                          NoahmpVarType.o ConstantDefineMod.o IrrigationInfilPhilipMod.o

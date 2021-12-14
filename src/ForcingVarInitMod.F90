@@ -23,7 +23,11 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     noahmp%forcing%SFCTMP   = huge(1.0)
-
+    noahmp%forcing%UU       = huge(1.0)
+    noahmp%forcing%VV       = huge(1.0)
+    noahmp%forcing%Q2       = huge(1.0)
+    noahmp%forcing%SFCPRS   = huge(1.0)
+ 
 
   end subroutine ForcingVarInitDefault
 
@@ -35,6 +39,11 @@ contains
     type(input_type) , intent(inout) :: input
     type(noahmp_type), intent(inout) :: noahmp
 
+    !noahmp%forcing%SFCTMP    = input%SFCTMPIn
+    noahmp%forcing%UU        = input%UUIn
+    noahmp%forcing%VV        = input%VVIn
+    noahmp%forcing%Q2        = input%Q2In
+    noahmp%forcing%SFCPRS    = input%SFCPRSIn
 
   end subroutine ForcingVarInitTransfer
 

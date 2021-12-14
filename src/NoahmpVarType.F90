@@ -24,7 +24,7 @@ module NoahmpVarType
     type(config_type)   :: config
     type(energy_type)   :: energy
     type(water_type)    :: water
-    !type(biochem_type)  :: biochem
+    type(biochem_type)  :: biochem
 
   end type noahmp_type
 

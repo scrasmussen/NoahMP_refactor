@@ -1,4 +1,4 @@
-program WaterDriverMod
+Program NoahmpDriverMod
 
   use Machine, only : kind_noahmp
   use ConstantDefineMod
@@ -10,10 +10,11 @@ program WaterDriverMod
   use ForcingVarInitMod
   use WaterVarInitMod
   use WaterMainMod
-  use WaterOutputMod
+  use NoahmpOutputMod
+  use IrrigationTriggerMod
+  use IrrigationSprinklerMod
 
   implicit none
-
 !---------------------------------------------------------------------
 !  types
 !---------------------------------------------------------------------
@@ -40,9 +41,28 @@ program WaterDriverMod
   real(kind=kind_noahmp) :: SNOW               ! total snow rate mm/s
   real(kind=kind_noahmp) :: LATHEAV            ! latent heat vap./sublimation (j/kg) for canopy
   real(kind=kind_noahmp) :: LATHEAG            ! latent heat vap./sublimation (j/kg) for ground
+  real(kind=kind_noahmp) :: QAIR               ! specific humidity
   logical                :: raining            ! .true. if raining
 
-  print*, 'driver: local variable defined ....'
+!---------------------------------------------------------------------
+!  read in input data from table and initial file
+!---------------------------------------------------------------------
+  call InputVarInitDefault(input)
+  call ReadNamelist(input)
+  call ReadNoahmpTable(input)
+
+!---------------------------------------------------------------------
+!  initialize
+!---------------------------------------------------------------------
+  call ConfigVarInitDefault(noahmp)
+  call ConfigVarInitTransfer(noahmp, input)
+  call ForcingVarInitDefault(noahmp)
+  call ForcingVarInitTransfer(noahmp, input)
+  call EnergyVarInitDefault(noahmp)
+  call EnergyVarInitTransfer(noahmp, input)
+  call WaterVarInitDefault(noahmp)
+  call WaterVarInitTransfer(noahmp, input)
+!---------------------------------------------------------------------
 
 !---------------------------------------------------------------------
   associate(                                                        &
@@ -131,42 +151,25 @@ program WaterDriverMod
             LAIM            => noahmp%energy%param%LAIM            ,& ! in,     monthly LAI from table
             SAIM            => noahmp%energy%param%SAIM            ,& ! in,     monthly SAI from table
             ELAI            => noahmp%energy%state%ELAI            ,& ! out,    leaf area index, after burying by snow
-            ESAI            => noahmp%energy%state%ESAI             & ! out,    stem area index, after burying by snow
+            ESAI            => noahmp%energy%state%ESAI            ,& ! out,    stem area index, after burying by snow
+            Q2              => noahmp%forcing%Q2                   ,& ! in,     specific humidity kg/kg
+            IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
+            IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
+            IRCNTSI         => noahmp%water%state%IRCNTSI          ,& ! inout,  irrigation event number, Sprinkler
+            IRCNTMI         => noahmp%water%state%IRCNTMI          ,& ! inout,  irrigation event number, Micro
+            IRCNTFI         => noahmp%water%state%IRCNTFI          ,& ! inout,  irrigation event number, Flood
+            EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
+            IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+            FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
+            EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprinkler [mm/s]
+            SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,     surface pressure (pa)
+            IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
+            RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
+            SNOW            => noahmp%water%flux%SNOW              ,& ! inout,  snowfall rate
+            IR_RAIN         => noahmp%water%param%IR_RAIN           & ! in,     maximum precipitation to stop irrigation trigger
             )
 !---------------------------------------------------------------------
 
-  print*, 'driver: associate done ....'
-!---------------------------------------------------------------------
-!  read in input data from table and initial file
-!---------------------------------------------------------------------
-  call InputVarInitDefault(input)
-  print*, 'driver: InputVarInitDefault done ...'
-  call ReadNamelist(input)
-  print*, 'driver: ReadNamelist done ...'
-  call ReadNoahmpTable(input)
-  print*, 'driver: ReadNoahmpTable done ...'
-
-!---------------------------------------------------------------------
-!  initialize
-!---------------------------------------------------------------------
-  call ConfigVarInitDefault(noahmp)
-  print*, 'driver: ConfigVarInitDefault done ...'
-  call ConfigVarInitTransfer(noahmp, input)
-  print*, 'driver: ConfigVarInitTransfer done ...'
-
-  call ForcingVarInitDefault(noahmp)
-  print*, 'driver: ForcingVarInitDefault done ...'
-  call ForcingVarInitTransfer(noahmp, input)
-  print*, 'driver: ForcingVarInitTransfer done ...'
-  call EnergyVarInitDefault(noahmp)
-  print*, 'driver: EnergyVarInitDefault done ...'
-  call EnergyVarInitTransfer(noahmp, input)
-  print*, 'driver: EnergyVarInitTransfer done ...'
-  call WaterVarInitDefault(noahmp)
-  print*, 'driver: WaterVarInitDefault done ...'
-  call WaterVarInitTransfer(noahmp, input)
-  print*, 'driver: WaterVarInitTransfer done ...'
-!---------------------------------------------------------------------
 ! start with a default value at time 0
 
 ! input used to adjust for snow and non-snow cases
@@ -181,34 +184,20 @@ program WaterDriverMod
      STC(1:4)  = 265.0
      STC(-2:0) = 0.0
      SH2O(1:4) = 0.03
-     SICE(1:4) = 0.3
+     SICE(1:4) = 0.2
   else
      SFCTMP    = 298.0
      FB_snow   = 0.0
      TV        = 298.0
-  print*, 'TV1 = ', noahmp%energy%state%TV
-  print*, 'TV2 = ', TV
      TG        = 298.0
-  print*, 'TG1 = ', noahmp%energy%state%TG
-  print*, 'TG2 = ', TG
-  print*, 'IMELT1 = ', noahmp%water%state%IMELT
-  print*, 'IMELT2 = ', IMELT
      IMELT     = 1
      CANLIQ    = 0.4
      CANICE    = 0.0
-  print*, 'STC1 = ', noahmp%energy%state%STC
-  print*, 'size STC1 = ', size(noahmp%energy%state%STC)
-  print*, 'STC2 = ', STC
-  print*, 'size STC2 = ', size(STC) 
      STC(1:4)  = 298.0
      STC(-2:0) = 0.0
-  print*, 'initialization checkpoint 01 ...'
-     SH2O(1:4) = 0.3
+     SH2O(1:4) = 0.2
      SICE(1:4) = 0.03
   end if
-
-  print*, 'initialization checkpoint 1 ...'
-
 
 ! others
   IST     = 1                     ! surface type 1-soil; 2-lake
@@ -269,7 +258,6 @@ program WaterDriverMod
   sfcheadrt  = 0.0
   WATBLED    = 0.0
 
-  print*, 'initialization checkpoint 2 ...'
 
 ! set psychrometric constant
   if ( TV > TFRZ ) then           
@@ -291,10 +279,9 @@ program WaterDriverMod
   QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
 
-  print*, 'initialization checkpoint 3 ...'
 
   if ( OPT_IRR > 0) then
-     IRRFRA = 0.5  ! irrigation fraction
+     IRRFRA = 1.0  ! irrigation fraction
      CROPLU = .true.
   else
      IRRFRA = 0.0
@@ -307,35 +294,55 @@ program WaterDriverMod
      FIFAC    = 0.4
      IRAMTFI  = 0.25
      IRAMTMI  = 0.25
+     IRAMTSI  = 0.5
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   elseif ( OPT_IRRM == 1 ) then ! sprinkler
      SIFAC    = 1.0
      MIFAC    = 0.0
      FIFAC    = 0.0
      IRAMTFI  = 0.0
      IRAMTMI  = 0.0
+     IRAMTSI  = 0.5
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   elseif ( OPT_IRRM == 2 ) then ! micro
      SIFAC    = 0.0
      MIFAC    = 1.0
      FIFAC    = 0.0
      IRAMTFI  = 0.0
      IRAMTMI  = 0.5
+     IRAMTSI  = 0.0
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   elseif ( OPT_IRRM == 3 ) then ! flood
      SIFAC    = 0.0
      MIFAC    = 0.0
      FIFAC    = 1.0
      IRAMTFI  = 0.5
      IRAMTMI  = 0.0
+     IRAMTSI  = 0.0
      IRFIRATE = 0.0
      IRMIRATE = 0.0
+     IRSIRATE = 0.0
   endif
 
-  print*, 'initialization checkpoint 4 ...'
+!  IRAMTFI = 0.0
+!  IRAMTMI = 0.0
+!  IRAMTSI = 0.0
+
+
+  IRCNTSI = 0
+  IRCNTMI = 0
+  IRCNTFI = 0
+  QAIR = Q2
+  EAIR   = QAIR*SFCPRS / (0.622+0.378*QAIR)
+  IREVPLOS = 0.0
+  FIRR = 0.0
+  EIRR = 0.0
 
   if ( OPT_TDRN > 0 ) then
       TDFRACMP = 0.5
@@ -344,14 +351,13 @@ program WaterDriverMod
       TDFRACMP = 0.0
   endif
 
-  print*,'initialization done ...'
 
 ! for other variables
-    DT         = input%DTIn
-    ntime      = nint(input%maxtime * 3600.0 / DT)
-    rain_steps = input%rain_duration * 3600.0 / DT
-    dry_steps  = input%dry_duration * 3600.0 / DT
-    raining    = input%raining
+  DT         = input%DTIn
+  ntime      = nint(input%maxtime * 3600.0 / DT)
+  rain_steps = input%rain_duration * 3600.0 / DT
+  dry_steps  = input%dry_duration * 3600.0 / DT
+  raining    = input%raining
 
 ! prevent too large SMC initial values
   do isoil = 1, NSOIL
@@ -371,7 +377,6 @@ program WaterDriverMod
   call initialize_output(noahmp, input, ntime+1)
   call add_to_output(0, noahmp, errwat)
 
-  print*, 'driver: add output at time 0 ...'
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -379,13 +384,16 @@ program WaterDriverMod
 
   do itime = 1, ntime
 
-    print*, 'itime = ',itime
 
     tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA ! [mm] 
 
     IRFIRATE = 0.0
     IRMIRATE = 0.0
- 
+    IRSIRATE = 0.0
+    IREVPLOS = 0.0 
+    FIRR     = 0.0
+    EIRR     = 0.0
+
   !---------------------------------------------------------------------
   ! calculate the input water
   !---------------------------------------------------------------------
@@ -413,6 +421,38 @@ program WaterDriverMod
        SNOW = 0.0
     endif
 
+
+!---------------------------------------------------------------------
+!--------------------------------------------------------------------- 
+! main noahmplsm subroutine below
+
+    !---------------------------------------------------------------------
+    ! call irrigation trigger and sprinkler irrigation
+    !--------------------------------------------------------------------- 
+
+    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. (RAIN < (IR_RAIN/3600.0)) .and. &
+         ((IRAMTSI+IRAMTMI+IRAMTFI) == 0.0) ) then
+       call IrrigationTrigger(noahmp)
+    endif
+    ! set irrigation off if larger than IR_RAIN mm/h for this time step and irr triggered last time step
+    if ( (RAIN >= (IR_RAIN/3600.0)) .or. (IRRFRA < IRR_FRAC) ) then
+        IRAMTSI = 0.0
+        IRAMTMI = 0.0
+        IRAMTFI = 0.0
+    endif
+
+    ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
+    if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) then
+       call SprinklerIrrigation(noahmp)
+       RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
+       ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
+       FIRR = IREVPLOS * 1000.0 * HVAP / DT   ! heat used for evaporation (W/m2)
+       EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
+    endif
+
+    !---------------------------------------------------------------------
+    ! call canopy water interception and precip heat advection
+    !--------------------------------------------------------------------- 
     QRAIN = RAIN * 0.99
     QSNOW = SNOW * 0.9
     SNOWHIN = QSNOW / BDFALL
@@ -423,7 +463,11 @@ program WaterDriverMod
 
     call WaterMain(noahmp)
 
-    print*, 'driver: watermain done ...'
+
+! main noahmplsm subroutines above
+!--------------------------------------------------------------------- 
+!---------------------------------------------------------------------
+
 
 ! some updates from last time step for use in next step (from drv)
 
@@ -433,12 +477,13 @@ program WaterDriverMod
     totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA      ! total soil+snow water [mm]
     errwat   = (QRAIN+QSNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! water balance error [mm]
 
+  if (abs(errwat) > 0.1) print*,'water not balanced ....'
+
     !---------------------------------------------------------------------
     ! add to output file
     !---------------------------------------------------------------------
 
     call add_to_output(itime, noahmp, errwat)
-    print*, 'add output done ...'
    
   end do ! time loop
 
@@ -446,4 +491,7 @@ program WaterDriverMod
    
   end associate
 
-end program WaterDriverMod
+  print*, 'model run successfully completed ...'
+
+
+end program NoahmpDriverMod

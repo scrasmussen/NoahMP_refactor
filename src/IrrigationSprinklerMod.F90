@@ -1,0 +1,92 @@
+module IrrigationSprinklerMod
+
+!!! Estimate irrigation water depth (m) based on sprinkler method 
+!!! Reference: chapter 11 of NRCS, Part 623 National Engineering Handbook. 
+!!! Irrigation water will be applied over the canopy, affecting  present soil moisture, 
+!!! infiltration rate of the soil, and evaporative loss, which should be executed before canopy process.
+ 
+  use Machine,     only : kind_noahmp
+  use CheckNanMod, only : CheckRealNaN
+  use NoahmpVarType
+  use ConstantDefineMod
+  use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
+
+  implicit none
+
+contains
+
+  subroutine SprinklerIrrigation(noahmp)
+
+! ------------------------ Code history --------------------------------------------------
+! Original Noah-MP subroutine: SPRINKLER_IRRIGATION
+! Original code: P. Valayamkunnath (NCAR) <prasanth@ucar.edu> (08/06/2020)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! ----------------------------------------------------------------------------------------
+
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
+
+! local variable
+    logical                :: NaNInd       ! NaN value indicator: if NaN, return true
+    real(kind=kind_noahmp) :: FSUR         ! surface infiltration rate (m/s)
+    real(kind=kind_noahmp) :: TEMP_RATE    ! temporary irrigation rate (m/timestep)
+    real(kind=kind_noahmp) :: WINDSPEED    ! total wind speed (m/s)
+    real(kind=kind_noahmp) :: IRRLOSS      ! temporary var for irr loss [%]
+    real(kind=kind_noahmp) :: ESAT1        ! satuarated air pressure (pa)
+
+! --------------------------------------------------------------------
+    associate(                                                        &
+              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              T2              => noahmp%forcing%SFCTMP               ,& ! in,     surface air temperature [k] from Atmos forcing
+              WINDU           => noahmp%forcing%UU                   ,& ! in,     u direction wind
+              WINDV           => noahmp%forcing%VV                   ,& ! in,     v direction wind
+              EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
+              SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
+              SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
+              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
+              IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
+              IREVPLOS        => noahmp%water%flux%IREVPLOS           & ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+             )
+! ----------------------------------------------------------------------
+
+    ! estimate infiltration rate based on Philips Eq.
+    call IrrigationInfilPhilip(noahmp, DT, FSUR)
+
+    ! irrigation rate of sprinkler
+    TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * DT / 3600.0   ! NRCS rate/time step - calibratable
+    IRSIRATE  = min( FSUR*DT, IRAMTSI, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
+                                                          ! and to the NRCS recommended rate, (m)
+
+    ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
+    ! losses from sprinkler irrigation systems under various operating 
+    ! conditions. Journal of Applied Sciences, 9(3), 597-600.
+    WINDSPEED = sqrt( (WINDU**2.0) + (WINDV**2.0) )                       ! [m/s]
+    ESAT1     = 610.8 * exp( (17.27*(T2-273.15)) / (237.3+(T2-273.15)) )  ! [Pa]
+    if ( T2 > 273.15 ) then ! Equation (3)
+       IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.092) ) * ( (T2-273.15)**(-0.102) ) ! [%]
+    else ! Equation (4)
+       IRRLOSS = 4.337 * ( exp(0.077*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.098) ) ! [%]
+    endif
+    ! Old PGI Fortran compiler does not support ISNAN
+    call CheckRealNaN(IRRLOSS, NaNInd)
+    if ( NaNInd .eqv. .true. ) IRRLOSS = 4.0 ! In case if IRRLOSS is NaN
+    if ( (IRRLOSS > 100.0) .or. (IRRLOSS < 0.0) ) IRRLOSS = 4.0 ! In case if IRRLOSS is out of range
+
+    ! Sprinkler water (m) for sprinkler fraction 
+    IRSIRATE  = IRSIRATE * SIFAC
+    if ( IRSIRATE >= IRAMTSI ) then
+       IRSIRATE = IRAMTSI
+       IRAMTSI  = 0.0
+    else
+       IRAMTSI = IRAMTSI - IRSIRATE
+    endif
+
+    IREVPLOS = IRSIRATE * IRRLOSS * (1.0/100.0)
+    IRSIRATE = IRSIRATE - IREVPLOS
+    
+    end associate
+
+  end subroutine SprinklerIrrigation
+
+end module IrrigationSprinklerMod

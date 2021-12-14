@@ -28,6 +28,9 @@ contains
              )
 
     ! water state variable
+    noahmp%water%state%IRCNTSI        = huge(1  )
+    noahmp%water%state%IRCNTMI        = huge(1  )
+    noahmp%water%state%IRCNTFI        = huge(1  )
     noahmp%water%state%BDFALL         = huge(1.0)
     noahmp%water%state%CANLIQ         = huge(1.0)
     noahmp%water%state%CANICE         = huge(1.0)
@@ -45,6 +48,7 @@ contains
     noahmp%water%state%MIFAC          = huge(1.0)
     noahmp%water%state%IRAMTMI        = huge(1.0)
     noahmp%water%state%SIFAC          = huge(1.0)
+    noahmp%water%state%IRAMTSI        = huge(1.0)
     noahmp%water%state%ZWT            = huge(1.0)
     noahmp%water%state%SICEMAX        = huge(1.0)
     noahmp%water%state%SH2OMIN        = huge(1.0)
@@ -97,6 +101,8 @@ contains
     noahmp%water%state%BTRANI(:)      = huge(1.0)
 
     ! water flux variable
+    noahmp%water%flux%RAIN            = huge(1.0)
+    noahmp%water%flux%SNOW            = huge(1.0)
     noahmp%water%flux%ECAN            = huge(1.0)
     noahmp%water%flux%ETRAN           = huge(1.0)
     noahmp%water%flux%QEVAC           = huge(1.0)
@@ -114,6 +120,8 @@ contains
     noahmp%water%flux%SNOFLOW         = huge(1.0)
     noahmp%water%flux%IRFIRATE        = huge(1.0)
     noahmp%water%flux%IRMIRATE        = huge(1.0)
+    noahmp%water%flux%IRSIRATE        = huge(1.0)
+    noahmp%water%flux%IREVPLOS        = huge(1.0)
     noahmp%water%flux%QINSUR          = huge(1.0)
     noahmp%water%flux%RUNSRF          = huge(1.0)
     noahmp%water%flux%RUNSUB          = huge(1.0)
@@ -126,6 +134,7 @@ contains
     noahmp%water%flux%QVAP            = huge(1.0)
     noahmp%water%flux%QDEW            = huge(1.0)
     noahmp%water%flux%QSDEW           = huge(1.0)
+    noahmp%water%flux%EIRR            = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )
@@ -143,6 +152,7 @@ contains
     noahmp%water%param%DRAIN_LAYER_OPT  = huge(1  )
     noahmp%water%param%TD_DEPTH         = huge(1  )
     noahmp%water%param%NROOT            = huge(1  )
+    noahmp%water%param%IRR_HAR          = huge(1  )
     noahmp%water%param%CH2OP            = huge(1.0)
     noahmp%water%param%C2_SnowCompact   = huge(1.0)
     noahmp%water%param%C3_SnowCompact   = huge(1.0)
@@ -185,6 +195,12 @@ contains
     noahmp%water%param%REFDK            = huge(1.0)
     noahmp%water%param%REFKDT           = huge(1.0)
     noahmp%water%param%FRZK             = huge(1.0)
+    noahmp%water%param%IRR_LAI          = huge(1.0)
+    noahmp%water%param%IRR_MAD          = huge(1.0)
+    noahmp%water%param%FILOSS           = huge(1.0)
+    noahmp%water%param%SPRIR_RATE       = huge(1.0)
+    noahmp%water%param%IRR_FRAC         = huge(1.0)
+    noahmp%water%param%IR_RAIN          = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -238,8 +254,8 @@ contains
     !noahmp%water%state%SNICE(-NSNOW+1:0)        = input%SNICEIn(-NSNOW+1:0)
     !noahmp%water%state%SNLIQ(-NSNOW+1:0)        = input%SNLIQIn(-NSNOW+1:0)
     !noahmp%water%state%FICEOLD_SNOW(-NSNOW+1:0) = input%FICEOLDIn(-NSNOW+1:0)
-    !noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(1:NSOIL)
-    !noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(1:NSOIL)
+    noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(1:NSOIL)
+    noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(1:NSOIL)
     !noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(1:NSOIL)
     !noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(1:NSOIL)
     !noahmp%water%state%FIFAC                    = input%FIFACIn
@@ -247,6 +263,7 @@ contains
     !noahmp%water%state%MIFAC                    = input%MIFACIn
     !noahmp%water%state%IRAMTMI                  = input%IRAMTMIIn
     !noahmp%water%state%SIFAC                    = input%SIFACIn
+    !noahmp%water%state%IRAMTSI                  = input%IRAMTSIIn
     !noahmp%water%state%ZWT                      = input%ZWTIn
     !noahmp%water%state%SMCWTD                   = input%SMCWTDIn
     !noahmp%water%state%DEEPRECH                 = input%DEEPRECHIn
@@ -259,6 +276,10 @@ contains
     !noahmp%water%state%PONDING                  = input%PONDINGIn
     !noahmp%water%state%sfcheadrt                = input%sfcheadrtIn
     !noahmp%water%state%IRRFRA                   = input%IRRFRAIn
+    !noahmp%water%state%IRCNTSI                  = input%IRCNTSIIn
+    !noahmp%water%state%IRCNTMI                  = input%IRCNTMIIn
+    !noahmp%water%state%IRCNTFI                  = input%IRCNTFIIn
+
 
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT   = input%DRAIN_LAYER_OPT_TABLE
@@ -283,6 +304,14 @@ contains
     noahmp%water%param%CMIC              = input%CMIC_TABLE
     noahmp%water%param%WSLMAX            = input%WSLMAX_TABLE
     noahmp%water%param%SWEMAXGLA         = input%SWEMAXGLA_TABLE
+    noahmp%water%param%IRR_HAR           = input%IRR_HAR_TABLE
+    noahmp%water%param%IRR_LAI           = input%IRR_LAI_TABLE
+    noahmp%water%param%IRR_MAD           = input%IRR_MAD_TABLE
+    noahmp%water%param%FILOSS            = input%FILOSS_TABLE
+    noahmp%water%param%SPRIR_RATE        = input%SPRIR_RATE_TABLE
+    noahmp%water%param%IRR_FRAC          = input%IRR_FRAC_TABLE
+    noahmp%water%param%IR_RAIN           = input%IR_RAIN_TABLE
+
     noahmp%water%param%BVIC              = input%BVIC_TABLE(SOILTYP(1))
     noahmp%water%param%AXAJ              = input%AXAJ_TABLE(SOILTYP(1))
     noahmp%water%param%BXAJ              = input%BXAJ_TABLE(SOILTYP(1))

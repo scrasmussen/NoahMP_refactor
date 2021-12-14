@@ -5,10 +5,10 @@
 
 include ../user_build_options
 
-OBJS = ../driver/NoahMPDriverMod.o \
-       ../driver/WaterDriverMod.o \
-       ../driver/WaterOutputMod.o \
+OBJS = ../driver/NoahmpDriverMod.o \
+       ../driver/NoahmpOutputMod.o \
        ../utility/Machine.o \
+       ../utility/CheckNanMod.o \
        ../src/ConstantDefineMod.o \
        ../src/InputVarType.o \
        ../src/ConfigVarType.o \
@@ -60,10 +60,12 @@ OBJS = ../driver/NoahMPDriverMod.o \
        ../src/TileDrainageSimpleMod.o \
        ../src/WaterMainMod.o \
        ../src/WaterTableDepthSearchMod.o \
-       ../src/WaterTableEquilibriumMod.o
+       ../src/WaterTableEquilibriumMod.o \
+       ../src/IrrigationTriggerMod.o \
+       ../src/IrrigationSprinklerMod.o
 
 
-CMD = water_refac.exe
+CMD = noahmp_refac.exe
 all:	$(CMD)
 
 water_refac.exe: $(OBJS)
