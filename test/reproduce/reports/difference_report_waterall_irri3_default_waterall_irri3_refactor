@@ -1,0 +1,1303 @@
+==============================
+Output differences from simulation
+waterall_irri3_default
+compared to:
+waterall_irri3_refactor
+==============================
+
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm0.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm0.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm0.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm1.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm1.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm1.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm2.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm2.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm2.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr1.irrm3.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr1.irrm3.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr1.irrm3.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm0.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm0.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm0.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm1.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm1.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm1.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm2.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm2.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm2.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr2.irrm3.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr2.irrm3.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr2.irrm3.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm0.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm0.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm0.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm1.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm1.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm1.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm2.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm2.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm2.runoff3.soil19.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil1.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil1.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil1.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil2.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil2.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil2.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil3.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil3.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil3.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil4.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil4.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil4.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil5.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil5.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil5.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil6.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil6.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil6.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil7.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil7.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil7.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil8.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil8.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil8.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil9.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil9.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil9.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil10.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil10.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil10.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil11.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil11.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil11.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil12.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil12.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil12.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil13.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil13.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil13.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil15.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil15.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil15.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil16.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil16.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil16.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil17.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil17.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil17.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil18.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil18.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil18.vege12" are identical.
+
+=====================================
+=== case.irr3.irrm3.runoff3.soil19.vege12 ===
+=====================================
+
+Files "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_default/output.nc.irr3.irrm3.runoff3.soil19.vege12" and "/glade/work/cenlinhe/NoahMP_refact/test_results_new/waterall_irri3_refactor/output.nc.irr3.irrm3.runoff3.soil19.vege12" are identical.

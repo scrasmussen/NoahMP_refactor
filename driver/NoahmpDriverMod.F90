@@ -334,6 +334,7 @@ Program NoahmpDriverMod
      IRSIRATE = 0.0
   endif
 
+! used to test irrigation trigger
 !  IRAMTFI = 0.0
 !  IRAMTMI = 0.0
 !  IRAMTSI = 0.0
