@@ -366,6 +366,204 @@ module noahmp_routines
 
 contains
 
+!== begin precip_heat ==============================================================================
+
+  SUBROUTINE PRECIP_HEAT (parameters,ILOC   ,JLOC   ,VEGTYP ,DT     ,UU     ,VV     , & !in
+                          ELAI   ,ESAI   ,FVEG   ,IST    ,                 & !in
+                          BDFALL ,RAIN   ,SNOW   ,FP     ,                 & !in
+                          CANLIQ ,CANICE ,TV     ,SFCTMP ,TG     ,         & !in
+                          QINTR  ,QDRIPR ,QTHROR ,QINTS  ,QDRIPS ,QTHROS , & !out
+			  PAHV   ,PAHG   ,PAHB   ,QRAIN  ,QSNOW  ,SNOWHIN, & !out
+			  FWET   ,CMC                                    )   !out
+
+! ------------------------ code history ------------------------------
+! Michael Barlage: Oct 2013 - split CANWATER to calculate precip movement for 
+!                             tracking of advected heat
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! ------------------------ input/output variables --------------------
+! input
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,INTENT(IN)  :: ILOC    !grid index
+  INTEGER,INTENT(IN)  :: JLOC    !grid index
+  INTEGER,INTENT(IN)  :: VEGTYP  !vegetation type
+  INTEGER,INTENT(IN)  :: IST     !surface type 1-soil; 2-lake
+  REAL,   INTENT(IN)  :: DT      !main time step (s)
+  REAL,   INTENT(IN)  :: UU      !u-direction wind speed [m/s]
+  REAL,   INTENT(IN)  :: VV      !v-direction wind speed [m/s]
+  REAL,   INTENT(IN)  :: ELAI    !leaf area index, after burying by snow
+  REAL,   INTENT(IN)  :: ESAI    !stem area index, after burying by snow
+  REAL,   INTENT(IN)  :: FVEG    !greeness vegetation fraction (-)
+  REAL,   INTENT(IN)  :: BDFALL  !bulk density of snowfall (kg/m3)
+  REAL,   INTENT(IN)  :: RAIN    !rainfall (mm/s)
+  REAL,   INTENT(IN)  :: SNOW    !snowfall (mm/s)
+  REAL,   INTENT(IN)  :: FP      !fraction of the gridcell that receives precipitation
+  REAL,   INTENT(IN)  :: TV      !vegetation temperature (k)
+  REAL,   INTENT(IN)  :: SFCTMP  !model-level temperature (k)
+  REAL,   INTENT(IN)  :: TG      !ground temperature (k)
+
+! input & output
+  REAL, INTENT(INOUT) :: CANLIQ  !intercepted liquid water (mm)
+  REAL, INTENT(INOUT) :: CANICE  !intercepted ice mass (mm)
+
+! output
+  REAL, INTENT(OUT)   :: QINTR   !interception rate for rain (mm/s)
+  REAL, INTENT(OUT)   :: QDRIPR  !drip rate for rain (mm/s)
+  REAL, INTENT(OUT)   :: QTHROR  !throughfall for rain (mm/s)
+  REAL, INTENT(OUT)   :: QINTS   !interception (loading) rate for snowfall (mm/s)
+  REAL, INTENT(OUT)   :: QDRIPS  !drip (unloading) rate for intercepted snow (mm/s)
+  REAL, INTENT(OUT)   :: QTHROS  !throughfall of snowfall (mm/s)
+  REAL, INTENT(OUT)   :: PAHV    !precipitation advected heat - vegetation net (W/m2)
+  REAL, INTENT(OUT)   :: PAHG    !precipitation advected heat - under canopy net (W/m2)
+  REAL, INTENT(OUT)   :: PAHB    !precipitation advected heat - bare ground net (W/m2)
+  REAL, INTENT(OUT)   :: QRAIN   !rain at ground srf (mm/s) [+]
+  REAL, INTENT(OUT)   :: QSNOW   !snow at ground srf (mm/s) [+]
+  REAL, INTENT(OUT)   :: SNOWHIN !snow depth increasing rate (m/s)
+  REAL, INTENT(OUT)   :: FWET    !wetted or snowed fraction of the canopy (-)
+  REAL, INTENT(OUT)   :: CMC     !intercepted water (mm)
+! --------------------------------------------------------------------
+
+! ------------------------ local variables ---------------------------
+  REAL                :: MAXSNO  !canopy capacity for snow interception (mm)
+  REAL                :: MAXLIQ  !canopy capacity for rain interception (mm)
+  REAL                :: FT      !temperature factor for unloading rate
+  REAL                :: FV      !wind factor for unloading rate
+  REAL                :: PAH_AC  !precipitation advected heat - air to canopy (W/m2)
+  REAL                :: PAH_CG  !precipitation advected heat - canopy to ground (W/m2)
+  REAL                :: PAH_AG  !precipitation advected heat - air to ground (W/m2)
+  REAL                :: ICEDRIP !canice unloading
+! --------------------------------------------------------------------
+! initialization
+
+      QINTR   = 0.0
+      QDRIPR  = 0.0
+      QTHROR  = 0.0
+      QINTR   = 0.0
+      QINTS   = 0.0
+      QDRIPS  = 0.0
+      QTHROS  = 0.0
+      PAH_AC  = 0.0
+      PAH_CG  = 0.0
+      PAH_AG  = 0.0
+      PAHV    = 0.0
+      PAHG    = 0.0
+      PAHB    = 0.0
+      QRAIN   = 0.0
+      QSNOW   = 0.0
+      SNOWHIN = 0.0
+      ICEDRIP = 0.0
+
+! --------------------------- liquid water ------------------------------
+! maximum canopy water
+
+      MAXLIQ =  parameters%CH2OP * (ELAI+ ESAI)
+
+! average interception and throughfall
+
+      IF((ELAI+ ESAI).GT.0.0) THEN
+         QINTR  = FVEG * RAIN * FP  ! interception capability
+         QINTR  = MIN(QINTR, (MAXLIQ - CANLIQ)/DT * (1.0-EXP(-RAIN*DT/MAXLIQ)) )
+         QINTR  = MAX(QINTR, 0.0)
+         QDRIPR = FVEG * RAIN - QINTR
+         QTHROR = (1.0-FVEG) * RAIN
+         CANLIQ=MAX(0.0,CANLIQ+QINTR*DT)
+      ELSE
+         QINTR  = 0.0
+         QDRIPR = 0.0
+         QTHROR = RAIN
+	 IF(CANLIQ > 0.0) THEN             ! FOR CASE OF CANOPY GETTING BURIED
+	   QDRIPR = QDRIPR + CANLIQ/DT
+	   CANLIQ = 0.0
+	 END IF
+      END IF
+      
+! heat transported by liquid water
+
+      PAH_AC = FVEG * RAIN * (CWAT/1000.0) * (SFCTMP - TV)
+      PAH_CG = QDRIPR * (CWAT/1000.0) * (TV - TG)
+      PAH_AG = QTHROR * (CWAT/1000.0) * (SFCTMP - TG)
+
+! --------------------------- canopy ice ------------------------------
+! for canopy ice
+
+      MAXSNO = 6.6*(0.27+46.0/BDFALL) * (ELAI+ ESAI)
+
+      IF((ELAI+ ESAI) .GT. 0.0) THEN
+         QINTS = FVEG * SNOW * FP
+         QINTS = MIN(QINTS, (MAXSNO - CANICE)/DT * (1.0-EXP(-SNOW*DT/MAXSNO)) )
+         QINTS = MAX(QINTS, 0.0)
+         FT = MAX(0.0,(TV - 270.15) / 1.87E5)
+         FV = SQRT(UU*UU + VV*VV) / 1.56E5
+	 ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
+	 ICEDRIP = MAX(0.0,CANICE) * (FV+FT)    !MB: removed /DT
+         QDRIPS = (FVEG * SNOW - QINTS) + ICEDRIP
+         QTHROS = (1.0-FVEG) * SNOW
+         CANICE= MAX(0.0,CANICE + (QINTS - ICEDRIP)*DT)
+      ELSE
+         QINTS  = 0.0
+         QDRIPS = 0.0
+         QTHROS = SNOW
+	 IF(CANICE > 0.0) THEN             ! FOR CASE OF CANOPY GETTING BURIED
+	   QDRIPS = QDRIPS + CANICE/DT
+	   CANICE = 0.0
+	 END IF
+      ENDIF
+
+! wetted fraction of canopy
+
+      IF(CANICE .GT. 0.0) THEN
+           FWET = MAX(0.0,CANICE) / MAX(MAXSNO,1.0E-06)
+      ELSE
+           FWET = MAX(0.0,CANLIQ) / MAX(MAXLIQ,1.0E-06)
+      ENDIF
+      FWET = MIN(FWET, 1.0) ** 0.667
+
+! total canopy water
+
+      CMC = CANLIQ + CANICE
+
+! heat transported by snow/ice
+
+      PAH_AC = PAH_AC +  FVEG * SNOW * (CICE/1000.0) * (SFCTMP - TV)
+      PAH_CG = PAH_CG + QDRIPS * (CICE/1000.0) * (TV - TG)
+      PAH_AG = PAH_AG + QTHROS * (CICE/1000.0) * (SFCTMP - TG)
+      
+      PAHV = PAH_AC - PAH_CG
+      PAHG = PAH_CG
+      PAHB = PAH_AG
+      
+      IF (FVEG > 0.0 .AND. FVEG < 1.0) THEN
+        PAHG = PAHG / FVEG         ! these will be multiplied by fraction later
+	PAHB = PAHB / (1.0-FVEG)
+      ELSEIF (FVEG <= 0.0) THEN
+        PAHB = PAHG + PAHB         ! for case of canopy getting buried
+        PAHG = 0.0
+	PAHV = 0.0
+      ELSEIF (FVEG >= 1.0) THEN
+	PAHB = 0.0
+      END IF
+      
+      PAHV = MAX(PAHV,-20.0)       ! Put some artificial limits here for stability
+      PAHV = MIN(PAHV,20.0)
+      PAHG = MAX(PAHG,-20.0)
+      PAHG = MIN(PAHG,20.0)
+      PAHB = MAX(PAHB,-20.0)
+      PAHB = MIN(PAHB,20.0)
+      
+! rain or snow on the ground
+
+      QRAIN   = QDRIPR + QTHROR
+      QSNOW   = QDRIPS + QTHROS
+      SNOWHIN = QSNOW/BDFALL
+
+      IF (IST == 2 .AND. TG > TFRZ) THEN
+         QSNOW   = 0.0
+         SNOWHIN = 0.0
+      END IF
+
+  END SUBROUTINE PRECIP_HEAT
+
+
 !!!======================================== Start the default Water subroutine ================================
 !== begin water ====================================================================================
 
