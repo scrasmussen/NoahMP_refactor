@@ -562,6 +562,299 @@ contains
       END IF
 
   END SUBROUTINE PRECIP_HEAT
+!!!================================ END OF PRECIP_HEAT ================================
+
+
+!!!================================ Start Energy subroutines ================================
+
+
+!== begin thermoprop ===============================================================================
+
+  SUBROUTINE THERMOPROP (parameters,NSOIL   ,NSNOW   ,ISNOW   ,IST     ,DZSNSO  , & !in
+                         DT      ,SNOWH   ,SNICE   ,SNLIQ   , & !in
+                         SMC     ,SH2O    ,TG      ,STC     ,UR      , & !in
+                         LAT     ,Z0M     ,ZLVL    ,VEGTYP  , & !in
+                         DF      ,HCPCT   ,SNICEV  ,SNLIQV  ,EPORE   , & !out
+                         FACT    )                                       !out
+! ------------------------------------------------------------------------------------------------- 
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! inputs
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER                        , INTENT(IN)  :: NSOIL   !number of soil layers
+  INTEGER                        , INTENT(IN)  :: NSNOW   !maximum no. of snow layers        
+  INTEGER                        , INTENT(IN)  :: ISNOW   !actual no. of snow layers
+  INTEGER                        , INTENT(IN)  :: IST     !surface type
+  REAL                           , INTENT(IN)  :: DT      !time step [s]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(IN)  :: SNICE   !snow ice mass (kg/m2)
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(IN)  :: SNLIQ   !snow liq mass (kg/m2)
+  REAL, DIMENSION(-NSNOW+1:NSOIL), INTENT(IN)  :: DZSNSO  !thickness of snow/soil layers [m]
+  REAL, DIMENSION(       1:NSOIL), INTENT(IN)  :: SMC     !soil moisture (ice + liq.) [m3/m3]
+  REAL, DIMENSION(       1:NSOIL), INTENT(IN)  :: SH2O    !liquid soil moisture [m3/m3]
+  REAL                           , INTENT(IN)  :: SNOWH   !snow height [m]
+  REAL,                            INTENT(IN)  :: TG      !surface temperature (k)
+  REAL, DIMENSION(-NSNOW+1:NSOIL), INTENT(IN)  :: STC     !snow/soil/lake temp. (k)
+  REAL,                            INTENT(IN)  :: UR      !wind speed at ZLVL (m/s)
+  REAL,                            INTENT(IN)  :: LAT     !latitude (radians)
+  REAL,                            INTENT(IN)  :: Z0M     !roughness length (m)
+  REAL,                            INTENT(IN)  :: ZLVL    !reference height (m)
+  INTEGER                        , INTENT(IN)  :: VEGTYP  !vegtyp type
+
+! outputs
+  REAL, DIMENSION(-NSNOW+1:NSOIL), INTENT(OUT) :: DF      !thermal conductivity [w/m/k]
+  REAL, DIMENSION(-NSNOW+1:NSOIL), INTENT(OUT) :: HCPCT   !heat capacity [j/m3/k]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: SNICEV  !partial volume of ice [m3/m3]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: SNLIQV  !partial volume of liquid water [m3/m3]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: EPORE   !effective porosity [m3/m3]
+  REAL, DIMENSION(-NSNOW+1:NSOIL), INTENT(OUT) :: FACT    !computing energy for phase change
+! --------------------------------------------------------------------------------------------------
+! locals
+
+  INTEGER :: IZ
+  REAL, DIMENSION(-NSNOW+1:    0)              :: CVSNO   !volumetric specific heat (j/m3/k)
+  REAL, DIMENSION(-NSNOW+1:    0)              :: TKSNO   !snow thermal conductivity (j/m3/k)
+  REAL, DIMENSION(       1:NSOIL)              :: SICE    !soil ice content
+! --------------------------------------------------------------------------------------------------
+
+! compute snow thermal conductivity and heat capacity
+
+    CALL CSNOW (parameters,ISNOW   ,NSNOW   ,NSOIL   ,SNICE   ,SNLIQ   ,DZSNSO  , & !in
+                TKSNO   ,CVSNO   ,SNICEV  ,SNLIQV  ,EPORE   )   !out
+
+    DO IZ = ISNOW+1, 0
+      DF   (IZ) = TKSNO(IZ)
+      HCPCT(IZ) = CVSNO(IZ)
+    END DO
+
+! compute soil thermal properties
+
+    DO  IZ = 1, NSOIL
+       SICE(IZ)  = SMC(IZ) - SH2O(IZ)
+       HCPCT(IZ) = SH2O(IZ)*CWAT + (1.0-parameters%SMCMAX(IZ))*parameters%CSOIL &
+                + (parameters%SMCMAX(IZ)-SMC(IZ))*CPAIR + SICE(IZ)*CICE
+       CALL TDFCND (parameters,IZ,DF(IZ), SMC(IZ), SH2O(IZ))
+    END DO
+
+    IF ( parameters%urban_flag ) THEN
+       DO IZ = 1,NSOIL
+         DF(IZ) = 3.24
+       END DO
+    ENDIF
+
+! heat flux reduction effect from the overlying green canopy, adapted from 
+! section 2.1.2 of Peters-Lidard et al. (1997, JGR, VOL 102(D4)).
+! not in use because of the separation of the canopy layer from the ground.
+! but this may represent the effects of leaf litter (Niu comments)
+!       DF1 = DF1 * EXP (SBETA * SHDFAC)
+
+! compute lake thermal properties 
+! (no consideration of turbulent mixing for this version)
+
+    IF(IST == 2) THEN
+       DO IZ = 1, NSOIL
+         IF(STC(IZ) > TFRZ) THEN
+            HCPCT(IZ) = CWAT
+            DF(IZ)    = TKWAT  !+ KEDDY * CWAT 
+         ELSE
+            HCPCT(IZ) = CICE
+            DF(IZ)    = TKICE
+         END IF
+       END DO
+    END IF
+
+! combine a temporary variable used for melting/freezing of snow and frozen soil
+
+    DO IZ = ISNOW+1,NSOIL
+     FACT(IZ) = DT/(HCPCT(IZ)*DZSNSO(IZ))
+    END DO
+
+! snow/soil interface
+
+    IF(ISNOW == 0) THEN
+       DF(1) = (DF(1)*DZSNSO(1)+0.35*SNOWH)      / (SNOWH    +DZSNSO(1))
+    ELSE
+       DF(1) = (DF(1)*DZSNSO(1)+DF(0)*DZSNSO(0)) / (DZSNSO(0)+DZSNSO(1))
+    END IF
+
+
+  END SUBROUTINE THERMOPROP
+
+!== begin csnow ====================================================================================
+
+  SUBROUTINE CSNOW (parameters,ISNOW   ,NSNOW   ,NSOIL   ,SNICE   ,SNLIQ   ,DZSNSO  , & !in
+                    TKSNO   ,CVSNO   ,SNICEV  ,SNLIQV  ,EPORE   )   !out
+! --------------------------------------------------------------------------------------------------
+! Snow bulk density,volumetric capacity, and thermal conductivity
+!---------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+!---------------------------------------------------------------------------------------------------
+! inputs
+
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,                          INTENT(IN) :: ISNOW  !number of snow layers (-)            
+  INTEGER                        ,  INTENT(IN) :: NSNOW  !maximum no. of snow layers        
+  INTEGER                        ,  INTENT(IN) :: NSOIL  !number of soil layers
+  REAL, DIMENSION(-NSNOW+1:    0),  INTENT(IN) :: SNICE  !snow ice mass (kg/m2)
+  REAL, DIMENSION(-NSNOW+1:    0),  INTENT(IN) :: SNLIQ  !snow liq mass (kg/m2) 
+  REAL, DIMENSION(-NSNOW+1:NSOIL),  INTENT(IN) :: DZSNSO !snow/soil layer thickness [m]
+
+! outputs
+
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: CVSNO  !volumetric specific heat (j/m3/k)
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: TKSNO  !thermal conductivity (w/m/k)
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: SNICEV !partial volume of ice [m3/m3]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: SNLIQV !partial volume of liquid water [m3/m3]
+  REAL, DIMENSION(-NSNOW+1:    0), INTENT(OUT) :: EPORE  !effective porosity [m3/m3]
+
+! locals
+
+  INTEGER :: IZ
+  REAL, DIMENSION(-NSNOW+1:    0) :: BDSNOI  !bulk density of snow(kg/m3)
+
+!---------------------------------------------------------------------------------------------------
+! thermal capacity of snow
+
+  DO IZ = ISNOW+1, 0
+      SNICEV(IZ)   = MIN(1.0, SNICE(IZ)/(DZSNSO(IZ)*DENICE) )
+      EPORE(IZ)    = 1.0 - SNICEV(IZ)
+      SNLIQV(IZ)   = MIN(EPORE(IZ),SNLIQ(IZ)/(DZSNSO(IZ)*DENH2O))
+  ENDDO
+
+  DO IZ = ISNOW+1, 0
+      BDSNOI(IZ) = (SNICE(IZ)+SNLIQ(IZ))/DZSNSO(IZ)
+      CVSNO(IZ) = CICE*SNICEV(IZ)+CWAT*SNLIQV(IZ)
+!      CVSNO(IZ) = 0.525E06                          ! constant
+  enddo
+
+! thermal conductivity of snow
+
+  DO IZ = ISNOW+1, 0
+     TKSNO(IZ) = 3.2217E-6*BDSNOI(IZ)**2.0           ! Stieglitz(yen,1965)
+!    TKSNO(IZ) = 2E-2+2.5E-6*BDSNOI(IZ)*BDSNOI(IZ)   ! Anderson, 1976
+!    TKSNO(IZ) = 0.35                                ! constant
+!    TKSNO(IZ) = 2.576E-6*BDSNOI(IZ)**2. + 0.074    ! Verseghy (1991)
+!    TKSNO(IZ) = 2.22*(BDSNOI(IZ)/1000.)**1.88      ! Douvill(Yen, 1981)
+  ENDDO
+
+  END SUBROUTINE CSNOW
+
+!== begin tdfcnd ===================================================================================
+
+  SUBROUTINE TDFCND (parameters, ISOIL, DF, SMC, SH2O)
+! --------------------------------------------------------------------------------------------------
+! Calculate thermal diffusivity and conductivity of the soil.
+! Peters-Lidard approach (Peters-Lidard et al., 1998)
+! --------------------------------------------------------------------------------------------------
+! Code history:
+! June 2001 changes: frozen soil condition.
+! --------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+  type (noahmp_parameters), intent(in) :: parameters
+    INTEGER, INTENT(IN)    :: ISOIL  ! soil layer
+    REAL, INTENT(IN)       :: SMC    ! total soil water
+    REAL, INTENT(IN)       :: SH2O   ! liq. soil water
+    REAL, INTENT(OUT)      :: DF     ! thermal diffusivity
+
+! local variables
+    REAL  :: AKE
+    REAL  :: GAMMD
+    REAL  :: THKDRY
+    REAL  :: THKO     ! thermal conductivity for other soil components         
+    REAL  :: THKQTZ   ! thermal conductivity for quartz
+    REAL  :: THKSAT   ! 
+    REAL  :: THKS     ! thermal conductivity for the solids
+    REAL  :: THKW     ! water thermal conductivity
+    REAL  :: SATRATIO
+    REAL  :: XU
+    REAL  :: XUNFROZ
+! --------------------------------------------------------------------------------------------------
+! We now get quartz as an input argument (set in routine redprm):
+!      DATA QUARTZ /0.82, 0.10, 0.25, 0.60, 0.52,
+!     &             0.35, 0.60, 0.40, 0.82/
+! --------------------------------------------------------------------------------------------------
+! If the soil has any moisture content compute a partial sum/product
+! otherwise use a constant value which works well with most soils
+! --------------------------------------------------------------------------------------------------
+!  QUARTZ ....QUARTZ CONTENT (SOIL TYPE DEPENDENT)
+! --------------------------------------------------------------------------------------------------
+! USE AS IN PETERS-LIDARD, 1998 (MODIF. FROM JOHANSEN, 1975).
+
+!                                  PABLO GRUNMANN, 08/17/98
+! Refs.:
+!      Farouki, O.T.,1986: Thermal properties of soils. Series on Rock
+!              and Soil Mechanics, Vol. 11, Trans Tech, 136 pp.
+!      Johansen, O., 1975: Thermal conductivity of soils. PH.D. Thesis,
+!              University of Trondheim,
+!      Peters-Lidard, C. D., et al., 1998: The effect of soil thermal
+!              conductivity parameterization on surface energy fluxes
+!              and temperatures. Journal of The Atmospheric Sciences,
+!              Vol. 55, pp. 1209-1224.
+! --------------------------------------------------------------------------------------------------
+! NEEDS PARAMETERS
+! POROSITY(SOIL TYPE):
+!      POROS = SMCMAX
+! SATURATION RATIO:
+! PARAMETERS  W/(M.K)
+    SATRATIO = SMC / parameters%SMCMAX(ISOIL)
+    THKW = 0.57
+!      IF (QUARTZ .LE. 0.2) THKO = 3.0
+    THKO = 2.0
+! SOLIDS' CONDUCTIVITY
+! QUARTZ' CONDUCTIVITY
+    THKQTZ = 7.7
+
+! UNFROZEN FRACTION (FROM 1., i.e., 100%LIQUID, TO 0. (100% FROZEN))
+    THKS = (THKQTZ ** parameters%QUARTZ(ISOIL))* (THKO ** (1.0 - parameters%QUARTZ(ISOIL)))
+
+! UNFROZEN VOLUME FOR SATURATION (POROSITY*XUNFROZ)
+    XUNFROZ = 1.0                       ! Prevent divide by zero (suggested by D. Mocko)
+    IF(SMC > 0.0) XUNFROZ = SH2O / SMC
+! SATURATED THERMAL CONDUCTIVITY
+    XU = XUNFROZ * parameters%SMCMAX(ISOIL)
+
+! DRY DENSITY IN KG/M3
+    THKSAT = THKS ** (1.0 - parameters%SMCMAX(ISOIL))* TKICE ** (parameters%SMCMAX(ISOIL) - XU)* THKW **   &
+         (XU)
+
+! DRY THERMAL CONDUCTIVITY IN W.M-1.K-1
+    GAMMD = (1.0 - parameters%SMCMAX(ISOIL))*2700.0
+
+    THKDRY = (0.135* GAMMD+ 64.7)/ (2700.0 - 0.947* GAMMD)
+! FROZEN
+    IF ( (SH2O + 0.0005) <  SMC ) THEN
+       AKE = SATRATIO
+! UNFROZEN
+! RANGE OF VALIDITY FOR THE KERSTEN NUMBER (AKE)
+    ELSE
+
+! KERSTEN NUMBER (USING "FINE" FORMULA, VALID FOR SOILS CONTAINING AT
+! LEAST 5% OF PARTICLES WITH DIAMETER LESS THAN 2.E-6 METERS.)
+! (FOR "COARSE" FORMULA, SEE PETERS-LIDARD ET AL., 1998).
+
+       IF ( SATRATIO >  0.1 ) THEN
+
+          AKE = LOG10 (SATRATIO) + 1.0
+
+! USE K = KDRY
+       ELSE
+
+          AKE = 0.0
+       END IF
+!  THERMAL CONDUCTIVITY
+
+    END IF
+
+    DF = AKE * (THKSAT - THKDRY) + THKDRY
+
+
+  end subroutine TDFCND
+
+
+
+
+
+
+!!!================================ END OF Energy subroutines ================================
 
 
 !!!======================================== Start the default Water subroutine ================================

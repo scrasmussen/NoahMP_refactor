@@ -72,7 +72,6 @@ module noahmp_output
   integer           :: IREVPLOS_id
   integer           :: FIRR_id
   integer           :: EIRR_id
-
   integer           :: SNOWHIN_id
   integer           :: TG_id
   integer           :: QINTR_id
@@ -85,7 +84,13 @@ module noahmp_output
   integer           :: PAHG_id
   integer           :: PAHB_id
   integer           :: EDIR_id
-
+! thermoprop new vars
+  integer           :: DF_id
+  integer           :: HCPCT_id
+  integer           :: SNICEV_id
+  integer           :: SNLIQV_id
+  integer           :: EPORE_id
+  integer           :: FACT_id
 
 contains
 
@@ -164,7 +169,6 @@ contains
     iret = nf90_def_var(ncid, "IREVPLOS",    NF90_FLOAT, (/time_dim/), IREVPLOS_id)
     iret = nf90_def_var(ncid, "FIRR",        NF90_FLOAT, (/time_dim/), FIRR_id)
     iret = nf90_def_var(ncid, "EIRR",        NF90_FLOAT, (/time_dim/), EIRR_id)
-
     iret = nf90_def_var(ncid, "SNOWHIN",     NF90_FLOAT, (/time_dim/), SNOWHIN_id)
     iret = nf90_def_var(ncid, "TG",          NF90_FLOAT, (/time_dim/), TG_id)
     iret = nf90_def_var(ncid, "QINTR",       NF90_FLOAT, (/time_dim/), QINTR_id)
@@ -177,6 +181,13 @@ contains
     iret = nf90_def_var(ncid, "PAHG",        NF90_FLOAT, (/time_dim/), PAHG_id)
     iret = nf90_def_var(ncid, "PAHB",        NF90_FLOAT, (/time_dim/), PAHB_id)
     iret = nf90_def_var(ncid, "EDIR",        NF90_FLOAT, (/time_dim/), EDIR_id)
+! thermoprop new vars
+    iret = nf90_def_var(ncid, "DF",          NF90_FLOAT, (/time_dim,snso_dim/), DF_id)
+    iret = nf90_def_var(ncid, "HCPCT",       NF90_FLOAT, (/time_dim,snso_dim/), HCPCT_id)
+    iret = nf90_def_var(ncid, "FACT",        NF90_FLOAT, (/time_dim,snso_dim/), FACT_id)
+    iret = nf90_def_var(ncid, "SNLIQV",      NF90_FLOAT, (/time_dim,snow_dim/), SNLIQV_id)
+    iret = nf90_def_var(ncid, "EPORE",       NF90_FLOAT, (/time_dim,snow_dim/), EPORE_id)
+    iret = nf90_def_var(ncid, "SNICEV",      NF90_FLOAT, (/time_dim,snow_dim/), SNICEV_id)
 
 
     iret = nf90_enddef(ncid)
@@ -190,7 +201,8 @@ contains
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR)
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -257,7 +269,6 @@ contains
      real                          :: IREVPLOS
      real                          :: FIRR
      real                          :: EIRR
-
      real                          :: SNOWHIN
      real                          :: TG
      real                          :: QINTR
@@ -271,7 +282,16 @@ contains
      real                          :: PAHB
      real                          :: EDIR
 
+! thermoprop new vars
+     real, dimension(nsoil+nsnow)  :: DF
+     real, dimension(nsoil+nsnow)  :: HCPCT
+     real, dimension(nsoil+nsnow)  :: FACT
+     real, dimension(nsnow)        :: SNICEV
+     real, dimension(nsnow)        :: SNLIQV
+     real, dimension(nsnow)        :: EPORE
 
+
+! assign values
      iret = nf90_put_var(ncid, ISNOW_id,    ISNOW,         start=(/itime+1/))
      iret = nf90_put_var(ncid, CANLIQ_id,   CANLIQ,        start=(/itime+1/))
      iret = nf90_put_var(ncid, CANICE_id,   CANICE,        start=(/itime+1/))
@@ -334,7 +354,6 @@ contains
      iret = nf90_put_var(ncid, IREVPLOS_id, IREVPLOS,      start=(/itime+1/))
      iret = nf90_put_var(ncid, FIRR_id,     FIRR,          start=(/itime+1/))
      iret = nf90_put_var(ncid, EIRR_id,     EIRR,          start=(/itime+1/))
-
      iret = nf90_put_var(ncid, SNOWHIN_id,  SNOWHIN,       start=(/itime+1/))
      iret = nf90_put_var(ncid, TG_id,       TG,            start=(/itime+1/))
      iret = nf90_put_var(ncid, QINTR_id,    QINTR,         start=(/itime+1/))
@@ -347,6 +366,14 @@ contains
      iret = nf90_put_var(ncid, PAHG_id,     PAHG,          start=(/itime+1/))
      iret = nf90_put_var(ncid, PAHB_id,     PAHB,          start=(/itime+1/))
      iret = nf90_put_var(ncid, EDIR_id,     EDIR,          start=(/itime+1/))
+
+! thermoprop new vars
+     iret = nf90_put_var(ncid, DF_id,       DF,            start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, HCPCT_id,    HCPCT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, FACT_id,     FACT,          start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, SNICEV_id,   SNICEV,        start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, SNLIQV_id,   SNLIQV,        start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, EPORE_id,    EPORE,         start=(/itime+1,1/), count=(/1,nsnow/))
 
 
    end subroutine add_to_output

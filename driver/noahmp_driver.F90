@@ -188,8 +188,6 @@ USE NOAHMP_TABLES
 #ifdef WRF_HYDRO
   REAL                            :: sfcheadrt, WATBLED
 #endif
-
-
   REAL                            :: QINTR   !interception rate for rain (mm/s)
   REAL                            :: QDRIPR  !drip rate for rain (mm/s)
   REAL                            :: QTHROR  !throughfall for rain (mm/s)
@@ -200,6 +198,19 @@ USE NOAHMP_TABLES
   REAL                            :: PAHG    !precipitation advected heat - under canopy net (W/m2)
   REAL                            :: PAHB    !precipitation advected heat - bare ground net (W/m2)
   REAL                            :: EDIR    !net soil evaporation (mm/s)
+
+! thermoprop new vars
+  REAL                            :: UR      !wind speed at ZLVL (m/s)
+  REAL                            :: LAT     !latitude (radians)
+  REAL                            :: Z0M     !roughness length (m)
+  REAL                            :: ZLVL    !reference height (m)
+  real, allocatable, dimension(:) :: DF      !thermal conductivity [w/m/k]
+  real, allocatable, dimension(:) :: HCPCT   !heat capacity [j/m3/k]
+  real, allocatable, dimension(:) :: SNICEV  !partial volume of ice [m3/m3]
+  real, allocatable, dimension(:) :: SNLIQV  !partial volume of liquid water [m3/m3]
+  real, allocatable, dimension(:) :: EPORE   !effective porosity [m3/m3]
+  real, allocatable, dimension(:) :: FACT    !computing energy for phase change
+
 
 !---------------------------------------------------------------------
 !  local variables
@@ -245,7 +256,16 @@ USE NOAHMP_TABLES
   allocate (SH2O  (       1:nsoil))   !soil liquid water content [m3/m3]
   allocate (SMC   (       1:nsoil))   !total soil water content [m3/m3]
   allocate (ETRANI(       1:nsoil))   !transpiration rate (mm/s) [+]
-  allocate (WCND (       1:nsoil))   !hydraulic conductivity (m/s)
+  allocate (WCND  (       1:nsoil))   !hydraulic conductivity (m/s)
+
+! thermoprop new vars
+  allocate (DF    (-nsnow+1:nsoil))
+  allocate (HCPCT (-nsnow+1:nsoil))
+  allocate (SNICEV(-nsnow+1:0    ))
+  allocate (SNLIQV(-nsnow+1:0    ))
+  allocate (EPORE (-nsnow+1:0    ))
+  allocate (FACT  (-nsnow+1:nsoil))
+
 
 !---------------------------------------------------------------------
 !  read input file, part 2: initialize
@@ -625,8 +645,6 @@ end if
   sfcheadrt = 0.0
   WATBLED  0.0
 #endif
-
-
   VEGTYP = vegtype
   QINTR  = 0.0
   QDRIPR = 0.0
@@ -637,6 +655,18 @@ end if
   PAHV   = 0.0
   PAHG   = 0.0
   PAHB   = 0.0
+
+! thermoprop new vars
+  UR     = MAX( SQRT(UU**2.0 + VV**2.0), 1.0 )
+  LAT    = 120.0 * 3.1415 / 180.0  ! 120E -> radian
+  Z0M    = 0.1
+  ZLVL   = 10.0
+  DF     = 0.0
+  HCPCT  = 0.0
+  SNICEV = 0.0
+  SNLIQV = 0.0
+  EPORE  = 0.0
+  FACT   = 0.0
 
 
 ! set psychrometric constant
@@ -756,7 +786,8 @@ end if
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR)
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -849,6 +880,15 @@ end if
 
 !!!============================ Energy module all
 
+! Thermal properties of soil, snow, lake, and frozen soil
+
+  CALL THERMOPROP (parameters,NSOIL   ,NSNOW   ,ISNOW   ,IST     ,DZSNSO  , & !in
+                   DT      ,SNOWH   ,SNICE   ,SNLIQ   , & !in
+                   SMC     ,SH2O    ,TG      ,STC     ,UR      , & !in
+                   LAT     ,Z0M     ,ZLVL    ,VEGTYP  , & !in
+                   DF      ,HCPCT   ,SNICEV  ,SNLIQV  ,EPORE   , & !out
+                   FACT    )                              !out
+
 
 
 
@@ -911,7 +951,8 @@ end if
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR)
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
 
  
   end do ! time loop
