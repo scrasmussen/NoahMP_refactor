@@ -28,11 +28,11 @@ module WaterVarType
     real(kind=kind_noahmp) :: QSUBC         ! canopy ice sublimation rate (mm/s)
     real(kind=kind_noahmp) :: QMELTC        ! canopy ice melting rate (mm/s)
     real(kind=kind_noahmp) :: QFRZC         ! canopy water refreezing rate (mm/s)
-    real(kind=kind_noahmp) :: QSNOW         ! snow at ground surface (mm/s) [+]
+    real(kind=kind_noahmp) :: QSNOW         ! snowfall at ground surface (mm/s) [+]
     real(kind=kind_noahmp) :: SNOWHIN       ! snow depth increasing rate (m/s)
     real(kind=kind_noahmp) :: QSNFRO        ! snow surface frost rate[mm/s]
     real(kind=kind_noahmp) :: QSNSUB        ! snow surface sublimation rate[mm/s]
-    real(kind=kind_noahmp) :: QRAIN         ! snow surface rain rate[mm/s]
+    real(kind=kind_noahmp) :: QRAIN         ! ground (soil/snow) surface rain rate[mm/s]
     real(kind=kind_noahmp) :: QSNBOT        ! melting water out of snow bottom [mm/s]
     real(kind=kind_noahmp) :: SNOFLOW       ! glacier flow [mm/s]
     real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
@@ -52,6 +52,13 @@ module WaterVarType
     real(kind=kind_noahmp) :: QDEW          ! soil surface dew rate[mm/s]
     real(kind=kind_noahmp) :: QSDEW         ! soil surface dew rate [mm/s]
     real(kind=kind_noahmp) :: EIRR          ! evaporation of irrigation water to evaporation,sprinkler [mm/s]
+    real(kind=kind_noahmp) :: QINTR         ! interception rate for rain (mm/s)
+    real(kind=kind_noahmp) :: QDRIPR        ! drip rate for rain (mm/s)
+    real(kind=kind_noahmp) :: QTHROR        ! throughfall for rain (mm/s)
+    real(kind=kind_noahmp) :: QINTS         ! interception (loading) rate for snowfall (mm/s)
+    real(kind=kind_noahmp) :: QDRIPS        ! drip (unloading) rate for intercepted snow (mm/s)
+    real(kind=kind_noahmp) :: QTHROS        ! throughfall of snowfall (mm/s)
+    real(kind=kind_noahmp) :: EDIR          ! net direct soil evaporation (mm/s)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
@@ -102,7 +109,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: WSLAKE      ! water storage in lake (can be -) (mm) 
     real(kind=kind_noahmp) :: sfcheadrt   ! surface water head (mm)
     real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
-
+    real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -179,6 +186,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: SPRIR_RATE       ! sprinkler irrigation rate (mm/h)
     real(kind=kind_noahmp) :: IRR_FRAC         ! irrigation Fraction
     real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger
+    real(kind=kind_noahmp) :: SNOWDEN_MIN      ! minimum fresh snowfall density (kg/m3)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

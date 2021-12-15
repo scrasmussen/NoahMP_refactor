@@ -378,6 +378,7 @@
   WSLMAX = 5000.0      ! maximum lake water storage (mm)  cenlin
   ROUS = 0.20   ! specific yield [-] for Niu et al. 2007 groundwater scheme (OPT_RUNSUB=1)
   CMIC = 0.20   ! microprore content (0.0-1.0), 0.0: close to free drainage
+  SNOWDEN_MIN = 120.0  ! minimum fresh snowfall density (kg/m3)
 /
 
 &noahmp_irrigation_parameters

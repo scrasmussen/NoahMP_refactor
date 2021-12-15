@@ -13,7 +13,6 @@ module NoahmpOutputMod
   integer           :: soil_dim
   integer           :: snow_dim
   integer           :: snso_dim
-
   integer           :: ISNOW_id
   integer           :: CANLIQ_id
   integer           :: CANICE_id
@@ -76,6 +75,18 @@ module NoahmpOutputMod
   integer           :: IREVPLOS_id
   integer           :: FIRR_id
   integer           :: EIRR_id
+  integer           :: SNOWHIN_id
+  integer           :: TG_id
+  integer           :: QINTR_id
+  integer           :: QDRIPR_id
+  integer           :: QTHROR_id
+  integer           :: QINTS_id
+  integer           :: QDRIPS_id
+  integer           :: QTHROS_id
+  integer           :: PAHV_id
+  integer           :: PAHG_id
+  integer           :: PAHB_id
+  integer           :: EDIR_id
 
 contains
 
@@ -159,6 +170,18 @@ contains
     iret = nf90_def_var(ncid, "IREVPLOS",    NF90_FLOAT, (/time_dim/)         , IREVPLOS_id )
     iret = nf90_def_var(ncid, "FIRR",        NF90_FLOAT, (/time_dim/)         , FIRR_id     )
     iret = nf90_def_var(ncid, "EIRR",        NF90_FLOAT, (/time_dim/)         , EIRR_id     )
+    iret = nf90_def_var(ncid, "SNOWHIN",     NF90_FLOAT, (/time_dim/)         , SNOWHIN_id  )
+    iret = nf90_def_var(ncid, "TG",          NF90_FLOAT, (/time_dim/)         , TG_id       )
+    iret = nf90_def_var(ncid, "QINTR",       NF90_FLOAT, (/time_dim/)         , QINTR_id    )
+    iret = nf90_def_var(ncid, "QDRIPR",      NF90_FLOAT, (/time_dim/)         , QDRIPR_id   )
+    iret = nf90_def_var(ncid, "QTHROR",      NF90_FLOAT, (/time_dim/)         , QTHROR_id   )
+    iret = nf90_def_var(ncid, "QINTS",       NF90_FLOAT, (/time_dim/)         , QINTS_id    )
+    iret = nf90_def_var(ncid, "QDRIPS",      NF90_FLOAT, (/time_dim/)         , QDRIPS_id   )
+    iret = nf90_def_var(ncid, "QTHROS",      NF90_FLOAT, (/time_dim/)         , QTHROS_id   )
+    iret = nf90_def_var(ncid, "PAHV",        NF90_FLOAT, (/time_dim/)         , PAHV_id     )
+    iret = nf90_def_var(ncid, "PAHG",        NF90_FLOAT, (/time_dim/)         , PAHG_id     )
+    iret = nf90_def_var(ncid, "PAHB",        NF90_FLOAT, (/time_dim/)         , PAHB_id     )
+    iret = nf90_def_var(ncid, "EDIR",        NF90_FLOAT, (/time_dim/)         , EDIR_id     )
 
 
     iret = nf90_enddef(ncid)
@@ -242,7 +265,18 @@ contains
     iret = nf90_put_var(ncid, IREVPLOS_id, noahmp%water%flux%IREVPLOS,       start=(/itime+1/))
     iret = nf90_put_var(ncid, FIRR_id,     noahmp%energy%flux%FIRR,          start=(/itime+1/))
     iret = nf90_put_var(ncid, EIRR_id,     noahmp%water%flux%EIRR,           start=(/itime+1/))
-
+    iret = nf90_put_var(ncid, SNOWHIN_id,  noahmp%water%flux%SNOWHIN,        start=(/itime+1/))
+    iret = nf90_put_var(ncid, TG_id,       noahmp%energy%state%TG,           start=(/itime+1/))
+    iret = nf90_put_var(ncid, QINTR_id,    noahmp%water%flux%QINTR,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, QDRIPR_id,   noahmp%water%flux%QDRIPR,         start=(/itime+1/))
+    iret = nf90_put_var(ncid, QTHROR_id,   noahmp%water%flux%QTHROR,         start=(/itime+1/))
+    iret = nf90_put_var(ncid, QINTS_id,    noahmp%water%flux%QINTS,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, QDRIPS_id,   noahmp%water%flux%QDRIPS,         start=(/itime+1/))
+    iret = nf90_put_var(ncid, QTHROS_id,   noahmp%water%flux%QTHROS,         start=(/itime+1/))
+    iret = nf90_put_var(ncid, PAHV_id,     noahmp%energy%flux%PAHV,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, PAHG_id,     noahmp%energy%flux%PAHG,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, PAHB_id,     noahmp%energy%flux%PAHB,          start=(/itime+1/))
+    iret = nf90_put_var(ncid, EDIR_id,     noahmp%water%flux%EDIR,           start=(/itime+1/))
 
 
     end associate

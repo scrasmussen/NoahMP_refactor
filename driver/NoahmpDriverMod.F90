@@ -14,6 +14,8 @@ Program NoahmpDriverMod
   use NoahmpOutputMod
   use IrrigationTriggerMod
   use IrrigationSprinklerMod
+  use CanopyWaterInterceptMod
+  use PrecipitationHeatAdvectMod
 
   implicit none
 !---------------------------------------------------------------------
@@ -38,8 +40,6 @@ Program NoahmpDriverMod
   real(kind=kind_noahmp) :: FB_snow            ! canopy fraction buried by snow
   real(kind=kind_noahmp) :: LAI                ! leaf area index
   real(kind=kind_noahmp) :: SAI                ! stem area index
-  real(kind=kind_noahmp) :: RAIN               ! total rain rate mm/s
-  real(kind=kind_noahmp) :: SNOW               ! total snow rate mm/s
   real(kind=kind_noahmp) :: LATHEAV            ! latent heat vap./sublimation (j/kg) for canopy
   real(kind=kind_noahmp) :: LATHEAG            ! latent heat vap./sublimation (j/kg) for ground
   real(kind=kind_noahmp) :: QAIR               ! specific humidity
@@ -170,7 +170,18 @@ Program NoahmpDriverMod
             IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
             RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
             SNOW            => noahmp%water%flux%SNOW              ,& ! inout,  snowfall rate
-            IR_RAIN         => noahmp%water%param%IR_RAIN           & ! in,     maximum precipitation to stop irrigation trigger
+            IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
+            QINTR           => noahmp%water%flux%QINTR             ,& ! out,   interception rate for rain (mm/s)
+            QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! out,   drip rate for rain (mm/s)
+            QTHROR          => noahmp%water%flux%QTHROR            ,& ! out,   throughfall for rain (mm/s)
+            QINTS           => noahmp%water%flux%QINTS             ,& ! out,   interception (loading) rate for snowfall (mm/s)
+            QDRIPS          => noahmp%water%flux%QDRIPS            ,& ! out,   drip (unloading) rate for intercepted snow (mm/s)
+            QTHROS          => noahmp%water%flux%QTHROS            ,& ! out,   throughfall of snowfall (mm/s)
+            PAHV            => noahmp%energy%flux%PAHV             ,& ! out,   precipitation advected heat - vegetation net (W/m2)
+            PAHG            => noahmp%energy%flux%PAHG             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
+            PAHB            => noahmp%energy%flux%PAHB             ,& ! out,   precipitation advected heat - bare ground net (W/m2)
+            EDIR            => noahmp%water%flux%EDIR              ,& ! out,   net soil evaporation
+            FP              => noahmp%water%state%FP                & ! out,   precipitation area fraction
             )
 !---------------------------------------------------------------------
 
@@ -180,11 +191,11 @@ Program NoahmpDriverMod
   if ( input%runsnow .eqv. .true. ) then
      SFCTMP    = 265.0 
      FB_snow   = 0.5
-     TV        = 265.0
-     TG        = 265.0
+     TV        = 268.0
+     TG        = 270.0
      IMELT     = 2  
-     CANLIQ    = 0.1
-     CANICE    = 4.0
+     CANLIQ    = 0.0
+     CANICE    = 0.0
      STC(1:4)  = 265.0
      STC(-2:0) = 0.0
      SH2O(1:4) = 0.03
@@ -192,10 +203,10 @@ Program NoahmpDriverMod
   else
      SFCTMP    = 298.0
      FB_snow   = 0.0
-     TV        = 298.0
-     TG        = 298.0
+     TV        = 293.0
+     TG        = 285.0
      IMELT     = 1
-     CANLIQ    = 0.4
+     CANLIQ    = 0.0
      CANICE    = 0.0
      STC(1:4)  = 298.0
      STC(-2:0) = 0.0
@@ -219,6 +230,7 @@ Program NoahmpDriverMod
   if ( FVEG <= 0.05 ) FVEG = 0.05
   SMCEQ(1:4) = 0.3                ! used only for MMF, so set to fixed value
   BDFALL     = 120.0              ! bulk density of snowfall (kg/m3)
+  FP         = 0.9 
   RAIN       = 0.0                ! total rain
   SNOW       = 0.0                ! total snowfall (mm/s)
   QRAIN      = RAIN * 0.99
@@ -261,7 +273,15 @@ Program NoahmpDriverMod
   WCND       = 0.0
   sfcheadrt  = 0.0
   WATBLED    = 0.0
-
+  QINTR      = 0.0
+  QDRIPR     = 0.0
+  QTHROR     = 0.0
+  QINTS      = 0.0
+  QDRIPS     = 0.0
+  QTHROS     = 0.0
+  PAHV       = 0.0
+  PAHG       = 0.0
+  PAHB       = 0.0
 
 ! set psychrometric constant
   if ( TV > TFRZ ) then           
@@ -282,7 +302,7 @@ Program NoahmpDriverMod
   QVAP = max( FGEV / LATHEAG, 0.0 )       ! positive part of fgev; Barlage change to ground v3.6
   QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
-
+  EDIR = QVAP - QDEW   ! net soil evaporation
 
   if ( OPT_IRR > 0) then
      IRRFRA = 1.0  ! irrigation fraction
@@ -390,7 +410,7 @@ Program NoahmpDriverMod
   do itime = 1, ntime
 
 
-    tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA ! [mm] 
+    tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA + CANLIQ + CANICE ! [mm] 
 
     IRFIRATE = 0.0
     IRMIRATE = 0.0
@@ -458,15 +478,28 @@ Program NoahmpDriverMod
     !---------------------------------------------------------------------
     ! call canopy water interception and precip heat advection
     !--------------------------------------------------------------------- 
-    QRAIN = RAIN * 0.99
-    QSNOW = SNOW * 0.9
-    SNOWHIN = QSNOW / BDFALL
+
+    call CanopyWaterIntercept(noahmp)
+    call PrecipitationHeatAdvect(noahmp)
+
+    !---------------------------------------------------------------------
+    ! call the main energy routines
+    !--------------------------------------------------------------------- 
+
 
     !---------------------------------------------------------------------
     ! call the main water routines
     !--------------------------------------------------------------------- 
 
     call WaterMain(noahmp)
+
+    !---------------------------------------------------------------------
+    ! call the main crop and carbon routines
+    !--------------------------------------------------------------------- 
+
+    !---------------------------------------------------------------------
+    ! call the main ERROR routines
+    !--------------------------------------------------------------------- 
 
 
 ! main noahmplsm subroutines above
@@ -479,8 +512,8 @@ Program NoahmpDriverMod
     FICEOLD(ISNOW+1:0) = SNICE(ISNOW+1:0) /(SNICE(ISNOW+1:0) + SNLIQ(ISNOW+1:0))
 
 ! balance check for soil and snow layers  
-    totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA      ! total soil+snow water [mm]
-    errwat   = (QRAIN+QSNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT+QDEW-QVAP-ETRAN-RUNSRF-RUNSUB-QTLDRN)*DT - (totalwat - tw0)  ! water balance error [mm]
+    totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA + CANLIQ + CANICE     ! total water storage [mm]
+    errwat   = (RAIN+SNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT-EDIR-ETRAN-RUNSRF-RUNSUB-QTLDRN-ECAN)*DT - (totalwat - tw0)  ! water balance error [mm]
 
   if (abs(errwat) > 0.1) print*,'water not balanced ....'
 

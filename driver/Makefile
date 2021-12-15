@@ -36,5 +36,7 @@ NoahmpDriverMod.o: ../utility/Machine.o \
                   ../src/WaterMainMod.o \
                   ../src/IrrigationTriggerMod.o \
                   ../src/IrrigationSprinklerMod.o \
+                  ../src/CanopyWaterInterceptMod.o \
+                  ../src/PrecipitationHeatAdvectMod.o \
                   NoahmpOutputMod.o
 

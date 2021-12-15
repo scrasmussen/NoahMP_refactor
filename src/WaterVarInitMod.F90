@@ -65,6 +65,7 @@ contains
     noahmp%water%state%WSLAKE         = huge(1.0)
     noahmp%water%state%sfcheadrt      = huge(1.0)
     noahmp%water%state%IRRFRA         = huge(1.0)
+    noahmp%water%state%FP             = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
@@ -135,6 +136,13 @@ contains
     noahmp%water%flux%QDEW            = huge(1.0)
     noahmp%water%flux%QSDEW           = huge(1.0)
     noahmp%water%flux%EIRR            = huge(1.0)
+    noahmp%water%flux%QINTR           = huge(1.0)
+    noahmp%water%flux%QDRIPR          = huge(1.0)
+    noahmp%water%flux%QTHROR          = huge(1.0)
+    noahmp%water%flux%QINTS           = huge(1.0)
+    noahmp%water%flux%QDRIPS          = huge(1.0)
+    noahmp%water%flux%QTHROS          = huge(1.0)
+    noahmp%water%flux%EDIR            = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )
@@ -201,6 +209,7 @@ contains
     noahmp%water%param%SPRIR_RATE       = huge(1.0)
     noahmp%water%param%IRR_FRAC         = huge(1.0)
     noahmp%water%param%IR_RAIN          = huge(1.0)
+    noahmp%water%param%SNOWDEN_MIN      = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -311,6 +320,7 @@ contains
     noahmp%water%param%SPRIR_RATE        = input%SPRIR_RATE_TABLE
     noahmp%water%param%IRR_FRAC          = input%IRR_FRAC_TABLE
     noahmp%water%param%IR_RAIN           = input%IR_RAIN_TABLE
+    noahmp%water%param%SNOWDEN_MIN       = input%SNOWDEN_MIN_TABLE
 
     noahmp%water%param%BVIC              = input%BVIC_TABLE(SOILTYP(1))
     noahmp%water%param%AXAJ              = input%AXAJ_TABLE(SOILTYP(1))

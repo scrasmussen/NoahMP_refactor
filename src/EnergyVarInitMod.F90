@@ -48,6 +48,9 @@ contains
     noahmp%energy%flux%FCTR             = huge(1.0)
     noahmp%energy%flux%FGEV             = huge(1.0)
     noahmp%energy%flux%FIRR             = huge(1.0)
+    noahmp%energy%flux%PAHV             = huge(1.0)
+    noahmp%energy%flux%PAHG             = huge(1.0)
+    noahmp%energy%flux%PAHB             = huge(1.0)
 
     ! energy parameter variable
     allocate( noahmp%energy%param%LAIM (12) )

@@ -22,6 +22,9 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FCTR            ! transpiration (w/m2) [+ = to atm]
     real(kind=kind_noahmp) :: FGEV            ! soil evap heat (w/m2) [+ to atm]
     real(kind=kind_noahmp) :: FIRR            ! latent heating due to sprinkler irrigation evaporation [w/m2]
+    real(kind=kind_noahmp) :: PAHV            ! precipitation advected heat - vegetation net (W/m2)
+    real(kind=kind_noahmp) :: PAHG            ! precipitation advected heat - under canopy net (W/m2)
+    real(kind=kind_noahmp) :: PAHB            ! precipitation advected heat - bare ground net (W/m2)
 
   end type flux_type
 

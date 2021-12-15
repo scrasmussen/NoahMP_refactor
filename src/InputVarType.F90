@@ -199,6 +199,7 @@ module InputVarType
     real(kind=kind_noahmp)                              :: WSLMAX_TABLE              !maximum lake water storage (mm)
     real(kind=kind_noahmp)                              :: ROUS_TABLE                !specific yield [-] for Niu et al. 2007 groundwater scheme
     real(kind=kind_noahmp)                              :: CMIC_TABLE                !microprore content (0.0-1.0), 0.0: close to free drainage
+    real(kind=kind_noahmp)                              :: SNOWDEN_MIN_TABLE         !fresh snowfall density (kg/m3)
 
     ! original MPTABLE.TBL irrigation parameters
     integer                                             :: IRR_HAR_TABLE             ! number of days before harvest date to stop irrigation 

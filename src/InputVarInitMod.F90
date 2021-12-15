@@ -108,13 +108,13 @@ contains
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN
     namelist / noahmp_global_parameters /       CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
                                                 GRAIN_GROWTH, EXTRA_GROWTH, DIRT_SOOT, BATS_COSZ, BATS_VIS_NEW,              &
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN
 
     ! MPTABLE.TBL irrigation parameters
     integer                                  :: IRR_HAR
@@ -498,6 +498,7 @@ contains
     input%WSLMAX_TABLE           = -1.0e36
     input%ROUS_TABLE             = -1.0e36
     input%CMIC_TABLE             = -1.0e36
+    input%SNOWDEN_MIN_TABLE      = -1.0e36
 
     ! MPTABLE.TBL irrigation parameters
     input%IRR_HAR_TABLE          = -99999
@@ -872,6 +873,7 @@ contains
     input%WSLMAX_TABLE           = WSLMAX
     input%ROUS_TABLE             = ROUS
     input%CMIC_TABLE             = CMIC
+    input%SNOWDEN_MIN_TABLE      = SNOWDEN_MIN
 
     !---------------- MPTABLE.TBL irrigation parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )

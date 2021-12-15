@@ -3,7 +3,7 @@
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
   output_filename = 'output.nc'
-  runsnow         = .false. ! true or false whether to run snow cases
+  runsnow         = .true. ! true or false whether to run snow cases
   JULIAN          = 180.0
 /
 
@@ -12,8 +12,8 @@
   rain_duration = 3       ! duration of rain events [hours]
   dry_duration  = 3     ! duration of no-rain events [hours]
   raining       = .true.  ! start with rain
-  uwind         = 3.0   ! wind speed m/s
-  vwind         = 3.0   ! wind speed m/s
+  uwind         = 6.0   ! wind speed m/s
+  vwind         = 6.0   ! wind speed m/s
   sfcpres       = 90000.0  ! surface pressure Pa
   fcev_e        = 5.0       ! constant canopy evaporation heat (w/m2) [+ to atm ]
   fctr_e        = 5.0       ! constant transpiration heat (w/m2) [+ to atm]
@@ -65,8 +65,8 @@ iopt_rsf = 1
 iopt_soil = 1
 iopt_pedo = 1
 iopt_crop = 0
-iopt_irr = 1  ! irrigation
-iopt_irrm = 1 ! irri method
+iopt_irr = 0  ! irrigation
+iopt_irrm = 0 ! irri method
 iopt_infdv = 1 ! only for runoff=8
 iopt_tdrn = 0 ! drainage only for runoff=3
 
