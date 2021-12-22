@@ -27,6 +27,7 @@ USE NOAHMP_TABLES
   real          :: fctr_e
   real          :: fgev_e
   real          :: Q2
+  real          :: SWDOWN
 ! structure
   integer       :: isltyp
   integer       :: vegtype
@@ -57,7 +58,7 @@ USE NOAHMP_TABLES
   !--------------------!
   namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
   namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2
+                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN
   namelist / structure       / isltyp,VEGTYPE,soilcolor,slopetype,croptype,nsoil,nsnow,structure_option,soil_depth,&
                                vegfra,vegmax,shdmax
   namelist / fixed_initial   / zsoil,dzsnso
@@ -198,7 +199,6 @@ USE NOAHMP_TABLES
   REAL                            :: PAHG    !precipitation advected heat - under canopy net (W/m2)
   REAL                            :: PAHB    !precipitation advected heat - bare ground net (W/m2)
   REAL                            :: EDIR    !net soil evaporation (mm/s)
-
 ! thermoprop new vars
   REAL                            :: UR      !wind speed at ZLVL (m/s)
   REAL                            :: LAT     !latitude (radians)
@@ -210,6 +210,31 @@ USE NOAHMP_TABLES
   real, allocatable, dimension(:) :: SNLIQV  !partial volume of liquid water [m3/m3]
   real, allocatable, dimension(:) :: EPORE   !effective porosity [m3/m3]
   real, allocatable, dimension(:) :: FACT    !computing energy for phase change
+! radiation new vars
+  integer                         :: ICE     ! value of ist for land ice
+  real                            :: SNEQVO  ! SWE at last time step
+  real                            :: COSZ    ! cosine solar zenith angle [0-1]
+  real                            :: FSNO    ! snow cover fraction
+  REAL, DIMENSION(1:2)            :: SOLAD   ! incoming direct solar radiation (w/m2)
+  REAL, DIMENSION(1:2)            :: SOLAI   ! incoming diffuse solar radiation (w/m2)
+  real                            :: ALBOLD  ! snow albedo at last time step(CLASS type)
+  real                            :: TAUSS   ! non-dimensional snow age
+  REAL                            :: FSUN    ! sunlit fraction of canopy (-)
+  REAL                            :: LAISUN  ! sunlit leaf area (-)
+  REAL                            :: LAISHA  ! shaded leaf area (-)
+  REAL                            :: PARSUN  ! average absorbed par for sunlit leaves (w/m2)
+  REAL                            :: PARSHA  ! average absorbed par for shaded leaves (w/m2)
+  REAL                            :: SAV     ! solar radiation absorbed by vegetation (w/m2)
+  REAL                            :: SAG     ! solar radiation absorbed by ground (w/m2)
+  REAL                            :: FSA     ! total absorbed solar radiation (w/m2)
+  REAL                            :: FSR     ! total reflected solar radiation (w/m2)
+  REAL                            :: FSRV    ! veg. reflected solar radiation (w/m2)
+  REAL                            :: FSRG    ! ground reflected solar radiation (w/m2)
+  REAL                            :: BGAP
+  REAL                            :: WGAP
+  REAL, DIMENSION(1:2)            :: ALBSND  ! snow albedo (direct)
+  REAL, DIMENSION(1:2)            :: ALBSNI  ! snow albedo (diffuse)
+
 
 
 !---------------------------------------------------------------------
@@ -566,6 +591,7 @@ if (runsnow) then
   STC(-2:0) = 0.0
   SH2O(1:4) = 0.03
   SICE(1:4) = 0.2
+  FSNO = 0.8
 else
   SFCTMP = 298.0 !model-level temperature (k)
   FB_snow = 0.0
@@ -578,6 +604,7 @@ else
   STC(-2:0) = 0.0
   SH2O(1:4) = 0.2
   SICE(1:4) = 0.03
+  FSNO = 0.0
 end if
 ! others
   IST = 1   !surface type 1-soil; 2-lake
@@ -655,7 +682,6 @@ end if
   PAHV   = 0.0
   PAHG   = 0.0
   PAHB   = 0.0
-
 ! thermoprop new vars
   UR     = MAX( SQRT(UU**2.0 + VV**2.0), 1.0 )
   LAT    = 120.0 * 3.1415 / 180.0  ! 120E -> radian
@@ -667,8 +693,34 @@ end if
   SNLIQV = 0.0
   EPORE  = 0.0
   FACT   = 0.0
+! radiation new vars
+  ICE    = 0
+  COSZ   = 0.5
+  SOLAD(1) = SWDOWN*0.7*0.5     ! direct  vis
+  SOLAD(2) = SWDOWN*0.7*0.5     ! direct  nir
+  SOLAI(1) = SWDOWN*0.3*0.5     ! diffuse vis
+  SOLAI(2) = SWDOWN*0.3*0.5     ! diffuse nir
+  SNEQVO = 0.0
+  ALBOLD   = 0.0
+  TAUSS    = 0.0
+  FSUN     = 0.0
+  LAISUN   = 0.0
+  LAISHA   = 0.0
+  PARSUN   = 0.0
+  PARSHA   = 0.0
+  SAV      = 0.0
+  SAG      = 0.0
+  FSA      = 0.0
+  FSR      = 0.0
+  FSRV     = 0.0
+  FSRG     = 0.0
+  BGAP     = 0.0
+  WGAP     = 0.0
+  ALBSND(:)= 0.0
+  ALBSNI(:)= 0.0
 
 
+!============================
 ! set psychrometric constant
   IF (TV .GT. TFRZ) THEN           ! Barlage: add distinction between ground and 
       LATHEAV = HVAP                ! vegetation in v3.6
@@ -787,7 +839,8 @@ end if
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
                      SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -889,8 +942,25 @@ end if
                    DF      ,HCPCT   ,SNICEV  ,SNLIQV  ,EPORE   , & !out
                    FACT    )                              !out
 
+! Solar radiation: absorbed & reflected by the ground and canopy
+
+  CALL  RADIATION (parameters,VEGTYP  ,IST     ,ICE     ,NSOIL   , & !in 
+                   SNEQVO  ,SNEQV   ,DT      ,COSZ    ,SNOWH   , & !in
+                   TG      ,TV      ,FSNO    ,QSNOW   ,FWET    , & !in
+                   ELAI    ,ESAI    ,SMC     ,SOLAD   ,SOLAI   , & !in
+                   FVEG    ,ILOC    ,JLOC    ,                   & !in
+                   ALBOLD  ,TAUSS   ,                            & !inout
+                   FSUN    ,LAISUN  ,LAISHA  ,PARSUN  ,PARSHA  , & !out
+                   SAV     ,SAG     ,FSR     ,FSA     ,FSRV    , & 
+                   FSRG    ,ALBSND  ,ALBSNI  ,BGAP    ,WGAP     )  !out
 
 
+
+
+
+
+
+    SNEQVO  = SNEQV
 
 !!!============================ Water module all
      CALL WATER (parameters,VEGTYPE ,NSNOW  ,NSOIL  ,IMELT  ,DT     ,UU     , & !in
@@ -952,7 +1022,8 @@ end if
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
                      SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO)
 
  
   end do ! time loop

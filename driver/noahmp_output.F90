@@ -10,6 +10,7 @@ module noahmp_output
   integer           :: soil_dim
   integer           :: snow_dim
   integer           :: snso_dim
+  integer           :: band_dim
   integer           :: ISNOW_id
   integer           :: CANLIQ_id
   integer           :: CANICE_id
@@ -91,6 +92,25 @@ module noahmp_output
   integer           :: SNLIQV_id
   integer           :: EPORE_id
   integer           :: FACT_id
+! radiation new vars
+  integer           :: ALBOLD_id
+  integer           :: TAUSS_id
+  integer           :: FSUN_id
+  integer           :: LAISUN_id
+  integer           :: LAISHA_id
+  integer           :: PARSUN_id
+  integer           :: PARSHA_id
+  integer           :: SAV_id
+  integer           :: SAG_id
+  integer           :: FSA_id
+  integer           :: FSR_id
+  integer           :: FSRV_id
+  integer           :: FSRG_id
+  integer           :: BGAP_id
+  integer           :: WGAP_id
+  integer           :: ALBSND_id
+  integer           :: ALBSNI_id
+  integer           :: SNEQVO_id
 
 contains
 
@@ -107,6 +127,7 @@ contains
     iret = nf90_def_dim(ncid, "soil", nsoil, soil_dim)
     iret = nf90_def_dim(ncid, "snow", nsnow, snow_dim)
     iret = nf90_def_dim(ncid, "snso", nsnow+nsoil, snso_dim)
+    iret = nf90_def_dim(ncid, "band", 2, band_dim)
     iret = nf90_def_var(ncid, "ISNOW",       NF90_INT  , (/time_dim/), ISNOW_id)
     iret = nf90_def_var(ncid, "CANLIQ",      NF90_FLOAT, (/time_dim/), CANLIQ_id)
     iret = nf90_def_var(ncid, "CANICE",      NF90_FLOAT, (/time_dim/), CANICE_id)
@@ -188,6 +209,25 @@ contains
     iret = nf90_def_var(ncid, "SNLIQV",      NF90_FLOAT, (/time_dim,snow_dim/), SNLIQV_id)
     iret = nf90_def_var(ncid, "EPORE",       NF90_FLOAT, (/time_dim,snow_dim/), EPORE_id)
     iret = nf90_def_var(ncid, "SNICEV",      NF90_FLOAT, (/time_dim,snow_dim/), SNICEV_id)
+! radiation new vars
+    iret = nf90_def_var(ncid, "ALBOLD",      NF90_FLOAT, (/time_dim/), ALBOLD_id)
+    iret = nf90_def_var(ncid, "TAUSS",       NF90_FLOAT, (/time_dim/), TAUSS_id)
+    iret = nf90_def_var(ncid, "FSUN",        NF90_FLOAT, (/time_dim/), FSUN_id)
+    iret = nf90_def_var(ncid, "LAISUN",      NF90_FLOAT, (/time_dim/), LAISUN_id)
+    iret = nf90_def_var(ncid, "LAISHA",      NF90_FLOAT, (/time_dim/), LAISHA_id)
+    iret = nf90_def_var(ncid, "PARSUN",      NF90_FLOAT, (/time_dim/), PARSUN_id)
+    iret = nf90_def_var(ncid, "PARSHA",      NF90_FLOAT, (/time_dim/), PARSHA_id)
+    iret = nf90_def_var(ncid, "SAV",         NF90_FLOAT, (/time_dim/), SAV_id)
+    iret = nf90_def_var(ncid, "SAG",         NF90_FLOAT, (/time_dim/), SAG_id)
+    iret = nf90_def_var(ncid, "FSA",         NF90_FLOAT, (/time_dim/), FSA_id)
+    iret = nf90_def_var(ncid, "FSR",         NF90_FLOAT, (/time_dim/), FSR_id)
+    iret = nf90_def_var(ncid, "FSRV",        NF90_FLOAT, (/time_dim/), FSRV_id)
+    iret = nf90_def_var(ncid, "FSRG",        NF90_FLOAT, (/time_dim/), FSRG_id)
+    iret = nf90_def_var(ncid, "BGAP",        NF90_FLOAT, (/time_dim/), BGAP_id)
+    iret = nf90_def_var(ncid, "WGAP",        NF90_FLOAT, (/time_dim/), WGAP_id)
+    iret = nf90_def_var(ncid, "SNEQVO",      NF90_FLOAT, (/time_dim/), SNEQVO_id)
+    iret = nf90_def_var(ncid, "ALBSND",      NF90_FLOAT, (/time_dim,band_dim/), ALBSND_id)
+    iret = nf90_def_var(ncid, "ALBSNI",      NF90_FLOAT, (/time_dim,band_dim/), ALBSNI_id)
 
 
     iret = nf90_enddef(ncid)
@@ -202,7 +242,8 @@ contains
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
                      SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT)
+                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -281,7 +322,6 @@ contains
      real                          :: PAHG
      real                          :: PAHB
      real                          :: EDIR
-
 ! thermoprop new vars
      real, dimension(nsoil+nsnow)  :: DF
      real, dimension(nsoil+nsnow)  :: HCPCT
@@ -289,6 +329,26 @@ contains
      real, dimension(nsnow)        :: SNICEV
      real, dimension(nsnow)        :: SNLIQV
      real, dimension(nsnow)        :: EPORE
+! radiation new vars
+     real                          :: SNEQVO 
+     real                          :: ALBOLD  
+     real                          :: TAUSS   
+     REAL                          :: FSUN    
+     REAL                          :: LAISUN  
+     REAL                          :: LAISHA  
+     REAL                          :: PARSUN  
+     REAL                          :: PARSHA  
+     REAL                          :: SAV     
+     REAL                          :: SAG     
+     REAL                          :: FSA     
+     REAL                          :: FSR     
+     REAL                          :: FSRV   
+     REAL                          :: FSRG
+     REAL                          :: BGAP
+     REAL                          :: WGAP
+     REAL, DIMENSION(1:2)          :: ALBSND
+     REAL, DIMENSION(1:2)          :: ALBSNI
+
 
 
 ! assign values
@@ -366,7 +426,6 @@ contains
      iret = nf90_put_var(ncid, PAHG_id,     PAHG,          start=(/itime+1/))
      iret = nf90_put_var(ncid, PAHB_id,     PAHB,          start=(/itime+1/))
      iret = nf90_put_var(ncid, EDIR_id,     EDIR,          start=(/itime+1/))
-
 ! thermoprop new vars
      iret = nf90_put_var(ncid, DF_id,       DF,            start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
      iret = nf90_put_var(ncid, HCPCT_id,    HCPCT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
@@ -374,6 +433,25 @@ contains
      iret = nf90_put_var(ncid, SNICEV_id,   SNICEV,        start=(/itime+1,1/), count=(/1,nsnow/))
      iret = nf90_put_var(ncid, SNLIQV_id,   SNLIQV,        start=(/itime+1,1/), count=(/1,nsnow/))
      iret = nf90_put_var(ncid, EPORE_id,    EPORE,         start=(/itime+1,1/), count=(/1,nsnow/))
+! radiation new vars
+     iret = nf90_put_var(ncid, ALBOLD_id,   ALBOLD,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, TAUSS_id,    TAUSS,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSUN_id,     FSUN,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, LAISUN_id,   LAISUN,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, LAISHA_id,   LAISHA,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, PARSUN_id,   PARSUN,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, PARSHA_id,   PARSHA,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, SAV_id,      SAV,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, SAG_id,      SAG,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSA_id,      FSA,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSR_id,      FSR,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSRV_id,     FSRV,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSRG_id,     FSRG,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, BGAP_id,     BGAP,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, WGAP_id,     WGAP,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, SNEQVO_id,   SNEQVO,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, ALBSND_id,   ALBSND,        start=(/itime+1,1/), count=(/1,2/))
+     iret = nf90_put_var(ncid, ALBSNI_id,   ALBSNI,        start=(/itime+1,1/), count=(/1,2/))
 
 
    end subroutine add_to_output

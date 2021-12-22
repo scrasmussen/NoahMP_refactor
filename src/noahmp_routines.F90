@@ -849,6 +849,849 @@ contains
 
   end subroutine TDFCND
 
+!!!================================================================================================================================
+
+!== begin radiation ================================================================================
+
+  SUBROUTINE RADIATION (parameters,VEGTYP  ,IST     ,ICE     ,NSOIL   , & !in
+                        SNEQVO  ,SNEQV   ,DT      ,COSZ    ,SNOWH   , & !in
+                        TG      ,TV      ,FSNO    ,QSNOW   ,FWET    , & !in
+                        ELAI    ,ESAI    ,SMC     ,SOLAD   ,SOLAI   , & !in
+                        FVEG    ,ILOC    ,JLOC    ,                   & !in
+                        ALBOLD  ,TAUSS   ,                            & !inout
+                        FSUN    ,LAISUN  ,LAISHA  ,PARSUN  ,PARSHA  , & !out
+                        SAV     ,SAG     ,FSR     ,FSA     ,FSRV    , &
+                        FSRG    ,ALBSND  ,ALBSNI  ,BGAP    ,WGAP    )   !out
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER, INTENT(IN)                  :: ILOC
+  INTEGER, INTENT(IN)                  :: JLOC
+  INTEGER, INTENT(IN)                  :: VEGTYP !vegetation type
+  INTEGER, INTENT(IN)                  :: IST    !surface type
+  INTEGER, INTENT(IN)                  :: ICE    !ice (ice = 1)
+  INTEGER, INTENT(IN)                  :: NSOIL  !number of soil layers
+
+  REAL, INTENT(IN)                     :: DT     !time step [s]
+  REAL, INTENT(IN)                     :: QSNOW  !snowfall (mm/s)
+  REAL, INTENT(IN)                     :: SNEQVO !snow mass at last time step(mm)
+  REAL, INTENT(IN)                     :: SNEQV  !snow mass (mm)
+  REAL, INTENT(IN)                     :: SNOWH  !snow height (mm)
+  REAL, INTENT(IN)                     :: COSZ   !cosine solar zenith angle (0-1)
+  REAL, INTENT(IN)                     :: TG     !ground temperature (k)
+  REAL, INTENT(IN)                     :: TV     !vegetation temperature (k)
+  REAL, INTENT(IN)                     :: ELAI   !LAI, one-sided, adjusted for burying by snow
+  REAL, INTENT(IN)                     :: ESAI   !SAI, one-sided, adjusted for burying by snow
+  REAL, INTENT(IN)                     :: FWET   !fraction of canopy that is wet
+  REAL, DIMENSION(1:NSOIL), INTENT(IN) :: SMC    !volumetric soil water [m3/m3]
+  REAL, DIMENSION(1:2)    , INTENT(IN) :: SOLAD  !incoming direct solar radiation (w/m2)
+  REAL, DIMENSION(1:2)    , INTENT(IN) :: SOLAI  !incoming diffuse solar radiation (w/m2)
+  REAL, INTENT(IN)                     :: FSNO   !snow cover fraction (-)
+  REAL, INTENT(IN)                     :: FVEG   !green vegetation fraction [0.0-1.0]
+
+! inout
+  REAL,                  INTENT(INOUT) :: ALBOLD !snow albedo at last time step (CLASS type)
+  REAL,                  INTENT(INOUT) :: TAUSS  !non-dimensional snow age.
+
+! output
+  REAL, INTENT(OUT)                    :: FSUN   !sunlit fraction of canopy (-)
+  REAL, INTENT(OUT)                    :: LAISUN !sunlit leaf area (-)
+  REAL, INTENT(OUT)                    :: LAISHA !shaded leaf area (-)
+  REAL, INTENT(OUT)                    :: PARSUN !average absorbed par for sunlit leaves (w/m2)
+  REAL, INTENT(OUT)                    :: PARSHA !average absorbed par for shaded leaves (w/m2)
+  REAL, INTENT(OUT)                    :: SAV    !solar radiation absorbed by vegetation (w/m2)
+  REAL, INTENT(OUT)                    :: SAG    !solar radiation absorbed by ground (w/m2)
+  REAL, INTENT(OUT)                    :: FSA    !total absorbed solar radiation (w/m2)
+  REAL, INTENT(OUT)                    :: FSR    !total reflected solar radiation (w/m2)
+
+!jref:start  
+  REAL, INTENT(OUT)                    :: FSRV    !veg. reflected solar radiation (w/m2)
+  REAL, INTENT(OUT)                    :: FSRG    !ground reflected solar radiation (w/m2)
+  REAL, INTENT(OUT)                    :: BGAP
+  REAL, INTENT(OUT)                    :: WGAP
+  REAL, DIMENSION(1:2), INTENT(OUT)    :: ALBSND   !snow albedo (direct)
+  REAL, DIMENSION(1:2), INTENT(OUT)    :: ALBSNI   !snow albedo (diffuse)
+!jref:end  
+
+! local
+  REAL                                 :: FAGE   !snow age function (0 - new snow)
+  REAL, DIMENSION(1:2)                 :: ALBGRD !ground albedo (direct)
+  REAL, DIMENSION(1:2)                 :: ALBGRI !ground albedo (diffuse)
+  REAL, DIMENSION(1:2)                 :: ALBD   !surface albedo (direct)
+  REAL, DIMENSION(1:2)                 :: ALBI   !surface albedo (diffuse)
+  REAL, DIMENSION(1:2)                 :: FABD   !flux abs by veg (per unit direct flux)
+  REAL, DIMENSION(1:2)                 :: FABI   !flux abs by veg (per unit diffuse flux)
+  REAL, DIMENSION(1:2)                 :: FTDD   !down direct flux below veg (per unit dir flux)
+  REAL, DIMENSION(1:2)                 :: FTID   !down diffuse flux below veg (per unit dir flux)
+  REAL, DIMENSION(1:2)                 :: FTII   !down diffuse flux below veg (per unit dif flux)
+!jref:start  
+  REAL, DIMENSION(1:2)                 :: FREVI
+  REAL, DIMENSION(1:2)                 :: FREVD
+  REAL, DIMENSION(1:2)                 :: FREGI
+  REAL, DIMENSION(1:2)                 :: FREGD
+!jref:end
+
+  REAL                                 :: FSHA   !shaded fraction of canopy
+  REAL                                 :: VAI    !total LAI + stem area index, one sided
+
+  REAL,PARAMETER :: MPE = 1.0E-6
+  LOGICAL VEG  !true: vegetated for surface temperature calculation
+
+! --------------------------------------------------------------------------------------------------
+
+! surface abeldo
+
+   CALL ALBEDO (parameters,VEGTYP ,IST    ,ICE    ,NSOIL  , & !in
+                DT     ,COSZ   ,FAGE   ,ELAI   ,ESAI   , & !in
+                TG     ,TV     ,SNOWH  ,FSNO   ,FWET   , & !in
+                SMC    ,SNEQVO ,SNEQV  ,QSNOW  ,FVEG   , & !in
+                ILOC   ,JLOC   ,                         & !in
+                ALBOLD ,TAUSS                          , & !inout
+                ALBGRD ,ALBGRI ,ALBD   ,ALBI   ,FABD   , & !out
+                FABI   ,FTDD   ,FTID   ,FTII   ,FSUN   , & !)   !out
+                FREVI  ,FREVD   ,FREGD ,FREGI  ,BGAP   , & !inout
+                WGAP   ,ALBSND ,ALBSNI )
+
+! surface radiation
+
+     FSHA = 1.0-FSUN
+     LAISUN = ELAI*FSUN
+     LAISHA = ELAI*FSHA
+     VAI = ELAI+ ESAI
+     IF (VAI .GT. 0.0) THEN
+        VEG = .TRUE.
+     ELSE
+        VEG = .FALSE.
+     END IF
+
+   CALL SURRAD (parameters,MPE    ,FSUN   ,FSHA   ,ELAI   ,VAI    , & !in
+                LAISUN ,LAISHA ,SOLAD  ,SOLAI  ,FABD   , & !in
+                FABI   ,FTDD   ,FTID   ,FTII   ,ALBGRD , & !in
+                ALBGRI ,ALBD   ,ALBI   ,ILOC   ,JLOC   , & !in
+                PARSUN ,PARSHA ,SAV    ,SAG    ,FSA    , & !out
+                FSR    ,                                 & !out
+                FREVI  ,FREVD  ,FREGD  ,FREGI  ,FSRV   , & !inout
+                FSRG)
+
+  END SUBROUTINE RADIATION
+
+!== begin albedo ===================================================================================
+
+  SUBROUTINE ALBEDO (parameters,VEGTYP ,IST    ,ICE    ,NSOIL  , & !in
+                     DT     ,COSZ   ,FAGE   ,ELAI   ,ESAI   , & !in
+                     TG     ,TV     ,SNOWH  ,FSNO   ,FWET   , & !in
+                     SMC    ,SNEQVO ,SNEQV  ,QSNOW  ,FVEG   , & !in
+                     ILOC   ,JLOC   ,                         & !in
+                     ALBOLD ,TAUSS                          , & !inout
+                     ALBGRD ,ALBGRI ,ALBD   ,ALBI   ,FABD   , & !out
+                     FABI   ,FTDD   ,FTID   ,FTII   ,FSUN   , & !out
+                     FREVI  ,FREVD  ,FREGD  ,FREGI  ,BGAP   , & !out
+                     WGAP   ,ALBSND ,ALBSNI )
+
+! --------------------------------------------------------------------------------------------------
+! surface albedos. also fluxes (per unit incoming direct and diffuse
+! radiation) reflected, transmitted, and absorbed by vegetation.
+! also sunlit fraction of the canopy.
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,                  INTENT(IN)  :: ILOC
+  INTEGER,                  INTENT(IN)  :: JLOC
+  INTEGER,                  INTENT(IN)  :: NSOIL  !number of soil layers
+  INTEGER,                  INTENT(IN)  :: VEGTYP !vegetation type
+  INTEGER,                  INTENT(IN)  :: IST    !surface type
+  INTEGER,                  INTENT(IN)  :: ICE    !ice (ice = 1)
+
+  REAL,                     INTENT(IN)  :: DT     !time step [sec]
+  REAL,                     INTENT(IN)  :: QSNOW  !snowfall
+  REAL,                     INTENT(IN)  :: COSZ   !cosine solar zenith angle for next time step
+  REAL,                     INTENT(IN)  :: SNOWH  !snow height (mm)
+  REAL,                     INTENT(IN)  :: TG     !ground temperature (k)
+  REAL,                     INTENT(IN)  :: TV     !vegetation temperature (k)
+  REAL,                     INTENT(IN)  :: ELAI   !LAI, one-sided, adjusted for burying by snow
+  REAL,                     INTENT(IN)  :: ESAI   !SAI, one-sided, adjusted for burying by snow
+  REAL,                     INTENT(IN)  :: FSNO   !fraction of grid covered by snow
+  REAL,                     INTENT(IN)  :: FWET   !fraction of canopy that is wet
+  REAL,                     INTENT(IN)  :: SNEQVO !snow mass at last time step(mm)
+  REAL,                     INTENT(IN)  :: SNEQV  !snow mass (mm)
+  REAL,                     INTENT(IN)  :: FVEG   !green vegetation fraction [0.0-1.0]
+  REAL, DIMENSION(1:NSOIL), INTENT(IN)  :: SMC    !volumetric soil water (m3/m3)
+
+! inout
+  REAL,                  INTENT(INOUT)  :: ALBOLD !snow albedo at last time step (CLASS type)
+  REAL,                  INTENT(INOUT)  :: TAUSS  !non-dimensional snow age
+
+! output
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBGRD !ground albedo (direct)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBGRI !ground albedo (diffuse)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBD   !surface albedo (direct)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBI   !surface albedo (diffuse)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FABD   !flux abs by veg (per unit direct flux)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FABI   !flux abs by veg (per unit diffuse flux)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FTDD   !down direct flux below veg (per unit dir flux)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FTID   !down diffuse flux below veg (per unit dir flux)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FTII   !down diffuse flux below veg (per unit dif flux)
+  REAL,                     INTENT(OUT) :: FSUN   !sunlit fraction of canopy (-)
+!jref:start
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FREVD
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FREVI
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FREGD
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: FREGI
+  REAL, INTENT(OUT) :: BGAP
+  REAL, INTENT(OUT) :: WGAP
+!jref:end
+
+! ------------------------------------------------------------------------
+! ------------------------ local variables -------------------------------
+! local
+  REAL                 :: FAGE     !snow age function
+  REAL                 :: ALB
+  INTEGER              :: IB       !indices
+  INTEGER              :: NBAND    !number of solar radiation wave bands
+  INTEGER              :: IC       !direct beam: ic=0; diffuse: ic=1
+
+  REAL                 :: WL       !fraction of LAI+SAI that is LAI
+  REAL                 :: WS       !fraction of LAI+SAI that is SAI
+  REAL                 :: MPE      !prevents overflow for division by zero
+
+  REAL, DIMENSION(1:2) :: RHO      !leaf/stem reflectance weighted by fraction LAI and SAI
+  REAL, DIMENSION(1:2) :: TAU      !leaf/stem transmittance weighted by fraction LAI and SAI
+  REAL, DIMENSION(1:2) :: FTDI     !down direct flux below veg per unit dif flux = 0
+  REAL, DIMENSION(1:2), INTENT(OUT) :: ALBSND   !snow albedo (direct)
+  REAL, DIMENSION(1:2), INTENT(OUT) :: ALBSNI   !snow albedo (diffuse)
+
+  REAL                 :: VAI      !ELAI+ESAI
+  REAL                 :: GDIR     !average projected leaf/stem area in solar direction
+  REAL                 :: EXT      !optical depth direct beam per unit leaf + stem area
+
+! --------------------------------------------------------------------------------------------------
+
+  NBAND = 2
+  MPE = 1.0E-06
+  BGAP = 0.0
+  WGAP = 0.0
+
+! initialize output because solar radiation only done if COSZ > 0
+
+  DO IB = 1, NBAND
+    ALBD(IB) = 0.0
+    ALBI(IB) = 0.0
+    ALBGRD(IB) = 0.0
+    ALBGRI(IB) = 0.0
+    ALBSND(IB) = 0.0
+    ALBSNI(IB) = 0.0
+    FABD(IB) = 0.0
+    FABI(IB) = 0.0
+    FTDD(IB) = 0.0
+    FTID(IB) = 0.0
+    FTII(IB) = 0.0
+    IF (IB .EQ. 1) FSUN = 0.0
+  END DO
+
+  IF(COSZ <= 0) GOTO 100
+
+! weight reflectance/transmittance by LAI and SAI
+
+  DO IB = 1, NBAND
+    VAI = ELAI + ESAI
+    WL  = ELAI / MAX(VAI,MPE)
+    WS  = ESAI / MAX(VAI,MPE)
+    RHO(IB) = MAX(parameters%RHOL(IB)*WL+parameters%RHOS(IB)*WS, MPE)
+    TAU(IB) = MAX(parameters%TAUL(IB)*WL+parameters%TAUS(IB)*WS, MPE)
+  END DO
+
+! snow age
+
+   CALL SNOW_AGE (parameters,DT,TG,SNEQVO,SNEQV,TAUSS,FAGE)
+
+! snow albedos: only if COSZ > 0 and FSNO > 0
+
+  IF(OPT_ALB == 1) &
+     CALL SNOWALB_BATS (parameters,NBAND, FSNO,COSZ,FAGE,ALBSND,ALBSNI)
+  IF(OPT_ALB == 2) THEN
+     CALL SNOWALB_CLASS (parameters,NBAND,QSNOW,DT,ALB,ALBOLD,ALBSND,ALBSNI,ILOC,JLOC)
+     ALBOLD = ALB
+  END IF
+
+! ground surface albedo
+
+  CALL GROUNDALB (parameters,NSOIL   ,NBAND   ,ICE     ,IST     , & !in
+                  FSNO    ,SMC     ,ALBSND  ,ALBSNI  ,COSZ    , & !in
+                  TG      ,ILOC    ,JLOC    ,                   & !in
+                  ALBGRD  ,ALBGRI  )                              !out
+
+! loop over NBAND wavebands to calculate surface albedos and solar
+! fluxes for unit incoming direct (IC=0) and diffuse flux (IC=1)
+
+  DO IB = 1, NBAND
+      IC = 0      ! direct
+      CALL TWOSTREAM (parameters,IB     ,IC      ,VEGTYP  ,COSZ    ,VAI    , & !in
+                      FWET   ,TV      ,ALBGRD  ,ALBGRI  ,RHO    , & !in
+                      TAU    ,FVEG    ,IST     ,ILOC    ,JLOC   , & !in
+                      FABD   ,ALBD    ,FTDD    ,FTID    ,GDIR   , &!)   !out
+                      FREVD  ,FREGD   ,BGAP    ,WGAP)
+
+      IC = 1      ! diffuse
+      CALL TWOSTREAM (parameters,IB     ,IC      ,VEGTYP  ,COSZ    ,VAI    , & !in
+                      FWET   ,TV      ,ALBGRD  ,ALBGRI  ,RHO    , & !in
+                      TAU    ,FVEG    ,IST     ,ILOC    ,JLOC   , & !in
+                      FABI   ,ALBI    ,FTDI    ,FTII    ,GDIR   , & !)   !out
+                      FREVI  ,FREGI   ,BGAP    ,WGAP)
+
+  END DO
+
+! sunlit fraction of canopy. set FSUN = 0 if FSUN < 0.01.
+
+  EXT = GDIR/COSZ * SQRT(1.0-RHO(1)-TAU(1))
+  FSUN = (1.0-EXP(-EXT*VAI)) / MAX(EXT*VAI,MPE)
+  EXT = FSUN
+
+  IF (EXT .LT. 0.01) THEN
+     WL = 0.0
+  ELSE
+     WL = EXT 
+  END IF
+  FSUN = WL
+
+100 CONTINUE
+
+  END SUBROUTINE ALBEDO
+
+!== begin surrad ===================================================================================
+
+  SUBROUTINE SURRAD (parameters,MPE     ,FSUN    ,FSHA    ,ELAI    ,VAI     , & !in
+                     LAISUN  ,LAISHA  ,SOLAD   ,SOLAI   ,FABD    , & !in
+                     FABI    ,FTDD    ,FTID    ,FTII    ,ALBGRD  , & !in
+                     ALBGRI  ,ALBD    ,ALBI    ,ILOC    ,JLOC    , & !in
+                     PARSUN  ,PARSHA  ,SAV     ,SAG     ,FSA     , & !out
+                     FSR     , & !)                                       !out
+                     FREVI   ,FREVD   ,FREGD   ,FREGI   ,FSRV    , &
+                     FSRG) !inout
+
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER, INTENT(IN)              :: ILOC
+  INTEGER, INTENT(IN)              :: JLOC
+  REAL, INTENT(IN)                 :: MPE     !prevents underflow errors if division by zero
+
+  REAL, INTENT(IN)                 :: FSUN    !sunlit fraction of canopy
+  REAL, INTENT(IN)                 :: FSHA    !shaded fraction of canopy
+  REAL, INTENT(IN)                 :: ELAI    !leaf area, one-sided
+  REAL, INTENT(IN)                 :: VAI     !leaf + stem area, one-sided
+  REAL, INTENT(IN)                 :: LAISUN  !sunlit leaf area index, one-sided
+  REAL, INTENT(IN)                 :: LAISHA  !shaded leaf area index, one-sided
+
+  REAL, DIMENSION(1:2), INTENT(IN) :: SOLAD   !incoming direct solar radiation (w/m2)
+  REAL, DIMENSION(1:2), INTENT(IN) :: SOLAI   !incoming diffuse solar radiation (w/m2)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FABD    !flux abs by veg (per unit incoming direct flux)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FABI    !flux abs by veg (per unit incoming diffuse flux)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FTDD    !down dir flux below veg (per incoming dir flux)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FTID    !down dif flux below veg (per incoming dir flux)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FTII    !down dif flux below veg (per incoming dif flux)
+  REAL, DIMENSION(1:2), INTENT(IN) :: ALBGRD  !ground albedo (direct)
+  REAL, DIMENSION(1:2), INTENT(IN) :: ALBGRI  !ground albedo (diffuse)
+  REAL, DIMENSION(1:2), INTENT(IN) :: ALBD    !overall surface albedo (direct)
+  REAL, DIMENSION(1:2), INTENT(IN) :: ALBI    !overall surface albedo (diffuse)
+
+  REAL, DIMENSION(1:2), INTENT(IN) :: FREVD    !overall surface albedo veg (direct)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FREVI    !overall surface albedo veg (diffuse)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FREGD    !overall surface albedo grd (direct)
+  REAL, DIMENSION(1:2), INTENT(IN) :: FREGI    !overall surface albedo grd (diffuse)
+
+! output
+
+  REAL, INTENT(OUT)                :: PARSUN  !average absorbed par for sunlit leaves (w/m2)
+  REAL, INTENT(OUT)                :: PARSHA  !average absorbed par for shaded leaves (w/m2)
+  REAL, INTENT(OUT)                :: SAV     !solar radiation absorbed by vegetation (w/m2)
+  REAL, INTENT(OUT)                :: SAG     !solar radiation absorbed by ground (w/m2)
+  REAL, INTENT(OUT)                :: FSA     !total absorbed solar radiation (w/m2)
+  REAL, INTENT(OUT)                :: FSR     !total reflected solar radiation (w/m2)
+  REAL, INTENT(OUT)                :: FSRV    !reflected solar radiation by vegetation
+  REAL, INTENT(OUT)                :: FSRG    !reflected solar radiation by ground
+
+! ------------------------ local variables ----------------------------------------------------
+  INTEGER                          :: IB      !waveband number (1=vis, 2=nir)
+  INTEGER                          :: NBAND   !number of solar radiation waveband classes
+
+  REAL                             :: ABS     !absorbed solar radiation (w/m2)
+  REAL                             :: RNIR    !reflected solar radiation [nir] (w/m2)
+  REAL                             :: RVIS    !reflected solar radiation [vis] (w/m2)
+  REAL                             :: LAIFRA  !leaf area fraction of canopy
+  REAL                             :: TRD     !transmitted solar radiation: direct (w/m2)
+  REAL                             :: TRI     !transmitted solar radiation: diffuse (w/m2)
+  REAL, DIMENSION(1:2)             :: CAD     !direct beam absorbed by canopy (w/m2)
+  REAL, DIMENSION(1:2)             :: CAI     !diffuse radiation absorbed by canopy (w/m2)
+! ---------------------------------------------------------------------------------------------
+   NBAND = 2
+
+! zero summed solar fluxes
+
+    SAG = 0.0
+    SAV = 0.0
+    FSA = 0.0
+
+! loop over nband wavebands
+
+  DO IB = 1, NBAND
+
+! absorbed by canopy
+
+    CAD(IB) = SOLAD(IB)*FABD(IB)    
+    CAI(IB) = SOLAI(IB)*FABI(IB)
+    SAV     = SAV + CAD(IB) + CAI(IB)
+    FSA     = FSA + CAD(IB) + CAI(IB)
+ 
+! transmitted solar fluxes incident on ground
+
+    TRD = SOLAD(IB)*FTDD(IB)
+    TRI = SOLAD(IB)*FTID(IB) + SOLAI(IB)*FTII(IB)
+
+! solar radiation absorbed by ground surface
+
+    ABS = TRD*(1.0-ALBGRD(IB)) + TRI*(1.0-ALBGRI(IB))
+    SAG = SAG + ABS
+    FSA = FSA + ABS
+  END DO
+
+! partition visible canopy absorption to sunlit and shaded fractions
+! to get average absorbed par for sunlit and shaded leaves
+
+     LAIFRA = ELAI / MAX(VAI,MPE)
+     IF (FSUN .GT. 0.0) THEN
+        PARSUN = (CAD(1)+FSUN*CAI(1)) * LAIFRA / MAX(LAISUN,MPE)
+        PARSHA = (FSHA*CAI(1))*LAIFRA / MAX(LAISHA,MPE)
+     ELSE
+        PARSUN = 0.0
+        PARSHA = (CAD(1)+CAI(1))*LAIFRA /MAX(LAISHA,MPE)
+     ENDIF
+
+! reflected solar radiation
+
+     RVIS = ALBD(1)*SOLAD(1) + ALBI(1)*SOLAI(1)
+     RNIR = ALBD(2)*SOLAD(2) + ALBI(2)*SOLAI(2)
+     FSR  = RVIS + RNIR
+
+! reflected solar radiation of veg. and ground (combined ground)
+     FSRV = FREVD(1)*SOLAD(1)+FREVI(1)*SOLAI(1)+FREVD(2)*SOLAD(2)+FREVI(2)*SOLAI(2)
+     FSRG = FREGD(1)*SOLAD(1)+FREGI(1)*SOLAI(1)+FREGD(2)*SOLAD(2)+FREGI(2)*SOLAI(2)
+
+
+  END SUBROUTINE SURRAD
+
+!== begin snow_age =================================================================================
+
+  SUBROUTINE SNOW_AGE (parameters,DT,TG,SNEQVO,SNEQV,TAUSS,FAGE)
+! ----------------------------------------------------------------------
+  IMPLICIT NONE
+! ------------------------ code history ------------------------------------------------------------
+! from BATS
+! ------------------------ input/output variables --------------------------------------------------
+!input
+  type (noahmp_parameters), intent(in) :: parameters
+   REAL, INTENT(IN) :: DT        !main time step (s)
+   REAL, INTENT(IN) :: TG        !ground temperature (k)
+   REAL, INTENT(IN) :: SNEQVO    !snow mass at last time step(mm)
+   REAL, INTENT(IN) :: SNEQV     !snow water per unit ground area (mm)
+
+!output
+   REAL, INTENT(OUT) :: FAGE     !snow age
+
+!input/output
+   REAL, INTENT(INOUT) :: TAUSS      !non-dimensional snow age
+!local
+   REAL            :: TAGE       !total aging effects
+   REAL            :: AGE1       !effects of grain growth due to vapor diffusion
+   REAL            :: AGE2       !effects of grain growth at freezing of melt water
+   REAL            :: AGE3       !effects of soot
+   REAL            :: DELA       !temporary variable
+   REAL            :: SGE        !temporary variable
+   REAL            :: DELS       !temporary variable
+   REAL            :: DELA0      !temporary variable
+   REAL            :: ARG        !temporary variable
+! See Yang et al. (1997) J.of Climate for detail.
+!---------------------------------------------------------------------------------------------------
+
+   IF(SNEQV.LE.0.0) THEN
+          TAUSS = 0.0
+   ELSE
+          DELA0 = DT/parameters%TAU0
+          ARG   = parameters%GRAIN_GROWTH*(1.0/TFRZ-1.0/TG)
+          AGE1  = EXP(ARG)
+          AGE2  = EXP(AMIN1(0.0,parameters%EXTRA_GROWTH*ARG))
+          AGE3  = parameters%DIRT_SOOT
+          TAGE  = AGE1+AGE2+AGE3
+          DELA  = DELA0*TAGE
+          DELS  = AMAX1(0.0,SNEQV-SNEQVO) / parameters%SWEMX
+          SGE   = (TAUSS+DELA)*(1.0-DELS)
+          TAUSS = AMAX1(0.0,SGE)
+   ENDIF
+
+   FAGE= TAUSS/(TAUSS+1.0)
+
+  END SUBROUTINE SNOW_AGE
+
+!== begin snowalb_bats =============================================================================
+
+  SUBROUTINE SNOWALB_BATS (parameters,NBAND,FSNO,COSZ,FAGE,ALBSND,ALBSNI)
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,INTENT(IN) :: NBAND  !number of waveband classes
+
+  REAL,INTENT(IN) :: COSZ    !cosine solar zenith angle
+  REAL,INTENT(IN) :: FSNO    !snow cover fraction (-)
+  REAL,INTENT(IN) :: FAGE    !snow age correction
+
+! output
+
+  REAL, DIMENSION(1:2),INTENT(OUT) :: ALBSND !snow albedo for direct(1=vis, 2=nir)
+  REAL, DIMENSION(1:2),INTENT(OUT) :: ALBSNI !snow albedo for diffuse
+! ---------------------------------------------------------------------------------------------
+
+! ------------------------ local variables ----------------------------------------------------
+  INTEGER :: IB          !waveband class
+
+  REAL :: FZEN                 !zenith angle correction
+  REAL :: CF1                  !temperary variable
+  REAL :: SL2                  !2.*SL
+  REAL :: SL1                  !1/SL
+  REAL :: SL                   !adjustable parameter
+!  REAL, PARAMETER :: C1 = 0.2  !default in BATS 
+!  REAL, PARAMETER :: C2 = 0.5  !default in BATS
+!  REAL, PARAMETER :: C1 = 0.2 * 2. ! double the default to match Sleepers River's
+!  REAL, PARAMETER :: C2 = 0.5 * 2. ! snow surface albedo (double aging effects)
+! ---------------------------------------------------------------------------------------------
+! zero albedos for all points
+        ALBSND(1: NBAND) = 0.0
+        ALBSNI(1: NBAND) = 0.0
+! when cosz > 0
+        SL=parameters%BATS_COSZ
+        SL1=1.0/SL
+        SL2=2.0*SL
+        CF1=((1.0+SL1)/(1.0+SL2*COSZ)-SL1)
+        FZEN=AMAX1(CF1,0.0)
+        ALBSNI(1)=parameters%BATS_VIS_NEW*(1.0-parameters%BATS_VIS_AGE*FAGE)         
+        ALBSNI(2)=parameters%BATS_NIR_NEW*(1.0-parameters%BATS_NIR_AGE*FAGE)        
+        ALBSND(1)=ALBSNI(1)+parameters%BATS_VIS_DIR*FZEN*(1.0-ALBSNI(1))    !  vis direct
+        ALBSND(2)=ALBSNI(2)+parameters%BATS_NIR_DIR*FZEN*(1.0-ALBSNI(2))    !  nir direct
+  END SUBROUTINE SNOWALB_BATS
+!== begin snowalb_class ============================================================================
+  SUBROUTINE SNOWALB_CLASS (parameters,NBAND,QSNOW,DT,ALB,ALBOLD,ALBSND,ALBSNI,ILOC,JLOC)
+! ----------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,INTENT(IN) :: ILOC !grid index
+  INTEGER,INTENT(IN) :: JLOC !grid index
+  INTEGER,INTENT(IN) :: NBAND  !number of waveband classes
+  REAL,INTENT(IN) :: QSNOW     !snowfall (mm/s)
+  REAL,INTENT(IN) :: DT        !time step (sec)
+  REAL,INTENT(IN) :: ALBOLD    !snow albedo at last time step
+! in & out
+  REAL,                INTENT(INOUT) :: ALB        ! 
+! output
+  REAL, DIMENSION(1:2),INTENT(OUT) :: ALBSND !snow albedo for direct(1=vis, 2=nir)
+  REAL, DIMENSION(1:2),INTENT(OUT) :: ALBSNI !snow albedo for diffuse
+! ---------------------------------------------------------------------------------------------
+! ------------------------ local variables ----------------------------------------------------
+  INTEGER :: IB          !waveband class
+! ---------------------------------------------------------------------------------------------
+! zero albedos for all points
+        ALBSND(1: NBAND) = 0.0
+        ALBSNI(1: NBAND) = 0.0
+! when cosz > 0
+         ALB = 0.55 + (ALBOLD-0.55) * EXP(-0.01*DT/3600.0)
+! 1 mm fresh snow(SWE) -- 10mm snow depth, assumed the fresh snow density 100kg/m3
+! here assume 1cm snow depth will fully cover the old snow
+         IF (QSNOW > 0.0) then
+           ALB = ALB + MIN(QSNOW,parameters%SWEMX/DT) * (0.84-ALB)/(parameters%SWEMX/DT)
+         ENDIF
+         ALBSNI(1)= ALB         ! vis diffuse
+         ALBSNI(2)= ALB         ! nir diffuse
+         ALBSND(1)= ALB         ! vis direct
+         ALBSND(2)= ALB         ! nir direct
+  END SUBROUTINE SNOWALB_CLASS
+
+!== begin groundalb ================================================================================
+  SUBROUTINE GROUNDALB (parameters,NSOIL   ,NBAND   ,ICE     ,IST     , & !in
+                        FSNO    ,SMC     ,ALBSND  ,ALBSNI  ,COSZ    , & !in
+                        TG      ,ILOC    ,JLOC    ,                   & !in
+                        ALBGRD  ,ALBGRI  )                              !out
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+!input
+  type (noahmp_parameters), intent(in) :: parameters
+  INTEGER,                  INTENT(IN)  :: ILOC   !grid index
+  INTEGER,                  INTENT(IN)  :: JLOC   !grid index
+  INTEGER,                  INTENT(IN)  :: NSOIL  !number of soil layers
+  INTEGER,                  INTENT(IN)  :: NBAND  !number of solar radiation waveband classes
+  INTEGER,                  INTENT(IN)  :: ICE    !value of ist for land ice
+  INTEGER,                  INTENT(IN)  :: IST    !surface type
+  REAL,                     INTENT(IN)  :: FSNO   !fraction of surface covered with snow (-)
+  REAL,                     INTENT(IN)  :: TG     !ground temperature (k)
+  REAL,                     INTENT(IN)  :: COSZ   !cosine solar zenith angle (0-1)
+  REAL, DIMENSION(1:NSOIL), INTENT(IN)  :: SMC    !volumetric soil water content (m3/m3)
+  REAL, DIMENSION(1:    2), INTENT(IN)  :: ALBSND !direct beam snow albedo (vis, nir)
+  REAL, DIMENSION(1:    2), INTENT(IN)  :: ALBSNI !diffuse snow albedo (vis, nir)
+!output
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBGRD !ground albedo (direct beam: vis, nir)
+  REAL, DIMENSION(1:    2), INTENT(OUT) :: ALBGRI !ground albedo (diffuse: vis, nir)
+!local 
+  INTEGER                               :: IB     !waveband number (1=vis, 2=nir)
+  REAL                                  :: INC    !soil water correction factor for soil albedo
+  REAL                                  :: ALBSOD !soil albedo (direct)
+  REAL                                  :: ALBSOI !soil albedo (diffuse)
+! --------------------------------------------------------------------------------------------------
+  DO IB = 1, NBAND
+        INC = MAX(0.11-0.40*SMC(1), 0.0)
+        IF (IST .EQ. 1)  THEN                     !soil
+           ALBSOD = MIN(parameters%ALBSAT(IB)+INC,parameters%ALBDRY(IB))
+           ALBSOI = ALBSOD
+        ELSE IF (TG .GT. TFRZ) THEN               !unfrozen lake, wetland
+           ALBSOD = 0.06/(MAX(0.01,COSZ)**1.7 + 0.15)
+           ALBSOI = 0.06
+        ELSE                                      !frozen lake, wetland
+           ALBSOD = parameters%ALBLAK(IB)
+           ALBSOI = ALBSOD
+        END IF
+        ALBGRD(IB) = ALBSOD*(1.0-FSNO) + ALBSND(IB)*FSNO
+        ALBGRI(IB) = ALBSOI*(1.0-FSNO) + ALBSNI(IB)*FSNO
+  END DO
+  END SUBROUTINE GROUNDALB
+!== begin twostream ================================================================================
+  SUBROUTINE TWOSTREAM (parameters,IB     ,IC      ,VEGTYP  ,COSZ    ,VAI    , & !in
+                        FWET   ,T       ,ALBGRD  ,ALBGRI  ,RHO    , & !in
+                        TAU    ,FVEG    ,IST     ,ILOC    ,JLOC   , & !in
+                        FAB    ,FRE     ,FTD     ,FTI     ,GDIR   , & !)   !out
+                        FREV   ,FREG    ,BGAP    ,WGAP)
+! --------------------------------------------------------------------------------------------------
+! use two-stream approximation of Dickinson (1983) Adv Geophysics
+! 25:305-353 and Sellers (1985) Int J Remote Sensing 6:1335-1372
+! to calculate fluxes absorbed by vegetation, reflected by vegetation,
+! and transmitted through vegetation for unit incoming direct or diffuse
+! flux given an underlying surface with known albedo.
+! --------------------------------------------------------------------------------------------------
+  IMPLICIT NONE
+! --------------------------------------------------------------------------------------------------
+! input
+  type (noahmp_parameters), intent(in) :: parameters
+   INTEGER,              INTENT(IN)  :: ILOC    !grid index
+   INTEGER,              INTENT(IN)  :: JLOC    !grid index
+   INTEGER,              INTENT(IN)  :: IST     !surface type
+   INTEGER,              INTENT(IN)  :: IB      !waveband number
+   INTEGER,              INTENT(IN)  :: IC      !0=unit incoming direct; 1=unit incoming diffuse
+   INTEGER,              INTENT(IN)  :: VEGTYP  !vegetation type
+   REAL,                 INTENT(IN)  :: COSZ    !cosine of direct zenith angle (0-1)
+   REAL,                 INTENT(IN)  :: VAI     !one-sided leaf+stem area index (m2/m2)
+   REAL,                 INTENT(IN)  :: FWET    !fraction of lai, sai that is wetted (-)
+   REAL,                 INTENT(IN)  :: T       !surface temperature (k)
+   REAL, DIMENSION(1:2), INTENT(IN)  :: ALBGRD  !direct  albedo of underlying surface (-)
+   REAL, DIMENSION(1:2), INTENT(IN)  :: ALBGRI  !diffuse albedo of underlying surface (-)
+   REAL, DIMENSION(1:2), INTENT(IN)  :: RHO     !leaf+stem reflectance
+   REAL, DIMENSION(1:2), INTENT(IN)  :: TAU     !leaf+stem transmittance
+   REAL,                 INTENT(IN)  :: FVEG    !green vegetation fraction [0.0-1.0]
+! output
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FAB     !flux abs by veg layer (per unit incoming flux)
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FRE     !flux refl above veg layer (per unit incoming flux)
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FTD     !down dir flux below veg layer (per unit in flux)
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FTI     !down dif flux below veg layer (per unit in flux)
+   REAL,                 INTENT(OUT) :: GDIR    !projected leaf+stem area in solar direction
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FREV    !flux reflected by veg layer   (per unit incoming flux) 
+   REAL, DIMENSION(1:2), INTENT(OUT) :: FREG    !flux reflected by ground (per unit incoming flux)
+! local
+   REAL                              :: OMEGA   !fraction of intercepted radiation that is scattered
+   REAL                              :: OMEGAL  !omega for leaves
+   REAL                              :: BETAI   !upscatter parameter for diffuse radiation
+   REAL                              :: BETAIL  !betai for leaves
+   REAL                              :: BETAD   !upscatter parameter for direct beam radiation
+   REAL                              :: BETADL  !betad for leaves
+   REAL                              :: EXT     !optical depth of direct beam per unit leaf area
+   REAL                              :: AVMU    !average diffuse optical depth
+   REAL                              :: COSZI   !0.001 <= cosz <= 1.000
+   REAL                              :: ASU     !single scattering albedo
+   REAL                              :: CHIL    ! -0.4 <= xl <= 0.6
+   REAL                              :: TMP0,TMP1,TMP2,TMP3,TMP4,TMP5,TMP6,TMP7,TMP8,TMP9
+   REAL                              :: P1,P2,P3,P4,S1,S2,U1,U2,U3
+   REAL                              :: B,C,D,D1,D2,F,H,H1,H2,H3,H4,H5,H6,H7,H8,H9,H10
+   REAL                              :: PHI1,PHI2,SIGMA
+   REAL                              :: FTDS,FTIS,FRES
+   REAL                              :: DENFVEG
+   REAL                              :: VAI_SPREAD
+!jref:start
+   REAL                              :: FREVEG,FREBAR,FTDVEG,FTIVEG,FTDBAR,FTIBAR
+   REAL                              :: THETAZ
+!jref:end   
+!  variables for the modified two-stream scheme
+!  Niu and Yang (2004), JGR
+   REAL, PARAMETER :: PAI = 3.14159265 
+   REAL :: HD       !crown depth (m)
+   REAL :: BB       !vertical crown radius (m)
+   REAL :: THETAP   !angle conversion from SZA 
+   REAL :: FA       !foliage volume density (m-1)
+   REAL :: NEWVAI   !effective LSAI (-)
+   REAL,INTENT(INOUT) :: BGAP     !between canopy gap fraction for beam (-)
+   REAL,INTENT(INOUT) :: WGAP     !within canopy gap fraction for beam (-)
+   REAL :: KOPEN    !gap fraction for diffue light (-)
+   REAL :: GAP      !total gap fraction for beam ( <=1-shafac )
+! -----------------------------------------------------------------
+! compute within and between gaps
+     VAI_SPREAD = VAI
+     if(VAI == 0.0) THEN
+         GAP     = 1.0
+         KOPEN   = 1.0
+     ELSE
+         IF(OPT_RAD == 1) THEN
+	   DENFVEG = -LOG(MAX(1.0-FVEG,0.01))/(PAI*parameters%RC**2)
+           HD      = parameters%HVT - parameters%HVB
+           BB      = 0.5 * HD           
+           THETAP  = ATAN(BB/parameters%RC * TAN(ACOS(MAX(0.01,COSZ))) )
+           ! BGAP    = EXP(-parameters%DEN * PAI * parameters%RC**2/COS(THETAP) )
+           BGAP    = EXP(-DENFVEG * PAI * parameters%RC**2/COS(THETAP) )
+           FA      = VAI/(1.33 * PAI * parameters%RC**3.0 *(BB/parameters%RC)*DENFVEG)
+           NEWVAI  = HD*FA
+           WGAP    = (1.0-BGAP) * EXP(-0.5*NEWVAI/COSZ)
+           GAP     = MIN(1.0-FVEG, BGAP+WGAP)
+           KOPEN   = 0.05
+         END IF
+         IF(OPT_RAD == 2) THEN
+           GAP     = 0.0
+           KOPEN   = 0.0
+         END IF
+         IF(OPT_RAD == 3) THEN
+           GAP     = 1.0-FVEG
+           KOPEN   = 1.0-FVEG
+         END IF
+     end if
+! calculate two-stream parameters OMEGA, BETAD, BETAI, AVMU, GDIR, EXT.
+! OMEGA, BETAD, BETAI are adjusted for snow. values for OMEGA*BETAD
+! and OMEGA*BETAI are calculated and then divided by the new OMEGA
+! because the product OMEGA*BETAI, OMEGA*BETAD is used in solution.
+! also, the transmittances and reflectances (TAU, RHO) are linear
+! weights of leaf and stem values.
+     COSZI  = MAX(0.001, COSZ)
+     CHIL   = MIN( MAX(parameters%XL, -0.4), 0.6)
+     IF (ABS(CHIL) .LE. 0.01) CHIL = 0.01
+     PHI1   = 0.5 - 0.633*CHIL - 0.330*CHIL*CHIL
+     PHI2   = 0.877 * (1.0-2.0*PHI1)
+     GDIR   = PHI1 + PHI2*COSZI
+     EXT    = GDIR/COSZI
+     AVMU   = ( 1.0 - PHI1/PHI2 * LOG((PHI1+PHI2)/PHI1) ) / PHI2
+     OMEGAL = RHO(IB) + TAU(IB)
+     TMP0   = GDIR + PHI2*COSZI
+     TMP1   = PHI1*COSZI
+     ASU    = 0.5*OMEGAL*GDIR/TMP0 * ( 1.0-TMP1/TMP0*LOG((TMP1+TMP0)/TMP1) )
+     BETADL = (1.0+AVMU*EXT)/(OMEGAL*AVMU*EXT)*ASU
+     BETAIL = 0.5 * ( RHO(IB)+TAU(IB) + (RHO(IB)-TAU(IB))   &
+            * ((1.0+CHIL)/2.0)**2 ) / OMEGAL
+! adjust omega, betad, and betai for intercepted snow
+     IF (T .GT. TFRZ) THEN                                !no snow
+        TMP0 = OMEGAL
+        TMP1 = BETADL
+        TMP2 = BETAIL
+     ELSE
+        TMP0 =   (1.0-FWET)*OMEGAL        + FWET*parameters%OMEGAS(IB)
+        TMP1 = ( (1.0-FWET)*OMEGAL*BETADL + FWET*parameters%OMEGAS(IB)*parameters%BETADS ) / TMP0
+        TMP2 = ( (1.0-FWET)*OMEGAL*BETAIL + FWET*parameters%OMEGAS(IB)*parameters%BETAIS ) / TMP0
+     END IF
+     OMEGA = TMP0
+     BETAD = TMP1
+     BETAI = TMP2
+! absorbed, reflected, transmitted fluxes per unit incoming radiation
+     B = 1.0 - OMEGA + OMEGA*BETAI
+     C = OMEGA*BETAI
+     TMP0 = AVMU*EXT
+     D = TMP0 * OMEGA*BETAD
+     F = TMP0 * OMEGA*(1.0-BETAD)
+     TMP1 = B*B - C*C
+     H = SQRT(TMP1) / AVMU
+     SIGMA = TMP0*TMP0 - TMP1
+     if ( ABS (SIGMA) < 1.0e-6 ) SIGMA = SIGN(1.0e-6,SIGMA)
+     P1 = B + AVMU*H
+     P2 = B - AVMU*H
+     P3 = B + TMP0
+     P4 = B - TMP0
+     S1 = EXP(-H*VAI)
+     S2 = EXP(-EXT*VAI)
+     IF (IC .EQ. 0) THEN
+        U1 = B - C/ALBGRD(IB)
+        U2 = B - C*ALBGRD(IB)
+        U3 = F + C*ALBGRD(IB)
+     ELSE
+        U1 = B - C/ALBGRI(IB)
+        U2 = B - C*ALBGRI(IB)
+        U3 = F + C*ALBGRI(IB)
+     END IF
+     TMP2 = U1 - AVMU*H
+     TMP3 = U1 + AVMU*H
+     D1 = P1*TMP2/S1 - P2*TMP3*S1
+     TMP4 = U2 + AVMU*H
+     TMP5 = U2 - AVMU*H
+     D2 = TMP4/S1 - TMP5*S1
+     H1 = -D*P4 - C*F
+     TMP6 = D - H1*P3/SIGMA
+     TMP7 = ( D - C - H1/SIGMA*(U1+TMP0) ) * S2
+     H2 = ( TMP6*TMP2/S1 - P2*TMP7 ) / D1
+     H3 = - ( TMP6*TMP3*S1 - P1*TMP7 ) / D1
+     H4 = -F*P3 - C*D
+     TMP8 = H4/SIGMA
+     TMP9 = ( U3 - TMP8*(U2-TMP0) ) * S2
+     H5 = - ( TMP8*TMP4/S1 + TMP9 ) / D2
+     H6 = ( TMP8*TMP5*S1 + TMP9 ) / D2
+     H7 = (C*TMP2) / (D1*S1)
+     H8 = (-C*TMP3*S1) / D1
+     H9 = TMP4 / (D2*S1)
+     H10 = (-TMP5*S1) / D2
+! downward direct and diffuse fluxes below vegetation
+! Niu and Yang (2004), JGR.
+     IF (IC .EQ. 0) THEN
+        FTDS = S2                           *(1.0-GAP) + GAP
+        FTIS = (H4*S2/SIGMA + H5*S1 + H6/S1)*(1.0-GAP)
+     ELSE
+        FTDS = 0.0
+        FTIS = (H9*S1 + H10/S1)*(1.0-KOPEN) + KOPEN
+     END IF
+     FTD(IB) = FTDS
+     FTI(IB) = FTIS
+! flux reflected by the surface (veg. and ground)
+     IF (IC .EQ. 0) THEN
+        FRES   = (H1/SIGMA + H2 + H3)*(1.0-GAP  ) + ALBGRD(IB)*GAP        
+        FREVEG = (H1/SIGMA + H2 + H3)*(1.0-GAP  ) 
+        FREBAR = ALBGRD(IB)*GAP                   !jref - separate veg. and ground reflection
+     ELSE
+        FRES   = (H7 + H8) *(1.0-KOPEN) + ALBGRI(IB)*KOPEN        
+        FREVEG = (H7 + H8) *(1.0-KOPEN) + ALBGRI(IB)*KOPEN
+        FREBAR = 0                                !jref - separate veg. and ground reflection
+     END IF
+     FRE(IB) = FRES
+     FREV(IB) = FREVEG 
+     FREG(IB) = FREBAR 
+! flux absorbed by vegetation
+     FAB(IB) = 1.0 - FRE(IB) - (1.0-ALBGRD(IB))*FTD(IB) &
+                             - (1.0-ALBGRI(IB))*FTI(IB)
+  END SUBROUTINE TWOSTREAM
+
+
+
+
+
+
+
+
+
+
 
 
 
