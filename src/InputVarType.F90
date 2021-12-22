@@ -79,6 +79,7 @@ module InputVarType
     integer                  :: OPT_IRRMIn
     integer                  :: OPT_INFDVIn
     integer                  :: OPT_TDRNIn
+    integer                  :: OPT_TKSNOIn
 
     !----------------------------------------------------------------
     ! Noahmp Table variables
@@ -105,108 +106,108 @@ module InputVarType
     integer                                             :: LCZ_9_TABLE
     integer                                             :: LCZ_10_TABLE
     integer                                             :: LCZ_11_TABLE
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: CH2OP_TABLE       !maximum intercepted h2o per unit lai+sai (mm)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DLEAF_TABLE       !characteristic leaf dimension (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: Z0MVT_TABLE       !momentum roughness length (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: HVT_TABLE         !top of canopy (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: HVB_TABLE         !bottom of canopy (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DEN_TABLE         !tree density (no. of trunks per m2)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RC_TABLE          !tree crown radius (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: MFSNO_TABLE       !snowmelt curve parameter ()
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SCFFAC_TABLE      !snow cover factor (m) (replace original hard-coded 2.5*z0 in SCF formulation)
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: SAIM_TABLE        !monthly stem area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: LAIM_TABLE        !monthly leaf area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SLA_TABLE         !single-side leaf area per Kg [m2/kg]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DILEFC_TABLE      !coeficient for leaf stress death [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DILEFW_TABLE      !coeficient for leaf stress death [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: FRAGR_TABLE       !fraction of growth respiration  !original was 0.3 
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: LTOVRC_TABLE      !leaf turnover [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: C3PSN_TABLE       !photosynthetic pathway: 0. = c4, 1. = c3
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: KC25_TABLE        !co2 michaelis-menten constant at 25c (pa)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: AKC_TABLE         !q10 for kc25
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: KO25_TABLE        !o2 michaelis-menten constant at 25c (pa)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: AKO_TABLE         !q10 for ko25
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: VCMX25_TABLE      !maximum rate of carboxylation at 25c (umol co2/m**2/s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: AVCMX_TABLE       !q10 for vcmx25
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BP_TABLE          !minimum leaf conductance (umol/m**2/s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: MP_TABLE          !slope of conductance-to-photosynthesis relationship
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: QE25_TABLE        !quantum efficiency at 25c (umol co2 / umol photon)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: AQE_TABLE         !q10 for qe25
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMF25_TABLE       !leaf maintenance respiration at 25c (umol co2/m**2/s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMS25_TABLE       !stem maintenance respiration at 25c (umol co2/kg bio/s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMR25_TABLE       !root maintenance respiration at 25c (umol co2/kg bio/s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: ARM_TABLE         !q10 for maintenance respiration
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: FOLNMX_TABLE      !foliage nitrogen concentration when f(n)=1 (%)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: TMIN_TABLE        !minimum temperature for photosynthesis (k)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: XL_TABLE          !leaf/stem orientation index
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: RHOL_TABLE        !leaf reflectance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: RHOS_TABLE        !stem reflectance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: TAUL_TABLE        !leaf transmittance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: TAUS_TABLE        !stem transmittance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: MRP_TABLE         !microbial respiration parameter (umol co2 /kg c/ s)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: CWPVT_TABLE       !empirical canopy wind parameter
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: WRRAT_TABLE       !wood to non-wood ratio
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: WDPOOL_TABLE      !wood pool (switch 1 or 0) depending on woody or not [-]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: TDLEF_TABLE       !characteristic T for leaf freezing [K]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: NROOT_TABLE       !number of soil layers with root present
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RGL_TABLE         !Parameter used in radiation stress function
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RS_TABLE          !Minimum stomatal resistance [s m-1]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: HS_TABLE          !Parameter used in vapor pressure deficit function
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: TOPT_TABLE        !Optimum transpiration air temperature [K]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RSMAX_TABLE       !Maximal stomatal resistance [s m-1]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: CH2OP_TABLE       ! maximum intercepted h2o per unit lai+sai (mm)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DLEAF_TABLE       ! characteristic leaf dimension (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: Z0MVT_TABLE       ! momentum roughness length (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: HVT_TABLE         ! top of canopy (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: HVB_TABLE         ! bottom of canopy (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DEN_TABLE         ! tree density (no. of trunks per m2)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RC_TABLE          ! tree crown radius (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: MFSNO_TABLE       ! snowmelt curve parameter ()
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SCFFAC_TABLE      ! snow cover factor (m) (replace original hard-coded 2.5*z0 in SCF formulation)
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: SAIM_TABLE        ! monthly stem area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: LAIM_TABLE        ! monthly leaf area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SLA_TABLE         ! single-side leaf area per Kg [m2/kg]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DILEFC_TABLE      ! coeficient for leaf stress death [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DILEFW_TABLE      ! coeficient for leaf stress death [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: FRAGR_TABLE       ! fraction of growth respiration  !original was 0.3 
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: LTOVRC_TABLE      ! leaf turnover [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: C3PSN_TABLE       ! photosynthetic pathway: 0. = c4, 1. = c3
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: KC25_TABLE        ! co2 michaelis-menten constant at 25c (pa)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: AKC_TABLE         ! q10 for kc25
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: KO25_TABLE        ! o2 michaelis-menten constant at 25c (pa)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: AKO_TABLE         ! q10 for ko25
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: VCMX25_TABLE      ! maximum rate of carboxylation at 25c (umol co2/m**2/s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: AVCMX_TABLE       ! q10 for vcmx25
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BP_TABLE          ! minimum leaf conductance (umol/m**2/s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: MP_TABLE          ! slope of conductance-to-photosynthesis relationship
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: QE25_TABLE        ! quantum efficiency at 25c (umol co2 / umol photon)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: AQE_TABLE         ! q10 for qe25
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMF25_TABLE       ! leaf maintenance respiration at 25c (umol co2/m**2/s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMS25_TABLE       ! stem maintenance respiration at 25c (umol co2/kg bio/s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RMR25_TABLE       ! root maintenance respiration at 25c (umol co2/kg bio/s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: ARM_TABLE         ! q10 for maintenance respiration
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: FOLNMX_TABLE      ! foliage nitrogen concentration when f(n)=1 (%)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: TMIN_TABLE        ! minimum temperature for photosynthesis (k)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: XL_TABLE          ! leaf/stem orientation index
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: RHOL_TABLE        ! leaf reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: RHOS_TABLE        ! stem reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: TAUL_TABLE        ! leaf transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: TAUS_TABLE        ! stem transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: MRP_TABLE         ! microbial respiration parameter (umol co2 /kg c/ s)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: CWPVT_TABLE       ! empirical canopy wind parameter
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: WRRAT_TABLE       ! wood to non-wood ratio
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: WDPOOL_TABLE      ! wood pool (switch 1 or 0) depending on woody or not [-]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: TDLEF_TABLE       ! characteristic T for leaf freezing [K]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: NROOT_TABLE       ! number of soil layers with root present
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RGL_TABLE         ! Parameter used in radiation stress function
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RS_TABLE          ! Minimum stomatal resistance [s m-1]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: HS_TABLE          ! Parameter used in vapor pressure deficit function
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: TOPT_TABLE        ! Optimum transpiration air temperature [K]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RSMAX_TABLE       ! Maximal stomatal resistance [s m-1]
 
     ! original MPTABLE.TBL radiation parameters
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBSAT_TABLE      !saturated soil albedos: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBDRY_TABLE      !dry soil albedos: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: ALBICE_TABLE      !albedo land ice: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: ALBLAK_TABLE      !albedo frozen lakes: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: OMEGAS_TABLE      !two-stream parameter omega for snow
-    real(kind=kind_noahmp)                              :: BETADS_TABLE      !two-stream parameter betad for snow
-    real(kind=kind_noahmp)                              :: BETAIS_TABLE      !two-stream parameter betad for snow
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: EG_TABLE          !emissivity
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBSAT_TABLE      ! saturated soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBDRY_TABLE      ! dry soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: ALBICE_TABLE      ! albedo land ice: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: ALBLAK_TABLE      ! albedo frozen lakes: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: OMEGAS_TABLE      ! two-stream parameter omega for snow
+    real(kind=kind_noahmp)                              :: BETADS_TABLE      ! two-stream parameter betad for snow
+    real(kind=kind_noahmp)                              :: BETAIS_TABLE      ! two-stream parameter betad for snow
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: EG_TABLE          ! emissivity
 
     ! original MPTABLE.TBL global parameters
-    real(kind=kind_noahmp)                              :: CO2_TABLE                 !co2 partial pressure
-    real(kind=kind_noahmp)                              :: O2_TABLE                  !o2 partial pressure
-    real(kind=kind_noahmp)                              :: TIMEAN_TABLE              !gridcell mean topgraphic index (global mean)
-    real(kind=kind_noahmp)                              :: FSATMX_TABLE              !maximum surface saturated fraction (global mean)
-    real(kind=kind_noahmp)                              :: Z0SNO_TABLE               !snow surface roughness length (m) (0.002)
-    real(kind=kind_noahmp)                              :: SSI_TABLE                 !liquid water holding capacity for snowpack (m3/m3) (0.03)
-    real(kind=kind_noahmp)                              :: SNOW_RET_FAC_TABLE        !snowpack water release timescale factor (1/s)
-    real(kind=kind_noahmp)                              :: SNOW_EMIS_TABLE           !snow emissivity
-    real(kind=kind_noahmp)                              :: SWEMX_TABLE               !new snow mass to fully cover old snow (mm)
-    real(kind=kind_noahmp)                              :: TAU0_TABLE                !tau0 from Yang97 eqn. 10a
-    real(kind=kind_noahmp)                              :: GRAIN_GROWTH_TABLE        !growth from vapor diffusion Yang97 eqn. 10b
-    real(kind=kind_noahmp)                              :: EXTRA_GROWTH_TABLE        !extra growth near freezing Yang97 eqn. 10c
-    real(kind=kind_noahmp)                              :: DIRT_SOOT_TABLE           !dirt and soot term Yang97 eqn. 10d
-    real(kind=kind_noahmp)                              :: BATS_COSZ_TABLE           !zenith angle snow albedo adjustment; b in Yang97 eqn. 15
-    real(kind=kind_noahmp)                              :: BATS_VIS_NEW_TABLE        !new snow visible albedo
-    real(kind=kind_noahmp)                              :: BATS_NIR_NEW_TABLE        !new snow NIR albedo
-    real(kind=kind_noahmp)                              :: BATS_VIS_AGE_TABLE        !age factor for diffuse visible snow albedo Yang97 eqn. 17
-    real(kind=kind_noahmp)                              :: BATS_NIR_AGE_TABLE        !age factor for diffuse NIR snow albedo Yang97 eqn. 18
-    real(kind=kind_noahmp)                              :: BATS_VIS_DIR_TABLE        !cosz factor for direct visible snow albedo Yang97 eqn. 15
-    real(kind=kind_noahmp)                              :: BATS_NIR_DIR_TABLE        !cosz factor for direct NIR snow albedo Yang97 eqn. 16
-    real(kind=kind_noahmp)                              :: RSURF_SNOW_TABLE          !surface resistance for snow(s/m)
-    real(kind=kind_noahmp)                              :: RSURF_EXP_TABLE           !exponent in the shape parameter for soil resistance option 1
-    real(kind=kind_noahmp)                              :: C2_SNOWCOMPACT_TABLE      !overburden snow compaction parameter (m3/kg)
-    real(kind=kind_noahmp)                              :: C3_SNOWCOMPACT_TABLE      !snow desctructive metamorphism compaction parameter1 [1/s]
-    real(kind=kind_noahmp)                              :: C4_SNOWCOMPACT_TABLE      !snow desctructive metamorphism compaction parameter2 [1/k]
-    real(kind=kind_noahmp)                              :: C5_SNOWCOMPACT_TABLE      !snow desctructive metamorphism compaction parameter3
-    real(kind=kind_noahmp)                              :: DM_SNOWCOMPACT_TABLE      !upper Limit on destructive metamorphism compaction [kg/m3]
-    real(kind=kind_noahmp)                              :: ETA0_SNOWCOMPACT_TABLE    !snow viscosity coefficient [kg-s/m2]
-    real(kind=kind_noahmp)                              :: SNLIQMAXFRAC_TABLE        !maximum liquid water fraction in snow
-    real(kind=kind_noahmp)                              :: SWEMAXGLA_TABLE           !Maximum SWE allowed at glaciers (mm)
-    real(kind=kind_noahmp)                              :: WSLMAX_TABLE              !maximum lake water storage (mm)
-    real(kind=kind_noahmp)                              :: ROUS_TABLE                !specific yield [-] for Niu et al. 2007 groundwater scheme
-    real(kind=kind_noahmp)                              :: CMIC_TABLE                !microprore content (0.0-1.0), 0.0: close to free drainage
-    real(kind=kind_noahmp)                              :: SNOWDEN_MIN_TABLE         !fresh snowfall density (kg/m3)
+    real(kind=kind_noahmp)                              :: CO2_TABLE                 ! co2 partial pressure
+    real(kind=kind_noahmp)                              :: O2_TABLE                  ! o2 partial pressure
+    real(kind=kind_noahmp)                              :: TIMEAN_TABLE              ! gridcell mean topgraphic index (global mean)
+    real(kind=kind_noahmp)                              :: FSATMX_TABLE              ! maximum surface saturated fraction (global mean)
+    real(kind=kind_noahmp)                              :: Z0SNO_TABLE               ! snow surface roughness length (m) (0.002)
+    real(kind=kind_noahmp)                              :: SSI_TABLE                 ! liquid water holding capacity for snowpack (m3/m3) (0.03)
+    real(kind=kind_noahmp)                              :: SNOW_RET_FAC_TABLE        ! snowpack water release timescale factor (1/s)
+    real(kind=kind_noahmp)                              :: SNOW_EMIS_TABLE           ! snow emissivity
+    real(kind=kind_noahmp)                              :: SWEMX_TABLE               ! new snow mass to fully cover old snow (mm)
+    real(kind=kind_noahmp)                              :: TAU0_TABLE                ! tau0 from Yang97 eqn. 10a
+    real(kind=kind_noahmp)                              :: GRAIN_GROWTH_TABLE        ! growth from vapor diffusion Yang97 eqn. 10b
+    real(kind=kind_noahmp)                              :: EXTRA_GROWTH_TABLE        ! extra growth near freezing Yang97 eqn. 10c
+    real(kind=kind_noahmp)                              :: DIRT_SOOT_TABLE           ! dirt and soot term Yang97 eqn. 10d
+    real(kind=kind_noahmp)                              :: BATS_COSZ_TABLE           ! zenith angle snow albedo adjustment; b in Yang97 eqn. 15
+    real(kind=kind_noahmp)                              :: BATS_VIS_NEW_TABLE        ! new snow visible albedo
+    real(kind=kind_noahmp)                              :: BATS_NIR_NEW_TABLE        ! new snow NIR albedo
+    real(kind=kind_noahmp)                              :: BATS_VIS_AGE_TABLE        ! age factor for diffuse visible snow albedo Yang97 eqn. 17
+    real(kind=kind_noahmp)                              :: BATS_NIR_AGE_TABLE        ! age factor for diffuse NIR snow albedo Yang97 eqn. 18
+    real(kind=kind_noahmp)                              :: BATS_VIS_DIR_TABLE        ! cosz factor for direct visible snow albedo Yang97 eqn. 15
+    real(kind=kind_noahmp)                              :: BATS_NIR_DIR_TABLE        ! cosz factor for direct NIR snow albedo Yang97 eqn. 16
+    real(kind=kind_noahmp)                              :: RSURF_SNOW_TABLE          ! surface resistance for snow(s/m)
+    real(kind=kind_noahmp)                              :: RSURF_EXP_TABLE           ! exponent in the shape parameter for soil resistance option 1
+    real(kind=kind_noahmp)                              :: C2_SNOWCOMPACT_TABLE      ! overburden snow compaction parameter (m3/kg)
+    real(kind=kind_noahmp)                              :: C3_SNOWCOMPACT_TABLE      ! snow desctructive metamorphism compaction parameter1 [1/s]
+    real(kind=kind_noahmp)                              :: C4_SNOWCOMPACT_TABLE      ! snow desctructive metamorphism compaction parameter2 [1/k]
+    real(kind=kind_noahmp)                              :: C5_SNOWCOMPACT_TABLE      ! snow desctructive metamorphism compaction parameter3
+    real(kind=kind_noahmp)                              :: DM_SNOWCOMPACT_TABLE      ! upper Limit on destructive metamorphism compaction [kg/m3]
+    real(kind=kind_noahmp)                              :: ETA0_SNOWCOMPACT_TABLE    ! snow viscosity coefficient [kg-s/m2]
+    real(kind=kind_noahmp)                              :: SNLIQMAXFRAC_TABLE        ! maximum liquid water fraction in snow
+    real(kind=kind_noahmp)                              :: SWEMAXGLA_TABLE           ! Maximum SWE allowed at glaciers (mm)
+    real(kind=kind_noahmp)                              :: WSLMAX_TABLE              ! maximum lake water storage (mm)
+    real(kind=kind_noahmp)                              :: ROUS_TABLE                ! specific yield [-] for Niu et al. 2007 groundwater scheme
+    real(kind=kind_noahmp)                              :: CMIC_TABLE                ! microprore content (0.0-1.0), 0.0: close to free drainage
+    real(kind=kind_noahmp)                              :: SNOWDEN_MIN_TABLE         ! fresh snowfall density (kg/m3)
 
     ! original MPTABLE.TBL irrigation parameters
     integer                                             :: IRR_HAR_TABLE             ! number of days before harvest date to stop irrigation 
     real(kind=kind_noahmp)                              :: IRR_FRAC_TABLE            ! irrigation Fraction
     real(kind=kind_noahmp)                              :: IRR_LAI_TABLE             ! Minimum lai to trigger irrigation
     real(kind=kind_noahmp)                              :: IRR_MAD_TABLE             ! management allowable deficit (0-1)
-    real(kind=kind_noahmp)                              :: FILOSS_TABLE              ! fraction of flood irrigation loss (0-1) 
+    real(kind=kind_noahmp)                              :: FILOSS_TABLE              ! factor of flood irrigation loss
     real(kind=kind_noahmp)                              :: SPRIR_RATE_TABLE          ! mm/h, sprinkler irrigation rate
     real(kind=kind_noahmp)                              :: MICIR_RATE_TABLE          ! mm/h, micro irrigation rate
     real(kind=kind_noahmp)                              :: FIRTFAC_TABLE             ! flood application rate factor
@@ -323,33 +324,33 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BIO2LAI_TABLE             ! leaf are per living leaf biomass [m^2/kg]
 
     ! original SOILPARM.TBL parameters
-    integer                                             :: SLCATS_TABLE      !number of soil categories
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BEXP_TABLE        !maximum intercepted h2o per unit lai+sai (mm)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCDRY_TABLE      !characteristic leaf dimension (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: F1_TABLE          !momentum roughness length (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCMAX_TABLE      !top of canopy (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCREF_TABLE      !bottom of canopy (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: PSISAT_TABLE      !tree density (no. of trunks per m2)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DKSAT_TABLE       !tree crown radius (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: DWSAT_TABLE       !monthly stem area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCWLT_TABLE      !monthly leaf area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: QUARTZ_TABLE      !single-side leaf area per Kg [m2/kg]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BVIC_TABLE        !VIC model infiltration parameter (-) for opt_run=6
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: AXAJ_TABLE        !Xinanjiang: Tension water distribution inflection parameter [-] for opt_run=7
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BXAJ_TABLE        !Xinanjiang: Tension water distribution shape parameter [-] for opt_run=7
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: XXAJ_TABLE        !Xinanjiang: Free water distribution shape parameter [-] for opt_run=7
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BDVIC_TABLE       !VIC model infiltration parameter (-)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: GDVIC_TABLE       !mean capilary drive (m)
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: BBVIC_TABLE       !heterogeniety parameter for DVIC infiltration [-]
+    integer                                             :: SLCATS_TABLE      ! number of soil categories
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BEXP_TABLE        ! soil B parameter
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCDRY_TABLE      ! dry soil moisture threshold
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: F1_TABLE          ! soil thermal diffusivity/conductivity coef
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCMAX_TABLE      ! porosity, saturated value of soil moisture (volumetric)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCREF_TABLE      ! reference soil moisture (field capacity) (volumetric)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: PSISAT_TABLE      ! saturated soil matric potential
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DKSAT_TABLE       ! saturated soil hydraulic conductivity
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: DWSAT_TABLE       ! saturated soil hydraulic diffusivity
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCWLT_TABLE      ! wilting point soil moisture (volumetric)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: QUARTZ_TABLE      ! soil quartz content
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BVIC_TABLE        ! VIC model infiltration parameter (-) for opt_run=6
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: AXAJ_TABLE        ! Xinanjiang: Tension water distribution inflection parameter [-] for opt_run=7
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BXAJ_TABLE        ! Xinanjiang: Tension water distribution shape parameter [-] for opt_run=7
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: XXAJ_TABLE        ! Xinanjiang: Free water distribution shape parameter [-] for opt_run=7
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BDVIC_TABLE       ! VIC model infiltration parameter (-)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: GDVIC_TABLE       ! mean capilary drive (m)
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BBVIC_TABLE       ! heterogeniety parameter for DVIC infiltration [-]
 
     ! original GENPARM.TBL parameters
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SLOPE_TABLE       !slope factor for soil drainage
-    real(kind=kind_noahmp)                              :: CSOIL_TABLE       !Soil heat capacity [J m-3 K-1]
-    real(kind=kind_noahmp)                              :: REFDK_TABLE       !Parameter in the surface runoff parameterization
-    real(kind=kind_noahmp)                              :: REFKDT_TABLE      !Parameter in the surface runoff parameterization
-    real(kind=kind_noahmp)                              :: FRZK_TABLE        !Frozen ground parameter
-    real(kind=kind_noahmp)                              :: ZBOT_TABLE        !Depth [m] of lower boundary soil temperature
-    real(kind=kind_noahmp)                              :: CZIL_TABLE        !Parameter used in the calculation of the roughness length for heat
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: SLOPE_TABLE       ! slope factor for soil drainage
+    real(kind=kind_noahmp)                              :: CSOIL_TABLE       ! Soil heat capacity [J m-3 K-1]
+    real(kind=kind_noahmp)                              :: REFDK_TABLE       ! Parameter in the surface runoff parameterization
+    real(kind=kind_noahmp)                              :: REFKDT_TABLE      ! Parameter in the surface runoff parameterization
+    real(kind=kind_noahmp)                              :: FRZK_TABLE        ! Frozen ground parameter
+    real(kind=kind_noahmp)                              :: ZBOT_TABLE        ! Depth [m] of lower boundary soil temperature
+    real(kind=kind_noahmp)                              :: CZIL_TABLE        ! Parameter used in the calculation of the roughness length for heat
 
     !----------------------------------------------------------------
     ! Noahmp State variables from restart or initial input files

@@ -3,7 +3,7 @@
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
   output_filename = 'output.nc'
-  runsnow         = .true. ! true or false whether to run snow cases
+  runsnow         = .false. ! true or false whether to run snow cases
   JULIAN          = 180.0
 /
 
@@ -69,7 +69,7 @@ iopt_irr = 0  ! irrigation
 iopt_irrm = 0 ! irri method
 iopt_infdv = 1 ! only for runoff=8
 iopt_tdrn = 0 ! drainage only for runoff=3
-
+iopt_tksno = 1
 /
 
 

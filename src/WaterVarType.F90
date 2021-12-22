@@ -117,7 +117,8 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: FICEOLD_SNOW  ! ice fraction in snow layers at last timestep
     real(kind=kind_noahmp), allocatable, dimension(:) :: FICE_SNOW     ! ice fraction in snow layers at current timestep
     real(kind=kind_noahmp), allocatable, dimension(:) :: FICE_SOIL     ! ice fraction in soil layers at current timestep
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SNOW    ! snow effective porosity (m3/m3) 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SNOW    ! snow effective porosity (m3/m3) used in snow hydrology 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SNOW2   ! snow effective porosity (m3/m3) used in snow heat capacity
     real(kind=kind_noahmp), allocatable, dimension(:) :: SH2O          ! soil liquid moisture (m3/m3)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SICE          ! soil ice moisture (m3/m3)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMC           ! total soil moisture [m3/m3]
@@ -127,6 +128,8 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SOIL    ! soil effective porosity (m3/m3) 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCEQ         ! equilibrium soil water  content [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: BTRANI        ! soil water transpiration factor (0 to 1)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SNICEV        ! partial volume of ice [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SNLIQV        ! partial volume of liquid water [m3/m3]
 
   end type state_type
 
@@ -182,7 +185,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: FRZK             ! Frozen ground parameter
     real(kind=kind_noahmp) :: IRR_LAI          ! minimum lai to trigger irrigation
     real(kind=kind_noahmp) :: IRR_MAD          ! management allowable deficit (0-1)
-    real(kind=kind_noahmp) :: FILOSS           ! fraction of flood irrigation loss (0-1)
+    real(kind=kind_noahmp) :: FILOSS           ! factor of flood irrigation loss
     real(kind=kind_noahmp) :: SPRIR_RATE       ! sprinkler irrigation rate (mm/h)
     real(kind=kind_noahmp) :: IRR_FRAC         ! irrigation Fraction
     real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger

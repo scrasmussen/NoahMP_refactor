@@ -62,7 +62,12 @@ OBJS = ConstantDefineMod.o \
        IrrigationTriggerMod.o \
        IrrigationSprinklerMod.o \
        CanopyWaterInterceptMod.o \
-       PrecipitationHeatAdvectMod.o
+       PrecipitationHeatAdvectMod.o \
+       SnowThermalPropertyMod.o \
+       SoilThermalPropertyMod.o \
+       GroundThermalPropertyMod.o \
+       EnergyMainMod.o \
+       NoahmpMainMod.o
 
 all:	$(OBJS)
 
@@ -167,5 +172,13 @@ IrrigationSprinklerMod.o: ../utility/Machine.o ../utility/CheckNanMod.o \
                           NoahmpVarType.o ConstantDefineMod.o IrrigationInfilPhilipMod.o
 CanopyWaterInterceptMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 PrecipitationHeatAdvectMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-
+SnowThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SoilThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GroundThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                            SnowThermalPropertyMod.o SoilThermalPropertyMod.o
+EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                 GroundThermalPropertyMod.o
+NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                 IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
+                 PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
 

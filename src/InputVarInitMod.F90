@@ -1180,7 +1180,7 @@ contains
     ! options
     integer                :: idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
                               iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-                              iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn
+                              iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno
 
     !=== arrange structures for reading namelist.input
     namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
@@ -1192,7 +1192,7 @@ contains
     namelist / uniform_initial / initial_uniform,initial_sh2o_value,initial_sice_value
     namelist / options         / idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
                                  iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-                                 iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn
+                                 iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno
 
     !---------------------------------------------------------------
     ! read namelist.input
@@ -1238,6 +1238,7 @@ contains
     input%OPT_IRRMIn       = iopt_irrm
     input%OPT_INFDVIn      = iopt_infdv
     input%OPT_TDRNIn       = iopt_tdrn
+    input%OPT_TKSNOIn      = iopt_tksno
     input%output_filename  = output_filename
     input%DTIn             = dt
     input%maxtime          = maxtime

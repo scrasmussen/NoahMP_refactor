@@ -43,8 +43,14 @@ module EnergyVarType
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
     logical                :: FROZEN_GROUND   ! used to define latent heat pathway
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: STC  ! snow and soil layer temperature [k]
-
+    real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CVSNO       ! snow layer volumetric specific heat (j/m3/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TKSNO       ! snow layer thermal conductivity (w/m/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CVSOIL      ! soil layer volumetric specific heat (j/m3/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TKSOIL      ! soil layer thermal conductivity (w/m/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DF          ! thermal conductivity [w/m/k] for all soil and snow layers
+    real(kind=kind_noahmp), allocatable, dimension(:) :: HCPCT       ! heat capacity [j/m3/k] for all snow and soil layers
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FACT        ! energy factor for soil and snow phase change
 
   end type state_type
 
@@ -52,9 +58,10 @@ module EnergyVarType
   type :: parameter_type
 
     ! define specific energy parameter variables
-    real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM   ! monthly leaf area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM   ! monthly stem area index, one-sided
-
+    real(kind=kind_noahmp) :: CSOIL            ! vol. soil heat capacity [j/m3/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: QUARTZ      ! soil quartz content
 
   end type parameter_type
 

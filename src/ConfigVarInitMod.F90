@@ -23,28 +23,29 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
-    noahmp%config%nmlist%OPT_RUNSRF = huge(1)
-    noahmp%config%nmlist%OPT_RUNSUB = huge(1)
-    noahmp%config%nmlist%OPT_INF    = huge(1)
-    noahmp%config%nmlist%OPT_INFDV  = huge(1)
-    noahmp%config%nmlist%OPT_TDRN   = huge(1)
-    noahmp%config%nmlist%OPT_IRR    = huge(1)
-    noahmp%config%nmlist%OPT_IRRM   = huge(1)
+    noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
+    noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
+    noahmp%config%nmlist%OPT_INF      = huge(1)
+    noahmp%config%nmlist%OPT_INFDV    = huge(1)
+    noahmp%config%nmlist%OPT_TDRN     = huge(1)
+    noahmp%config%nmlist%OPT_IRR      = huge(1)
+    noahmp%config%nmlist%OPT_IRRM     = huge(1)
+    noahmp%config%nmlist%OPT_TKSNO    = huge(1)
 
     ! config domain variable
-    noahmp%config%domain%NSNOW      = 3
-    noahmp%config%domain%NSOIL      = 4
-    noahmp%config%domain%URBAN_FLAG = .false.
-    noahmp%config%domain%CROPLU     = .false.
-    noahmp%config%domain%ILOC       = huge(1)
-    noahmp%config%domain%JLOC       = huge(1)
-    noahmp%config%domain%VEGTYP     = huge(1)
-    noahmp%config%domain%CROPTYP    = huge(1)
-    noahmp%config%domain%ISNOW      = huge(1)
-    noahmp%config%domain%IST        = huge(1)
-    noahmp%config%domain%DT         = huge(1.0)
-    noahmp%config%domain%DX         = huge(1.0)
-    noahmp%config%domain%JULIAN     = huge(1.0)
+    noahmp%config%domain%URBAN_FLAG   = .false.
+    noahmp%config%domain%CROPLU       = .false.
+    noahmp%config%domain%NSNOW        = huge(1)
+    noahmp%config%domain%NSOIL        = huge(1)
+    noahmp%config%domain%ILOC         = huge(1)
+    noahmp%config%domain%JLOC         = huge(1)
+    noahmp%config%domain%VEGTYP       = huge(1)
+    noahmp%config%domain%CROPTYP      = huge(1)
+    noahmp%config%domain%ISNOW        = huge(1)
+    noahmp%config%domain%IST          = huge(1)
+    noahmp%config%domain%DT           = huge(1.0)
+    noahmp%config%domain%DX           = huge(1.0)
+    noahmp%config%domain%JULIAN       = huge(1.0)
 
   end subroutine ConfigVarInitDefault
 
@@ -69,6 +70,7 @@ contains
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
     noahmp%config%nmlist%OPT_IRR    = input%OPT_IRRIn
     noahmp%config%nmlist%OPT_IRRM   = input%OPT_IRRMIn
+    noahmp%config%nmlist%OPT_TKSNO  = input%OPT_TKSNOIn
     noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
     noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
     if ( input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn ) then

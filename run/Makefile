@@ -66,7 +66,12 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/IrrigationTriggerMod.o \
        ../src/IrrigationSprinklerMod.o \
        ../src/CanopyWaterInterceptMod.o \
-       ../src/PrecipitationHeatAdvectMod.o
+       ../src/PrecipitationHeatAdvectMod.o \
+       ../src/SnowThermalPropertyMod.o \
+       ../src/SoilThermalPropertyMod.o \
+       ../src/GroundThermalPropertyMod.o \
+       ../src/EnergyMainMod.o \
+       ../src/NoahmpMainMod.o
 
 
 CMD = noahmp_refac.exe

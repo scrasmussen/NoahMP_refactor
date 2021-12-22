@@ -10,12 +10,8 @@ Program NoahmpDriverMod
   use ForcingVarInitMod
   use WaterVarInitMod
   use BiochemVarInitMod
-  use WaterMainMod
   use NoahmpOutputMod
-  use IrrigationTriggerMod
-  use IrrigationSprinklerMod
-  use CanopyWaterInterceptMod
-  use PrecipitationHeatAdvectMod
+  use NoahmpMainMod
 
   implicit none
 !---------------------------------------------------------------------
@@ -181,7 +177,13 @@ Program NoahmpDriverMod
             PAHG            => noahmp%energy%flux%PAHG             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
             PAHB            => noahmp%energy%flux%PAHB             ,& ! out,   precipitation advected heat - bare ground net (W/m2)
             EDIR            => noahmp%water%flux%EDIR              ,& ! out,   net soil evaporation
-            FP              => noahmp%water%state%FP                & ! out,   precipitation area fraction
+            FP              => noahmp%water%state%FP               ,& ! out,   precipitation area fraction
+            DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
+            HCPCT           => noahmp%energy%state%HCPCT           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
+            FACT            => noahmp%energy%state%FACT            ,& ! out,    energy factor for soil & snow phase change
+            SNICEV          => noahmp%water%state%SNICEV           ,& ! out,    partial volume of ice [m3/m3]
+            SNLIQV          => noahmp%water%state%SNLIQV           ,& ! out,    partial volume of liquid water [m3/m3]
+            EPORE_SNOW      => noahmp%water%state%EPORE_SNOW2       & ! out,    snow effective porosity (m3/m3) used in snow heat capacity
             )
 !---------------------------------------------------------------------
 
@@ -273,6 +275,7 @@ Program NoahmpDriverMod
   WCND       = 0.0
   sfcheadrt  = 0.0
   WATBLED    = 0.0
+! canopy water and heat vars
   QINTR      = 0.0
   QDRIPR     = 0.0
   QTHROR     = 0.0
@@ -282,6 +285,13 @@ Program NoahmpDriverMod
   PAHV       = 0.0
   PAHG       = 0.0
   PAHB       = 0.0
+! thermoprop new vars
+  DF         = 0.0
+  HCPCT      = 0.0
+  SNICEV     = 0.0
+  SNLIQV     = 0.0
+  EPORE_SNOW = 0.0
+  FACT       = 0.0
 
 ! set psychrometric constant
   if ( TV > TFRZ ) then           
@@ -447,63 +457,11 @@ Program NoahmpDriverMod
     endif
 
 
-!---------------------------------------------------------------------
 !--------------------------------------------------------------------- 
 ! main noahmplsm subroutine below
 
-    !---------------------------------------------------------------------
-    ! call irrigation trigger and sprinkler irrigation
-    !--------------------------------------------------------------------- 
+    call NoahmpMain(noahmp)
 
-    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. (RAIN < (IR_RAIN/3600.0)) .and. &
-         ((IRAMTSI+IRAMTMI+IRAMTFI) == 0.0) ) then
-       call IrrigationTrigger(noahmp)
-    endif
-    ! set irrigation off if larger than IR_RAIN mm/h for this time step and irr triggered last time step
-    if ( (RAIN >= (IR_RAIN/3600.0)) .or. (IRRFRA < IRR_FRAC) ) then
-        IRAMTSI = 0.0
-        IRAMTMI = 0.0
-        IRAMTFI = 0.0
-    endif
-
-    ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
-    if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) then
-       call SprinklerIrrigation(noahmp)
-       RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
-       ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-       FIRR = IREVPLOS * 1000.0 * HVAP / DT   ! heat used for evaporation (W/m2)
-       EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
-    endif
-
-    !---------------------------------------------------------------------
-    ! call canopy water interception and precip heat advection
-    !--------------------------------------------------------------------- 
-
-    call CanopyWaterIntercept(noahmp)
-    call PrecipitationHeatAdvect(noahmp)
-
-    !---------------------------------------------------------------------
-    ! call the main energy routines
-    !--------------------------------------------------------------------- 
-
-
-    !---------------------------------------------------------------------
-    ! call the main water routines
-    !--------------------------------------------------------------------- 
-
-    call WaterMain(noahmp)
-
-    !---------------------------------------------------------------------
-    ! call the main crop and carbon routines
-    !--------------------------------------------------------------------- 
-
-    !---------------------------------------------------------------------
-    ! call the main ERROR routines
-    !--------------------------------------------------------------------- 
-
-
-! main noahmplsm subroutines above
-!--------------------------------------------------------------------- 
 !---------------------------------------------------------------------
 
 

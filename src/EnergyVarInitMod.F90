@@ -39,9 +39,23 @@ contains
     noahmp%energy%state%FROZEN_CANOPY   = .false.
     noahmp%energy%state%FROZEN_GROUND   = .false.
 
-    allocate( noahmp%energy%state%STC (-NSNOW+1:NSOIL) )
+    allocate( noahmp%energy%state%STC     (-NSNOW+1:NSOIL) )
+    allocate( noahmp%energy%state%DF      (-NSNOW+1:NSOIL) )
+    allocate( noahmp%energy%state%HCPCT   (-NSNOW+1:NSOIL) )
+    allocate( noahmp%energy%state%FACT    (-NSNOW+1:NSOIL) )
+    allocate( noahmp%energy%state%CVSNO   (-NSNOW+1:0    ) )
+    allocate( noahmp%energy%state%TKSNO   (-NSNOW+1:0    ) )
+    allocate( noahmp%energy%state%CVSOIL  (       1:NSOIL) )
+    allocate( noahmp%energy%state%TKSOIL  (       1:NSOIL) )
 
     noahmp%energy%state%STC(:)          = huge(1.0)
+    noahmp%energy%state%DF(:)           = huge(1.0)
+    noahmp%energy%state%HCPCT(:)        = huge(1.0)
+    noahmp%energy%state%FACT(:)         = huge(1.0)
+    noahmp%energy%state%CVSNO(:)        = huge(1.0)
+    noahmp%energy%state%TKSNO(:)        = huge(1.0)
+    noahmp%energy%state%CVSOIL(:)       = huge(1.0)
+    noahmp%energy%state%TKSOIL(:)       = huge(1.0)
 
     ! energy flux variable
     noahmp%energy%flux%FCEV             = huge(1.0)
@@ -53,11 +67,15 @@ contains
     noahmp%energy%flux%PAHB             = huge(1.0)
 
     ! energy parameter variable
+    noahmp%energy%param%CSOIL           = huge(1.0)
+
     allocate( noahmp%energy%param%LAIM (12) )
     allocate( noahmp%energy%param%SAIM (12) )
+    allocate( noahmp%energy%param%QUARTZ  (       1:NSOIL) )
 
     noahmp%energy%param%LAIM(:)         = huge(1.0)
     noahmp%energy%param%SAIM(:)         = huge(1.0)
+    noahmp%energy%param%QUARTZ(:)       = huge(1.0)
 
     end associate
 
@@ -71,10 +89,14 @@ contains
     type(input_type) , intent(inout) :: input
     type(noahmp_type), intent(inout) :: noahmp
 
+    ! local loop index
+    integer                          :: ISOIL
+
     associate(                                                  &
               ILOC        => noahmp%config%domain%ILOC         ,&
               JLOC        => noahmp%config%domain%JLOC         ,&
               VEGTYP      => noahmp%config%domain%VEGTYP       ,&
+              SOILTYP     => noahmp%config%domain%SOILTYP      ,&
               NSNOW       => noahmp%config%domain%NSNOW        ,&
               NSOIL       => noahmp%config%domain%NSOIL         &
              )
@@ -83,10 +105,18 @@ contains
     !noahmp%energy%state%LAI   = input%LAIIn
     !noahmp%energy%state%SAI   = input%SAIIn
     !noahmp%energy%state%FVEG  = input%FVEGIn
+    !noahmp%energy%state%TG    = input%TGIn
+    !noahmp%energy%state%TV    = input%TVIn
+    !noahmp%energy%state%STC   = input%STCIn
 
     ! energy parameter variable
-    noahmp%energy%param%LAIM = input%LAIM_TABLE(VEGTYP,:)
-    noahmp%energy%param%SAIM = input%SAIM_TABLE(VEGTYP,:)
+    noahmp%energy%param%CSOIL              = input%CSOIL_TABLE
+    noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
+    noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)
+
+    do ISOIL = 1, size(SOILTYP)
+       noahmp%energy%param%QUARTZ(ISOIL)    = input%QUARTZ_TABLE(SOILTYP(ISOIL))
+    enddo
 
 
     end associate

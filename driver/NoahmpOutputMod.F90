@@ -87,6 +87,13 @@ module NoahmpOutputMod
   integer           :: PAHG_id
   integer           :: PAHB_id
   integer           :: EDIR_id
+! thermoprop new vars
+  integer           :: DF_id
+  integer           :: HCPCT_id
+  integer           :: SNICEV_id
+  integer           :: SNLIQV_id
+  integer           :: EPORE_id
+  integer           :: FACT_id
 
 contains
 
@@ -182,7 +189,13 @@ contains
     iret = nf90_def_var(ncid, "PAHG",        NF90_FLOAT, (/time_dim/)         , PAHG_id     )
     iret = nf90_def_var(ncid, "PAHB",        NF90_FLOAT, (/time_dim/)         , PAHB_id     )
     iret = nf90_def_var(ncid, "EDIR",        NF90_FLOAT, (/time_dim/)         , EDIR_id     )
-
+! thermoprop new vars
+    iret = nf90_def_var(ncid, "DF",          NF90_FLOAT, (/time_dim,snso_dim/), DF_id)
+    iret = nf90_def_var(ncid, "HCPCT",       NF90_FLOAT, (/time_dim,snso_dim/), HCPCT_id)
+    iret = nf90_def_var(ncid, "FACT",        NF90_FLOAT, (/time_dim,snso_dim/), FACT_id)
+    iret = nf90_def_var(ncid, "SNLIQV",      NF90_FLOAT, (/time_dim,snow_dim/), SNLIQV_id)
+    iret = nf90_def_var(ncid, "EPORE",       NF90_FLOAT, (/time_dim,snow_dim/), EPORE_id)
+    iret = nf90_def_var(ncid, "SNICEV",      NF90_FLOAT, (/time_dim,snow_dim/), SNICEV_id)
 
     iret = nf90_enddef(ncid)
   
@@ -277,6 +290,13 @@ contains
     iret = nf90_put_var(ncid, PAHG_id,     noahmp%energy%flux%PAHG,          start=(/itime+1/))
     iret = nf90_put_var(ncid, PAHB_id,     noahmp%energy%flux%PAHB,          start=(/itime+1/))
     iret = nf90_put_var(ncid, EDIR_id,     noahmp%water%flux%EDIR,           start=(/itime+1/))
+! thermoprop new vars
+     iret = nf90_put_var(ncid, DF_id,      noahmp%energy%state%DF,           start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, HCPCT_id,   noahmp%energy%state%HCPCT,        start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, FACT_id,    noahmp%energy%state%FACT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, SNICEV_id,  noahmp%water%state%SNICEV,        start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, SNLIQV_id,  noahmp%water%state%SNLIQV,        start=(/itime+1,1/), count=(/1,nsnow/))
+     iret = nf90_put_var(ncid, EPORE_id,   noahmp%water%state%EPORE_SNOW2,   start=(/itime+1,1/), count=(/1,nsnow/))
 
 
     end associate

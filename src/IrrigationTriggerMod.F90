@@ -50,7 +50,7 @@ contains
               IRR_HAR         => noahmp%water%param%IRR_HAR          ,& ! in,     number of days before harvest date to stop irrigation
               IRR_LAI         => noahmp%water%param%IRR_LAI          ,& ! in,     minimum lai to trigger irrigation
               IRR_MAD         => noahmp%water%param%IRR_MAD          ,& ! in,     management allowable deficit (0-1)
-              FILOSS          => noahmp%water%param%FILOSS           ,& ! in,     fraction of flood irrigation loss (0-1)
+              FILOSS          => noahmp%water%param%FILOSS           ,& ! in,     factor of flood irrigation loss
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
               LAI             => noahmp%energy%state%LAI             ,& ! in,     leaf area index (m2/m2)
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigated area fraction
