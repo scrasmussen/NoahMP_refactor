@@ -84,6 +84,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: MAXLIQ      ! canopy capacity for rain interception (mm)
     real(kind=kind_noahmp) :: SNOWH       ! snow depth [m]
     real(kind=kind_noahmp) :: SNEQV       ! snow water equivalent [mm]
+    real(kind=kind_noahmp) :: SNEQVO      ! snow mass at last time step(mm) for BATS albedo
     real(kind=kind_noahmp) :: PONDING     ! surface ponding (mm)
     real(kind=kind_noahmp) :: PONDING1    ! surface ponding 1 (mm)
     real(kind=kind_noahmp) :: PONDING2    ! surface ponding 2 (mm)
@@ -110,6 +111,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: sfcheadrt   ! surface water head (mm)
     real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
     real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
+    real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -190,6 +192,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: IRR_FRAC         ! irrigation Fraction
     real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger
     real(kind=kind_noahmp) :: SNOWDEN_MIN      ! minimum fresh snowfall density (kg/m3)
+    real(kind=kind_noahmp) :: SWEMX            ! new snow mass to fully cover old snow (mm)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

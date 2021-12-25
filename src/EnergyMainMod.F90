@@ -7,6 +7,7 @@ module EnergyMainMod
   use NoahmpVarType
   use ConstantDefineMod
   use GroundThermalPropertyMod, only : GroundThermalProperty
+  use RadiationMainMod,         only : RadiationMain
 
   implicit none
 
@@ -32,7 +33,11 @@ contains
 ! ----------------------------------------------------------------------
 
 
+    ! Thermal properties of soil, snow, lake, and frozen soil
     call GroundThermalProperty(noahmp)
+
+    ! Solar radiation: absorbed & reflected by the ground and canopy
+    call RadiationMain(noahmp)
 
 
 !    end associate

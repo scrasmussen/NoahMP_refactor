@@ -71,7 +71,15 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/SoilThermalPropertyMod.o \
        ../src/GroundThermalPropertyMod.o \
        ../src/EnergyMainMod.o \
-       ../src/NoahmpMainMod.o
+       ../src/NoahmpMainMod.o \
+       ../src/CanopyRadiationTwoStreamMod.o \
+       ../src/GroundAlbedoMod.o \
+       ../src/RadiationMainMod.o \
+       ../src/SnowAgingBatsMod.o \
+       ../src/SnowAlbedoBatsMod.o \
+       ../src/SnowAlbedoClassMod.o \
+       ../src/SurfaceAlbedoMod.o \
+       ../src/SurfaceRadiationMod.o
 
 
 CMD = noahmp_refac.exe

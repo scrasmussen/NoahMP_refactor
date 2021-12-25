@@ -379,6 +379,9 @@
   ROUS = 0.20   ! specific yield [-] for Niu et al. 2007 groundwater scheme (OPT_RUNSUB=1)
   CMIC = 0.20   ! microprore content (0.0-1.0), 0.0: close to free drainage
   SNOWDEN_MIN = 120.0  ! minimum fresh snowfall density (kg/m3)
+  CLASS_ALB_REF = 0.55 ! reference snow albedo in CLASS scheme
+  CLASS_SNO_AGE = 3600.0  ! snow aging e-folding time (s) in CLASS albedo scheme
+  CLASS_ALB_NEW = 0.84  ! fresh snow albedo in CLASS scheme
 /
 
 &noahmp_irrigation_parameters

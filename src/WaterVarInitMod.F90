@@ -40,6 +40,7 @@ contains
     noahmp%water%state%MAXLIQ         = huge(1.0)
     noahmp%water%state%SNOWH          = huge(1.0)
     noahmp%water%state%SNEQV          = huge(1.0)
+    noahmp%water%state%SNEQVO         = huge(1.0)
     noahmp%water%state%PONDING        = huge(1.0)
     noahmp%water%state%PONDING1       = huge(1.0)
     noahmp%water%state%PONDING2       = huge(1.0)
@@ -66,6 +67,7 @@ contains
     noahmp%water%state%sfcheadrt      = huge(1.0)
     noahmp%water%state%IRRFRA         = huge(1.0)
     noahmp%water%state%FP             = huge(1.0)
+    noahmp%water%state%FSNO           = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
@@ -216,6 +218,7 @@ contains
     noahmp%water%param%IRR_FRAC         = huge(1.0)
     noahmp%water%param%IR_RAIN          = huge(1.0)
     noahmp%water%param%SNOWDEN_MIN      = huge(1.0)
+    noahmp%water%param%SWEMX            = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -265,6 +268,7 @@ contains
     !noahmp%water%state%CANLIQ                   = input%CANLIQIn
     !noahmp%water%state%CANICE                   = input%CANICEIn
     !noahmp%water%state%SNEQV                    = input%SNEQVIn
+    !noahmp%water%state%SNEQVO                   = input%SNEQVOIn
     !noahmp%water%state%SNOWH                    = input%SNOWHIn
     !noahmp%water%state%SNICE(-NSNOW+1:0)        = input%SNICEIn(-NSNOW+1:0)
     !noahmp%water%state%SNLIQ(-NSNOW+1:0)        = input%SNLIQIn(-NSNOW+1:0)
@@ -327,6 +331,7 @@ contains
     noahmp%water%param%IRR_FRAC          = input%IRR_FRAC_TABLE
     noahmp%water%param%IR_RAIN           = input%IR_RAIN_TABLE
     noahmp%water%param%SNOWDEN_MIN       = input%SNOWDEN_MIN_TABLE
+    noahmp%water%param%SWEMX             = input%SWEMX_TABLE
 
     noahmp%water%param%BVIC              = input%BVIC_TABLE(SOILTYP(1))
     noahmp%water%param%AXAJ              = input%AXAJ_TABLE(SOILTYP(1))

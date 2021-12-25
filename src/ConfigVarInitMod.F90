@@ -23,6 +23,8 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_ALB      = huge(1)
+    noahmp%config%nmlist%OPT_RAD      = huge(1)
     noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
     noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
     noahmp%config%nmlist%OPT_INF      = huge(1)
@@ -43,9 +45,12 @@ contains
     noahmp%config%domain%CROPTYP      = huge(1)
     noahmp%config%domain%ISNOW        = huge(1)
     noahmp%config%domain%IST          = huge(1)
+    noahmp%config%domain%NBAND        = huge(1)
+    noahmp%config%domain%SOILCOLOR    = huge(1)
     noahmp%config%domain%DT           = huge(1.0)
     noahmp%config%domain%DX           = huge(1.0)
     noahmp%config%domain%JULIAN       = huge(1.0)
+    noahmp%config%domain%COSZ         = huge(1.0)
 
   end subroutine ConfigVarInitDefault
 
@@ -65,6 +70,8 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_ALB    = input%OPT_ALBIn
+    noahmp%config%nmlist%OPT_RAD    = input%OPT_RADIn
     noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
@@ -79,19 +86,21 @@ contains
     endif
 
     ! config domain variable
-    ILOC                         = input%ILOCIn
-    JLOC                         = input%JLOCIn
-    NSNOW                        = input%NSNOWIn
-    NSOIL                        = input%NSOILIn
-    noahmp%config%domain%DT      = input%DTIn
-    noahmp%config%domain%DX      = input%DXIn
-    !noahmp%config%domain%ISNOW   = input%ISNOWIn
-    !noahmp%config%domain%IST     = input%ISTIn
-    noahmp%config%domain%VEGTYP  = input%VEGTYPEIn
-    noahmp%config%domain%CROPTYP = input%CROPTYPEIn
+    ILOC                            = input%ILOCIn
+    JLOC                            = input%JLOCIn
+    NSNOW                           = input%NSNOWIn
+    NSOIL                           = input%NSOILIn
+    noahmp%config%domain%NBAND      = input%NBANDIn    
+    noahmp%config%domain%DT         = input%DTIn
+    noahmp%config%domain%DX         = input%DXIn
+    noahmp%config%domain%VEGTYP     = input%VEGTYPEIn
+    noahmp%config%domain%CROPTYP    = input%CROPTYPEIn
+    noahmp%config%domain%SOILCOLOR  = input%SOILCOLORIn
+    noahmp%config%domain%JULIAN     = input%JULIANIn
+    !noahmp%config%domain%COSZ       = input%COSZIn
+    !noahmp%config%domain%ISNOW      = input%ISNOWIn
+    !noahmp%config%domain%IST        = input%ISTIn
     !noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
-    noahmp%config%domain%JULIAN  = input%JULIANIn
-
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
     allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )

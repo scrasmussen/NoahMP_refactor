@@ -18,6 +18,13 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
+    integer                   :: OPT_ALB       ! options for ground snow surface albedo
+                                                 ! 1 -> BATS snow albedo scheme
+                                                 ! 2 -> CLASS snow albedo scheme
+    integer                   :: OPT_RAD       ! options for canopy radiation transfer
+                                                 ! 1 -> modified two-stream (gap = F(solar angle, 3D structure ...)<1-FVEG)
+                                                 ! 2 -> two-stream applied to grid-cell (gap = 0)
+                                                 ! 3 -> two-stream applied to vegetated fraction (gap=1-FVEG)
     integer                   :: OPT_RUNSRF    ! options for surface runoff
                                                  ! 1 -> TOPMODEL with groundwater
                                                  ! 2 -> TOPMODEL with an equilibrium water table
@@ -74,9 +81,12 @@ module ConfigVarType
     integer                   :: NSNOW       ! maximum number of snow layers
     integer                   :: ISNOW       ! actual number of snow layers
     integer                   :: IST         ! surface type 1-soil; 2-lake
+    integer                   :: NBAND       ! number of solar radiation wave bands
+    integer                   :: SOILCOLOR   ! soil texture type for albedo
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
+    real(kind=kind_noahmp)    :: COSZ        ! cosine solar zenith angle
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

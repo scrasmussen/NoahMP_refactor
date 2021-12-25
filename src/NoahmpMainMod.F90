@@ -37,17 +37,31 @@ contains
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigation fraction
-              RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
-              IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! inout,   maximum precipitation to stop irrigation trigger
+              IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! inout,  maximum precipitation to stop irrigation trigger
+              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent (mm)
+              SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
               IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
+              RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
-              FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
-              IREVPLOS        => noahmp%water%flux%IREVPLOS           & ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+              IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+              FIRR            => noahmp%energy%flux%FIRR              & ! inout,  latent heating due to sprinkler evaporation [w/m2]
              )
 ! ----------------------------------------------------------------------
+
+    !---------------------------------------------------------------------
+    ! call atmospheric forcing processing
+    !--------------------------------------------------------------------- 
+
+
+
+    !---------------------------------------------------------------------
+    ! call phenology
+    !--------------------------------------------------------------------- 
+
+
 
     !---------------------------------------------------------------------
     ! call irrigation trigger and sprinkler irrigation
@@ -81,23 +95,29 @@ contains
     call PrecipitationHeatAdvect(noahmp)
 
     !---------------------------------------------------------------------
-    ! call the main energy routines
+    ! call the main energy routine
     !--------------------------------------------------------------------- 
 
     call EnergyMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! call the main water routines
+    ! prepare for water module
+    !--------------------------------------------------------------------- 
+    SNEQVO  = SNEQV
+
+    !---------------------------------------------------------------------
+    ! call the main water routine
     !--------------------------------------------------------------------- 
 
     call WaterMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! call the main crop and carbon routines
+    ! call the main biochem and crop routine
     !--------------------------------------------------------------------- 
 
+
     !---------------------------------------------------------------------
-    ! call the main ERROR routines
+    ! call the main ERROR balance check  routine
     !--------------------------------------------------------------------- 
 
 

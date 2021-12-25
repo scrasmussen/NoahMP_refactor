@@ -108,13 +108,13 @@ contains
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW
     namelist / noahmp_global_parameters /       CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
                                                 GRAIN_GROWTH, EXTRA_GROWTH, DIRT_SOOT, BATS_COSZ, BATS_VIS_NEW,              &
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW
 
     ! MPTABLE.TBL irrigation parameters
     integer                                  :: IRR_HAR
@@ -499,6 +499,9 @@ contains
     input%ROUS_TABLE             = -1.0e36
     input%CMIC_TABLE             = -1.0e36
     input%SNOWDEN_MIN_TABLE      = -1.0e36
+    input%CLASS_ALB_REF_TABLE    = -1.0e36
+    input%CLASS_SNO_AGE_TABLE    = -1.0e36
+    input%CLASS_ALB_NEW_TABLE    = -1.0e36
 
     ! MPTABLE.TBL irrigation parameters
     input%IRR_HAR_TABLE          = -99999
@@ -874,6 +877,9 @@ contains
     input%ROUS_TABLE             = ROUS
     input%CMIC_TABLE             = CMIC
     input%SNOWDEN_MIN_TABLE      = SNOWDEN_MIN
+    input%CLASS_ALB_REF_TABLE    = CLASS_ALB_REF
+    input%CLASS_SNO_AGE_TABLE    = CLASS_SNO_AGE
+    input%CLASS_ALB_NEW_TABLE    = CLASS_ALB_NEW
 
     !---------------- MPTABLE.TBL irrigation parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
@@ -1157,6 +1163,7 @@ contains
     real(kind=kind_noahmp) :: fctr_e
     real(kind=kind_noahmp) :: fgev_e
     real(kind=kind_noahmp) :: Q2
+    real(kind=kind_noahmp) :: SWDOWN
     ! structure
     integer                :: isltyp
     integer                :: vegtype
@@ -1185,7 +1192,7 @@ contains
     !=== arrange structures for reading namelist.input
     namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2
+                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
                                  nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax
     namelist / fixed_initial   / zsoil,dzsnso
@@ -1264,6 +1271,7 @@ contains
     input%SHDMAXIn         = shdmax
     input%JULIANIn         = JULIAN
     input%Q2In             = Q2
+    input%SWDOWNIn         = SWDOWN
 
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))
@@ -1296,6 +1304,7 @@ contains
     input%DXIn     = 4000.0
     input%NSOILIn  = 4
     input%NSNOWIn  = 3
+    input%NBANDIn  = 2
 
   end subroutine InputVarInitDefault
 

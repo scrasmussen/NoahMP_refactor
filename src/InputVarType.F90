@@ -41,7 +41,8 @@ module InputVarType
     real(kind=kind_noahmp)   :: FCEVIn
     real(kind=kind_noahmp)   :: FCTRIn
     real(kind=kind_noahmp)   :: FGEVIn
-    real(kind=kind_noahmp)   :: Q2In 
+    real(kind=kind_noahmp)   :: Q2In
+    real(kind=kind_noahmp)   :: SWDOWNIn 
     ! structure
     integer                  :: VEGTYPEIn
     integer                  :: SOILCOLORIn
@@ -201,6 +202,9 @@ module InputVarType
     real(kind=kind_noahmp)                              :: ROUS_TABLE                ! specific yield [-] for Niu et al. 2007 groundwater scheme
     real(kind=kind_noahmp)                              :: CMIC_TABLE                ! microprore content (0.0-1.0), 0.0: close to free drainage
     real(kind=kind_noahmp)                              :: SNOWDEN_MIN_TABLE         ! fresh snowfall density (kg/m3)
+    real(kind=kind_noahmp)                              :: CLASS_ALB_REF_TABLE       ! reference snow albedo in CLASS scheme
+    real(kind=kind_noahmp)                              :: CLASS_SNO_AGE_TABLE       ! snow aging e-folding time (s) in CLASS albedo scheme
+    real(kind=kind_noahmp)                              :: CLASS_ALB_NEW_TABLE       ! fresh snow albedo in CLASS scheme
 
     ! original MPTABLE.TBL irrigation parameters
     integer                                             :: IRR_HAR_TABLE             ! number of days before harvest date to stop irrigation 
@@ -360,6 +364,7 @@ module InputVarType
     integer                                             :: IRCNTSIIn
     integer                                             :: IRCNTMIIn
     integer                                             :: IRCNTFIIn
+    integer                                             :: NBANDIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
     real(kind=kind_noahmp)                              :: TVIn              ! leaf temperature (K)
@@ -387,6 +392,10 @@ module InputVarType
     real(kind=kind_noahmp)                              :: LAIIn
     real(kind=kind_noahmp)                              :: SAIIn
     real(kind=kind_noahmp)                              :: FVEGIn
+    real(kind=kind_noahmp)                              :: TAUSSIn
+    real(kind=kind_noahmp)                              :: COSZIn
+    real(kind=kind_noahmp)                              :: SNEQVOIn
+    real(kind=kind_noahmp)                              :: ALBOLDIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

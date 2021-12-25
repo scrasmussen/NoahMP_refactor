@@ -67,7 +67,15 @@ OBJS = ConstantDefineMod.o \
        SoilThermalPropertyMod.o \
        GroundThermalPropertyMod.o \
        EnergyMainMod.o \
-       NoahmpMainMod.o
+       NoahmpMainMod.o \
+       SnowAgingBatsMod.o \
+       SnowAlbedoBatsMod.o \
+       SnowAlbedoClassMod.o \
+       GroundAlbedoMod.o \
+       CanopyRadiationTwoStreamMod.o \
+       SurfaceAlbedoMod.o \
+       SurfaceRadiationMod.o \
+       RadiationMainMod.o
 
 all:	$(OBJS)
 
@@ -176,9 +184,21 @@ SnowThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod
 SoilThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GroundThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                             SnowThermalPropertyMod.o SoilThermalPropertyMod.o
+CanopyRadiationTwoStreamMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GroundAlbedoMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAgingBatsMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAlbedoBatsMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAlbedoClassMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SurfaceAlbedoMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                    SnowAgingBatsMod.o SnowAlbedoBatsMod.o SnowAlbedoClassMod.o \
+                    GroundAlbedoMod.o CanopyRadiationTwoStreamMod.o
+SurfaceRadiationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                    SurfaceAlbedoMod.o SurfaceRadiationMod.o
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
-                 GroundThermalPropertyMod.o
+                 GroundThermalPropertyMod.o RadiationMainMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
+
 

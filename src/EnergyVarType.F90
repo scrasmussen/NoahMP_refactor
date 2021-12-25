@@ -25,6 +25,27 @@ module EnergyVarType
     real(kind=kind_noahmp) :: PAHV            ! precipitation advected heat - vegetation net (W/m2)
     real(kind=kind_noahmp) :: PAHG            ! precipitation advected heat - under canopy net (W/m2)
     real(kind=kind_noahmp) :: PAHB            ! precipitation advected heat - bare ground net (W/m2)
+    real(kind=kind_noahmp) :: PARSUN          ! average absorbed par for sunlit leaves (w/m2)
+    real(kind=kind_noahmp) :: PARSHA          ! average absorbed par for shaded leaves (w/m2)
+    real(kind=kind_noahmp) :: SAV             ! solar radiation absorbed by vegetation (w/m2)
+    real(kind=kind_noahmp) :: SAG             ! solar radiation absorbed by ground (w/m2)
+    real(kind=kind_noahmp) :: FSA             ! total absorbed solar radiation (w/m2)
+    real(kind=kind_noahmp) :: FSR             ! total reflected solar radiation (w/m2)
+    real(kind=kind_noahmp) :: FSRV            ! reflected solar radiation by vegetation (w/m2)
+    real(kind=kind_noahmp) :: FSRG            ! reflected solar radiation by ground (w/m2)
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FTDD        ! down direct flux below veg (per unit dir flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FTDI        ! down direct flux below veg per unit dif flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FTID        ! down diffuse flux below veg (per unit dir flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FTII        ! down diffuse flux below veg (per unit dif flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FREVD       ! flux reflected by veg layer (per unit direct flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FREVI       ! flux reflected by veg layer (per unit diffuse flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FREGD       ! flux reflected by ground (per unit direct flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: FREGI       ! flux reflected by ground (per unit diffuse flux)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAD       ! incoming direct solar radiation (w/m2)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAI       ! incoming diffuse solar radiation (w/m2)
 
   end type flux_type
 
@@ -36,10 +57,23 @@ module EnergyVarType
     real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
     real(kind=kind_noahmp) :: LAI             ! leaf area index
     real(kind=kind_noahmp) :: SAI             ! stem area index
+    real(kind=kind_noahmp) :: VAI             ! one-sided leaf+stem area index (m2/m2), after burying by snow
     real(kind=kind_noahmp) :: FVEG            ! greeness vegetation fraction
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
     real(kind=kind_noahmp) :: EAIR            ! vapor pressure air (pa)
+    real(kind=kind_noahmp) :: FAGE            ! snow age factor
+    real(kind=kind_noahmp) :: TAUSS           ! non-dimensional snow age
+    real(kind=kind_noahmp) :: ALBOLD          ! snow albedo at last time step
+    real(kind=kind_noahmp) :: GDIR            ! projected leaf+stem area in solar direction
+    real(kind=kind_noahmp) :: BGAP            ! between canopy gap fraction for beam
+    real(kind=kind_noahmp) :: WGAP            ! within canopy gap fraction for beam
+    real(kind=kind_noahmp) :: KOPEN           ! gap fraction for diffue light
+    real(kind=kind_noahmp) :: GAP             ! total gap fraction for beam (<=1-shafac)
+    real(kind=kind_noahmp) :: FSUN            ! sunlit fraction of canopy
+    real(kind=kind_noahmp) :: FSHA            ! shaded fraction of canopy
+    real(kind=kind_noahmp) :: LAISUN          ! sunlit leaf area
+    real(kind=kind_noahmp) :: LAISHA          ! shaded leaf area
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
     logical                :: FROZEN_GROUND   ! used to define latent heat pathway
 
@@ -51,6 +85,16 @@ module EnergyVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: DF          ! thermal conductivity [w/m/k] for all soil and snow layers
     real(kind=kind_noahmp), allocatable, dimension(:) :: HCPCT       ! heat capacity [j/m3/k] for all snow and soil layers
     real(kind=kind_noahmp), allocatable, dimension(:) :: FACT        ! energy factor for soil and snow phase change
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSND      ! snow albedo for direct(1=vis, 2=nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSNI      ! snow albedo for diffuse(1=vis, 2=nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSOD      ! soil albedo (direct)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSOI      ! soil albedo (diffuse)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBGRD      ! ground albedo (direct beam: vis, nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBGRI      ! ground albedo (diffuse: vis, nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RHO         ! leaf/stem reflectance weighted by fraction LAI and SAI
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TAU         ! leaf/stem transmittance weighted by fraction LAI and SAI
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBD        ! surface albedo (direct)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBI        ! surface albedo (diffuse)
 
   end type state_type
 
@@ -58,10 +102,40 @@ module EnergyVarType
   type :: parameter_type
 
     ! define specific energy parameter variables
+    real(kind=kind_noahmp) :: RC               ! tree crown radius (m)
+    real(kind=kind_noahmp) :: HVT              ! top of canopy (m)
+    real(kind=kind_noahmp) :: HVB              ! bottom of canopy (m)
+    real(kind=kind_noahmp) :: DEN              ! tree density (no. of trunks per m2)
+    real(kind=kind_noahmp) :: XL               ! leaf/stem orientation index
+    real(kind=kind_noahmp) :: BETADS           ! two-stream parameter betad for snow (dir rad)
+    real(kind=kind_noahmp) :: BETAIS           ! two-stream parameter betad for snow (dif rad)
     real(kind=kind_noahmp) :: CSOIL            ! vol. soil heat capacity [j/m3/K]
+    real(kind=kind_noahmp) :: TAU0             ! snow aging parameter for BATS snow albedo
+    real(kind=kind_noahmp) :: GRAIN_GROWTH     ! vapor diffusion snow growth factor for BATS snow albedo
+    real(kind=kind_noahmp) :: DIRT_SOOT        ! dirt and soot effect factor for BATS snow albedo
+    real(kind=kind_noahmp) :: EXTRA_GROWTH     ! extra snow growth factor near freezing for BATS snow albedo
+    real(kind=kind_noahmp) :: BATS_COSZ        ! zenith angle snow albedo adjustment
+    real(kind=kind_noahmp) :: BATS_VIS_NEW     ! new snow visible albedo
+    real(kind=kind_noahmp) :: BATS_NIR_NEW     ! new snow NIR albedo
+    real(kind=kind_noahmp) :: BATS_VIS_AGE     ! age factor for diffuse visible snow albedo
+    real(kind=kind_noahmp) :: BATS_NIR_AGE     ! age factor for diffuse NIR snow albedo
+    real(kind=kind_noahmp) :: BATS_VIS_DIR     ! cosz factor for direct visible snow albedo
+    real(kind=kind_noahmp) :: BATS_NIR_DIR     ! cosz factor for direct NIR snow albedo
+    real(kind=kind_noahmp) :: CLASS_ALB_REF    ! reference snow albedo in CLASS scheme
+    real(kind=kind_noahmp) :: CLASS_SNO_AGE    ! snow aging e-folding time (s) in CLASS albedo scheme
+    real(kind=kind_noahmp) :: CLASS_ALB_NEW    ! fresh snow albedo in CLASS albedo scheme
+
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: QUARTZ      ! soil quartz content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSAT      ! saturated soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBDRY      ! dry soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBLAK      ! albedo frozen lakes: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: OMEGAS      ! two-stream parameter omega for snow
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RHOL        ! leaf reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RHOS        ! stem reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TAUL        ! leaf transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TAUS        ! stem transmittance: 1=vis, 2=nir
 
   end type parameter_type
 

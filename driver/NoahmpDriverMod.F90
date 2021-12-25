@@ -183,7 +183,30 @@ Program NoahmpDriverMod
             FACT            => noahmp%energy%state%FACT            ,& ! out,    energy factor for soil & snow phase change
             SNICEV          => noahmp%water%state%SNICEV           ,& ! out,    partial volume of ice [m3/m3]
             SNLIQV          => noahmp%water%state%SNLIQV           ,& ! out,    partial volume of liquid water [m3/m3]
-            EPORE_SNOW      => noahmp%water%state%EPORE_SNOW2       & ! out,    snow effective porosity (m3/m3) used in snow heat capacity
+            EPORE_SNOW      => noahmp%water%state%EPORE_SNOW2      ,& ! out,    snow effective porosity (m3/m3) used in snow heat capacity
+            SNEQVO          => noahmp%water%state%SNEQVO           ,& ! in,     snow mass at last time step(mm)
+            COSZ            => noahmp%config%domain%COSZ           ,& ! in,     cosine solar zenith angle
+            FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
+            SOLAD           => noahmp%energy%flux%SOLAD            ,& ! in,    incoming direct solar radiation (w/m2)
+            SOLAI           => noahmp%energy%flux%SOLAI            ,& ! in,    incoming diffuse solar radiation (w/m2)
+            ALBOLD          => noahmp%energy%state%ALBOLD          ,& ! in,     snow albedo at last time step
+            TAUSS           => noahmp%energy%state%TAUSS           ,& ! inout,  non-dimensional snow age
+            FSUN            => noahmp%energy%state%FSUN            ,& ! in,    sunlit fraction of canopy
+            LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,    sunlit leaf area
+            LAISHA          => noahmp%energy%state%LAISHA          ,& ! in,    shaded leaf area
+            PARSUN          => noahmp%energy%flux%PARSUN           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
+            PARSHA          => noahmp%energy%flux%PARSHA           ,& ! out,   average absorbed par for shaded leaves (w/m2)
+            SAV             => noahmp%energy%flux%SAV              ,& ! out,   solar radiation absorbed by vegetation (w/m2)
+            SAG             => noahmp%energy%flux%SAG              ,& ! out,   solar radiation absorbed by ground (w/m2)
+            FSA             => noahmp%energy%flux%FSA              ,& ! out,   total absorbed solar radiation (w/m2)
+            FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
+            FSRV            => noahmp%energy%flux%FSRV             ,& ! out,   reflected solar radiation by vegetation (w/m2)
+            FSRG            => noahmp%energy%flux%FSRG             ,& ! out,   reflected solar radiation by ground (w/m2)
+            BGAP            => noahmp%energy%state%BGAP            ,& ! out,   between canopy gap fraction for beam
+            WGAP            => noahmp%energy%state%WGAP            ,& ! out,   within canopy gap fraction for beam
+            ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
+            ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
+            SWDOWN          => noahmp%forcing%SWDOWN                & ! in,    downward surface radiation
             )
 !---------------------------------------------------------------------
 
@@ -202,6 +225,7 @@ Program NoahmpDriverMod
      STC(-2:0) = 0.0
      SH2O(1:4) = 0.03
      SICE(1:4) = 0.2
+     FSNO      = 0.8
   else
      SFCTMP    = 298.0
      FB_snow   = 0.0
@@ -214,6 +238,7 @@ Program NoahmpDriverMod
      STC(-2:0) = 0.0
      SH2O(1:4) = 0.2
      SICE(1:4) = 0.03
+     FSNO      = 0.0
   end if
 
 ! others
@@ -292,7 +317,34 @@ Program NoahmpDriverMod
   SNLIQV     = 0.0
   EPORE_SNOW = 0.0
   FACT       = 0.0
+! radiation new vars
+  COSZ   = 0.5
+  SOLAD(1) = SWDOWN*0.7*0.5     ! direct  vis
+  SOLAD(2) = SWDOWN*0.7*0.5     ! direct  nir
+  SOLAI(1) = SWDOWN*0.3*0.5     ! diffuse vis
+  SOLAI(2) = SWDOWN*0.3*0.5     ! diffuse nir
+  SNEQVO   = 0.0
+  ALBOLD   = 0.0
+  TAUSS    = 0.0
+  FSUN     = 0.0
+  LAISUN   = 0.0
+  LAISHA   = 0.0
+  PARSUN   = 0.0
+  PARSHA   = 0.0
+  SAV      = 0.0
+  SAG      = 0.0
+  FSA      = 0.0
+  FSR      = 0.0
+  FSRV     = 0.0
+  FSRG     = 0.0
+  BGAP     = 0.0
+  WGAP     = 0.0
+  ALBSND(:)= 0.0
+  ALBSNI(:)= 0.0
 
+
+
+!============================
 ! set psychrometric constant
   if ( TV > TFRZ ) then           
      LATHEAV       = HVAP          
