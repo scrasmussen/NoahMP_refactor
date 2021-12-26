@@ -19,7 +19,8 @@
   fctr_e        = 5.0       ! constant transpiration heat (w/m2) [+ to atm]
   fgev_e        = 15.0      ! evaporation/sublimation heat (w/m2) [+ to atm]
   Q2            = 0.01
-  SWDOWN        = 800.0
+  SWDOWN        = 500.0
+  LWDOWN        = 300.0
 /
 
 &structure

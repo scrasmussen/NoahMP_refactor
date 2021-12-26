@@ -28,6 +28,7 @@ USE NOAHMP_TABLES
   real          :: fgev_e
   real          :: Q2
   real          :: SWDOWN
+  real          :: LWDOWN
 ! structure
   integer       :: isltyp
   integer       :: vegtype
@@ -58,7 +59,7 @@ USE NOAHMP_TABLES
   !--------------------!
   namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
   namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN
+                               raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN,LWDOWN
   namelist / structure       / isltyp,VEGTYPE,soilcolor,slopetype,croptype,nsoil,nsnow,structure_option,soil_depth,&
                                vegfra,vegmax,shdmax
   namelist / fixed_initial   / zsoil,dzsnso
@@ -103,12 +104,8 @@ USE NOAHMP_TABLES
   REAL                            :: QDEW    !ground surface dew rate [mm/s]
   real                            :: TV      ! canopy temperature
   real                            :: TG      ! ground temperature
-  real                            :: LATHEAV !latent heat vap./sublimation (j/kg)
-  real                            :: LATHEAG !latent heat vap./sublimation (j/kg)
   logical                         :: frozen_canopy ! used to define latent heat pathway for canopy
   logical                         :: frozen_ground ! used to define latent heat pathway for ground
-  real                            :: GAMMAV  !psychrometric constant (pa/k)
-  real                            :: GAMMAG  !psychrometric constant (pa/k)
   real                            :: SFCPRS !surface pressure (pa)
   real                            :: FGEV   ! FGEV   !ground evap heat (w/m2) [+ to atm]
   REAL, allocatable, dimension(:) :: BTRANI !Soil water transpiration factor (0 - 1) !!!!!!! Cenlin
@@ -181,8 +178,6 @@ USE NOAHMP_TABLES
   integer                         :: IRCNTSI !irrigation event number, Sprinkler
   integer                         :: IRCNTMI !irrigation event number, Micro
   integer                         :: IRCNTFI !irrigation event number, Flood 
-  real                            :: EAIR    !vapor pressure air (pa)
-  real                            :: QAIR    !specific humidity (kg/kg)
   real                            :: IREVPLOS    !loss of irrigation water to evaporation,sprinkler [m/timestep]
   real                            :: FIRR           ! irrigation:latent heating due to sprinkler evaporation [w/m2]
   real                            :: EIRR           ! evaporation of irrigation water to evaporation,sprinkler [mm/s]
@@ -200,10 +195,7 @@ USE NOAHMP_TABLES
   REAL                            :: PAHB    !precipitation advected heat - bare ground net (W/m2)
   REAL                            :: EDIR    !net soil evaporation (mm/s)
 ! thermoprop new vars
-  REAL                            :: UR      !wind speed at ZLVL (m/s)
   REAL                            :: LAT     !latitude (radians)
-  REAL                            :: Z0M     !roughness length (m)
-  REAL                            :: ZLVL    !reference height (m)
   real, allocatable, dimension(:) :: DF      !thermal conductivity [w/m/k]
   real, allocatable, dimension(:) :: HCPCT   !heat capacity [j/m3/k]
   real, allocatable, dimension(:) :: SNICEV  !partial volume of ice [m3/m3]
@@ -234,8 +226,65 @@ USE NOAHMP_TABLES
   REAL                            :: WGAP
   REAL, DIMENSION(1:2)            :: ALBSND  ! snow albedo (direct)
   REAL, DIMENSION(1:2)            :: ALBSNI  ! snow albedo (diffuse)
-
-
+! vege_flux new vars
+  REAL                            :: CM      ! momentum drag coefficient
+  REAL                            :: CMV     ! momentum drag coefficient
+  REAL                            :: CH      !sensible heat exchange coefficient
+  REAL                            :: CHV     !sensible heat exchange coefficient
+  REAL                            :: TGV    ! vegetated ground temperature
+  logical                         :: VEG    !true if vegetated surface
+  REAL                            :: LWDN   !atmospheric longwave radiation (w/m2)
+  REAL                            :: UR     !wind speed at height zlvl (m/s)
+  REAL                            :: THAIR  !potential temp at reference height (k)
+  REAL                            :: QAIR   !specific humidity at zlvl (kg/kg)
+  REAL                            :: EAIR   !vapor pressure air at zlvl (pa)
+  REAL                            :: RHOAIR !density air (kg/m**3)
+  REAL                            :: VAI    !total leaf area index + stem area index
+  real                            :: GAMMAV  !psychrometric constant (pa/k)
+  real                            :: GAMMAG  !psychrometric constant (pa/k)
+  REAL                            :: CWP    !canopy wind parameter
+  REAL                            :: ZLVL    !reference height (m)
+  REAL                            :: ZPD    !zero plane displacement (m)
+  REAL                            :: Z0M    !roughness length, momentum (m)
+  REAL                            :: Z0MG   !roughness length, momentum, ground (m)
+  REAL                            :: EMV    !vegetation emissivity
+  REAL                            :: EMG    !ground emissivity
+  REAL                            :: RSSUN        !sunlit leaf stomatal resistance (s/m)
+  REAL                            :: RSSHA        !shaded leaf stomatal resistance (s/m)
+  REAL                            :: RSURF  !ground surface resistance (s/m)
+  real                            :: LATHEAV !latent heat vap./sublimation (j/kg)
+  real                            :: LATHEAG !latent heat vap./sublimation (j/kg)
+  REAL                            :: IGS    !growing season index (0=off, 1=on)
+  REAL                            :: FOLN   !foliage nitrogen (%)
+  REAL                            :: CO2AIR !atmospheric co2 concentration (pa)
+  REAL                            :: O2AIR  !atmospheric o2 concentration (pa)
+  REAL                            :: BTRAN  !soil water transpiration factor (0 to 1)
+  REAL                            :: RHSUR  !raltive humidity in surface soil/snow air space (-)
+  REAL                            :: PSI    !surface layer soil matrix potential (m)
+  REAL                            :: EAH    !canopy air vapor pressure (pa)
+  REAL                            :: TAH    !canopy air temperature (k)
+  REAL                            :: DZ8W   !thickness of lowest layer
+  REAL                            :: TAUXV  !wind stress: e-w (n/m2)
+  REAL                            :: TAUYV  !wind stress: n-s (n/m2)
+  REAL                            :: IRG    !net longwave radiation (w/m2) [+= to atm]
+  REAL                            :: IRC    !net longwave radiation (w/m2) [+= to atm]
+  REAL                            :: SHG    !sensible heat flux (w/m2)     [+= to atm]
+  REAL                            :: SHC    !sensible heat flux (w/m2)     [+= to atm]
+  REAL                            :: EVG    !evaporation heat flux (w/m2)  [+= to atm]
+  REAL                            :: EVC    !evaporation heat flux (w/m2)  [+= to atm]
+  REAL                            :: TR     !transpiration heat flux (w/m2)[+= to atm]
+  REAL                            :: GHV    !ground heat (w/m2) [+ = to soil]
+  REAL                            :: T2MV   !2 m height air temperature (k)
+  REAL                            :: PSNSUN !sunlit leaf photosynthesis (umolco2/m2/s)
+  REAL                            :: PSNSHA !shaded leaf photosynthesis (umolco2/m2/s)
+  REAL                            :: QC     !cloud water mixing ratio
+  REAL                            :: QSFC   !mixing ratio at lowest model layer
+  REAL                            :: PSFC   !pressure at lowest model layer
+  REAL                            :: Q2V
+  REAL                            :: CHV2         !sensible heat conductance for diagnostics
+  REAL                            :: CHLEAF !leaf exchange coefficient
+  REAL                            :: CHUC   !under canopy exchange coefficient
+  REAL                            :: ZPDG
 
 !---------------------------------------------------------------------
 !  local variables
@@ -413,6 +462,7 @@ USE NOAHMP_TABLES
 !------------------------------------------------------------------------------------------!
 ! Transfer crop parameters
 !------------------------------------------------------------------------------------------!
+ IF(CROPTYPE > 0) THEN
    parameters%PLTDAY    =    PLTDAY_TABLE(CROPTYPE)    ! Planting date
    parameters%HSDAY     =     HSDAY_TABLE(CROPTYPE)    ! Harvest date
    parameters%PLANTPOP  =  PLANTPOP_TABLE(CROPTYPE)    ! Plant density [per ha] - used?
@@ -465,7 +515,7 @@ USE NOAHMP_TABLES
    parameters%STCT      =      STCT_TABLE(CROPTYPE,:)  ! fraction of translocation to grain
    parameters%RTCT      =      RTCT_TABLE(CROPTYPE,:)  ! fraction of translocation to grain
    parameters%BIO2LAI   =   BIO2LAI_TABLE(CROPTYPE)    ! leaf are per living leaf biomass [m^2/kg]
-
+ END IF
 !------------------------------------------------------------------------------------------!
 ! Transfer global parameters
 !------------------------------------------------------------------------------------------!
@@ -683,10 +733,7 @@ end if
   PAHG   = 0.0
   PAHB   = 0.0
 ! thermoprop new vars
-  UR     = MAX( SQRT(UU**2.0 + VV**2.0), 1.0 )
   LAT    = 120.0 * 3.1415 / 180.0  ! 120E -> radian
-  Z0M    = 0.1
-  ZLVL   = 10.0
   DF     = 0.0
   HCPCT  = 0.0
   SNICEV = 0.0
@@ -719,18 +766,31 @@ end if
   ALBSND(:)= 0.0
   ALBSNI(:)= 0.0
 
-
-!============================
-! set psychrometric constant
-  IF (TV .GT. TFRZ) THEN           ! Barlage: add distinction between ground and 
-      LATHEAV = HVAP                ! vegetation in v3.6
+!====== vege_flux new vars
+!!! in 
+  CM = 0.1
+  CH = 0.01
+  LWDN = LWDOWN
+  UR     = MAX( SQRT(UU**2.0 + VV**2.0), 1.0 )
+  THAIR  = SFCTMP * (SFCPRS/SFCPRS)**(RAIR/CPAIR) 
+  QAIR = Q2
+  EAIR   = QAIR*SFCPRS / (0.622+0.378*QAIR)
+  RHOAIR = (SFCPRS-0.378*EAIR) / (RAIR*SFCTMP)
+   CWP = parameters%CWPVT
+   Z0MG = 0.002 * (1.0-FSNO) + FSNO * parameters%Z0SNO
+! needs to update each time step
+  VAI = ELAI + ESAI
+  VEG = .FALSE.
+  IF(VAI > 0.0) VEG = .TRUE.
+  IF (TV .GT. TFRZ) THEN  
+      LATHEAV = HVAP   
       frozen_canopy = .false.
    ELSE
       LATHEAV = HSUB
       frozen_canopy = .true.
    END IF
    GAMMAV = CPAIR*SFCPRS/(0.622*LATHEAV)
-   IF (TG .GT. TFRZ) THEN
+   IF (TGV .GT. TFRZ) THEN
       LATHEAG = HVAP
       frozen_ground = .false.
    ELSE
@@ -738,20 +798,75 @@ end if
       frozen_ground = .true.
    END IF
    GAMMAG = CPAIR*SFCPRS/(0.622*LATHEAG)
+   ZPDG  = SNOWH
+   IF(VEG) THEN
+      Z0M  = parameters%Z0MVT
+      ZPD  = 0.65 * parameters%HVT
+      IF(SNOWH.GT.ZPD) ZPD  = SNOWH
+   ELSE
+      Z0M  = Z0MG
+      ZPD  = ZPDG
+   END IF
+   ZLVL = MAX(ZPD,parameters%HVT) + 10.0
+   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
+   EMV = 1.0 - EXP(-(ELAI+ESAI)/1.0)
+   EMG = parameters%EG(IST)*(1.0-FSNO) + parameters%SNOW_EMIS*FSNO
+   RSURF = FSNO * 1.0 + (1.0-FSNO)* EXP(8.25-4.225*(MAX(0.0,SH2O(1)/parameters%SMCMAX(1)))) !Sellers (1992)
+   IGS = 1.0
+   FOLN   = 1.0 
+   CO2AIR = 395.e-06 * SFCPRS
+   O2AIR  = 0.209 * SFCPRS
+   BTRAN  = 0.2
+   PSI   = -parameters%PSISAT(1)*(MAX(0.01,SH2O(1))/parameters%SMCMAX(1))**(-parameters%BEXP(1)) 
+   RHSUR = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
+   DZ8W = 20.0
+   QC = 0.0005
+   PSFC = SFCPRS
+!!! inout
+   ! TV
+   TAH = TV
+   EAH = Q2 * SFCPRS / (0.622 + 0.378*Q2)
+   TGV = TG
+   CMV = CM
+   CHV = CH
+   QSFC = 0.622*EAIR/(PSFC-0.378*EAIR) 
+!!! out
+   RSSUN  = 0.0
+   RSSHA  = 0.0
+   TAUXV  = 0.0
+   TAUYV  = 0.0
+   IRG    = 0.0
+   IRC    = 0.0
+   SHG    = 0.0
+   SHC    = 0.0
+   EVG    = 0.0
+   EVC    = 0.0
+   TR     = 0.0
+   GHV    = 0.0
+   T2MV   = 0.0
+   PSNSUN = 0.0
+   PSNSHA = 0.0
+   Q2V    = 0.0
+   CHV2   = 0.0
+   CHLEAF = 0.0
+   CHUC   = 0.0
+!====== vege_flux end
+
+
+!============================
   QVAP = MAX( FGEV/LATHEAG, 0.)       ! positive part of fgev; Barlage change to ground v3.6
   QDEW = ABS( MIN(FGEV/LATHEAG, 0.))  ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
   EDIR = QVAP - QDEW   ! net soil evaporation
 
-! irrigation related
+!============= irrigation related
   IF (OPT_IRR .gt. 0) then
      IRRFRA = 1.0  ! irrigation fraction
      CROPLU = .true.
   ELSE
      IRRFRA = 0.0
      CROPLU = .false.
-  END IF
-  
+  END IF  
   IF(OPT_IRRM .EQ. 0) THEN
       SIFAC = 0.3
       MIFAC = 0.3
@@ -793,22 +908,21 @@ end if
      IRMIRATE = 0.0
      IRSIRATE = 0.0
   END IF
-
   IRCNTSI = 0
   IRCNTMI = 0
   IRCNTFI = 0
-  QAIR = Q2
-  EAIR   = QAIR*SFCPRS / (0.622+0.378*QAIR)
   IREVPLOS = 0.0
   FIRR = 0.0
   EIRR = 0.0
-
   IF(OPT_TDRN .gt. 0) THEN
       TDFRACMP = 0.5
       ZWT   = 0.2  ! to allow the drainage effect to show up
   ELSE
       TDFRACMP = 0.0
   END IF
+!================= irrigation end
+
+
 
 
   ntime      =  nint(maxtime * 3600.0 / dt)
@@ -840,14 +954,16 @@ end if
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
                      SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
                      DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
-                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO)
+                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
+                     TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
+                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC)
 
 !---------------------------------------------------------------------
 ! start the time loop
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
-  
+ 
   tw0 = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA + CANLIQ + CANICE ! [mm] 
 
      IRFIRATE = 0.0
@@ -886,6 +1002,16 @@ end if
 
 
 !!!============================================= Start the original NoahMP Subroutine ==========================================
+! extract from phenology to update ELAI and ESAI temporally
+  FB_snow = MIN( MAX(SNOWH - parameters%HVB,0.0), parameters%HVT-parameters%HVB ) / &
+       MAX(1.0E-06,parameters%HVT-parameters%HVB)
+     IF(parameters%HVT> 0.0 .AND. parameters%HVT <= 1.0) THEN          !MB: change to 1.0 and 0.2 to reflect
+       FB_snow     = MIN(SNOWH,(parameters%HVT*EXP(-SNOWH/0.2)) )/(parameters%HVT*EXP(-SNOWH/0.2) )
+     ENDIF
+     ELAI =  LAI*(1.0-FB_snow)
+     ESAI =  SAI*(1.0-FB_snow)
+     IF (ESAI < 0.05 .and. CROPTYPE == 0) ESAI = 0.0                   ! MB: ESAI CHECK, change to 0.05 v3.6
+     IF ((ELAI < 0.05 .OR. ESAI == 0.0) .and. CROPTYPE == 0) ELAI = 0.0  ! MB: LAI CHECK
 
 
 !!!============================ Irrigation trigger and sprinkler 
@@ -933,6 +1059,48 @@ end if
 
 !!!============================ Energy module all
 
+!=== some input variables need to be updated every time step (temporally, will be included in completed Energy subroutine)
+
+  VAI = ELAI + ESAI
+  VEG = .FALSE.
+  IF(VAI > 0.0) VEG = .TRUE.
+
+  IF (TV .GT. TFRZ) THEN
+      LATHEAV = HVAP
+      frozen_canopy = .false.
+   ELSE
+      LATHEAV = HSUB
+      frozen_canopy = .true.
+   END IF
+   GAMMAV = CPAIR*SFCPRS/(0.622*LATHEAV)
+   IF (TGV .GT. TFRZ) THEN
+      LATHEAG = HVAP
+      frozen_ground = .false.
+   ELSE
+      LATHEAG = HSUB
+      frozen_ground = .true.
+   END IF
+   GAMMAG = CPAIR*SFCPRS/(0.622*LATHEAG)
+   ZPDG  = SNOWH
+   IF(VEG) THEN
+      Z0M  = parameters%Z0MVT
+      ZPD  = 0.65 * parameters%HVT
+      IF(SNOWH.GT.ZPD) ZPD  = SNOWH
+   ELSE
+      Z0M  = Z0MG
+      ZPD  = ZPDG
+   END IF
+   ZLVL = MAX(ZPD,parameters%HVT) + 10.0
+   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
+   RSURF = FSNO * 1.0 + (1.0-FSNO)* EXP(8.25-4.225*(MAX(0.0,SH2O(1)/parameters%SMCMAX(1)))) !Sellers (1992)
+   PSI   = -parameters%PSISAT(1)*(MAX(0.01,SH2O(1))/parameters%SMCMAX(1))**(-parameters%BEXP(1))
+   RHSUR = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
+   EMV = 1.0 - EXP(-(ELAI+ESAI)/1.0)
+   EMG = parameters%EG(IST)*(1.0-FSNO) + parameters%SNOW_EMIS*FSNO
+
+!=== input variable update end
+
+
 ! Thermal properties of soil, snow, lake, and frozen soil
 
   CALL THERMOPROP (parameters,NSOIL   ,NSNOW   ,ISNOW   ,IST     ,DZSNSO  , & !in
@@ -954,13 +1122,48 @@ end if
                    SAV     ,SAG     ,FSR     ,FSA     ,FSRV    , & 
                    FSRG    ,ALBSND  ,ALBSNI  ,BGAP    ,WGAP     )  !out
 
+! Surface temperatures of the ground and canopy and energy fluxes
+    IF (VEG .AND. FVEG > 0) THEN
+    TGV = TG
+    CMV = CM
+    CHV = CH
+    CALL VEGE_FLUX (parameters,NSNOW   ,NSOIL   ,ISNOW   ,VEGTYP  ,VEG     , & !in
+                    DT      ,SAV     ,SAG     ,LWDN    ,UR      , & !in
+                    UU      ,VV      ,SFCTMP  ,THAIR   ,QAIR    , & !in
+                    EAIR    ,RHOAIR  ,SNOWH   ,VAI     ,GAMMAV   ,GAMMAG   , & !in
+                    FWET    ,LAISUN  ,LAISHA  ,CWP     ,DZSNSO  , & !in
+                    ZLVL    ,ZPD     ,Z0M     ,FVEG    , & !in
+                    Z0MG    ,EMV     ,EMG     ,CANLIQ  ,FSNO, & !in
+                    CANICE  ,STC     ,DF      ,RSSUN   ,RSSHA   , & !in
+                    RSURF   ,LATHEAV ,LATHEAG ,PARSUN  ,PARSHA  ,IGS     , & !in
+                    FOLN    ,CO2AIR  ,O2AIR   ,BTRAN   ,SFCPRS  , & !in
+                    RHSUR   ,ILOC    ,JLOC    ,Q2      ,PAHV  ,PAHG  , & !in
+                    EAH     ,TAH     ,TV      ,TGV     ,CMV     , & !inout
+                    CHV     ,DX      ,DZ8W    ,                   & !inout
+                    TAUXV   ,TAUYV   ,IRG     ,IRC     ,SHG     , & !out
+                    SHC     ,EVG     ,EVC     ,TR      ,GHV     , & !out
+                    T2MV    ,PSNSUN  ,PSNSHA  ,                   & !out
+!jref:start
+                    QC      ,QSFC    ,PSFC    , & !in
+                    Q2V     ,CHV2, CHLEAF, CHUC)               !inout 
+!jref:end                            
+    END IF
+
+    TG = TGV
+    CM = CMV
+    CH = CHV
+    FGEV = EVG
+    FCEV = EVC
+    FCTR = TR
 
 
-
-
-
-
+!!!============================
+    SICE(:) = MAX(0.0, SMC(:) - SH2O(:))   
     SNEQVO  = SNEQV
+    QVAP = MAX( FGEV/LATHEAG, 0.0)       ! positive part of fgev; Barlage change to ground v3.6
+    QDEW = ABS( MIN(FGEV/LATHEAG, 0.0))  ! negative part of fgev
+    EDIR = QVAP - QDEW
+
 
 !!!============================ Water module all
      CALL WATER (parameters,VEGTYPE ,NSNOW  ,NSOIL  ,IMELT  ,DT     ,UU     , & !in
@@ -1023,7 +1226,9 @@ end if
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
                      SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
                      DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
-                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO)
+                     SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
+                     TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
+                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC)
 
  
   end do ! time loop
