@@ -112,6 +112,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
     real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
     real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
+    real(kind=kind_noahmp) :: BTRAN       ! soil water transpiration factor (0 to 1)
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]

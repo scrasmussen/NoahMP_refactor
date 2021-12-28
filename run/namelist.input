@@ -34,7 +34,8 @@
  soil_depth       = 2.0     ! total soil thickness [m] for structure_option > 1
  vegfra           = 50      ! vegetation fraction 50%
  vegmax           = 50      ! Vegetation fraction annual max [0-1]
- shdmax           = 50        !yearly max vegetation fraction
+ shdmax           = 50      ! yearly max vegetation fraction
+ zlvl             = 10.0    ! reference height (m)
 /
 
 &fixed_initial

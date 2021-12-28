@@ -18,6 +18,9 @@ module BiochemVarType
   type :: flux_type
 
     ! define specific biochem flux variables
+    real(kind=kind_noahmp) :: PSNSUN           ! sunlit leaf photosynthesis (umol co2 /m2/ s)
+    real(kind=kind_noahmp) :: PSNSHA           ! shaded leaf photosynthesis (umol co2 /m2 /s)
+
 
   end type flux_type
 
@@ -25,6 +28,8 @@ module BiochemVarType
   type :: state_type
 
     ! define specific biochem state variables
+    real(kind=kind_noahmp) :: IGS              ! growing season index (0=off, 1=on)    
+    real(kind=kind_noahmp) :: FOLN             ! foliage nitrogen concentration (%)
 
   end type state_type
 
@@ -32,8 +37,14 @@ module BiochemVarType
   type :: parameter_type
 
     ! define specific biochem parameter variables
-    integer                :: PLTDAY       ! Planting date
-    integer                :: HSDAY        ! Harvest date
+    integer                :: PLTDAY           ! Planting date
+    integer                :: HSDAY            ! Harvest date
+    real(kind=kind_noahmp) :: FOLNMX           ! foliage nitrogen concentration when f(n)=1 (%)
+    real(kind=kind_noahmp) :: QE25             ! quantum efficiency at 25c (umol co2 / umol photon)
+    real(kind=kind_noahmp) :: VCMX25           ! maximum rate of carboxylation at 25c (umol co2/m**2/s)
+    real(kind=kind_noahmp) :: AVCMX            ! q10 for vcmx25
+    real(kind=kind_noahmp) :: C3PSN            ! photosynthetic pathway: 0. = c4, 1. = c3
+    real(kind=kind_noahmp) :: MP               ! slope of conductance-to-photosynthesis relationship
 
   end type parameter_type
 

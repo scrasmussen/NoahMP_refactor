@@ -74,6 +74,48 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FSHA            ! shaded fraction of canopy
     real(kind=kind_noahmp) :: LAISUN          ! sunlit leaf area
     real(kind=kind_noahmp) :: LAISHA          ! shaded leaf area
+    real(kind=kind_noahmp) :: ESTV            ! saturation vapor pressure at TV (pa)
+    real(kind=kind_noahmp) :: EAH             ! canopy air vapor pressure (pa)
+    real(kind=kind_noahmp) :: CO2AIR          ! atmospheric co2 concentration (pa)
+    real(kind=kind_noahmp) :: O2AIR           ! atmospheric o2 concentration (pa)
+    real(kind=kind_noahmp) :: RB              ! leaf boundary layer resistance (s/m)
+    real(kind=kind_noahmp) :: RSSUN           ! sunlit leaf stomatal resistance (s/m)
+    real(kind=kind_noahmp) :: RSSHA           ! shaded leaf stomatal resistance (s/m)
+    real(kind=kind_noahmp) :: RHOAIR          ! density air (kg/m3)
+    real(kind=kind_noahmp) :: TAH             ! canopy air temperature (K)
+    real(kind=kind_noahmp) :: ZPD             ! zero plane displacement (m)
+    real(kind=kind_noahmp) :: Z0MG            ! roughness length, momentum, ground (m)
+    real(kind=kind_noahmp) :: Z0M             ! roughness length, momentum, surface (m)
+    real(kind=kind_noahmp) :: Z0HV            ! roughness length, sensible heat (m), vegetated
+    real(kind=kind_noahmp) :: Z0HG            ! roughness length, sensible heat, ground (m), below canopy
+    real(kind=kind_noahmp) :: HCAN            ! canopy height (m) [note: hcan >= z0mg]
+    real(kind=kind_noahmp) :: UC              ! wind speed at top of canopy (m/s)
+    real(kind=kind_noahmp) :: FVV             ! friction velocity (m/s), vegetated
+    real(kind=kind_noahmp) :: CWP             ! canopy wind absorption parameter
+    real(kind=kind_noahmp) :: MOZG            ! M-O stability parameter ground, below canopy
+    real(kind=kind_noahmp) :: MOZV            ! M-O stability parameter (z/L), above ZPD
+    real(kind=kind_noahmp) :: MOZ2V           ! M-O stability (2/L), 2m, vegetated
+    real(kind=kind_noahmp) :: MOLG            ! M-O length (m), ground, below canopy
+    real(kind=kind_noahmp) :: MOLV            ! M-O length (m), above ZPD, vegetated
+    real(kind=kind_noahmp) :: FHG             ! M-O stability correction ground, below canopy
+    real(kind=kind_noahmp) :: FMV             ! M-O momentum stability correction, above ZPD, vegetated
+    real(kind=kind_noahmp) :: FHV             ! M-O sen heat stability correction, above ZPD, vegetated
+    real(kind=kind_noahmp) :: FM2V            ! M-O momentum stability correction, 2m, vegetated
+    real(kind=kind_noahmp) :: FH2V            ! M-O sen heat stability correction, 2m, vegetated
+    real(kind=kind_noahmp) :: CMV             ! drag coefficient for momentum, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CHV             ! drag coefficient for heat, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CH2V            ! drag coefficient for heat, 2m, vegetated
+    real(kind=kind_noahmp) :: RAMG            ! aerodynamic resistance for momentum (s/m), ground, below canopy
+    real(kind=kind_noahmp) :: RAHG            ! aerodynamic resistance for sensible heat (s/m), ground, below canopy
+    real(kind=kind_noahmp) :: RAWG            ! aerodynamic resistance for water vapor (s/m), ground, below canopy
+    real(kind=kind_noahmp) :: RAMC            ! aerodynamic resistance for momentum (s/m), above canopy
+    real(kind=kind_noahmp) :: RAHC            ! aerodynamic resistance for sensible heat (s/m), above canopy
+    real(kind=kind_noahmp) :: RAWC            ! aerodynamic resistance for water vapor (s/m), above canopy
+    real(kind=kind_noahmp) :: RB              ! bulk leaf boundary layer resistance (s/m)
+    real(kind=kind_noahmp) :: QAIR            ! specific humidity at reference height ZLVL (kg/kg)
+    real(kind=kind_noahmp) :: THAIR           ! potential temp at reference height (K)
+    real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height ZLVL
+    real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
     logical                :: FROZEN_GROUND   ! used to define latent heat pathway
 
@@ -124,6 +166,18 @@ module EnergyVarType
     real(kind=kind_noahmp) :: CLASS_ALB_REF    ! reference snow albedo in CLASS scheme
     real(kind=kind_noahmp) :: CLASS_SNO_AGE    ! snow aging e-folding time (s) in CLASS albedo scheme
     real(kind=kind_noahmp) :: CLASS_ALB_NEW    ! fresh snow albedo in CLASS albedo scheme
+    real(kind=kind_noahmp) :: BP               ! minimum leaf conductance (umol/m**2/s)
+    real(kind=kind_noahmp) :: KC25             ! co2 michaelis-menten constant at 25c (pa)
+    real(kind=kind_noahmp) :: KO25             ! o2 michaelis-menten constant at 25c (pa)
+    real(kind=kind_noahmp) :: AKC              ! q10 for kc25
+    real(kind=kind_noahmp) :: AKO              ! q10 for ko25
+    real(kind=kind_noahmp) :: RGL              ! Parameter used in radiation stress function in Jarvis scheme
+    real(kind=kind_noahmp) :: RSMIN            ! Minimum stomatal resistance [s m-1] in Jarvis scheme
+    real(kind=kind_noahmp) :: RSMAX            ! Maximal stomatal resistance [s m-1] in Jarvis scheme
+    real(kind=kind_noahmp) :: TOPT             ! Optimum transpiration air temperature [K] in Jarvis scheme
+    real(kind=kind_noahmp) :: HS               ! Parameter used in vapor pressure deficit function in Jarvis scheme
+    real(kind=kind_noahmp) :: DLEAF            ! characteristic leaf dimension (m)
+    real(kind=kind_noahmp) :: CZIL             ! Calculate roughness length of heat
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided

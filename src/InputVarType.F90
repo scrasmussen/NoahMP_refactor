@@ -53,6 +53,7 @@ module InputVarType
     real(kind=kind_noahmp)   :: VEGFRAIn
     real(kind=kind_noahmp)   :: VEGMAXIn
     real(kind=kind_noahmp)   :: SHDMAXIn
+    real(kind=kind_noahmp)   :: ZLVLIn    ! reference height
     ! state variables
     integer               , allocatable, dimension(:) :: SOILTYPEIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOILIn 
@@ -396,6 +397,8 @@ module InputVarType
     real(kind=kind_noahmp)                              :: COSZIn
     real(kind=kind_noahmp)                              :: SNEQVOIn
     real(kind=kind_noahmp)                              :: ALBOLDIn
+    real(kind=kind_noahmp)                              :: EAHIn
+    real(kind=kind_noahmp)                              :: TAHIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

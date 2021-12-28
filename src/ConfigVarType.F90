@@ -87,6 +87,7 @@ module ConfigVarType
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
     real(kind=kind_noahmp)    :: COSZ        ! cosine solar zenith angle
+    real(kind=kind_noahmp)    :: ZLVL        ! reference height  (m)
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

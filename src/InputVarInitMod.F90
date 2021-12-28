@@ -1177,6 +1177,7 @@ contains
     real(kind=kind_noahmp) :: vegfra
     real(kind=kind_noahmp) :: vegmax
     real(kind=kind_noahmp) :: shdmax
+    real(kind=kind_noahmp) :: zlvl
     ! fixed_initial
     real(kind=kind_noahmp), allocatable, dimension(:) :: zsoil   ! depth of layer-bottom from soil surface
     real(kind=kind_noahmp), allocatable, dimension(:) :: dzsnso  ! snow/soil layer thickness [m]
@@ -1194,7 +1195,7 @@ contains
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
                                  raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
-                                 nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax
+                                 nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax,zlvl
     namelist / fixed_initial   / zsoil,dzsnso
     namelist / uniform_initial / initial_uniform,initial_sh2o_value,initial_sice_value
     namelist / options         / idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
@@ -1272,6 +1273,7 @@ contains
     input%JULIANIn         = JULIAN
     input%Q2In             = Q2
     input%SWDOWNIn         = SWDOWN
+    input%ZLVLIn           = zlvl
 
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))

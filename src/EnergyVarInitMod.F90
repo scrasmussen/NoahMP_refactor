@@ -50,6 +50,48 @@ contains
     noahmp%energy%state%FSHA            = huge(1.0)
     noahmp%energy%state%LAISUN          = huge(1.0)
     noahmp%energy%state%LAISHA          = huge(1.0)
+    noahmp%energy%state%ESTV            = huge(1.0)
+    noahmp%energy%state%EAH             = huge(1.0)
+    noahmp%energy%state%CO2AIR          = huge(1.0)
+    noahmp%energy%state%O2AIR           = huge(1.0)
+    noahmp%energy%state%RB              = huge(1.0)
+    noahmp%energy%state%RSSUN           = huge(1.0)
+    noahmp%energy%state%RSSHA           = huge(1.0)
+    noahmp%energy%state%RHOAIR          = huge(1.0)
+    noahmp%energy%state%TAH             = huge(1.0)
+    noahmp%energy%state%ZPD             = huge(1.0)
+    noahmp%energy%state%Z0MG            = huge(1.0)
+    noahmp%energy%state%Z0M             = huge(1.0)
+    noahmp%energy%state%HCAN            = huge(1.0)
+    noahmp%energy%state%UC              = huge(1.0)
+    noahmp%energy%state%Z0HV            = huge(1.0)
+    noahmp%energy%state%Z0HG            = huge(1.0)
+    noahmp%energy%state%FVV             = huge(1.0)
+    noahmp%energy%state%CWP             = huge(1.0)
+    noahmp%energy%state%MOZG            = huge(1.0)
+    noahmp%energy%state%MOZV            = huge(1.0)
+    noahmp%energy%state%MOZ2V           = huge(1.0)
+    noahmp%energy%state%MOLG            = huge(1.0)
+    noahmp%energy%state%MOLV            = huge(1.0)
+    noahmp%energy%state%FHG             = huge(1.0)
+    noahmp%energy%state%FMV             = huge(1.0)
+    noahmp%energy%state%FHV             = huge(1.0)
+    noahmp%energy%state%FM2V            = huge(1.0)
+    noahmp%energy%state%FH2V            = huge(1.0)
+    noahmp%energy%state%CMV             = huge(1.0)
+    noahmp%energy%state%CHV             = huge(1.0)
+    noahmp%energy%state%CH2V            = huge(1.0)
+    noahmp%energy%state%RAMG            = huge(1.0)
+    noahmp%energy%state%RAHG            = huge(1.0)
+    noahmp%energy%state%RAWG            = huge(1.0)
+    noahmp%energy%state%RAMC            = huge(1.0)
+    noahmp%energy%state%RAHC            = huge(1.0)
+    noahmp%energy%state%RAWC            = huge(1.0)
+    noahmp%energy%state%RB              = huge(1.0)
+    noahmp%energy%state%QAIR            = huge(1.0)
+    noahmp%energy%state%THAIR           = huge(1.0)
+    noahmp%energy%state%UR              = huge(1.0)
+    noahmp%energy%state%WSTARV          = huge(1.0)
     noahmp%energy%state%FROZEN_CANOPY   = .false.
     noahmp%energy%state%FROZEN_GROUND   = .false.
 
@@ -157,6 +199,18 @@ contains
     noahmp%energy%param%CLASS_ALB_REF   = huge(1.0)
     noahmp%energy%param%CLASS_SNO_AGE   = huge(1.0)
     noahmp%energy%param%CLASS_ALB_NEW   = huge(1.0)
+    noahmp%energy%param%BP              = huge(1.0)
+    noahmp%energy%param%KC25            = huge(1.0)
+    noahmp%energy%param%KO25            = huge(1.0)
+    noahmp%energy%param%AKC             = huge(1.0)
+    noahmp%energy%param%AKO             = huge(1.0)
+    noahmp%energy%param%RGL             = huge(1.0)
+    noahmp%energy%param%RSMIN           = huge(1.0)
+    noahmp%energy%param%RSMAX           = huge(1.0)
+    noahmp%energy%param%TOPT            = huge(1.0)
+    noahmp%energy%param%HS              = huge(1.0)
+    noahmp%energy%param%DLEAF           = huge(1.0)
+    noahmp%energy%param%CZIL            = huge(1.0)
 
     allocate( noahmp%energy%param%LAIM   (1:12   ) )
     allocate( noahmp%energy%param%SAIM   (1:12   ) )
@@ -202,6 +256,7 @@ contains
               JLOC        => noahmp%config%domain%JLOC         ,&
               VEGTYP      => noahmp%config%domain%VEGTYP       ,&
               SOILTYP     => noahmp%config%domain%SOILTYP      ,&
+              CROPTYP     => noahmp%config%domain%CROPTYP      ,&
               SOILCOLOR   => noahmp%config%domain%SOILCOLOR    ,&
               NSNOW       => noahmp%config%domain%NSNOW        ,&
               NSOIL       => noahmp%config%domain%NSOIL        ,&
@@ -217,6 +272,10 @@ contains
     !noahmp%energy%state%STC               = input%STCIn
     !noahmp%energy%state%TAUSS             = input%TAUSSIn
     !noahmp%energy%state%ALBOLD            = input%ALBOLDIn
+    !noahmp%energy%state%EAH               = input%EAHIn
+    !noahmp%energy%state%TAH               = input%TAHIn
+    noahmp%energy%state%CO2AIR             = input%CO2_TABLE * input%SFCPRSIn
+    noahmp%energy%state%O2AIR              = input%O2_TABLE * input%SFCPRSIn
 
     ! energy parameter variable
     noahmp%energy%param%RC                 = input%RC_TABLE(VEGTYP)
@@ -224,6 +283,17 @@ contains
     noahmp%energy%param%HVB                = input%HVB_TABLE(VEGTYP)
     noahmp%energy%param%DEN                = input%DEN_TABLE(VEGTYP)
     noahmp%energy%param%XL                 = input%XL_TABLE(VEGTYP)
+    noahmp%energy%param%BP                 = input%BP_TABLE(VEGTYP)
+    noahmp%energy%param%KC25               = input%KC25_TABLE(VEGTYP)
+    noahmp%energy%param%KO25               = input%KO25_TABLE(VEGTYP)
+    noahmp%energy%param%AKC                = input%AKC_TABLE(VEGTYP)
+    noahmp%energy%param%AKO                = input%AKO_TABLE(VEGTYP)
+    noahmp%energy%param%RGL                = input%RGL_TABLE(VEGTYP)
+    noahmp%energy%param%RSMIN              = input%RS_TABLE(VEGTYP)
+    noahmp%energy%param%RSMAX              = input%RSMAX_TABLE(VEGTYP)
+    noahmp%energy%param%TOPT               = input%TOPT_TABLE(VEGTYP)
+    noahmp%energy%param%HS                 = input%HS_TABLE(VEGTYP)
+    noahmp%energy%param%DLEAF              = input%DLEAF_TABLE(VEGTYP)
     noahmp%energy%param%CSOIL              = input%CSOIL_TABLE
     noahmp%energy%param%TAU0               = input%TAU0_TABLE
     noahmp%energy%param%GRAIN_GROWTH       = input%GRAIN_GROWTH_TABLE
@@ -241,6 +311,7 @@ contains
     noahmp%energy%param%CLASS_ALB_NEW      = input%CLASS_ALB_NEW_TABLE
     noahmp%energy%param%BETADS             = input%BETADS_TABLE
     noahmp%energy%param%BETAIS             = input%BETAIS_TABLE
+    noahmp%energy%param%CZIL               = input%CZIL_TABLE
 
     noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)
@@ -254,8 +325,17 @@ contains
     noahmp%energy%param%OMEGAS(1:NBAND)    = input%OMEGAS_TABLE(1:NBAND)
 
     do ISOIL = 1, size(SOILTYP)
-       noahmp%energy%param%QUARTZ(ISOIL)    = input%QUARTZ_TABLE(SOILTYP(ISOIL))
+       noahmp%energy%param%QUARTZ(ISOIL)   = input%QUARTZ_TABLE(SOILTYP(ISOIL))
     enddo
+
+    if ( CROPTYP > 0 ) then
+       noahmp%energy%param%BP              = input%BPI_TABLE(CROPTYP)
+       noahmp%energy%param%KC25            = input%KC25I_TABLE(CROPTYP)
+       noahmp%energy%param%KO25            = input%KO25I_TABLE(CROPTYP)
+       noahmp%energy%param%AKC             = input%AKCI_TABLE(CROPTYP)
+       noahmp%energy%param%AKO             = input%AKOI_TABLE(CROPTYP)
+
+    endif
 
 
     end associate
