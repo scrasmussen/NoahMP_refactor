@@ -285,6 +285,21 @@ USE NOAHMP_TABLES
   REAL                            :: CHLEAF !leaf exchange coefficient
   REAL                            :: CHUC   !under canopy exchange coefficient
   REAL                            :: ZPDG
+! bare_flux new vars
+  REAL                            :: TGB ! bare ground temperature
+  REAL                            :: CMB     ! momentum drag coefficient
+  REAL                            :: CHB      !sensible heat exchange coefficient
+  REAL                            :: TAUXB  !wind stress: e-w (n/m2)
+  REAL                            :: TAUYB  !wind stress: n-s (n/m2)
+  REAL                            :: IRB
+  REAL                            :: SHB
+  REAL                            :: EVB
+  REAL                            :: GHB
+  REAL                            :: T2MB
+  REAL                            :: Q2B
+  REAL                            :: CHB2
+  REAL                            :: SSOIL
+
 
 !---------------------------------------------------------------------
 !  local variables
@@ -790,7 +805,7 @@ end if
       frozen_canopy = .true.
    END IF
    GAMMAV = CPAIR*SFCPRS/(0.622*LATHEAV)
-   IF (TGV .GT. TFRZ) THEN
+   IF (TG .GT. TFRZ) THEN
       LATHEAG = HVAP
       frozen_ground = .false.
    ELSE
@@ -851,6 +866,23 @@ end if
    CHLEAF = 0.0
    CHUC   = 0.0
 !====== vege_flux end
+
+!====== bare_flux new vars
+   TGB = TG
+   CMB = CM
+   CHB = CH
+   TAUXB = 0.0
+   TAUYB = 0.0
+   IRB = 0.0
+   SHB = 0.0
+   EVB = 0.0
+   GHB = 0.0
+   T2MB = 0.0
+   Q2B = 0.0
+   CHB2 = 0.0
+   SSOIL = 0.0
+!====== bare_flux end
+
 
 
 !============================
@@ -956,7 +988,8 @@ end if
                      DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC)
+                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -1073,7 +1106,7 @@ end if
       frozen_canopy = .true.
    END IF
    GAMMAV = CPAIR*SFCPRS/(0.622*LATHEAV)
-   IF (TGV .GT. TFRZ) THEN
+   IF (TG .GT. TFRZ) THEN
       LATHEAG = HVAP
       frozen_ground = .false.
    ELSE
@@ -1143,19 +1176,51 @@ end if
                     TAUXV   ,TAUYV   ,IRG     ,IRC     ,SHG     , & !out
                     SHC     ,EVG     ,EVC     ,TR      ,GHV     , & !out
                     T2MV    ,PSNSUN  ,PSNSHA  ,                   & !out
-!jref:start
                     QC      ,QSFC    ,PSFC    , & !in
                     Q2V     ,CHV2, CHLEAF, CHUC)               !inout 
-!jref:end                            
     END IF
 
-    TG = TGV
-    CM = CMV
-    CH = CHV
-    FGEV = EVG
-    FCEV = EVC
-    FCTR = TR
+! Surface temperatures and energy flux of bare ground
+    TGB = TG
+    CMB = CM
+    CHB = CH
+    CALL BARE_FLUX (parameters,NSNOW   ,NSOIL   ,ISNOW   ,DT      ,SAG     , & !in
+                    LWDN    ,UR      ,UU      ,VV      ,SFCTMP  , & !in
+                    THAIR   ,QAIR    ,EAIR    ,RHOAIR  ,SNOWH   , & !in
+                    DZSNSO  ,ZLVL    ,ZPDG    ,Z0MG    ,FSNO,          & !in
+                    EMG     ,STC     ,DF      ,RSURF   ,LATHEAG  , & !in
+                    GAMMAG   ,RHSUR   ,ILOC    ,JLOC    ,Q2      ,PAHB  , & !in
+                    TGB     ,CMB     ,CHB     ,                   & !inout
+                    TAUXB   ,TAUYB   ,IRB     ,SHB     ,EVB     , & !out
+                    GHB     ,T2MB    ,DX      ,DZ8W    ,VEGTYP  , & !out
+                    QC      ,QSFC    ,PSFC    , & !in
+                    SFCPRS  ,Q2B,   CHB2)                          !in 
 
+    IF (VEG .AND. FVEG > 0) THEN
+        FGEV  = FVEG * EVG       + (1.0 - FVEG) * EVB
+        SSOIL = FVEG * GHV       + (1.0 - FVEG) * GHB
+        FCEV  = EVC
+        FCTR  = TR
+        TG    = FVEG * TGV       + (1.0 - FVEG) * TGB
+        CM    = FVEG * CMV       + (1.0 - FVEG) * CMB      ! better way to average?
+        CH    = FVEG * CHV       + (1.0 - FVEG) * CHB
+    ELSE
+        FGEV  = EVB
+        SSOIL = GHB
+        TG    = TGB
+        FCEV  = 0.0
+        FCTR  = 0.0
+        CM    = CMB
+        CH    = CHB
+        RSSUN = 0.0
+        RSSHA = 0.0
+        TGV   = TGB
+        CHV   = CHB
+    END IF
+
+
+
+!!!============================ Energy module end
 
 !!!============================
     SICE(:) = MAX(0.0, SMC(:) - SH2O(:))   
@@ -1228,7 +1293,8 @@ end if
                      DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC)
+                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
 
  
   end do ! time loop

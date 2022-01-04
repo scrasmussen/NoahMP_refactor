@@ -139,7 +139,20 @@ module noahmp_output
   integer           :: CHV2_id
   integer           :: CHLEAF_id
   integer           :: CHUC_id
-
+! bare_flux new vars
+  integer           :: TGB_id
+  integer           :: CMB_id
+  integer           :: CHB_id
+  integer           :: TAUXB_id
+  integer           :: TAUYB_id
+  integer           :: IRB_id
+  integer           :: SHB_id
+  integer           :: EVB_id
+  integer           :: GHB_id
+  integer           :: T2MB_id
+  integer           :: Q2B_id
+  integer           :: CHB2_id
+  integer           :: SSOIL_id
 
 
 contains
@@ -286,6 +299,20 @@ contains
     iret = nf90_def_var(ncid, "CHV2",        NF90_FLOAT, (/time_dim/), CHV2_id)
     iret = nf90_def_var(ncid, "CHLEAF",      NF90_FLOAT, (/time_dim/), CHLEAF_id)
     iret = nf90_def_var(ncid, "CHUC",        NF90_FLOAT, (/time_dim/), CHUC_id)
+! bare_flux new vars
+    iret = nf90_def_var(ncid, "TGB",         NF90_FLOAT, (/time_dim/), TGB_id)
+    iret = nf90_def_var(ncid, "CMB",         NF90_FLOAT, (/time_dim/), CMB_id)
+    iret = nf90_def_var(ncid, "CHB",         NF90_FLOAT, (/time_dim/), CHB_id)
+    iret = nf90_def_var(ncid, "TAUXB",       NF90_FLOAT, (/time_dim/), TAUXB_id)
+    iret = nf90_def_var(ncid, "TAUYB",       NF90_FLOAT, (/time_dim/), TAUYB_id)
+    iret = nf90_def_var(ncid, "IRB",         NF90_FLOAT, (/time_dim/), IRB_id)
+    iret = nf90_def_var(ncid, "SHB",         NF90_FLOAT, (/time_dim/), SHB_id)
+    iret = nf90_def_var(ncid, "EVB",         NF90_FLOAT, (/time_dim/), EVB_id)
+    iret = nf90_def_var(ncid, "GHB",         NF90_FLOAT, (/time_dim/), GHB_id)
+    iret = nf90_def_var(ncid, "T2MB",        NF90_FLOAT, (/time_dim/), T2MB_id)
+    iret = nf90_def_var(ncid, "Q2B",         NF90_FLOAT, (/time_dim/), Q2B_id)
+    iret = nf90_def_var(ncid, "CHB2",        NF90_FLOAT, (/time_dim/), CHB2_id)
+    iret = nf90_def_var(ncid, "SSOIL",       NF90_FLOAT, (/time_dim/), SSOIL_id)
 
 
     iret = nf90_enddef(ncid)
@@ -303,7 +330,8 @@ contains
                      DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC)
+                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -436,6 +464,20 @@ contains
      REAL                          :: CHV2
      REAL                          :: CHLEAF
      REAL                          :: CHUC
+! bare_flux new vars
+     REAL                          :: TGB ! bare ground temperature
+     REAL                          :: CMB     ! momentum drag coefficient
+     REAL                          :: CHB      !sensible heat exchange coefficient
+     REAL                          :: TAUXB  !wind stress: e-w (n/m2)
+     REAL                          :: TAUYB  !wind stress: n-s (n/m2)
+     REAL                          :: IRB
+     REAL                          :: SHB
+     REAL                          :: EVB
+     REAL                          :: GHB
+     REAL                          :: T2MB
+     REAL                          :: Q2B
+     REAL                          :: CHB2
+     REAL                          :: SSOIL
 
 
 
@@ -569,6 +611,20 @@ contains
      iret = nf90_put_var(ncid, CHV2_id,     CHV2,          start=(/itime+1/))
      iret = nf90_put_var(ncid, CHLEAF_id,   CHLEAF,        start=(/itime+1/))
      iret = nf90_put_var(ncid, CHUC_id,     CHUC,          start=(/itime+1/))
+! bare_flux new vars
+     iret = nf90_put_var(ncid, TGB_id,      TGB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, CMB_id,      CMB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, CHB_id,      CHB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, TAUXB_id,    TAUXB,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, TAUYB_id,    TAUYB,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, IRB_id,      IRB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, SHB_id,      SHB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, EVB_id,      EVB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, GHB_id,      GHB,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, T2MB_id,     T2MB,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, Q2B_id,      Q2B,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, CHB2_id,     CHB2,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, SSOIL_id,    SSOIL,         start=(/itime+1/))
 
 
    end subroutine add_to_output
