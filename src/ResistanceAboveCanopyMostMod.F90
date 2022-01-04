@@ -44,8 +44,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ZLVL            => noahmp%config%domain%ZLVL           ,& ! in,    reference height  (m)
               SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
+              ZLVL            => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               QAIR            => noahmp%energy%state%QAIR            ,& ! in,    specific humidity at reference height (kg/kg)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL

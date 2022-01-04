@@ -29,6 +29,8 @@ contains
              )
 
     ! energy state variable
+    noahmp%energy%state%FROZEN_CANOPY   = .false.
+    noahmp%energy%state%FROZEN_GROUND   = .false.
     noahmp%energy%state%ELAI            = huge(1.0)
     noahmp%energy%state%ESAI            = huge(1.0)
     noahmp%energy%state%LAI             = huge(1.0)
@@ -51,15 +53,18 @@ contains
     noahmp%energy%state%LAISUN          = huge(1.0)
     noahmp%energy%state%LAISHA          = huge(1.0)
     noahmp%energy%state%ESTV            = huge(1.0)
+    noahmp%energy%state%ESTG            = huge(1.0)
+    noahmp%energy%state%DESTV           = huge(1.0)
+    noahmp%energy%state%DESTG           = huge(1.0)
     noahmp%energy%state%EAH             = huge(1.0)
     noahmp%energy%state%CO2AIR          = huge(1.0)
     noahmp%energy%state%O2AIR           = huge(1.0)
-    noahmp%energy%state%RB              = huge(1.0)
     noahmp%energy%state%RSSUN           = huge(1.0)
     noahmp%energy%state%RSSHA           = huge(1.0)
     noahmp%energy%state%RHOAIR          = huge(1.0)
     noahmp%energy%state%TAH             = huge(1.0)
     noahmp%energy%state%ZPD             = huge(1.0)
+    noahmp%energy%state%ZPDG            = huge(1.0)
     noahmp%energy%state%Z0MG            = huge(1.0)
     noahmp%energy%state%Z0M             = huge(1.0)
     noahmp%energy%state%HCAN            = huge(1.0)
@@ -78,9 +83,16 @@ contains
     noahmp%energy%state%FHV             = huge(1.0)
     noahmp%energy%state%FM2V            = huge(1.0)
     noahmp%energy%state%FH2V            = huge(1.0)
+    noahmp%energy%state%CM              = huge(1.0)
     noahmp%energy%state%CMV             = huge(1.0)
+    noahmp%energy%state%CH              = huge(1.0)
     noahmp%energy%state%CHV             = huge(1.0)
     noahmp%energy%state%CH2V            = huge(1.0)
+    noahmp%energy%state%CHV2            = huge(1.0)
+    noahmp%energy%state%CAW             = huge(1.0)
+    noahmp%energy%state%CTW             = huge(1.0)
+    noahmp%energy%state%CEW             = huge(1.0)
+    noahmp%energy%state%CGW             = huge(1.0)
     noahmp%energy%state%RAMG            = huge(1.0)
     noahmp%energy%state%RAHG            = huge(1.0)
     noahmp%energy%state%RAWG            = huge(1.0)
@@ -92,8 +104,24 @@ contains
     noahmp%energy%state%THAIR           = huge(1.0)
     noahmp%energy%state%UR              = huge(1.0)
     noahmp%energy%state%WSTARV          = huge(1.0)
-    noahmp%energy%state%FROZEN_CANOPY   = .false.
-    noahmp%energy%state%FROZEN_GROUND   = .false.
+    noahmp%energy%state%EMV             = huge(1.0)
+    noahmp%energy%state%EMG             = huge(1.0)
+    noahmp%energy%state%RSURF           = huge(1.0)
+    noahmp%energy%state%GAMMAV          = huge(1.0)
+    noahmp%energy%state%LATHEAV         = huge(1.0)
+    noahmp%energy%state%GAMMAG          = huge(1.0)
+    noahmp%energy%state%LATHEAG         = huge(1.0)
+    noahmp%energy%state%RHSUR           = huge(1.0)
+    noahmp%energy%state%QSFC            = huge(1.0)
+    noahmp%energy%state%Q2V             = huge(1.0)
+    noahmp%energy%state%TGV             = huge(1.0)
+    noahmp%energy%state%TAUXV           = huge(1.0)
+    noahmp%energy%state%TAUYV           = huge(1.0)
+    noahmp%energy%state%T2MV            = huge(1.0)
+    noahmp%energy%state%CHLEAF          = huge(1.0)
+    noahmp%energy%state%CHUC            = huge(1.0)
+    noahmp%energy%state%ZLVL            = huge(1.0)
+    noahmp%energy%state%FB_snow         = huge(1.0)
 
     allocate( noahmp%energy%state%STC     (-NSNOW+1:NSOIL) )
     allocate( noahmp%energy%state%DF      (-NSNOW+1:NSOIL) )
@@ -149,6 +177,15 @@ contains
     noahmp%energy%flux%FSR              = huge(1.0)
     noahmp%energy%flux%FSRV             = huge(1.0)
     noahmp%energy%flux%FSRG             = huge(1.0)
+    noahmp%energy%flux%SWDOWN           = huge(1.0)
+    noahmp%energy%flux%IRC              = huge(1.0)
+    noahmp%energy%flux%SHC              = huge(1.0)
+    noahmp%energy%flux%EVC              = huge(1.0)
+    noahmp%energy%flux%IRG              = huge(1.0)
+    noahmp%energy%flux%SHG              = huge(1.0)
+    noahmp%energy%flux%EVG              = huge(1.0)
+    noahmp%energy%flux%TR               = huge(1.0)
+    noahmp%energy%flux%GHV              = huge(1.0)
 
     allocate( noahmp%energy%flux%FABD    (1:NBAND) )
     allocate( noahmp%energy%flux%FABI    (1:NBAND) )
@@ -180,6 +217,7 @@ contains
     noahmp%energy%param%RC              = huge(1.0)
     noahmp%energy%param%HVT             = huge(1.0)
     noahmp%energy%param%HVB             = huge(1.0)
+    noahmp%energy%param%Z0MVT           = huge(1.0)
     noahmp%energy%param%DEN             = huge(1.0)
     noahmp%energy%param%XL              = huge(1.0)
     noahmp%energy%param%BETADS          = huge(1.0)
@@ -211,6 +249,9 @@ contains
     noahmp%energy%param%HS              = huge(1.0)
     noahmp%energy%param%DLEAF           = huge(1.0)
     noahmp%energy%param%CZIL            = huge(1.0)
+    noahmp%energy%param%SNOW_EMIS       = huge(1.0)
+    noahmp%energy%param%CWPVT           = huge(1.0)
+    noahmp%energy%param%Z0SNO           = huge(1.0)
 
     allocate( noahmp%energy%param%LAIM   (1:12   ) )
     allocate( noahmp%energy%param%SAIM   (1:12   ) )
@@ -223,6 +264,7 @@ contains
     allocate( noahmp%energy%param%RHOS   (1:NBAND) )
     allocate( noahmp%energy%param%TAUL   (1:NBAND) )
     allocate( noahmp%energy%param%TAUS   (1:NBAND) )
+    allocate( noahmp%energy%param%EG     (1:2    ) )
 
     noahmp%energy%param%LAIM(:)         = huge(1.0)
     noahmp%energy%param%SAIM(:)         = huge(1.0)
@@ -235,6 +277,7 @@ contains
     noahmp%energy%param%RHOS(:)         = huge(1.0)
     noahmp%energy%param%TAUL(:)         = huge(1.0)
     noahmp%energy%param%TAUS(:)         = huge(1.0)
+    noahmp%energy%param%EG(:)           = huge(1.0)
 
     end associate
 
@@ -263,6 +306,9 @@ contains
               NBAND       => noahmp%config%domain%NBAND         &
              )
 
+    ! temporary energy flux initialization
+    noahmp%energy%flux%SWDOWN              = input%SWDOWNIn  ! to be removed after merging with forcing
+
     ! energy state variable
     !noahmp%energy%state%LAI               = input%LAIIn
     !noahmp%energy%state%SAI               = input%SAIIn
@@ -274,6 +320,8 @@ contains
     !noahmp%energy%state%ALBOLD            = input%ALBOLDIn
     !noahmp%energy%state%EAH               = input%EAHIn
     !noahmp%energy%state%TAH               = input%TAHIn
+    !noahmp%energy%state%CH                = input%CHIn
+    !noahmp%energy%state%CM                = input%CMIn
     noahmp%energy%state%CO2AIR             = input%CO2_TABLE * input%SFCPRSIn
     noahmp%energy%state%O2AIR              = input%O2_TABLE * input%SFCPRSIn
 
@@ -281,6 +329,8 @@ contains
     noahmp%energy%param%RC                 = input%RC_TABLE(VEGTYP)
     noahmp%energy%param%HVT                = input%HVT_TABLE(VEGTYP)
     noahmp%energy%param%HVB                = input%HVB_TABLE(VEGTYP)
+    noahmp%energy%param%Z0MVT              = input%Z0MVT_TABLE(VEGTYP)
+    noahmp%energy%param%CWPVT              = input%CWPVT_TABLE(VEGTYP)
     noahmp%energy%param%DEN                = input%DEN_TABLE(VEGTYP)
     noahmp%energy%param%XL                 = input%XL_TABLE(VEGTYP)
     noahmp%energy%param%BP                 = input%BP_TABLE(VEGTYP)
@@ -312,6 +362,9 @@ contains
     noahmp%energy%param%BETADS             = input%BETADS_TABLE
     noahmp%energy%param%BETAIS             = input%BETAIS_TABLE
     noahmp%energy%param%CZIL               = input%CZIL_TABLE
+    noahmp%energy%param%SNOW_EMIS          = input%SNOW_EMIS_TABLE
+    noahmp%energy%param%EG                 = input%EG_TABLE
+    noahmp%energy%param%Z0SNO              = input%Z0SNO_TABLE
 
     noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)

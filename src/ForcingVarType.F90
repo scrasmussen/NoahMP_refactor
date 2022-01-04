@@ -22,7 +22,8 @@ module ForcingVarType
     real(kind=kind_noahmp) :: VV              ! wind speed in northward dir [m/s]
     real(kind=kind_noahmp) :: Q2              ! 2-m specific humidity (kg/kg)
     real(kind=kind_noahmp) :: SFCPRS          ! surface pressure (pa)
-    real(kind=kind_noahmp) :: SWDOWN          ! downward surface solar radiation (w/m2)
+    real(kind=kind_noahmp) :: LWDN            ! downward longwave radiation [w/m2]
+    real(kind=kind_noahmp) :: PSFC            ! pressure at lowest model layer (pa)
 
   end type forcing_type
 

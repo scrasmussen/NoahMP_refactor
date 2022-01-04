@@ -73,8 +73,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ZLM             => noahmp%config%domain%ZLVL           ,& ! in,    reference height  (m)
               CZIL            => noahmp%energy%param%CZIL            ,& ! in,    Calculate roughness length of heat
+              ZLM             => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
               THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
               SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
               Z0              => noahmp%energy%state%Z0M             ,& ! in,    roughness length, momentum, (m), surface
@@ -96,7 +96,7 @@ contains
     ILECH = 0
     ZILFC = -CZIL * VKRM * SQVISC
     ZU    = Z0
-    RDZ   = 1.0/ ZLM
+    RDZ   = 1.0 / ZLM
     CXCH  = EXCM * RDZ
     DTHV  = THLM - THZ0
 
@@ -109,7 +109,7 @@ contains
        else
           WSTAR2 = 0.0
        endif
-       USTAR = max( sqrt(AKMS * sqrt(DU2+ WSTAR2)), EPSUST )
+       USTAR = max( sqrt(AKMS * sqrt(DU2+WSTAR2)), EPSUST )
        RLMO  = ELFC * AKHS * DTHV / USTAR**3
     endif
 

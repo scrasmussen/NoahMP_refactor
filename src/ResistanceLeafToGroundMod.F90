@@ -10,7 +10,7 @@ module ResistanceLeafToGroundMod
 
 contains
 
-  subroutine ResistanceLeafToGround(noahmp, ITER, VAIE, HG)
+  subroutine ResistanceLeafToGround(noahmp, ITER, VAI, HG)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: RAGRB
@@ -22,7 +22,7 @@ contains
 
     integer               , intent(in   ) :: ITER         ! iteration index
     real(kind=kind_noahmp), intent(in   ) :: HG           ! temporary ground sensible heat flux (w/m2) in each iteration
-    real(kind=kind_noahmp), intent(in   ) :: VAIE         ! temporary effective LAI+SAI with constraint (<=6.0)
+    real(kind=kind_noahmp), intent(in   ) :: VAI          ! temporary effective LAI+SAI with constraint (<=6.0)
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variable

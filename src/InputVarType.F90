@@ -43,6 +43,7 @@ module InputVarType
     real(kind=kind_noahmp)   :: FGEVIn
     real(kind=kind_noahmp)   :: Q2In
     real(kind=kind_noahmp)   :: SWDOWNIn 
+    real(kind=kind_noahmp)   :: LWDNIn
     ! structure
     integer                  :: VEGTYPEIn
     integer                  :: SOILCOLORIn
@@ -367,6 +368,7 @@ module InputVarType
     integer                                             :: IRCNTFIIn
     integer                                             :: NBANDIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
+    real(kind=kind_noahmp)                              :: DZ8WIn
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
     real(kind=kind_noahmp)                              :: TVIn              ! leaf temperature (K)
     real(kind=kind_noahmp)                              :: CANLIQIn
@@ -399,6 +401,8 @@ module InputVarType
     real(kind=kind_noahmp)                              :: ALBOLDIn
     real(kind=kind_noahmp)                              :: EAHIn
     real(kind=kind_noahmp)                              :: TAHIn
+    real(kind=kind_noahmp)                              :: CHIn
+    real(kind=kind_noahmp)                              :: CMIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

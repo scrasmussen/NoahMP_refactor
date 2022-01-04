@@ -33,21 +33,38 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
+              CROPTYPE        => noahmp%config%domain%CROPTYP        ,& ! in,     crop type
               DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
+              HVB             => noahmp%energy%param%HVB             ,& ! in,     bottom of canopy (m)
+              HVT             => noahmp%energy%param%HVT             ,& ! in,     top of canopy (m)
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
+              IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigation fraction
-              IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! inout,  maximum precipitation to stop irrigation trigger
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent (mm)
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
+              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
               IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
+              SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
+              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil moisture [m3/m3]
+              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
               RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
               EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
               IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
-              FIRR            => noahmp%energy%flux%FIRR              & ! inout,  latent heating due to sprinkler evaporation [w/m2]
+              FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
+              LAI             => noahmp%energy%state%LAI             ,& ! inout,  leaf area index (m2/m2)
+              SAI             => noahmp%energy%state%SAI             ,& ! inout,  stem area index (m2/m2)
+              FB_snow         => noahmp%energy%state%FB_snow         ,& ! out,    fraction of canopy buried by snow
+              ELAI            => noahmp%energy%state%ELAI            ,& ! out,    leaf area index, after burying by snow
+              ESAI            => noahmp%energy%state%ESAI            ,& ! out,    stem area index, after burying by snow
+              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,    latent heat of vaporization/subli (j/kg), ground
+              FGEV            => noahmp%energy%flux%FGEV             ,& ! out,    soil evap heat (w/m2) [+ to atm]
+              QVAP            => noahmp%water%flux%QVAP              ,& ! out,    soil surface evaporation rate[mm/s]
+              QDEW            => noahmp%water%flux%QDEW              ,& ! out,    soil surface dew rate[mm/s]
+              EDIR            => noahmp%water%flux%EDIR               & ! out,    net direct soil evaporation (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -60,6 +77,16 @@ contains
     !---------------------------------------------------------------------
     ! call phenology
     !--------------------------------------------------------------------- 
+
+    ! extract from phenology to update ELAI and ESAI temporally
+    FB_snow = min( max(SNOWH-HVB, 0.0), HVT-HVB ) / max(1.0e-06, HVT-HVB)
+    if ( HVT > 0.0 .and. HVT <= 1.0 ) then    ! MB: change to 1.0 and 0.2 to reflect
+       FB_snow = min( SNOWH, (HVT*exp(-SNOWH/0.2)) ) / (HVT*exp(-SNOWH/0.2) )
+    endif
+    ELAI = LAI * (1.0 - FB_snow)
+    ESAI = SAI * (1.0 - FB_snow)
+    if ( ESAI < 0.05 .and. CROPTYPE == 0 ) ESAI = 0.0                   ! MB: ESAI CHECK, change to 0.05 v3.6
+    if ( (ELAI < 0.05 .or. ESAI == 0.0) .and. CROPTYPE == 0 ) ELAI = 0.0  ! MB: LAI CHECK
 
 
 
@@ -103,7 +130,11 @@ contains
     !---------------------------------------------------------------------
     ! prepare for water module
     !--------------------------------------------------------------------- 
+    SICE(:) = max(0.0, SMC(:)-SH2O(:))
     SNEQVO  = SNEQV
+    QVAP    = max(FGEV/LATHEAG, 0.0)       ! positive part of fgev; Barlage change to ground v3.6
+    QDEW    = abs(min(FGEV/LATHEAG, 0.0))  ! negative part of fgev
+    EDIR    = QVAP - QDEW
 
     !---------------------------------------------------------------------
     ! call the main water routine

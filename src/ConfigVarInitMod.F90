@@ -23,8 +23,11 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_SFC      = huge(1)
+    noahmp%config%nmlist%OPT_CRS      = huge(1)
     noahmp%config%nmlist%OPT_ALB      = huge(1)
     noahmp%config%nmlist%OPT_RAD      = huge(1)
+    noahmp%config%nmlist%OPT_STC      = huge(1)
     noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
     noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
     noahmp%config%nmlist%OPT_INF      = huge(1)
@@ -51,7 +54,8 @@ contains
     noahmp%config%domain%DX           = huge(1.0)
     noahmp%config%domain%JULIAN       = huge(1.0)
     noahmp%config%domain%COSZ         = huge(1.0)
-    noahmp%config%domain%ZLVL         = huge(1.0)
+    noahmp%config%domain%ZREF         = huge(1.0)
+    noahmp%config%domain%DZ8W         = huge(1.0)
 
   end subroutine ConfigVarInitDefault
 
@@ -71,8 +75,11 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_SFC    = input%OPT_SFCIn
+    noahmp%config%nmlist%OPT_CRS    = input%OPT_CRSIn
     noahmp%config%nmlist%OPT_ALB    = input%OPT_ALBIn
     noahmp%config%nmlist%OPT_RAD    = input%OPT_RADIn
+    noahmp%config%nmlist%OPT_STC    = input%OPT_STCIn
     noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
@@ -98,7 +105,8 @@ contains
     noahmp%config%domain%CROPTYP    = input%CROPTYPEIn
     noahmp%config%domain%SOILCOLOR  = input%SOILCOLORIn
     noahmp%config%domain%JULIAN     = input%JULIANIn
-    noahmp%config%domain%ZLVL       = input%ZLVLIn
+    noahmp%config%domain%ZREF       = input%ZLVLIn
+    !noahmp%config%domain%DZ8W      = input%DZ8WIn
     !noahmp%config%domain%COSZ       = input%COSZIn
     !noahmp%config%domain%ISNOW      = input%ISNOWIn
     !noahmp%config%domain%IST        = input%ISTIn

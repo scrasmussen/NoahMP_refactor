@@ -1164,6 +1164,7 @@ contains
     real(kind=kind_noahmp) :: fgev_e
     real(kind=kind_noahmp) :: Q2
     real(kind=kind_noahmp) :: SWDOWN
+    real(kind=kind_noahmp) :: LWDOWN
     ! structure
     integer                :: isltyp
     integer                :: vegtype
@@ -1193,7 +1194,7 @@ contains
     !=== arrange structures for reading namelist.input
     namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN
+                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN,LWDOWN
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
                                  nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax,zlvl
     namelist / fixed_initial   / zsoil,dzsnso
@@ -1273,6 +1274,7 @@ contains
     input%JULIANIn         = JULIAN
     input%Q2In             = Q2
     input%SWDOWNIn         = SWDOWN
+    input%LWDNIn           = LWDOWN
     input%ZLVLIn           = zlvl
 
     allocate( input%SOILTYPEIn(       1:nsoil))

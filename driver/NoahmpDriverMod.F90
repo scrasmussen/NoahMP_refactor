@@ -33,13 +33,8 @@ Program NoahmpDriverMod
   real(kind=kind_noahmp) :: totalwat   = 0.0   ! total soil water [mm]
   real(kind=kind_noahmp) :: tw0        = 0.0   ! initial total soil water [mm]
   real(kind=kind_noahmp) :: errwat     = 0.0   ! water balance error at each timestep [mm]
-  real(kind=kind_noahmp) :: FB_snow            ! canopy fraction buried by snow
-  real(kind=kind_noahmp) :: LAI                ! leaf area index
-  real(kind=kind_noahmp) :: SAI                ! stem area index
-  real(kind=kind_noahmp) :: LATHEAV            ! latent heat vap./sublimation (j/kg) for canopy
-  real(kind=kind_noahmp) :: LATHEAG            ! latent heat vap./sublimation (j/kg) for ground
-  real(kind=kind_noahmp) :: QAIR               ! specific humidity
   logical                :: raining            ! .true. if raining
+  logical                :: VEG                ! true if covered by vegetation
 
 !---------------------------------------------------------------------
 !  read in input data from table and initial file
@@ -70,23 +65,23 @@ Program NoahmpDriverMod
             NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
             ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
             SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,     surface air temperature [k] from Atmos forcing
-            TV              => noahmp%energy%state%TV              ,& ! inout, vegetation temperature (k)
-            TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
+            TV              => noahmp%energy%state%TV              ,& ! inout,  vegetation temperature (k)
+            TG              => noahmp%energy%state%TG              ,& ! in,     ground temperature (k)
             IMELT           => noahmp%water%state%IMELT            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
-            CANLIQ          => noahmp%water%state%CANLIQ           ,& ! inout, intercepted liquid water (mm)
-            CANICE          => noahmp%water%state%CANICE           ,& ! inout, intercepted ice mass (mm)
+            CANLIQ          => noahmp%water%state%CANLIQ           ,& ! inout,  intercepted liquid water (mm)
+            CANICE          => noahmp%water%state%CANICE           ,& ! inout,  intercepted ice mass (mm)
             STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
             SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
             SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
             IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake 
             DX              => noahmp%config%domain%DX             ,& ! in,     noahmp model grid spacing (m)
-            FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
-            FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
+            FCEV            => noahmp%energy%flux%FCEV             ,& ! in,     canopy evaporation (w/m2) [+ = to atm]
+            FCTR            => noahmp%energy%flux%FCTR             ,& ! in,     transpiration (w/m2) [+ = to atm]
             PONDING         => noahmp%water%state%PONDING          ,& ! inout,  melting water from snow when there is no layer (mm)
             FICEOLD         => noahmp%water%state%FICEOLD_SNOW     ,& ! in,     ice fraction in snow layers at last timestep
-            FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
+            FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
             SMCEQ           => noahmp%water%state%SMCEQ            ,& ! in,     equilibrium soil water  content [m3/m3]
-            BDFALL          => noahmp%water%state%BDFALL           ,& ! in,    bulk density of snowfall (kg/m3)
+            BDFALL          => noahmp%water%state%BDFALL           ,& ! in,     bulk density of snowfall (kg/m3)
             QRAIN           => noahmp%water%flux%QRAIN             ,& ! in,     snow surface rain rate[mm/s]
             QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
             SNOWHIN         => noahmp%water%flux%SNOWHIN           ,& ! in,     snow depth increasing rate (m/s)
@@ -103,10 +98,10 @@ Program NoahmpDriverMod
             SMCWTD          => noahmp%water%state%SMCWTD           ,& ! inout,  soil moisture between bottom of the soil and the water table
             DEEPRECH        => noahmp%water%state%DEEPRECH         ,& ! inout,  recharge to or from the water table when deep [m]
             RECH            => noahmp%water%state%RECH             ,& ! out,    groundwater recharge (net vertical flux across the water table), positive up
-            CMC             => noahmp%water%state%CMC              ,& ! out,   total canopy intercepted water (mm)
-            ECAN            => noahmp%water%flux%ECAN              ,& ! out,   evaporation of intercepted water (mm/s) [+]
-            ETRAN           => noahmp%water%flux%ETRAN             ,& ! out,   transpiration rate (mm/s) [+]
-            FWET            => noahmp%water%state%FWET             ,& ! out,   wetted or snowed fraction of the canopy
+            CMC             => noahmp%water%state%CMC              ,& ! out,    total canopy intercepted water (mm)
+            ECAN            => noahmp%water%flux%ECAN              ,& ! out,    evaporation of intercepted water (mm/s) [+]
+            ETRAN           => noahmp%water%flux%ETRAN             ,& ! out,    transpiration rate (mm/s) [+]
+            FWET            => noahmp%water%state%FWET             ,& ! out,    wetted or snowed fraction of the canopy
             RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
             RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! out,    subsurface runoff [mm/s] 
             QDIS            => noahmp%water%flux%QDIS              ,& ! out,    groundwater discharge [mm/s]
@@ -122,12 +117,12 @@ Program NoahmpDriverMod
             QSNSUB          => noahmp%water%flux%QSNSUB            ,& ! in,     snow surface sublimation rate[mm/s]
             SNOFLOW         => noahmp%water%flux%SNOFLOW           ,& ! out,    glacier flow [mm/s]
             QSDEW           => noahmp%water%flux%QSDEW             ,& ! inout,  soil surface dew rate [mm/s]
-            QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,    soil bottom drainage (m/s)
+            QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,     soil bottom drainage (m/s)
             FCRMAX          => noahmp%water%state%FCRMAX           ,& ! in,     maximum fraction of imperviousness (FCR)
             WCND            => noahmp%water%state%WCND             ,& ! out,    soil hydraulic conductivity (m/s)
             sfcheadrt       => noahmp%water%state%sfcheadrt        ,& ! inout,  surface water head (mm) 
             WATBLED         => noahmp%water%state%WATBLED          ,& ! in,     water table depth estimated in WRF-Hydro fine grids (m)
-            FROZEN_CANOPY   => noahmp%energy%state%FROZEN_CANOPY   ,& ! in,    used to define latent heat pathway
+            FROZEN_CANOPY   => noahmp%energy%state%FROZEN_CANOPY   ,& ! in,     used to define latent heat pathway
             FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! in,     frozen ground (logical) to define latent heat pathway
             QVAP            => noahmp%water%flux%QVAP              ,& ! in,     soil surface evaporation rate[mm/s]
             QDEW            => noahmp%water%flux%QDEW              ,& ! in,     soil surface dew rate[mm/s]
@@ -167,17 +162,17 @@ Program NoahmpDriverMod
             RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
             SNOW            => noahmp%water%flux%SNOW              ,& ! inout,  snowfall rate
             IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
-            QINTR           => noahmp%water%flux%QINTR             ,& ! out,   interception rate for rain (mm/s)
-            QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! out,   drip rate for rain (mm/s)
-            QTHROR          => noahmp%water%flux%QTHROR            ,& ! out,   throughfall for rain (mm/s)
-            QINTS           => noahmp%water%flux%QINTS             ,& ! out,   interception (loading) rate for snowfall (mm/s)
-            QDRIPS          => noahmp%water%flux%QDRIPS            ,& ! out,   drip (unloading) rate for intercepted snow (mm/s)
-            QTHROS          => noahmp%water%flux%QTHROS            ,& ! out,   throughfall of snowfall (mm/s)
-            PAHV            => noahmp%energy%flux%PAHV             ,& ! out,   precipitation advected heat - vegetation net (W/m2)
-            PAHG            => noahmp%energy%flux%PAHG             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
-            PAHB            => noahmp%energy%flux%PAHB             ,& ! out,   precipitation advected heat - bare ground net (W/m2)
-            EDIR            => noahmp%water%flux%EDIR              ,& ! out,   net soil evaporation
-            FP              => noahmp%water%state%FP               ,& ! out,   precipitation area fraction
+            QINTR           => noahmp%water%flux%QINTR             ,& ! out,    interception rate for rain (mm/s)
+            QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! out,    drip rate for rain (mm/s)
+            QTHROR          => noahmp%water%flux%QTHROR            ,& ! out,    throughfall for rain (mm/s)
+            QINTS           => noahmp%water%flux%QINTS             ,& ! out,    interception (loading) rate for snowfall (mm/s)
+            QDRIPS          => noahmp%water%flux%QDRIPS            ,& ! out,    drip (unloading) rate for intercepted snow (mm/s)
+            QTHROS          => noahmp%water%flux%QTHROS            ,& ! out,    throughfall of snowfall (mm/s)
+            PAHV            => noahmp%energy%flux%PAHV             ,& ! out,    precipitation advected heat - vegetation net (W/m2)
+            PAHG            => noahmp%energy%flux%PAHG             ,& ! out,    precipitation advected heat - under canopy net (W/m2)
+            PAHB            => noahmp%energy%flux%PAHB             ,& ! out,    precipitation advected heat - bare ground net (W/m2)
+            EDIR            => noahmp%water%flux%EDIR              ,& ! out,    net soil evaporation
+            FP              => noahmp%water%state%FP               ,& ! out,    precipitation area fraction
             DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
             HCPCT           => noahmp%energy%state%HCPCT           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
             FACT            => noahmp%energy%state%FACT            ,& ! out,    energy factor for soil & snow phase change
@@ -187,26 +182,94 @@ Program NoahmpDriverMod
             SNEQVO          => noahmp%water%state%SNEQVO           ,& ! in,     snow mass at last time step(mm)
             COSZ            => noahmp%config%domain%COSZ           ,& ! in,     cosine solar zenith angle
             FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
-            SOLAD           => noahmp%energy%flux%SOLAD            ,& ! in,    incoming direct solar radiation (w/m2)
-            SOLAI           => noahmp%energy%flux%SOLAI            ,& ! in,    incoming diffuse solar radiation (w/m2)
+            SOLAD           => noahmp%energy%flux%SOLAD            ,& ! in,     incoming direct solar radiation (w/m2)
+            SOLAI           => noahmp%energy%flux%SOLAI            ,& ! in,     incoming diffuse solar radiation (w/m2)
             ALBOLD          => noahmp%energy%state%ALBOLD          ,& ! in,     snow albedo at last time step
             TAUSS           => noahmp%energy%state%TAUSS           ,& ! inout,  non-dimensional snow age
-            FSUN            => noahmp%energy%state%FSUN            ,& ! in,    sunlit fraction of canopy
-            LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,    sunlit leaf area
-            LAISHA          => noahmp%energy%state%LAISHA          ,& ! in,    shaded leaf area
-            PARSUN          => noahmp%energy%flux%PARSUN           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
-            PARSHA          => noahmp%energy%flux%PARSHA           ,& ! out,   average absorbed par for shaded leaves (w/m2)
-            SAV             => noahmp%energy%flux%SAV              ,& ! out,   solar radiation absorbed by vegetation (w/m2)
-            SAG             => noahmp%energy%flux%SAG              ,& ! out,   solar radiation absorbed by ground (w/m2)
-            FSA             => noahmp%energy%flux%FSA              ,& ! out,   total absorbed solar radiation (w/m2)
-            FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
-            FSRV            => noahmp%energy%flux%FSRV             ,& ! out,   reflected solar radiation by vegetation (w/m2)
-            FSRG            => noahmp%energy%flux%FSRG             ,& ! out,   reflected solar radiation by ground (w/m2)
-            BGAP            => noahmp%energy%state%BGAP            ,& ! out,   between canopy gap fraction for beam
-            WGAP            => noahmp%energy%state%WGAP            ,& ! out,   within canopy gap fraction for beam
+            FSUN            => noahmp%energy%state%FSUN            ,& ! in,     sunlit fraction of canopy
+            LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,     sunlit leaf area
+            LAISHA          => noahmp%energy%state%LAISHA          ,& ! in,     shaded leaf area
+            PARSUN          => noahmp%energy%flux%PARSUN           ,& ! out,    average absorbed par for sunlit leaves (w/m2)
+            PARSHA          => noahmp%energy%flux%PARSHA           ,& ! out,    average absorbed par for shaded leaves (w/m2)
+            SAV             => noahmp%energy%flux%SAV              ,& ! out,    solar radiation absorbed by vegetation (w/m2)
+            SAG             => noahmp%energy%flux%SAG              ,& ! out,    solar radiation absorbed by ground (w/m2)
+            FSA             => noahmp%energy%flux%FSA              ,& ! out,    total absorbed solar radiation (w/m2)
+            FSR             => noahmp%energy%flux%FSR              ,& ! out,    total reflected solar radiation (w/m2)
+            FSRV            => noahmp%energy%flux%FSRV             ,& ! out,    reflected solar radiation by vegetation (w/m2)
+            FSRG            => noahmp%energy%flux%FSRG             ,& ! out,    reflected solar radiation by ground (w/m2)
+            BGAP            => noahmp%energy%state%BGAP            ,& ! out,    between canopy gap fraction for beam
+            WGAP            => noahmp%energy%state%WGAP            ,& ! out,    within canopy gap fraction for beam
             ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
-            ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
-            SWDOWN          => noahmp%forcing%SWDOWN                & ! in,    downward surface radiation
+            ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! out,    snow albedo for diffuse(1=vis, 2=nir)
+            SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,     downward surface radiation
+            CM              => noahmp%energy%state%CM              ,& ! inout,  momentum exchange coefficient (m/s), above ZPD, vegetated
+            CH              => noahmp%energy%state%CH              ,& ! inout,  heat exchange coefficient (m/s), above ZPD, vegetated
+            LWDN            => noahmp%forcing%LWDN                 ,& ! in,     downward longwave radiation [w/m2]
+            UU              => noahmp%forcing%UU                   ,& ! in,     u direction wind
+            VV              => noahmp%forcing%VV                   ,& ! in,     v direction wind
+            UR              => noahmp%energy%state%UR              ,& ! in,     wind speed (m/s) at reference height ZLVL
+            THAIR           => noahmp%energy%state%THAIR           ,& ! in,     potential temp at reference height (k)           
+            QAIR            => noahmp%energy%state%QAIR            ,& ! in,     specific humidity at reference height (kg/kg)
+            LAI             => noahmp%energy%state%LAI             ,& ! in,     leaf area index (m2/m2)
+            SAI             => noahmp%energy%state%SAI             ,& ! inout,  stem area index (m2/m2)
+            FB_snow         => noahmp%energy%state%FB_snow         ,& ! out,    fraction of canopy buried by snow
+            RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,     density air (kg/m3)
+            CWP             => noahmp%energy%state%CWP             ,& ! in,     canopy wind absorption parameter
+            CWPVT           => noahmp%energy%param%CWPVT           ,& ! in,     canopy wind absorption parameter
+            Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,    roughness length, momentum, ground (m)
+            Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! out,    snow surface roughness length (m) (0.002)
+            VAI             => noahmp%energy%state%VAI             ,& ! in,     one-sided leaf+stem area index (m2/m2)
+            LATHEAV         => noahmp%energy%state%LATHEAV         ,& ! out,   latent heat of vaporization/subli (j/kg), canopy
+            GAMMAV          => noahmp%energy%state%GAMMAV          ,& ! out,   psychrometric constant (pa/K), canopy
+            LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
+            GAMMAG          => noahmp%energy%state%GAMMAG          ,& ! out,   psychrometric constant (pa/K), ground
+            Z0M             => noahmp%energy%state%Z0M             ,& ! in,    roughness length, momentum, (m), surface
+            Z0MVT           => noahmp%energy%param%Z0MVT           ,& ! in,    momentum roughness length (m)
+            ZPD             => noahmp%energy%state%ZPD             ,& ! in,    zero plane displacement (m)
+            HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
+            ZPDG            => noahmp%energy%state%ZPD             ,& ! out,   ground zero plane displacement (m)
+            ZLVL            => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
+            EMV             => noahmp%energy%state%EMV             ,& ! out,   vegetation emissivity
+            EMG             => noahmp%energy%state%EMG             ,& ! out,   ground emissivity
+            EG              => noahmp%energy%param%EG              ,& ! in,    emissivity soil surface
+            SNOW_EMIS       => noahmp%energy%param%SNOW_EMIS       ,& ! in,    snow emissivity
+            RSURF           => noahmp%energy%state%RSURF           ,& ! out,   ground surface resistance (s/m)
+            IGS             => noahmp%biochem%state%IGS            ,& ! in,    growing season index (0=off, 1=on)
+            FOLN            => noahmp%biochem%state%FOLN           ,& ! in,    foliage nitrogen concentration (%)
+            CO2AIR          => noahmp%energy%state%CO2AIR          ,& ! in,    atmospheric co2 concentration (pa)
+            O2AIR           => noahmp%energy%state%O2AIR           ,& ! in,    atmospheric o2 concentration (pa)
+            BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
+            PSISAT          => noahmp%water%param%PSISAT           ,& ! in,     saturated soil matric potential (m)
+            PSI             => noahmp%water%state%PSI              ,& ! out,   surface layer soil matrix potential (m)
+            BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter
+            RHSUR           => noahmp%energy%state%RHSUR           ,& ! out,   raltive humidity in surface soil/snow air space (-)
+            DZ8W            => noahmp%config%domain%DZ8W           ,& ! in,    thickness of surface atmospheric layers [m]
+            PSFC            => noahmp%forcing%PSFC                 ,& ! in,    pressure at lowest model layer
+            TAH             => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
+            EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
+            TGV             => noahmp%energy%state%TGV             ,& ! out,   vegetated ground (below-canopy) temperature (K)
+            CMV             => noahmp%energy%state%CMV             ,& ! out,   drag coefficient for momentum, above ZPD, vegetated
+            CHV             => noahmp%energy%state%CHV             ,& ! out,   drag coefficient for heat, above ZPD, vegetated
+            QSFC            => noahmp%energy%state%QSFC            ,& ! inout, water vapor mixing ratio at lowest model layer
+            RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
+            RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
+            TAUXV           => noahmp%energy%state%TAUXV           ,& ! out,   wind stress: east-west (n/m2) above canopy
+            TAUYV           => noahmp%energy%state%TAUYV           ,& ! out,   wind stress: north-south (n/m2) above canopy
+            IRG             => noahmp%energy%flux%IRG              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
+            IRC             => noahmp%energy%flux%IRC              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
+            SHG             => noahmp%energy%flux%SHG              ,& ! out,   ground sensible heat flux (w/m2)     [+= to atm]
+            SHC             => noahmp%energy%flux%SHC              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
+            EVG             => noahmp%energy%flux%EVG              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
+            EVC             => noahmp%energy%flux%EVC              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
+            TR              => noahmp%energy%flux%TR               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
+            GHV             => noahmp%energy%flux%GHV              ,& ! out,   vegetated ground heat (w/m2) [+ = to soil]
+            T2MV            => noahmp%energy%state%T2MV            ,& ! out,   2 m height air temperature (k), vegetated
+            PSNSUN          => noahmp%biochem%flux%PSNSUN          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
+            PSNSHA          => noahmp%biochem%flux%PSNSHA          ,& ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+            Q2V             => noahmp%energy%state%Q2V             ,& ! out,   water vapor mixing ratio at 2m vegetated
+            CHV2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s)
+            CHLEAF          => noahmp%energy%state%CHLEAF          ,& ! out,   leaf sensible heat exchange coefficient (m/s),leaf surface to canopy air
+            CHUC            => noahmp%energy%state%CHUC             & ! out,   under canopy sensible heat exchange coefficient (m/s)
             )
 !---------------------------------------------------------------------
 
@@ -318,7 +381,7 @@ Program NoahmpDriverMod
   EPORE_SNOW = 0.0
   FACT       = 0.0
 ! radiation new vars
-  COSZ   = 0.5
+  COSZ     = 0.5
   SOLAD(1) = SWDOWN*0.7*0.5     ! direct  vis
   SOLAD(2) = SWDOWN*0.7*0.5     ! direct  nir
   SOLAI(1) = SWDOWN*0.3*0.5     ! diffuse vis
@@ -342,30 +405,102 @@ Program NoahmpDriverMod
   ALBSND(:)= 0.0
   ALBSNI(:)= 0.0
 
-
-
-!============================
-! set psychrometric constant
-  if ( TV > TFRZ ) then           
-     LATHEAV       = HVAP          
+!====== vege_flux new vars
+!!! in 
+  CM     = 0.1
+  CH     = 0.01
+  LWDN   = input%LWDNIn
+  UR     = max( sqrt(UU**2.0 + VV**2.0), 1.0 )
+  THAIR  = SFCTMP * (SFCPRS / SFCPRS)**(RAIR / CPAIR)
+  QAIR   = Q2
+  EAIR   = QAIR * SFCPRS / (0.622 + 0.378*QAIR)
+  RHOAIR = (SFCPRS - 0.378*EAIR) / (RAIR*SFCTMP)
+  CWP    = CWPVT
+  Z0MG   = 0.002 * (1.0 - FSNO) + FSNO * Z0SNO
+! needs to update each time step
+  VAI    = ELAI + ESAI
+  VEG    = .false.
+  if ( VAI > 0.0 ) VEG = .true.
+  if (TV > TFRZ ) then
+     LATHEAV       = HVAP
      FROZEN_CANOPY = .false.
   else
      LATHEAV       = HSUB
      FROZEN_CANOPY = .true.
   endif
+  GAMMAV = CPAIR * SFCPRS / (0.622 * LATHEAV)
   if ( TG > TFRZ ) then
-     LATHEAG       = HVAP
-     FROZEN_GROUND = .false.
+      LATHEAG       = HVAP
+      FROZEN_GROUND = .false.
   else
-     LATHEAG       = HSUB
-     FROZEN_GROUND = .true.
+      LATHEAG       = HSUB
+      frozen_ground = .true.
   endif
+   GAMMAG = CPAIR * SFCPRS / (0.622 * LATHEAG)
+   ZPDG  = SNOWH
+   if ( VEG .eqv. .true. ) then
+      Z0M = Z0MVT
+      ZPD = 0.65 * HVT
+      if ( SNOWH > ZPD ) ZPD = SNOWH
+   else
+      Z0M = Z0MG
+      ZPD = ZPDG
+   endif
+   ZLVL   = max( ZPD, HVT ) + 10.0
+   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
+   EMV    = 1.0 - exp(-(ELAI+ESAI)/1.0)
+   EMG    = EG(IST) * (1.0-FSNO) + SNOW_EMIS*FSNO
+   RSURF  = FSNO * 1.0 + (1.0-FSNO)* exp(8.25-4.225*(max(0.0,SH2O(1)/SMCMAX(1)))) !Sellers (1992)
+   IGS    = 1.0
+   FOLN   = 1.0
+   CO2AIR = 395.0e-06 * SFCPRS
+   O2AIR  = 0.209 * SFCPRS
+   BTRAN  = 0.2
+   PSI    = -PSISAT(1)*(max(0.01,SH2O(1))/SMCMAX(1))**(-BEXP(1))
+   RHSUR  = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
+   DZ8W   = 20.0
+   !QC     = 0.0005
+   PSFC   = SFCPRS
+!!! inout
+   ! TV
+   TAH = TV
+   EAH = Q2 * SFCPRS / (0.622 + 0.378*Q2)
+   TGV = TG
+   CMV = CM
+   CHV = CH
+   QSFC = 0.622 * EAIR / (PSFC - 0.378*EAIR)
+!!! out
+   RSSUN  = 0.0
+   RSSHA  = 0.0
+   TAUXV  = 0.0
+   TAUYV  = 0.0
+   IRG    = 0.0
+   IRC    = 0.0
+   SHG    = 0.0
+   SHC    = 0.0
+   EVG    = 0.0
+   EVC    = 0.0
+   TR     = 0.0
+   GHV    = 0.0
+   T2MV   = 0.0
+   PSNSUN = 0.0
+   PSNSHA = 0.0
+   Q2V    = 0.0
+   CHV2   = 0.0
+   CHLEAF = 0.0
+   CHUC   = 0.0
+!====== vege_flux end
 
+
+
+
+!============================
   QVAP = max( FGEV / LATHEAG, 0.0 )       ! positive part of fgev; Barlage change to ground v3.6
   QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
   BTRANI(1:nsoil) = 0.2 ! 0~1
   EDIR = QVAP - QDEW   ! net soil evaporation
 
+!============= irrigation related
   if ( OPT_IRR > 0) then
      IRRFRA = 1.0  ! irrigation fraction
      CROPLU = .true.
@@ -373,7 +508,6 @@ Program NoahmpDriverMod
      IRRFRA = 0.0
      CROPLU = .false.
   endif
-
   if ( OPT_IRRM == 0 ) then
      SIFAC    = 0.3
      MIFAC    = 0.3
@@ -415,29 +549,19 @@ Program NoahmpDriverMod
      IRMIRATE = 0.0
      IRSIRATE = 0.0
   endif
-
-! used to test irrigation trigger
-!  IRAMTFI = 0.0
-!  IRAMTMI = 0.0
-!  IRAMTSI = 0.0
-
-
   IRCNTSI = 0
   IRCNTMI = 0
   IRCNTFI = 0
-  QAIR = Q2
-  EAIR   = QAIR*SFCPRS / (0.622+0.378*QAIR)
   IREVPLOS = 0.0
   FIRR = 0.0
   EIRR = 0.0
-
   if ( OPT_TDRN > 0 ) then
       TDFRACMP = 0.5
       ZWT      = 0.2  ! to allow the drainage effect to show up
   else
       TDFRACMP = 0.0
   endif
-
+!================= irrigation end
 
 ! for other variables
   DT         = input%DTIn

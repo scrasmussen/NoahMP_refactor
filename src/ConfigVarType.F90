@@ -18,6 +18,12 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
+    integer                   :: OPT_SFC       ! options for surface layer drag/exchange coeff (CH & CM)
+                                                 ! 1 -> Monin-Obukhov (M-O) Similarity Theory (MOST)
+                                                 ! 2 -> original Noah (Chen et al. 1997)
+    integer                   :: OPT_CRS       ! options for canopy stomatal resistance
+                                                 ! 1 -> Ball-Berry scheme
+                                                 ! 2 -> Jarvis scheme
     integer                   :: OPT_ALB       ! options for ground snow surface albedo
                                                  ! 1 -> BATS snow albedo scheme
                                                  ! 2 -> CLASS snow albedo scheme
@@ -25,6 +31,10 @@ module ConfigVarType
                                                  ! 1 -> modified two-stream (gap = F(solar angle, 3D structure ...)<1-FVEG)
                                                  ! 2 -> two-stream applied to grid-cell (gap = 0)
                                                  ! 3 -> two-stream applied to vegetated fraction (gap=1-FVEG)
+    integer                   :: OPT_STC       ! options for snow/soil temperature time scheme (only layer 1)
+                                                 ! 1 -> semi-implicit; flux top boundary condition
+                                                 ! 2 -> full implicit (original Noah); temperature top boundary condition
+                                                 ! 3 -> same as 1, but FSNO for TS calculation (generally improves snow; v3.7)
     integer                   :: OPT_RUNSRF    ! options for surface runoff
                                                  ! 1 -> TOPMODEL with groundwater
                                                  ! 2 -> TOPMODEL with an equilibrium water table
@@ -87,7 +97,8 @@ module ConfigVarType
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
     real(kind=kind_noahmp)    :: COSZ        ! cosine solar zenith angle
-    real(kind=kind_noahmp)    :: ZLVL        ! reference height  (m)
+    real(kind=kind_noahmp)    :: ZREF        ! reference height  (m)
+    real(kind=kind_noahmp)    :: DZ8W        ! thickness of surface atmospheric layers [m]
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

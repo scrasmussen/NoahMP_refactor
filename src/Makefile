@@ -75,7 +75,15 @@ OBJS = ConstantDefineMod.o \
        CanopyRadiationTwoStreamMod.o \
        SurfaceAlbedoMod.o \
        SurfaceRadiationMod.o \
-       RadiationMainMod.o
+       RadiationMainMod.o \
+       HumiditySaturationMod.o \
+       ResistanceAboveCanopyChen97Mod.o \
+       ResistanceAboveCanopyMostMod.o \
+       ResistanceCanopyStomataBallBerryMod.o \
+       ResistanceCanopyStomataJarvisMod.o \
+       ResistanceLeafToGroundMod.o \
+       VaporPressureSaturationMod.o \
+       SurfaceEnergyFluxVegetatedMod.o
 
 all:	$(OBJS)
 
@@ -196,9 +204,21 @@ SurfaceRadiationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                     SurfaceAlbedoMod.o SurfaceRadiationMod.o
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
-                 GroundThermalPropertyMod.o RadiationMainMod.o
+                 GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
+HumiditySaturationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceAboveCanopyChen97Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceAboveCanopyMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceCanopyStomataBallBerryMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceCanopyStomataJarvisMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                    HumiditySaturationMod.o
+ResistanceLeafToGroundMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+VaporPressureSaturationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SurfaceEnergyFluxVegetatedMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                 VaporPressureSaturationMod.o ResistanceAboveCanopyMostMod.o \
+                                 ResistanceAboveCanopyChen97Mod.o ResistanceLeafToGroundMod.o \
+                                 ResistanceCanopyStomataBallBerryMod.o ResistanceCanopyStomataJarvisMod.o
 
 

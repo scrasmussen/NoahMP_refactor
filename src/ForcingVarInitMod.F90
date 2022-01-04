@@ -27,7 +27,8 @@ contains
     noahmp%forcing%VV       = huge(1.0)
     noahmp%forcing%Q2       = huge(1.0)
     noahmp%forcing%SFCPRS   = huge(1.0)
-    noahmp%forcing%SWDOWN   = huge(1.0) 
+    noahmp%forcing%LWDN     = huge(1.0)
+    noahmp%forcing%PSFC     = huge(1.0)
 
   end subroutine ForcingVarInitDefault
 
@@ -44,7 +45,8 @@ contains
     noahmp%forcing%VV        = input%VVIn
     noahmp%forcing%Q2        = input%Q2In
     noahmp%forcing%SFCPRS    = input%SFCPRSIn
-    noahmp%forcing%SWDOWN    = input%SWDOWNIn
+    noahmp%forcing%LWDN      = input%LWDNIn
+    noahmp%forcing%PSFC      = input%SFCPRSIn  ! to be changed when merging with forcing
 
   end subroutine ForcingVarInitTransfer
 

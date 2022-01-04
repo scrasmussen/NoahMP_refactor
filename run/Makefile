@@ -79,7 +79,15 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/SnowAlbedoBatsMod.o \
        ../src/SnowAlbedoClassMod.o \
        ../src/SurfaceAlbedoMod.o \
-       ../src/SurfaceRadiationMod.o
+       ../src/SurfaceRadiationMod.o \
+       ../src/HumiditySaturationMod.o \
+       ../src/ResistanceAboveCanopyChen97Mod.o \
+       ../src/ResistanceAboveCanopyMostMod.o \
+       ../src/ResistanceCanopyStomataBallBerryMod.o \
+       ../src/ResistanceCanopyStomataJarvisMod.o \
+       ../src/ResistanceLeafToGroundMod.o \
+       ../src/VaporPressureSaturationMod.o \
+       ../src/SurfaceEnergyFluxVegetatedMod.o
 
 
 CMD = noahmp_refac.exe

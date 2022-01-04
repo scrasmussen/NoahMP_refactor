@@ -33,6 +33,15 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FSR             ! total reflected solar radiation (w/m2)
     real(kind=kind_noahmp) :: FSRV            ! reflected solar radiation by vegetation (w/m2)
     real(kind=kind_noahmp) :: FSRG            ! reflected solar radiation by ground (w/m2)
+    real(kind=kind_noahmp) :: SWDOWN          ! downward solar filtered by sun angle [w/m2]
+    real(kind=kind_noahmp) :: IRC             ! canopy net longwave radiation (w/m2) [+= to atm]
+    real(kind=kind_noahmp) :: SHC             ! canopy sensible heat flux (w/m2)     [+= to atm]
+    real(kind=kind_noahmp) :: EVC             ! canopy evaporation heat flux (w/m2)  [+= to atm]
+    real(kind=kind_noahmp) :: IRG             ! vegetated ground net longwave radiation (w/m2) [+= to atm]
+    real(kind=kind_noahmp) :: SHG             ! vegetated ground sensible heat flux (w/m2)     [+= to atm]
+    real(kind=kind_noahmp) :: EVG             ! vegetated ground evaporation heat flux (w/m2)  [+= to atm]
+    real(kind=kind_noahmp) :: TR              ! canopy transpiration heat flux (w/m2)[+= to atm]
+    real(kind=kind_noahmp) :: GHV             ! vegetated ground heat (w/m2) [+ = to soil]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
@@ -53,6 +62,8 @@ module EnergyVarType
   type :: state_type
 
     ! define specific energy state variables
+    logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
+    logical                :: FROZEN_GROUND   ! used to define latent heat pathway
     real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
     real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
     real(kind=kind_noahmp) :: LAI             ! leaf area index
@@ -75,15 +86,18 @@ module EnergyVarType
     real(kind=kind_noahmp) :: LAISUN          ! sunlit leaf area
     real(kind=kind_noahmp) :: LAISHA          ! shaded leaf area
     real(kind=kind_noahmp) :: ESTV            ! saturation vapor pressure at TV (pa)
+    real(kind=kind_noahmp) :: ESTG            ! saturation vapor pressure at TG (pa)
+    real(kind=kind_noahmp) :: DESTV           ! d(ESTV)/dt at TV (pa/k)
+    real(kind=kind_noahmp) :: DESTG           ! d(ESTG)/dt at TG (pa/k)
     real(kind=kind_noahmp) :: EAH             ! canopy air vapor pressure (pa)
     real(kind=kind_noahmp) :: CO2AIR          ! atmospheric co2 concentration (pa)
     real(kind=kind_noahmp) :: O2AIR           ! atmospheric o2 concentration (pa)
-    real(kind=kind_noahmp) :: RB              ! leaf boundary layer resistance (s/m)
     real(kind=kind_noahmp) :: RSSUN           ! sunlit leaf stomatal resistance (s/m)
     real(kind=kind_noahmp) :: RSSHA           ! shaded leaf stomatal resistance (s/m)
     real(kind=kind_noahmp) :: RHOAIR          ! density air (kg/m3)
     real(kind=kind_noahmp) :: TAH             ! canopy air temperature (K)
-    real(kind=kind_noahmp) :: ZPD             ! zero plane displacement (m)
+    real(kind=kind_noahmp) :: ZPD             ! surface zero plane displacement (m)
+    real(kind=kind_noahmp) :: ZPDG            ! ground zero plane displacement (m)
     real(kind=kind_noahmp) :: Z0MG            ! roughness length, momentum, ground (m)
     real(kind=kind_noahmp) :: Z0M             ! roughness length, momentum, surface (m)
     real(kind=kind_noahmp) :: Z0HV            ! roughness length, sensible heat (m), vegetated
@@ -102,9 +116,16 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FHV             ! M-O sen heat stability correction, above ZPD, vegetated
     real(kind=kind_noahmp) :: FM2V            ! M-O momentum stability correction, 2m, vegetated
     real(kind=kind_noahmp) :: FH2V            ! M-O sen heat stability correction, 2m, vegetated
-    real(kind=kind_noahmp) :: CMV             ! drag coefficient for momentum, above ZPD, vegetated
-    real(kind=kind_noahmp) :: CHV             ! drag coefficient for heat, above ZPD, vegetated
-    real(kind=kind_noahmp) :: CH2V            ! drag coefficient for heat, 2m, vegetated
+    real(kind=kind_noahmp) :: CM              ! exchange coefficient (m/s) for momentum, surface, grid mean
+    real(kind=kind_noahmp) :: CMV             ! exchange coefficient (m/s) for momentum, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CH              ! exchange coefficient (m/s) for heat, surface, grid mean
+    real(kind=kind_noahmp) :: CHV             ! exchange coefficient (m/s) for heat, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CH2V            ! exchange coefficient (m/s) for heat, 2m, vegetated from MOST scheme
+    real(kind=kind_noahmp) :: CHV2            ! exchange coefficient (m/s) for heat, 2m, vegetated from vege_flux
+    real(kind=kind_noahmp) :: CAW             ! latent heat conductance/exchange coeff, canopy air ZLVL air (m/s)
+    real(kind=kind_noahmp) :: CTW             ! transpiration conductance, leaf to canopy air (m/s)
+    real(kind=kind_noahmp) :: CEW             ! evaporation conductance, leaf to canopy air (m/s)
+    real(kind=kind_noahmp) :: CGW             ! latent heat conductance, ground to canopy air (m/s)
     real(kind=kind_noahmp) :: RAMG            ! aerodynamic resistance for momentum (s/m), ground, below canopy
     real(kind=kind_noahmp) :: RAHG            ! aerodynamic resistance for sensible heat (s/m), ground, below canopy
     real(kind=kind_noahmp) :: RAWG            ! aerodynamic resistance for water vapor (s/m), ground, below canopy
@@ -116,8 +137,24 @@ module EnergyVarType
     real(kind=kind_noahmp) :: THAIR           ! potential temp at reference height (K)
     real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height ZLVL
     real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)
-    logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
-    logical                :: FROZEN_GROUND   ! used to define latent heat pathway
+    real(kind=kind_noahmp) :: EMV             ! vegetation emissivity
+    real(kind=kind_noahmp) :: EMG             ! ground emissivity
+    real(kind=kind_noahmp) :: RSURF           ! ground surface resistance (s/m)
+    real(kind=kind_noahmp) :: GAMMAV          ! psychrometric constant (pa/K), canopy
+    real(kind=kind_noahmp) :: LATHEAV         ! latent heat of vaporization/subli (j/kg), canopy
+    real(kind=kind_noahmp) :: GAMMAG          ! psychrometric constant (pa/K), ground
+    real(kind=kind_noahmp) :: LATHEAG         ! latent heat of vaporization/subli (j/kg), ground
+    real(kind=kind_noahmp) :: RHSUR           ! raltive humidity in surface soil/snow air space (-)
+    real(kind=kind_noahmp) :: QSFC            ! water vapor mixing ratio at lowest model layer
+    real(kind=kind_noahmp) :: Q2V             ! water vapor mixing ratio at 2m vegetated
+    real(kind=kind_noahmp) :: TGV             ! vegetated ground (below-canopy) temperature (K)
+    real(kind=kind_noahmp) :: TAUXV           ! wind stress: east-west (n/m2) above canopy
+    real(kind=kind_noahmp) :: TAUYV           ! wind stress: north-south (n/m2) above canopy
+    real(kind=kind_noahmp) :: T2MV            ! 2 m height air temperature (k), vegetated
+    real(kind=kind_noahmp) :: CHLEAF          ! leaf sensible heat exchange coefficient (m/s)
+    real(kind=kind_noahmp) :: CHUC            ! under canopy sensible heat exchange coefficient (m/s)
+    real(kind=kind_noahmp) :: ZLVL            ! surface reference height  (m)
+    real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
     real(kind=kind_noahmp), allocatable, dimension(:) :: CVSNO       ! snow layer volumetric specific heat (j/m3/k)
@@ -147,6 +184,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RC               ! tree crown radius (m)
     real(kind=kind_noahmp) :: HVT              ! top of canopy (m)
     real(kind=kind_noahmp) :: HVB              ! bottom of canopy (m)
+    real(kind=kind_noahmp) :: Z0MVT            ! momentum roughness length (m)
     real(kind=kind_noahmp) :: DEN              ! tree density (no. of trunks per m2)
     real(kind=kind_noahmp) :: XL               ! leaf/stem orientation index
     real(kind=kind_noahmp) :: BETADS           ! two-stream parameter betad for snow (dir rad)
@@ -178,6 +216,9 @@ module EnergyVarType
     real(kind=kind_noahmp) :: HS               ! Parameter used in vapor pressure deficit function in Jarvis scheme
     real(kind=kind_noahmp) :: DLEAF            ! characteristic leaf dimension (m)
     real(kind=kind_noahmp) :: CZIL             ! Calculate roughness length of heat
+    real(kind=kind_noahmp) :: SNOW_EMIS        ! snow emissivity
+    real(kind=kind_noahmp) :: CWPVT            ! empirical canopy wind absorption parameter
+    real(kind=kind_noahmp) :: Z0SNO            ! snow surface roughness length (m) (0.002)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
@@ -190,6 +231,8 @@ module EnergyVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: RHOS        ! stem reflectance: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: TAUL        ! leaf transmittance: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: TAUS        ! stem transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EG          ! emissivity soil surface: 1=soil, 2=lake
+
 
   end type parameter_type
 
