@@ -14,7 +14,7 @@ module SoilWaterDiffusionRichardsMod
 
 contains
 
-  subroutine SoilWaterDiffusionRichards(noahmp, DT, AI, BI, CI, RHSTT)
+  subroutine SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: SRT
@@ -26,7 +26,6 @@ contains
 
 ! in & out variables
     type(noahmp_type)     , intent(inout) :: noahmp
-    real(kind=kind_noahmp), intent(in)    :: DT       ! timestep (may not be the same as model timestep)
     real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: RHSTT  ! right-hand side term of the matrix
     real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: AI     ! left-hand side term of the matrix
     real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: BI     ! left-hand side term of the matrix
@@ -99,7 +98,7 @@ contains
        if ( OPT_RUNSUB == 5 ) SMXWTD = SMCWTD * SH2O(NSOIL) / SMC(NSOIL)  !same liquid fraction as in the bottom layer
     endif
 
-    ! compute right hand side of time tendency term of soil water diffusion equation
+    ! compute gradient and flux of soil water diffusion terms
     do K = 1, NSOIL
        if ( K == 1 ) then
           DENOM(K) = - ZSOIL(K)

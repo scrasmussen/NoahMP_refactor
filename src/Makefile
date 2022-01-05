@@ -86,7 +86,10 @@ OBJS = ConstantDefineMod.o \
        SurfaceEnergyFluxVegetatedMod.o \
        ResistanceBareGroundChen97Mod.o \
        ResistanceBareGroundMostMod.o \
-       SurfaceEnergyFluxBareGroundMod.o
+       SurfaceEnergyFluxBareGroundMod.o \
+       SoilSnowTemperatureMainMod.o \
+       SoilSnowTemperatureSolverMod.o \
+       SoilSnowThermalDiffusionMod.o
 
 all:	$(OBJS)
 
@@ -208,7 +211,7 @@ RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                     SurfaceAlbedoMod.o SurfaceRadiationMod.o
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o \
-                 SurfaceEnergyFluxBareGroundMod.o
+                 SurfaceEnergyFluxBareGroundMod.o SoilSnowTemperatureMainMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
@@ -229,5 +232,9 @@ ResistanceBareGroundMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefi
 SurfaceEnergyFluxBareGroundMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                   VaporPressureSaturationMod.o ResistanceBareGroundMostMod.o \
                                   ResistanceBareGroundChen97Mod.o
-
+SoilSnowTemperatureSolverMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                MatrixSolverTriDiagonalMod.o
+SoilSnowThermalDiffusionMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SoilSnowTemperatureMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                              SoilSnowTemperatureSolverMod.o SoilSnowThermalDiffusionMod.o
 

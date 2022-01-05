@@ -282,7 +282,8 @@ Program NoahmpDriverMod
             T2MB            => noahmp%energy%state%T2MB            ,& ! out,   2 m height air temperature (k) bare ground
             Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
             EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
-            SSOIL           => noahmp%energy%flux%SSOIL             & ! out,   soil heat flux (w/m2) [+ to soil]
+            SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
+            TBOT            => noahmp%energy%state%TBOT             & ! in,    bottom soil temp. at ZBOT (K)
             )
 !---------------------------------------------------------------------
 
@@ -518,6 +519,15 @@ Program NoahmpDriverMod
    EHB2   = 0.0
    SSOIL  = 0.0
 !====== bare_flux end
+
+!=== TSNOSOI new vars
+if (input%runsnow) then
+   TBOT = 270.0
+else
+   TBOT = 290.0
+endif
+!=== TSNOSOI end
+
 
 
 !============================

@@ -22,6 +22,7 @@ contains
 
     implicit none
 
+! in & out variables
     integer               , intent(in   ) :: ITER         ! iteration index
     type(noahmp_type)     , intent(inout) :: noahmp
 

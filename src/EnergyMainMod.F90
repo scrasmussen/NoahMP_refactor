@@ -10,7 +10,8 @@ module EnergyMainMod
   use RadiationMainMod,               only : RadiationMain
   use SurfaceEnergyFluxVegetatedMod,  only : SurfaceEnergyFluxVegetated
   use SurfaceEnergyFluxBareGroundMod, only : SurfaceEnergyFluxBareGround
-
+  use SoilSnowTemperatureMainMod,     only : SoilSnowTemperatureMain
+ 
   implicit none
 
 contains
@@ -176,7 +177,8 @@ contains
        CHV   = CHB
     endif
 
-
+    ! compute snow and soil layer temperature
+    call SoilSnowTemperatureMain(noahmp)
 
 
 

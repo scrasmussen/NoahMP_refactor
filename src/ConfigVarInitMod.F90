@@ -28,6 +28,8 @@ contains
     noahmp%config%nmlist%OPT_ALB      = huge(1)
     noahmp%config%nmlist%OPT_RAD      = huge(1)
     noahmp%config%nmlist%OPT_STC      = huge(1)
+    noahmp%config%nmlist%OPT_TKSNO    = huge(1)
+    noahmp%config%nmlist%OPT_TBOT     = huge(1)
     noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
     noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
     noahmp%config%nmlist%OPT_INF      = huge(1)
@@ -35,7 +37,6 @@ contains
     noahmp%config%nmlist%OPT_TDRN     = huge(1)
     noahmp%config%nmlist%OPT_IRR      = huge(1)
     noahmp%config%nmlist%OPT_IRRM     = huge(1)
-    noahmp%config%nmlist%OPT_TKSNO    = huge(1)
 
     ! config domain variable
     noahmp%config%domain%URBAN_FLAG   = .false.
@@ -80,12 +81,13 @@ contains
     noahmp%config%nmlist%OPT_ALB    = input%OPT_ALBIn
     noahmp%config%nmlist%OPT_RAD    = input%OPT_RADIn
     noahmp%config%nmlist%OPT_STC    = input%OPT_STCIn
+    noahmp%config%nmlist%OPT_TKSNO  = input%OPT_TKSNOIn
+    noahmp%config%nmlist%OPT_TBOT   = input%OPT_TBOTIn
     noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
     noahmp%config%nmlist%OPT_IRR    = input%OPT_IRRIn
     noahmp%config%nmlist%OPT_IRRM   = input%OPT_IRRMIn
-    noahmp%config%nmlist%OPT_TKSNO  = input%OPT_TKSNOIn
     noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
     noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
     if ( input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn ) then

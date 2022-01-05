@@ -148,6 +148,8 @@ contains
     noahmp%energy%state%T2MB            = huge(1.0)
     noahmp%energy%state%ZLVL            = huge(1.0)
     noahmp%energy%state%FB_snow         = huge(1.0)
+    noahmp%energy%state%TBOT            = huge(1.0)
+    noahmp%energy%state%ZBOTSNO         = huge(1.0)
 
     allocate( noahmp%energy%state%STC     (-NSNOW+1:NSOIL) )
     allocate( noahmp%energy%state%DF      (-NSNOW+1:NSOIL) )
@@ -217,6 +219,7 @@ contains
     noahmp%energy%flux%EVB              = huge(1.0)
     noahmp%energy%flux%GHB              = huge(1.0)
     noahmp%energy%flux%SSOIL            = huge(1.0)
+    noahmp%energy%flux%EFLXB            = huge(1.0)
 
     allocate( noahmp%energy%flux%FABD    (1:NBAND) )
     allocate( noahmp%energy%flux%FABI    (1:NBAND) )
@@ -230,6 +233,7 @@ contains
     allocate( noahmp%energy%flux%FREGI   (1:NBAND) )
     allocate( noahmp%energy%flux%SOLAD   (1:NBAND) )
     allocate( noahmp%energy%flux%SOLAI   (1:NBAND) )
+    allocate( noahmp%energy%flux%PHI     (-NSNOW+1:NSOIL) )
 
     noahmp%energy%flux%FABD(:)          = huge(1.0)
     noahmp%energy%flux%FABI(:)          = huge(1.0)
@@ -243,6 +247,7 @@ contains
     noahmp%energy%flux%FREGI(:)         = huge(1.0)
     noahmp%energy%flux%SOLAD(:)         = huge(1.0)
     noahmp%energy%flux%SOLAI(:)         = huge(1.0)
+    noahmp%energy%flux%PHI(:)           = huge(1.0)
 
     ! energy parameter variable
     noahmp%energy%param%RC              = huge(1.0)
@@ -283,6 +288,7 @@ contains
     noahmp%energy%param%SNOW_EMIS       = huge(1.0)
     noahmp%energy%param%CWPVT           = huge(1.0)
     noahmp%energy%param%Z0SNO           = huge(1.0)
+    noahmp%energy%param%ZBOT            = huge(1.0)
 
     allocate( noahmp%energy%param%LAIM   (1:12   ) )
     allocate( noahmp%energy%param%SAIM   (1:12   ) )
@@ -353,6 +359,7 @@ contains
     !noahmp%energy%state%TAH               = input%TAHIn
     !noahmp%energy%state%CH                = input%CHIn
     !noahmp%energy%state%CM                = input%CMIn
+    !noahmp%energy%state%TBOT              = input%TBOTIn
     noahmp%energy%state%CO2AIR             = input%CO2_TABLE * input%SFCPRSIn
     noahmp%energy%state%O2AIR              = input%O2_TABLE * input%SFCPRSIn
 
@@ -396,6 +403,7 @@ contains
     noahmp%energy%param%SNOW_EMIS          = input%SNOW_EMIS_TABLE
     noahmp%energy%param%EG                 = input%EG_TABLE
     noahmp%energy%param%Z0SNO              = input%Z0SNO_TABLE
+    noahmp%energy%param%ZBOT               = input%ZBOT_TABLE
 
     noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)

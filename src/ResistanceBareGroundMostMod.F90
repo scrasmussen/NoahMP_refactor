@@ -21,6 +21,7 @@ contains
 
     implicit none
 
+! in & out variables
     integer               , intent(in   ) :: ITER         ! iteration index
     integer               , intent(inout) :: MOZSGN       ! number of times moz changes sign
     real(kind=kind_noahmp), intent(in   ) :: H            ! temporary sensible heat flux (w/m2) in each iteration

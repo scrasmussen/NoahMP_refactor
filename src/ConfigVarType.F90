@@ -35,6 +35,15 @@ module ConfigVarType
                                                  ! 1 -> semi-implicit; flux top boundary condition
                                                  ! 2 -> full implicit (original Noah); temperature top boundary condition
                                                  ! 3 -> same as 1, but FSNO for TS calculation (generally improves snow; v3.7)
+    integer                   :: OPT_TKSNO     ! options for snow thermal conductivity
+                                                 ! 1 -> Stieglitz(yen,1965) scheme (default)
+                                                 ! 2 -> Anderson, 1976 scheme
+                                                 ! 3 -> constant
+                                                 ! 4 -> Verseghy (1991) scheme
+                                                 ! 5 -> Douvill(Yen, 1981) scheme
+    integer                   :: OPT_TBOT      ! options for lower boundary condition of soil temperature
+                                                 ! 1 -> zero heat flux from bottom (ZBOT and TBOT not used)
+                                                 ! 2 -> TBOT at ZBOT (8m) read from a file (original Noah)
     integer                   :: OPT_RUNSRF    ! options for surface runoff
                                                  ! 1 -> TOPMODEL with groundwater
                                                  ! 2 -> TOPMODEL with an equilibrium water table
@@ -67,12 +76,6 @@ module ConfigVarType
                                                  ! 1 -> sprinkler method
                                                  ! 2 -> micro/drip irrigation
                                                  ! 3 -> surface flooding
-    integer                   :: OPT_TKSNO     ! options for snow thermal conductivity
-                                                 ! 1 -> Stieglitz(yen,1965) scheme (default)
-                                                 ! 2 -> Anderson, 1976 scheme
-                                                 ! 3 -> constant
-                                                 ! 4 -> Verseghy (1991) scheme
-                                                 ! 5 -> Douvill(Yen, 1981) scheme
 
 
   end type namelist_type

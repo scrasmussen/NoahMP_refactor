@@ -403,6 +403,7 @@ module InputVarType
     real(kind=kind_noahmp)                              :: TAHIn
     real(kind=kind_noahmp)                              :: CHIn
     real(kind=kind_noahmp)                              :: CMIn
+    real(kind=kind_noahmp)                              :: TBOTIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

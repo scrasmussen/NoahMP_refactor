@@ -165,7 +165,7 @@ contains
           if ( OPT_RUNSRF == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DTFINE)
           if ( OPT_RUNSRF == 8 ) call RunoffSurfaceDynamicVic(noahmp,DTFINE,FACC)
        endif
-       call SoilWaterDiffusionRichards(noahmp, DTFINE, AI, BI, CI, RHSTT)
+       call SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
        call SoilMoistureSolver(noahmp, DTFINE, AI, BI, CI, RHSTT)
        RSAT        = RSAT + WPLUS
        QDRAIN_SAVE = QDRAIN_SAVE + QDRAIN

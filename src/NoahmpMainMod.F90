@@ -30,9 +30,11 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
+    integer                          :: IZ        ! loop index
 
 ! --------------------------------------------------------------------
     associate(                                                        &
+              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               CROPTYPE        => noahmp%config%domain%CROPTYP        ,& ! in,     crop type
               DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
@@ -41,6 +43,9 @@ contains
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
               IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigation fraction
+              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent (mm)
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
@@ -72,13 +77,23 @@ contains
     ! call atmospheric forcing processing
     !--------------------------------------------------------------------- 
 
+    ! temporarilly extract from NOAHMP_SFLX
+    ! snow/soil layer thickness (m)
+    do IZ = ISNOW+1, NSOIL
+       if ( IZ == ISNOW+1 ) then
+          DZSNSO(IZ) = - ZSNSO(IZ)
+       else
+          DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)
+       endif
+    enddo
+
 
 
     !---------------------------------------------------------------------
     ! call phenology
     !--------------------------------------------------------------------- 
 
-    ! extract from phenology to update ELAI and ESAI temporally
+    ! temporarilly extract from phenology to update ELAI and ESAI
     FB_snow = min( max(SNOWH-HVB, 0.0), HVT-HVB ) / max(1.0e-06, HVT-HVB)
     if ( HVT > 0.0 .and. HVT <= 1.0 ) then    ! MB: change to 1.0 and 0.2 to reflect
        FB_snow = min( SNOWH, (HVT*exp(-SNOWH/0.2)) ) / (HVT*exp(-SNOWH/0.2) )

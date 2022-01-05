@@ -47,6 +47,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EVB             ! latent heat flux (w/m2) bare ground [+ to atm]
     real(kind=kind_noahmp) :: GHB             ! bare ground heat flux (w/m2) [+ to soil]
     real(kind=kind_noahmp) :: SSOIL           ! soil heat flux (w/m2) [+ to soil]
+    real(kind=kind_noahmp) :: EFLXB           ! energy influx from soil bottom (w/m2)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
@@ -60,6 +61,7 @@ module EnergyVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: FREGI       ! flux reflected by ground (per unit diffuse flux)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAD       ! incoming direct solar radiation (w/m2)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAI       ! incoming diffuse solar radiation (w/m2)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: PHI         ! light penetrating through soil/snow water (W/m2)
 
   end type flux_type
 
@@ -186,6 +188,8 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EMB             ! bare ground momentum exchange coefficient (m/s)
     real(kind=kind_noahmp) :: ZLVL            ! surface reference height  (m)
     real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
+    real(kind=kind_noahmp) :: TBOT            ! bottom soil temp. at ZBOT (K)
+    real(kind=kind_noahmp) :: ZBOTSNO         ! depth of lower boundary condition (m) from snow surface
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
     real(kind=kind_noahmp), allocatable, dimension(:) :: CVSNO       ! snow layer volumetric specific heat (j/m3/k)
@@ -250,6 +254,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: SNOW_EMIS        ! snow emissivity
     real(kind=kind_noahmp) :: CWPVT            ! empirical canopy wind absorption parameter
     real(kind=kind_noahmp) :: Z0SNO            ! snow surface roughness length (m) (0.002)
+    real(kind=kind_noahmp) :: ZBOT             ! depth of lower boundary condition (m) from soil surface
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided

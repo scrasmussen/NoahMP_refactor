@@ -90,7 +90,10 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/SurfaceEnergyFluxVegetatedMod.o \
        ../src/ResistanceBareGroundChen97Mod.o \
        ../src/ResistanceBareGroundMostMod.o \
-       ../src/SurfaceEnergyFluxBareGroundMod.o
+       ../src/SurfaceEnergyFluxBareGroundMod.o \
+       ../src/SoilSnowTemperatureMainMod.o \
+       ../src/SoilSnowTemperatureSolverMod.o \
+       ../src/SoilSnowThermalDiffusionMod.o
 
 
 CMD = noahmp_refac.exe
