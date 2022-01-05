@@ -299,6 +299,8 @@ USE NOAHMP_TABLES
   REAL                            :: Q2B
   REAL                            :: CHB2
   REAL                            :: SSOIL
+! TSNOSOI new vars
+  REAL                            :: TBOT   !bottom condition for soil temp. [K]
 
 
 !---------------------------------------------------------------------
@@ -883,7 +885,15 @@ end if
    SSOIL = 0.0
 !====== bare_flux end
 
+!=== TSNOSOI new vars
+if (runsnow) then
+   TBOT = 270.0
+else
+   TBOT = 290.0
+endif
 
+
+!==== TSNOSOI end
 
 !============================
   QVAP = MAX( FGEV/LATHEAG, 0.)       ! positive part of fgev; Barlage change to ground v3.6
@@ -1035,6 +1045,16 @@ end if
 
 
 !!!============================================= Start the original NoahMP Subroutine ==========================================
+! extract from NOAHMP_SFLX
+! snow/soil layer thickness (m)
+     DO IZ = ISNOW+1, NSOIL
+         IF(IZ == ISNOW+1) THEN
+           DZSNSO(IZ) = - ZSNSO(IZ)
+         ELSE
+           DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)
+         END IF
+     END DO
+
 ! extract from phenology to update ELAI and ESAI temporally
   FB_snow = MIN( MAX(SNOWH - parameters%HVB,0.0), parameters%HVT-parameters%HVB ) / &
        MAX(1.0E-06,parameters%HVT-parameters%HVB)
@@ -1217,6 +1237,17 @@ end if
         TGV   = TGB
         CHV   = CHB
     END IF
+
+! 3L snow & 4L soil temperatures
+
+    CALL TSNOSOI (parameters,ICE     ,NSOIL   ,NSNOW   ,ISNOW   ,IST     , & !in
+                  TBOT    ,ZSNSO   ,SSOIL   ,DF      ,HCPCT   , & !in
+                  SAG     ,DT      ,SNOWH   ,DZSNSO  , & !in
+                  TG      ,ILOC    ,JLOC    ,                   & !in
+                  STC     )                                       !inout
+
+
+
 
 
 
