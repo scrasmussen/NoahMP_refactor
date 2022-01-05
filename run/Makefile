@@ -87,7 +87,10 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/ResistanceCanopyStomataJarvisMod.o \
        ../src/ResistanceLeafToGroundMod.o \
        ../src/VaporPressureSaturationMod.o \
-       ../src/SurfaceEnergyFluxVegetatedMod.o
+       ../src/SurfaceEnergyFluxVegetatedMod.o \
+       ../src/ResistanceBareGroundChen97Mod.o \
+       ../src/ResistanceBareGroundMostMod.o \
+       ../src/SurfaceEnergyFluxBareGroundMod.o
 
 
 CMD = noahmp_refac.exe

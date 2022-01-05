@@ -269,7 +269,20 @@ Program NoahmpDriverMod
             Q2V             => noahmp%energy%state%Q2V             ,& ! out,   water vapor mixing ratio at 2m vegetated
             CHV2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s)
             CHLEAF          => noahmp%energy%state%CHLEAF          ,& ! out,   leaf sensible heat exchange coefficient (m/s),leaf surface to canopy air
-            CHUC            => noahmp%energy%state%CHUC             & ! out,   under canopy sensible heat exchange coefficient (m/s)
+            CHUC            => noahmp%energy%state%CHUC            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
+            TGB             => noahmp%energy%state%TGB             ,& ! out,   bare ground temperature (K)
+            CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
+            CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
+            TAUXB           => noahmp%energy%state%TAUXB           ,& ! out,   wind stress: east-west (n/m2) bare ground
+            TAUYB           => noahmp%energy%state%TAUYB           ,& ! out,   wind stress: north-south (n/m2) bare ground
+            IRB             => noahmp%energy%flux%IRB              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
+            SHB             => noahmp%energy%flux%SHB              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
+            EVB             => noahmp%energy%flux%EVB              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
+            GHB             => noahmp%energy%flux%GHB              ,& ! out,   bare ground heat flux (w/m2) [+ to soil]
+            T2MB            => noahmp%energy%state%T2MB            ,& ! out,   2 m height air temperature (k) bare ground
+            Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
+            EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
+            SSOIL           => noahmp%energy%flux%SSOIL             & ! out,   soil heat flux (w/m2) [+ to soil]
             )
 !---------------------------------------------------------------------
 
@@ -421,7 +434,7 @@ Program NoahmpDriverMod
   VAI    = ELAI + ESAI
   VEG    = .false.
   if ( VAI > 0.0 ) VEG = .true.
-  if (TV > TFRZ ) then
+  if ( TV > TFRZ ) then
      LATHEAV       = HVAP
      FROZEN_CANOPY = .false.
   else
@@ -459,16 +472,15 @@ Program NoahmpDriverMod
    PSI    = -PSISAT(1)*(max(0.01,SH2O(1))/SMCMAX(1))**(-BEXP(1))
    RHSUR  = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
    DZ8W   = 20.0
-   !QC     = 0.0005
    PSFC   = SFCPRS
 !!! inout
    ! TV
-   TAH = TV
-   EAH = Q2 * SFCPRS / (0.622 + 0.378*Q2)
-   TGV = TG
-   CMV = CM
-   CHV = CH
-   QSFC = 0.622 * EAIR / (PSFC - 0.378*EAIR)
+   TAH    = TV
+   EAH    = Q2 * SFCPRS / (0.622 + 0.378*Q2)
+   TGV    = TG
+   CMV    = CM
+   CHV    = CH
+   QSFC   = 0.622 * EAIR / (PSFC - 0.378*EAIR)
 !!! out
    RSSUN  = 0.0
    RSSHA  = 0.0
@@ -491,7 +503,21 @@ Program NoahmpDriverMod
    CHUC   = 0.0
 !====== vege_flux end
 
-
+!====== bare_flux new vars
+   TGB    = TG
+   CMB    = CM
+   CHB    = CH
+   TAUXB  = 0.0
+   TAUYB  = 0.0
+   IRB    = 0.0
+   SHB    = 0.0
+   EVB    = 0.0
+   GHB    = 0.0
+   T2MB   = 0.0
+   Q2B    = 0.0
+   EHB2   = 0.0
+   SSOIL  = 0.0
+!====== bare_flux end
 
 
 !============================

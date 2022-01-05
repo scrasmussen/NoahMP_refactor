@@ -42,6 +42,11 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EVG             ! vegetated ground evaporation heat flux (w/m2)  [+= to atm]
     real(kind=kind_noahmp) :: TR              ! canopy transpiration heat flux (w/m2)[+= to atm]
     real(kind=kind_noahmp) :: GHV             ! vegetated ground heat (w/m2) [+ = to soil]
+    real(kind=kind_noahmp) :: IRB             ! net longwave rad (w/m2) bare ground [+ to atm]
+    real(kind=kind_noahmp) :: SHB             ! sensible heat flux (w/m2) bare ground [+ to atm]
+    real(kind=kind_noahmp) :: EVB             ! latent heat flux (w/m2) bare ground [+ to atm]
+    real(kind=kind_noahmp) :: GHB             ! bare ground heat flux (w/m2) [+ to soil]
+    real(kind=kind_noahmp) :: SSOIL           ! soil heat flux (w/m2) [+ to soil]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
@@ -85,10 +90,12 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FSHA            ! shaded fraction of canopy
     real(kind=kind_noahmp) :: LAISUN          ! sunlit leaf area
     real(kind=kind_noahmp) :: LAISHA          ! shaded leaf area
-    real(kind=kind_noahmp) :: ESTV            ! saturation vapor pressure at TV (pa)
-    real(kind=kind_noahmp) :: ESTG            ! saturation vapor pressure at TG (pa)
+    real(kind=kind_noahmp) :: ESTV            ! canopy saturation vapor pressure at TV (pa)
+    real(kind=kind_noahmp) :: ESTG            ! below-canopy saturation vapor pressure at TG (pa)
+    real(kind=kind_noahmp) :: ESTB            ! bare groudn saturation vapor pressure at TG (pa)
     real(kind=kind_noahmp) :: DESTV           ! d(ESTV)/dt at TV (pa/k)
     real(kind=kind_noahmp) :: DESTG           ! d(ESTG)/dt at TG (pa/k)
+    real(kind=kind_noahmp) :: DESTB           ! d(ESTB)/dt at TG (pa/k)
     real(kind=kind_noahmp) :: EAH             ! canopy air vapor pressure (pa)
     real(kind=kind_noahmp) :: CO2AIR          ! atmospheric co2 concentration (pa)
     real(kind=kind_noahmp) :: O2AIR           ! atmospheric o2 concentration (pa)
@@ -102,25 +109,37 @@ module EnergyVarType
     real(kind=kind_noahmp) :: Z0M             ! roughness length, momentum, surface (m)
     real(kind=kind_noahmp) :: Z0HV            ! roughness length, sensible heat (m), vegetated
     real(kind=kind_noahmp) :: Z0HG            ! roughness length, sensible heat, ground (m), below canopy
+    real(kind=kind_noahmp) :: Z0HB            ! roughness length, sensible heat, bare ground (m)
     real(kind=kind_noahmp) :: HCAN            ! canopy height (m) [note: hcan >= z0mg]
     real(kind=kind_noahmp) :: UC              ! wind speed at top of canopy (m/s)
     real(kind=kind_noahmp) :: FVV             ! friction velocity (m/s), vegetated
+    real(kind=kind_noahmp) :: FVB             ! friction velocity (m/s), bare ground
     real(kind=kind_noahmp) :: CWP             ! canopy wind absorption parameter
     real(kind=kind_noahmp) :: MOZG            ! M-O stability parameter ground, below canopy
-    real(kind=kind_noahmp) :: MOZV            ! M-O stability parameter (z/L), above ZPD
+    real(kind=kind_noahmp) :: MOZV            ! M-O stability parameter (z/L), above ZPD, vegetated
+    real(kind=kind_noahmp) :: MOZB            ! M-O stability parameter (z/L), above ZPD, bare ground
     real(kind=kind_noahmp) :: MOZ2V           ! M-O stability (2/L), 2m, vegetated
+    real(kind=kind_noahmp) :: MOZ2B           ! M-O stability (2/L), 2m, bare ground
     real(kind=kind_noahmp) :: MOLG            ! M-O length (m), ground, below canopy
     real(kind=kind_noahmp) :: MOLV            ! M-O length (m), above ZPD, vegetated
+    real(kind=kind_noahmp) :: MOLB            ! M-O length (m), above ZPD, bare ground
     real(kind=kind_noahmp) :: FHG             ! M-O stability correction ground, below canopy
     real(kind=kind_noahmp) :: FMV             ! M-O momentum stability correction, above ZPD, vegetated
     real(kind=kind_noahmp) :: FHV             ! M-O sen heat stability correction, above ZPD, vegetated
     real(kind=kind_noahmp) :: FM2V            ! M-O momentum stability correction, 2m, vegetated
     real(kind=kind_noahmp) :: FH2V            ! M-O sen heat stability correction, 2m, vegetated
+    real(kind=kind_noahmp) :: FMB             ! M-O momentum stability correction, above ZPD, bare ground
+    real(kind=kind_noahmp) :: FHB             ! M-O sen heat stability correction, above ZPD, bare ground
+    real(kind=kind_noahmp) :: FM2B            ! M-O momentum stability correction, 2m, bare ground
+    real(kind=kind_noahmp) :: FH2B            ! M-O sen heat stability correction, 2m, bare ground
     real(kind=kind_noahmp) :: CM              ! exchange coefficient (m/s) for momentum, surface, grid mean
     real(kind=kind_noahmp) :: CMV             ! exchange coefficient (m/s) for momentum, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CMB             ! exchange coefficient (m/s) for momentum, above ZPD, bare ground
     real(kind=kind_noahmp) :: CH              ! exchange coefficient (m/s) for heat, surface, grid mean
     real(kind=kind_noahmp) :: CHV             ! exchange coefficient (m/s) for heat, above ZPD, vegetated
+    real(kind=kind_noahmp) :: CHB             ! exchange coefficient (m/s) for heat, above ZPD, bare ground
     real(kind=kind_noahmp) :: CH2V            ! exchange coefficient (m/s) for heat, 2m, vegetated from MOST scheme
+    real(kind=kind_noahmp) :: CH2B            ! exchange coefficient (m/s) for heat, 2m, bare ground from MOST scheme
     real(kind=kind_noahmp) :: CHV2            ! exchange coefficient (m/s) for heat, 2m, vegetated from vege_flux
     real(kind=kind_noahmp) :: CAW             ! latent heat conductance/exchange coeff, canopy air ZLVL air (m/s)
     real(kind=kind_noahmp) :: CTW             ! transpiration conductance, leaf to canopy air (m/s)
@@ -132,11 +151,15 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RAMC            ! aerodynamic resistance for momentum (s/m), above canopy
     real(kind=kind_noahmp) :: RAHC            ! aerodynamic resistance for sensible heat (s/m), above canopy
     real(kind=kind_noahmp) :: RAWC            ! aerodynamic resistance for water vapor (s/m), above canopy
+    real(kind=kind_noahmp) :: RAMB            ! aerodynamic resistance for momentum (s/m), bare ground
+    real(kind=kind_noahmp) :: RAHB            ! aerodynamic resistance for sensible heat (s/m), bare ground
+    real(kind=kind_noahmp) :: RAWB            ! aerodynamic resistance for water vapor (s/m), bare ground
     real(kind=kind_noahmp) :: RB              ! bulk leaf boundary layer resistance (s/m)
     real(kind=kind_noahmp) :: QAIR            ! specific humidity at reference height ZLVL (kg/kg)
     real(kind=kind_noahmp) :: THAIR           ! potential temp at reference height (K)
     real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height ZLVL
     real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)
+    real(kind=kind_noahmp) :: WSTARB          ! friction velocity in vertical direction (m/s), bare ground (only for Chen97)
     real(kind=kind_noahmp) :: EMV             ! vegetation emissivity
     real(kind=kind_noahmp) :: EMG             ! ground emissivity
     real(kind=kind_noahmp) :: RSURF           ! ground surface resistance (s/m)
@@ -147,12 +170,20 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RHSUR           ! raltive humidity in surface soil/snow air space (-)
     real(kind=kind_noahmp) :: QSFC            ! water vapor mixing ratio at lowest model layer
     real(kind=kind_noahmp) :: Q2V             ! water vapor mixing ratio at 2m vegetated
+    real(kind=kind_noahmp) :: Q2B             ! water vapor mixing ratio at 2m bare ground
     real(kind=kind_noahmp) :: TGV             ! vegetated ground (below-canopy) temperature (K)
+    real(kind=kind_noahmp) :: TGB             ! bare ground temperature (K)
     real(kind=kind_noahmp) :: TAUXV           ! wind stress: east-west (n/m2) above canopy
     real(kind=kind_noahmp) :: TAUYV           ! wind stress: north-south (n/m2) above canopy
+    real(kind=kind_noahmp) :: TAUXB           ! wind stress: east-west (n/m2) bare ground
+    real(kind=kind_noahmp) :: TAUYB           ! wind stress: north-south (n/m2) bare ground
     real(kind=kind_noahmp) :: T2MV            ! 2 m height air temperature (k), vegetated
+    real(kind=kind_noahmp) :: T2MB            ! 2 m height air temperature (k), bare ground
     real(kind=kind_noahmp) :: CHLEAF          ! leaf sensible heat exchange coefficient (m/s)
     real(kind=kind_noahmp) :: CHUC            ! under canopy sensible heat exchange coefficient (m/s)
+    real(kind=kind_noahmp) :: EHB             ! bare ground sensible heat exchange coefficient (m/s)
+    real(kind=kind_noahmp) :: EHB2            ! bare ground 2-m sensible heat exchange coefficient (m/s)
+    real(kind=kind_noahmp) :: EMB             ! bare ground momentum exchange coefficient (m/s)
     real(kind=kind_noahmp) :: ZLVL            ! surface reference height  (m)
     real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
 

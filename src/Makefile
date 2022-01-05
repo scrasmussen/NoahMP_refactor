@@ -83,7 +83,10 @@ OBJS = ConstantDefineMod.o \
        ResistanceCanopyStomataJarvisMod.o \
        ResistanceLeafToGroundMod.o \
        VaporPressureSaturationMod.o \
-       SurfaceEnergyFluxVegetatedMod.o
+       SurfaceEnergyFluxVegetatedMod.o \
+       ResistanceBareGroundChen97Mod.o \
+       ResistanceBareGroundMostMod.o \
+       SurfaceEnergyFluxBareGroundMod.o
 
 all:	$(OBJS)
 
@@ -204,7 +207,8 @@ SurfaceRadiationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                     SurfaceAlbedoMod.o SurfaceRadiationMod.o
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
-                 GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o
+                 GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o \
+                 SurfaceEnergyFluxBareGroundMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
@@ -220,5 +224,10 @@ SurfaceEnergyFluxVegetatedMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDe
                                  VaporPressureSaturationMod.o ResistanceAboveCanopyMostMod.o \
                                  ResistanceAboveCanopyChen97Mod.o ResistanceLeafToGroundMod.o \
                                  ResistanceCanopyStomataBallBerryMod.o ResistanceCanopyStomataJarvisMod.o
+ResistanceBareGroundChen97Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceBareGroundMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SurfaceEnergyFluxBareGroundMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                  VaporPressureSaturationMod.o ResistanceBareGroundMostMod.o \
+                                  ResistanceBareGroundChen97Mod.o
 
 

@@ -120,7 +120,7 @@ contains
               EAH             => noahmp%energy%state%EAH             ,& ! inout, canopy air vapor pressure (pa)
               TAH             => noahmp%energy%state%TAH             ,& ! inout, canopy air temperature (K)
               TV              => noahmp%energy%state%TV              ,& ! inout, vegetation temperature (K)
-              TG              => noahmp%energy%state%TGV             ,& ! inout, vegetated ground (below-canopy) temperature (K)
+              TGV             => noahmp%energy%state%TGV             ,& ! inout, vegetated ground (below-canopy) temperature (K)
               CM              => noahmp%energy%state%CMV             ,& ! inout, momentum exchange coefficient (m/s), above ZPD, vegetated
               CH              => noahmp%energy%state%CHV             ,& ! inout, heat exchange coefficient (m/s), above ZPD, vegetated
               TAUXV           => noahmp%energy%state%TAUXV           ,& ! out,   wind stress: east-west (n/m2) above canopy
@@ -180,7 +180,7 @@ contains
     LAISHAE = min( 6.0, LAISHA )
 
     ! saturation vapor pressure at ground temperature
-    T = TDC(TG)
+    T = TDC(TGV)
     call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
     if ( T > 0.0 ) then
        ESTG = ESATW
@@ -216,7 +216,7 @@ contains
     endif
 
     ! prepare for longwave rad.
-    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * LWDN - EMV * EMG * SB * TG**4
+    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * LWDN - EMV * EMG * SB * TGV**4
     CIR = ( 2.0 - EMV * (1.0-EMG) ) * EMV * SB
 
     ! begin stability iteration for canopy temperature and flux
@@ -270,7 +270,7 @@ contains
        CVH  = 2.0 * VAIE / RB
        CGH  = 1.0 / RAHG
        COND = CAH + CVH + CGH
-       ATA  = (SFCTMP * CAH + TG * CGH) / COND
+       ATA  = (SFCTMP * CAH + TGV * CGH) / COND
        BTA  = CVH / COND
        CSH  = (1.0 - BTA) * RHOAIR * CPAIR * CVH
 
@@ -309,7 +309,7 @@ contains
 
        ! for computing M-O length in the next iteration
        H    = RHOAIR * CPAIR * (TAH - SFCTMP) / RAHC
-       HG   = RHOAIR * CPAIR * (TG  - TAH)   / RAHG
+       HG   = RHOAIR * CPAIR * (TGV  - TAH)   / RAHG
 
        ! consistent specific humidity from canopy air vapor pressure
        QSFC = (0.622 * EAH) / (SFCPRS - 0.378 * EAH)
@@ -319,8 +319,7 @@ contains
        if ( ITER >= 5 .and. abs(DTV) <= 0.01 .and. LITER == 0 ) then
           LITER = 1
        endif
-    enddo loop1 
-    ! end stability iteration
+    enddo loop1  ! end stability iteration
 
     ! under-canopy fluxes and ground temperature
     AIR = -EMG * (1.0 - EMV) * LWDN - EMG * EMV * SB * TV**4
@@ -330,7 +329,7 @@ contains
     CGH = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
     ! begin stability iteration
     loop2: do ITER = 1, NITERG
-       T = TDC(TG)
+       T = TDC(TGV)
        call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
        if ( T > 0.0 ) then
           ESTG  = ESATW
@@ -339,28 +338,28 @@ contains
           ESTG  = ESATI
           DESTG = DSATI
        endif
-       IRG = CIR * TG**4 + AIR
-       SHG = CSH * (TG         - TAH         )
+       IRG = CIR * TGV**4 + AIR
+       SHG = CSH * (TGV        - TAH         )
        EVG = CEV * (ESTG*RHSUR - EAH         )
-       GH  = CGH * (TG         - STC(ISNOW+1))
+       GH  = CGH * (TGV        - STC(ISNOW+1))
        B   = SAG - IRG - SHG - EVG - GH + PAHG
-       A   = 4.0 * CIR * TG**3 + CSH + CEV*DESTG + CGH
+       A   = 4.0 * CIR * TGV**3 + CSH + CEV*DESTG + CGH
        DTG = B / A
-       IRG = IRG + 4.0 * CIR * TG**3 * DTG
+       IRG = IRG + 4.0 * CIR * TGV**3 * DTG
        SHG = SHG + CSH * DTG
        EVG = EVG + CEV * DESTG * DTG
        GH  = GH  + CGH * DTG
-       TG  = TG  + DTG
+       TGV = TGV + DTG
     enddo loop2
-    !TAH = (CAH*SFCTMP + CVH*TV + CGH*TG)/(CAH + CVH + CGH)
+    !TAH = (CAH*SFCTMP + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
 
-    ! if snow on ground and TG > TFRZ: reset TG = TFRZ. reevaluate ground fluxes.
+    ! if snow on ground and TGV > TFRZ: reset TGV = TFRZ. reevaluate ground fluxes.
     if ( OPT_STC == 1 .or. OPT_STC == 3 ) then
-       if ( SNOWH > 0.05 .and. TG > TFRZ ) then
-          if ( OPT_STC == 1 ) TG = TFRZ
-          if ( OPT_STC == 3 ) TG = (1.0 - FSNO) * TG + FSNO * TFRZ   ! MB: allow TG>0C during melt v3.7
-          IRG = CIR * TG**4 - EMG * (1.0-EMV) * LWDN - EMG * EMV * SB * TV**4
-          SHG = CSH * (TG         - TAH)
+       if ( SNOWH > 0.05 .and. TGV > TFRZ ) then
+          if ( OPT_STC == 1 ) TGV = TFRZ
+          if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * TFRZ   ! MB: allow TGV>0C during melt v3.7
+          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * LWDN - EMG * EMV * SB * TV**4
+          SHG = CSH * (TGV        - TAH)
           EVG = CEV * (ESTG*RHSUR - EAH)
           GH  = SAG + PAHG - (IRG + SHG + EVG)
        endif
@@ -370,7 +369,7 @@ contains
     TAUXV = -RHOAIR * CM * UR * UU
     TAUYV = -RHOAIR * CM * UR * VV
 
-    ! consistent vegetation air temperature and vapor pressure since TG is not consistent with the TAH/EAH calculation.
+    ! consistent vegetation air temperature and vapor pressure since TGV is not consistent with the TAH/EAH calculation.
     ! TAH = SFCTMP + (SHG+SHC) / (RHOAIR*CPAIR*CAH) 
     ! TAH = SFCTMP + (SHG*FVEG+SHC) / (RHOAIR*CPAIR*CAH) ! ground flux need fveg
     ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*CPAIR/GAMMAG)

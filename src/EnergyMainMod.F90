@@ -6,9 +6,10 @@ module EnergyMainMod
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
-  use GroundThermalPropertyMod,      only : GroundThermalProperty
-  use RadiationMainMod,              only : RadiationMain
-  use SurfaceEnergyFluxVegetatedMod, only : SurfaceEnergyFluxVegetated
+  use GroundThermalPropertyMod,       only : GroundThermalProperty
+  use RadiationMainMod,               only : RadiationMain
+  use SurfaceEnergyFluxVegetatedMod,  only : SurfaceEnergyFluxVegetated
+  use SurfaceEnergyFluxBareGroundMod, only : SurfaceEnergyFluxBareGround
 
   implicit none
 
@@ -57,9 +58,10 @@ contains
               FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! out,   frozen ground (logical) to define latent heat pathway
               VAI             => noahmp%energy%state%VAI             ,& ! out,   one-sided leaf+stem area index (m2/m2)
               TGV             => noahmp%energy%state%TGV             ,& ! out,   vegetated ground (below-canopy) temperature (K)
+              TGB             => noahmp%energy%state%TGB             ,& ! out,   bare ground temperature (K)
               GAMMAV          => noahmp%energy%state%GAMMAV          ,& ! out,   psychrometric constant (pa/K), canopy
               GAMMAG          => noahmp%energy%state%GAMMAG          ,& ! out,   psychrometric constant (pa/K), ground
-              ZPDG            => noahmp%energy%state%ZPD             ,& ! out,   ground zero plane displacement (m)
+              ZPDG            => noahmp%energy%state%ZPDG            ,& ! out,   ground zero plane displacement (m)
               ZPD             => noahmp%energy%state%ZPD             ,& ! out,   surface zero plane displacement (m)
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
@@ -69,9 +71,17 @@ contains
               EMV             => noahmp%energy%state%EMV             ,& ! out,   vegetation emissivity
               EMG             => noahmp%energy%state%EMG             ,& ! out,   ground emissivity
               CMV             => noahmp%energy%state%CMV             ,& ! out,   drag coefficient for momentum, above ZPD, vegetated
+              CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
               CHV             => noahmp%energy%state%CHV             ,& ! out,   drag coefficient for heat, above ZPD, vegetated
+              CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
+              RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
+              RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
               EVG             => noahmp%energy%flux%EVG              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
+              EVB             => noahmp%energy%flux%EVB              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
               EVC             => noahmp%energy%flux%EVC              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
+              GHV             => noahmp%energy%flux%GHV              ,& ! out,   vegetated ground heat (w/m2) [+ = to soil]
+              GHB             => noahmp%energy%flux%GHB              ,& ! out,   bare ground heat flux (w/m2) [+ to soil]
+              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
               TR              => noahmp%energy%flux%TR               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
               FGEV            => noahmp%energy%flux%FGEV             ,& ! out,   soil evap heat (w/m2) [+ to atm]
               FCEV            => noahmp%energy%flux%FCEV             ,& ! out,   canopy evaporation (w/m2) [+ = to atm]
@@ -94,7 +104,7 @@ contains
       FROZEN_CANOPY = .true.
     endif
     GAMMAV = CPAIR * SFCPRS / (0.622 * LATHEAV)
-    if ( TGV > TFRZ ) then
+    if ( TG > TFRZ ) then
       LATHEAG       = HVAP
       FROZEN_GROUND = .false.
     else
@@ -114,7 +124,6 @@ contains
     endif
     ZLVL = max(ZPD, HVT) + ZREF
     if ( ZPDG >= ZLVL ) ZLVL = ZPDG + ZREF
-
     RSURF = FSNO * 1.0 + (1.0-FSNO) * exp(8.25-4.225*(max(0.0,SH2O(1)/SMCMAX(1)))) !Sellers (1992)
     PSI   = -PSISAT(1)*(max(0.01,SH2O(1))/SMCMAX(1))**(-BEXP(1))
     RHSUR = FSNO + (1.0-FSNO) * exp(PSI*GRAV/(RW*TG))
@@ -137,15 +146,35 @@ contains
        CHV = CH
        call SurfaceEnergyFluxVegetated(noahmp)
     endif
-    TG   = TGV
-    CM   = CMV
-    CH   = CHV
-    FGEV = EVG
-    FCEV = EVC
-    FCTR = TR
-
 
     ! Surface energy flux: bare ground
+    TGB = TG
+    CMB = CM
+    CHB = CH
+    call SurfaceEnergyFluxBareGround(noahmp)
+
+    ! grid cell average
+    if ( VEG .eqv. .true. .and. FVEG > 0 ) then
+       FGEV  = FVEG * EVG       + (1.0 - FVEG) * EVB
+       SSOIL = FVEG * GHV       + (1.0 - FVEG) * GHB
+       FCEV  = EVC
+       FCTR  = TR
+       TG    = FVEG * TGV       + (1.0 - FVEG) * TGB
+       CM    = FVEG * CMV       + (1.0 - FVEG) * CMB      ! better way to average?
+       CH    = FVEG * CHV       + (1.0 - FVEG) * CHB
+    else
+       FGEV  = EVB
+       SSOIL = GHB
+       TG    = TGB
+       FCEV  = 0.0
+       FCTR  = 0.0
+       CM    = CMB
+       CH    = CHB
+       RSSUN = 0.0
+       RSSHA = 0.0
+       TGV   = TGB
+       CHV   = CHB
+    endif
 
 
 
