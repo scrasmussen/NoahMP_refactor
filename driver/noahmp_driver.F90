@@ -301,6 +301,8 @@ USE NOAHMP_TABLES
   REAL                            :: SSOIL
 ! TSNOSOI new vars
   REAL                            :: TBOT   !bottom condition for soil temp. [K]
+! PHASECHANGE new vars
+  REAL                            :: QMELT
 
 
 !---------------------------------------------------------------------
@@ -333,7 +335,7 @@ USE NOAHMP_TABLES
 !---------------------------------------------------------------------
 !  allocate for dynamic levels
 !---------------------------------------------------------------------
-  allocate (IMELT (-nsnow+1:0    ))   !phase change index [1-melt; 2-freeze]
+  allocate (IMELT (-nsnow+1:nsoil))   !phase change index [1-melt; 2-freeze]
   allocate (zsoil (       1:nsoil))   !depth of layer-bottom from soil surface
   allocate (ZSNSO (-nsnow+1:nsoil))   !depth of snow/soil layer-bottom
   allocate (DZSNSO(-nsnow+1:nsoil))   !snow/soil layer thickness [m]
@@ -651,7 +653,7 @@ if (runsnow) then
   FB_snow = 0.5
   TV = 268.0
   TG = 270.0
-  IMELT = 2  ! freeze
+  !IMELT = 2  ! freeze
   CANLIQ = 0.0
   CANICE = 0.0
   STC(1:4) = 265.0
@@ -664,7 +666,7 @@ else
   FB_snow = 0.0
   TV = 293.0
   TG = 285.0
-  IMELT = 1 ! melt
+  !IMELT = 1 ! melt
   CANLIQ = 0.0
   CANICE = 0.0
   STC(1:4) = 298.0
@@ -891,9 +893,13 @@ if (runsnow) then
 else
    TBOT = 290.0
 endif
-
-
 !==== TSNOSOI end
+   QMELT    = 0.0
+   IMELT(:) = 0
+!==== phasechange new vars
+
+
+!==== phasechange end
 
 !============================
   QVAP = MAX( FGEV/LATHEAG, 0.)       ! positive part of fgev; Barlage change to ground v3.6
@@ -999,7 +1005,7 @@ endif
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
                      EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -1247,6 +1253,16 @@ endif
                   STC     )                                       !inout
 
 
+! Energy released or consumed by snow & frozen soil
+
+ CALL PHASECHANGE (parameters,NSNOW   ,NSOIL   ,ISNOW   ,DT      ,FACT    , & !in
+                   DZSNSO  ,HCPCT   ,IST     ,ILOC    ,JLOC    , & !in
+                   STC     ,SNICE   ,SNLIQ   ,SNEQV   ,SNOWH   , & !inout
+                   SMC     ,SH2O    ,                            & !inout
+                   QMELT   ,IMELT   ,PONDING )                     !out
+
+
+
 
 
 
@@ -1325,7 +1341,7 @@ endif
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
                      EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
 
  
   end do ! time loop

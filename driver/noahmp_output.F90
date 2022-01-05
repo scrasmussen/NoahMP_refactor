@@ -153,7 +153,10 @@ module noahmp_output
   integer           :: Q2B_id
   integer           :: CHB2_id
   integer           :: SSOIL_id
-
+! phasechange new vars
+  integer           :: QMELT_id
+  integer           :: IMELT_id
+  integer           :: PONDING_id
 
 contains
 
@@ -313,6 +316,10 @@ contains
     iret = nf90_def_var(ncid, "Q2B",         NF90_FLOAT, (/time_dim/), Q2B_id)
     iret = nf90_def_var(ncid, "CHB2",        NF90_FLOAT, (/time_dim/), CHB2_id)
     iret = nf90_def_var(ncid, "SSOIL",       NF90_FLOAT, (/time_dim/), SSOIL_id)
+! phasechange new vars
+    iret = nf90_def_var(ncid, "QMELT",       NF90_FLOAT, (/time_dim/), QMELT_id)
+    iret = nf90_def_var(ncid, "IMELT",       NF90_FLOAT, (/time_dim,snso_dim/), IMELT_id)
+    iret = nf90_def_var(ncid, "PONDING",     NF90_FLOAT, (/time_dim/), PONDING_id)
 
 
     iret = nf90_enddef(ncid)
@@ -331,7 +338,7 @@ contains
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
                      TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
                      EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL)
+                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -478,7 +485,10 @@ contains
      REAL                          :: Q2B
      REAL                          :: CHB2
      REAL                          :: SSOIL
-
+! phasechange new vars
+     integer, dimension(nsoil+nsnow) :: IMELT
+     REAL                            :: QMELT
+     REAL                            :: PONDING
 
 
 
@@ -625,6 +635,11 @@ contains
      iret = nf90_put_var(ncid, Q2B_id,      Q2B,           start=(/itime+1/))
      iret = nf90_put_var(ncid, CHB2_id,     CHB2,          start=(/itime+1/))
      iret = nf90_put_var(ncid, SSOIL_id,    SSOIL,         start=(/itime+1/))
+! phasechange new vars
+     iret = nf90_put_var(ncid, IMELT_id,    IMELT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, QMELT_id,    QMELT,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, PONDING_id,  PONDING,       start=(/itime+1/))
+
 
 
    end subroutine add_to_output
