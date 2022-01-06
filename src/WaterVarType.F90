@@ -59,6 +59,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: QDRIPS        ! drip (unloading) rate for intercepted snow (mm/s)
     real(kind=kind_noahmp) :: QTHROS        ! throughfall of snowfall (mm/s)
     real(kind=kind_noahmp) :: EDIR          ! net direct soil evaporation (mm/s)
+    real(kind=kind_noahmp) :: QMELT         ! ground snow melting rate (mm/s)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
@@ -134,6 +135,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: BTRANI        ! soil water transpiration factor (0 to 1)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICEV        ! partial volume of ice [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNLIQV        ! partial volume of liquid water [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SUPERCOOL     ! supercooled water in soil (kg/m2)
 
   end type state_type
 

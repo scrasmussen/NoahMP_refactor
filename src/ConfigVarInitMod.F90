@@ -30,6 +30,7 @@ contains
     noahmp%config%nmlist%OPT_STC      = huge(1)
     noahmp%config%nmlist%OPT_TKSNO    = huge(1)
     noahmp%config%nmlist%OPT_TBOT     = huge(1)
+    noahmp%config%nmlist%OPT_FRZ      = huge(1)
     noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
     noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
     noahmp%config%nmlist%OPT_INF      = huge(1)
@@ -83,6 +84,7 @@ contains
     noahmp%config%nmlist%OPT_STC    = input%OPT_STCIn
     noahmp%config%nmlist%OPT_TKSNO  = input%OPT_TKSNOIn
     noahmp%config%nmlist%OPT_TBOT   = input%OPT_TBOTIn
+    noahmp%config%nmlist%OPT_FRZ    = input%OPT_FRZIn
     noahmp%config%nmlist%OPT_INF    = input%OPT_INFIn
     noahmp%config%nmlist%OPT_INFDV  = input%OPT_INFDVIn
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn

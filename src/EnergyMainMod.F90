@@ -11,7 +11,8 @@ module EnergyMainMod
   use SurfaceEnergyFluxVegetatedMod,  only : SurfaceEnergyFluxVegetated
   use SurfaceEnergyFluxBareGroundMod, only : SurfaceEnergyFluxBareGround
   use SoilSnowTemperatureMainMod,     only : SoilSnowTemperatureMain
- 
+  use SoilSnowWaterPhaseChangeMod,    only : SoilSnowWaterPhaseChange
+
   implicit none
 
 contains
@@ -180,6 +181,9 @@ contains
     ! compute snow and soil layer temperature
     call SoilSnowTemperatureMain(noahmp)
 
+
+    ! Phase change and Energy released or consumed by snow & frozen soil
+    call SoilSnowWaterPhaseChange(noahmp)
 
 
     end associate

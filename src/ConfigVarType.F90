@@ -44,6 +44,9 @@ module ConfigVarType
     integer                   :: OPT_TBOT      ! options for lower boundary condition of soil temperature
                                                  ! 1 -> zero heat flux from bottom (ZBOT and TBOT not used)
                                                  ! 2 -> TBOT at ZBOT (8m) read from a file (original Noah)
+    integer                   :: OPT_FRZ       ! options for soil supercooled liquid water
+                                                 ! 1 -> no iteration (Niu and Yang, 2006 JHM)
+                                                 ! 2 -> Koren's iteration (Koren et al., 1999 JGR)
     integer                   :: OPT_RUNSRF    ! options for surface runoff
                                                  ! 1 -> TOPMODEL with groundwater
                                                  ! 2 -> TOPMODEL with an equilibrium water table

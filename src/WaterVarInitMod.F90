@@ -72,6 +72,7 @@ contains
     noahmp%water%state%PSI            = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
+    allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
     allocate( noahmp%water%state%SNLIQ        (-NSNOW+1:0)     )
     allocate( noahmp%water%state%SNICEV       (-NSNOW+1:0)     )
@@ -92,6 +93,7 @@ contains
     allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
 
     noahmp%water%state%IMELT(:)       = huge(1)
+    noahmp%water%state%SUPERCOOL(:)   = huge(1.0)
     noahmp%water%state%SNICE(:)       = huge(1.0)
     noahmp%water%state%SNLIQ(:)       = huge(1.0)
     noahmp%water%state%SNICEV(:)      = huge(1.0)
@@ -153,6 +155,7 @@ contains
     noahmp%water%flux%QDRIPS          = huge(1.0)
     noahmp%water%flux%QTHROS          = huge(1.0)
     noahmp%water%flux%EDIR            = huge(1.0)
+    noahmp%water%flux%QMELT           = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )

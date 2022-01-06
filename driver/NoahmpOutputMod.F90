@@ -156,6 +156,11 @@ module NoahmpOutputMod
   integer           :: Q2B_id
   integer           :: EHB2_id
   integer           :: SSOIL_id
+! phasechange new vars
+  integer           :: QMELT_id
+  integer           :: IMELT_id
+  integer           :: PONDING_id
+
 
 contains
 
@@ -320,6 +325,11 @@ contains
     iret = nf90_def_var(ncid, "Q2B",         NF90_FLOAT, (/time_dim/)         , Q2B_id      )
     iret = nf90_def_var(ncid, "CHB2",        NF90_FLOAT, (/time_dim/)         , EHB2_id     )
     iret = nf90_def_var(ncid, "SSOIL",       NF90_FLOAT, (/time_dim/)         , SSOIL_id    )
+! phasechange new vars
+    iret = nf90_def_var(ncid, "QMELT",       NF90_FLOAT, (/time_dim/)         , QMELT_id    )
+    iret = nf90_def_var(ncid, "IMELT",       NF90_FLOAT, (/time_dim,snso_dim/), IMELT_id    )
+    iret = nf90_def_var(ncid, "PONDING",     NF90_FLOAT, (/time_dim/)         , PONDING_id  )
+
 
     iret = nf90_enddef(ncid)
   
@@ -482,6 +492,11 @@ contains
      iret = nf90_put_var(ncid, Q2B_id,     noahmp%energy%state%Q2B,          start=(/itime+1/))
      iret = nf90_put_var(ncid, EHB2_id,    noahmp%energy%state%EHB2,         start=(/itime+1/))
      iret = nf90_put_var(ncid, SSOIL_id,   noahmp%energy%flux%SSOIL,         start=(/itime+1/))
+! phasechange new vars
+     iret = nf90_put_var(ncid, IMELT_id,   noahmp%water%state%IMELT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     iret = nf90_put_var(ncid, QMELT_id,   noahmp%water%flux%QMELT,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, PONDING_id, noahmp%water%state%PONDING,       start=(/itime+1/))
+
 
     end associate
 

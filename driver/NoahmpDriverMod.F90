@@ -283,7 +283,8 @@ Program NoahmpDriverMod
             Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
             EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
             SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
-            TBOT            => noahmp%energy%state%TBOT             & ! in,    bottom soil temp. at ZBOT (K)
+            TBOT            => noahmp%energy%state%TBOT            ,& ! in,    bottom soil temp. at ZBOT (K)
+            QMELT           => noahmp%water%flux%QMELT              & ! out,   snowmelt rate [mm/s]
             )
 !---------------------------------------------------------------------
 
@@ -295,7 +296,7 @@ Program NoahmpDriverMod
      FB_snow   = 0.5
      TV        = 268.0
      TG        = 270.0
-     IMELT     = 2  
+     !IMELT     = 2  
      CANLIQ    = 0.0
      CANICE    = 0.0
      STC(1:4)  = 265.0
@@ -308,7 +309,7 @@ Program NoahmpDriverMod
      FB_snow   = 0.0
      TV        = 293.0
      TG        = 285.0
-     IMELT     = 1
+     !IMELT     = 1
      CANLIQ    = 0.0
      CANICE    = 0.0
      STC(1:4)  = 298.0
@@ -528,6 +529,10 @@ else
 endif
 !=== TSNOSOI end
 
+!==== phasechange new vars
+   QMELT    = 0.0
+   IMELT(:) = 0
+!==== phasechange end
 
 
 !============================
