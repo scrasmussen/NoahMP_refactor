@@ -90,8 +90,6 @@ USE NOAHMP_TABLES
   integer, allocatable, dimension(:) :: IMELT  !phase change index
   real                            :: UU      !u-direction wind speed [m/s]
   real                            :: VV      !v-direction wind speed [m/s]
-  real                            :: FCEV    !canopy evaporation (w/m2) [+ to atm ]
-  real                            :: FCTR    !transpiration (w/m2) [+ to atm]
   REAL                            :: QPRECC  !convective precipitation (mm/s)
   REAL                            :: QPRECL  !large-scale precipitation (mm/s)
   real                            :: ELAI    !leaf area index, after burying by snow
@@ -104,11 +102,7 @@ USE NOAHMP_TABLES
   REAL                            :: QDEW    !ground surface dew rate [mm/s]
   real                            :: TV      ! canopy temperature
   real                            :: TG      ! ground temperature
-  logical                         :: frozen_canopy ! used to define latent heat pathway for canopy
-  logical                         :: frozen_ground ! used to define latent heat pathway for ground
   real                            :: SFCPRS !surface pressure (pa)
-  real                            :: FGEV   ! FGEV   !ground evap heat (w/m2) [+ to atm]
-  REAL, allocatable, dimension(:) :: BTRANI !Soil water transpiration factor (0 - 1) !!!!!!! Cenlin
   real                            :: IRRFRA   ! irrigation fraction
   real                            :: MIFAC    ! micro irrigation fraction
   real                            :: FIFAC    ! flood irrigation fraction
@@ -206,7 +200,6 @@ USE NOAHMP_TABLES
   integer                         :: ICE     ! value of ist for land ice
   real                            :: SNEQVO  ! SWE at last time step
   real                            :: COSZ    ! cosine solar zenith angle [0-1]
-  real                            :: FSNO    ! snow cover fraction
   REAL, DIMENSION(1:2)            :: SOLAD   ! incoming direct solar radiation (w/m2)
   REAL, DIMENSION(1:2)            :: SOLAI   ! incoming diffuse solar radiation (w/m2)
   real                            :: ALBOLD  ! snow albedo at last time step(CLASS type)
@@ -252,13 +245,10 @@ USE NOAHMP_TABLES
   REAL                            :: RSSUN        !sunlit leaf stomatal resistance (s/m)
   REAL                            :: RSSHA        !shaded leaf stomatal resistance (s/m)
   REAL                            :: RSURF  !ground surface resistance (s/m)
-  real                            :: LATHEAV !latent heat vap./sublimation (j/kg)
-  real                            :: LATHEAG !latent heat vap./sublimation (j/kg)
   REAL                            :: IGS    !growing season index (0=off, 1=on)
   REAL                            :: FOLN   !foliage nitrogen (%)
   REAL                            :: CO2AIR !atmospheric co2 concentration (pa)
   REAL                            :: O2AIR  !atmospheric o2 concentration (pa)
-  REAL                            :: BTRAN  !soil water transpiration factor (0 to 1)
   REAL                            :: RHSUR  !raltive humidity in surface soil/snow air space (-)
   REAL                            :: PSI    !surface layer soil matrix potential (m)
   REAL                            :: EAH    !canopy air vapor pressure (pa)
@@ -303,6 +293,34 @@ USE NOAHMP_TABLES
   REAL                            :: TBOT   !bottom condition for soil temp. [K]
 ! PHASECHANGE new vars
   REAL                            :: QMELT
+! Energy main new vars
+  REAL                            :: ERRENG !error in surface energy balance [w/m2]
+  REAL                            :: ERRSW  !error in shortwave radiation balance [w/m2]
+  REAL                            :: Z0WRF
+  REAL                            :: T2M
+  real                            :: FSNO    ! snow cover fraction
+  real                            :: TAUX
+  real                            :: TAUY
+  real                            :: FIRA
+  real                            :: FSH
+  real                            :: FCEV    !canopy evaporation (w/m2) [+ to atm ]
+  real                            :: FGEV   ! FGEV   !ground evap heat (w/m2) [+ to atm]
+  real                            :: FCTR    !transpiration (w/m2) [+ to atm]
+  real                            :: TRAD
+  real                            :: PSN
+  real                            :: APAR
+  REAL, allocatable, dimension(:) :: BTRANI !Soil water transpiration factor (0 - 1) !!!!!!! Cenlin
+  REAL                            :: BTRAN  !soil water transpiration factor (0 to 1)
+  REAL                            :: TS
+  real                            :: LATHEAV !latent heat vap./sublimation (j/kg)
+  real                            :: LATHEAG !latent heat vap./sublimation (j/kg)
+  logical                         :: frozen_canopy ! used to define latent heat pathway for canopy
+  logical                         :: frozen_ground ! used to define latent heat pathway for ground
+  real                            :: Q2E
+  real                            :: EMISSI
+  real                            :: PAH 
+  real                            :: RB
+  real                            :: Q1
 
 
 !---------------------------------------------------------------------
@@ -752,7 +770,7 @@ end if
   PAHG   = 0.0
   PAHB   = 0.0
 ! thermoprop new vars
-  LAT    = 120.0 * 3.1415 / 180.0  ! 120E -> radian
+  LAT    = 40.0 * 3.1415 / 180.0  ! 120E -> radian
   DF     = 0.0
   HCPCT  = 0.0
   SNICEV = 0.0
@@ -894,12 +912,33 @@ else
    TBOT = 290.0
 endif
 !==== TSNOSOI end
+!==== phasechange new vars
    QMELT    = 0.0
    IMELT(:) = 0
-!==== phasechange new vars
-
-
 !==== phasechange end
+
+!==== Energy Main 
+   ERRENG = 0.0
+   ERRSW  = 0.0
+   Z0WRF  = 0.0
+   T2M    = 0.0
+   TAUX   = 0.0
+   TAUY   = 0.0
+   FIRA   = 0.0
+   FSH    = 0.0
+   TRAD   = 0.0
+   PSN    = 0.0
+   APAR   = 0.0
+   BTRANI = 0.2 ! 0~1
+   BTRAN  = 0.2
+   TS     = 0.0
+   Q2E    = 0.0
+   EMISSI = 0.0
+   PAH    = 0.0
+
+!==== Energy end
+
+
 
 !============================
   QVAP = MAX( FGEV/LATHEAG, 0.)       ! positive part of fgev; Barlage change to ground v3.6
@@ -1000,12 +1039,14 @@ endif
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,EDIR,&
+                     SNICEV,SNLIQV,EPORE,LAISUN,LAISHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
-                     TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
+                     TAH,TGV,EAH,CM,CHV,CH,QSFC,RSSUN,RSSHA,IRG,IRC,SHG,SHC,&
+                     EVG,EVC,TR,GHV,T2MV,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CHB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT,&
+                     ERRSW,ERRENG,T2M,FSNO,TAUX,TAUY,FIRA,FSH,FCEV,FGEV,FCTR,TRAD,PSN,APAR,&
+                     BTRANI,BTRAN,TS,Q2E,EMISSI,PAH,Z0WRF)
 
 !---------------------------------------------------------------------
 ! start the time loop
@@ -1118,154 +1159,34 @@ endif
 
 !!!============================ Energy module all
 
-!=== some input variables need to be updated every time step (temporally, will be included in completed Energy subroutine)
+! compute energy budget (momentum & energy fluxes and phase changes) 
 
-  VAI = ELAI + ESAI
-  VEG = .FALSE.
-  IF(VAI > 0.0) VEG = .TRUE.
-
-  IF (TV .GT. TFRZ) THEN
-      LATHEAV = HVAP
-      frozen_canopy = .false.
-   ELSE
-      LATHEAV = HSUB
-      frozen_canopy = .true.
-   END IF
-   GAMMAV = CPAIR*SFCPRS/(0.622*LATHEAV)
-   IF (TG .GT. TFRZ) THEN
-      LATHEAG = HVAP
-      frozen_ground = .false.
-   ELSE
-      LATHEAG = HSUB
-      frozen_ground = .true.
-   END IF
-   GAMMAG = CPAIR*SFCPRS/(0.622*LATHEAG)
-   ZPDG  = SNOWH
-   IF(VEG) THEN
-      Z0M  = parameters%Z0MVT
-      ZPD  = 0.65 * parameters%HVT
-      IF(SNOWH.GT.ZPD) ZPD  = SNOWH
-   ELSE
-      Z0M  = Z0MG
-      ZPD  = ZPDG
-   END IF
-   ZLVL = MAX(ZPD,parameters%HVT) + 10.0
-   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
-   RSURF = FSNO * 1.0 + (1.0-FSNO)* EXP(8.25-4.225*(MAX(0.0,SH2O(1)/parameters%SMCMAX(1)))) !Sellers (1992)
-   PSI   = -parameters%PSISAT(1)*(MAX(0.01,SH2O(1))/parameters%SMCMAX(1))**(-parameters%BEXP(1))
-   RHSUR = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
-   EMV = 1.0 - EXP(-(ELAI+ESAI)/1.0)
-   EMG = parameters%EG(IST)*(1.0-FSNO) + parameters%SNOW_EMIS*FSNO
-
-!=== input variable update end
-
-
-! Thermal properties of soil, snow, lake, and frozen soil
-
-  CALL THERMOPROP (parameters,NSOIL   ,NSNOW   ,ISNOW   ,IST     ,DZSNSO  , & !in
-                   DT      ,SNOWH   ,SNICE   ,SNLIQ   , & !in
-                   SMC     ,SH2O    ,TG      ,STC     ,UR      , & !in
-                   LAT     ,Z0M     ,ZLVL    ,VEGTYP  , & !in
-                   DF      ,HCPCT   ,SNICEV  ,SNLIQV  ,EPORE   , & !out
-                   FACT    )                              !out
-
-! Solar radiation: absorbed & reflected by the ground and canopy
-
-  CALL  RADIATION (parameters,VEGTYP  ,IST     ,ICE     ,NSOIL   , & !in 
-                   SNEQVO  ,SNEQV   ,DT      ,COSZ    ,SNOWH   , & !in
-                   TG      ,TV      ,FSNO    ,QSNOW   ,FWET    , & !in
-                   ELAI    ,ESAI    ,SMC     ,SOLAD   ,SOLAI   , & !in
-                   FVEG    ,ILOC    ,JLOC    ,                   & !in
-                   ALBOLD  ,TAUSS   ,                            & !inout
-                   FSUN    ,LAISUN  ,LAISHA  ,PARSUN  ,PARSHA  , & !out
-                   SAV     ,SAG     ,FSR     ,FSA     ,FSRV    , & 
-                   FSRG    ,ALBSND  ,ALBSNI  ,BGAP    ,WGAP     )  !out
-
-! Surface temperatures of the ground and canopy and energy fluxes
-    IF (VEG .AND. FVEG > 0) THEN
-    TGV = TG
-    CMV = CM
-    CHV = CH
-    CALL VEGE_FLUX (parameters,NSNOW   ,NSOIL   ,ISNOW   ,VEGTYP  ,VEG     , & !in
-                    DT      ,SAV     ,SAG     ,LWDN    ,UR      , & !in
-                    UU      ,VV      ,SFCTMP  ,THAIR   ,QAIR    , & !in
-                    EAIR    ,RHOAIR  ,SNOWH   ,VAI     ,GAMMAV   ,GAMMAG   , & !in
-                    FWET    ,LAISUN  ,LAISHA  ,CWP     ,DZSNSO  , & !in
-                    ZLVL    ,ZPD     ,Z0M     ,FVEG    , & !in
-                    Z0MG    ,EMV     ,EMG     ,CANLIQ  ,FSNO, & !in
-                    CANICE  ,STC     ,DF      ,RSSUN   ,RSSHA   , & !in
-                    RSURF   ,LATHEAV ,LATHEAG ,PARSUN  ,PARSHA  ,IGS     , & !in
-                    FOLN    ,CO2AIR  ,O2AIR   ,BTRAN   ,SFCPRS  , & !in
-                    RHSUR   ,ILOC    ,JLOC    ,Q2      ,PAHV  ,PAHG  , & !in
-                    EAH     ,TAH     ,TV      ,TGV     ,CMV     , & !inout
-                    CHV     ,DX      ,DZ8W    ,                   & !inout
-                    TAUXV   ,TAUYV   ,IRG     ,IRC     ,SHG     , & !out
-                    SHC     ,EVG     ,EVC     ,TR      ,GHV     , & !out
-                    T2MV    ,PSNSUN  ,PSNSHA  ,                   & !out
-                    QC      ,QSFC    ,PSFC    , & !in
-                    Q2V     ,CHV2, CHLEAF, CHUC)               !inout 
-    END IF
-
-! Surface temperatures and energy flux of bare ground
-    TGB = TG
-    CMB = CM
-    CHB = CH
-    CALL BARE_FLUX (parameters,NSNOW   ,NSOIL   ,ISNOW   ,DT      ,SAG     , & !in
-                    LWDN    ,UR      ,UU      ,VV      ,SFCTMP  , & !in
-                    THAIR   ,QAIR    ,EAIR    ,RHOAIR  ,SNOWH   , & !in
-                    DZSNSO  ,ZLVL    ,ZPDG    ,Z0MG    ,FSNO,          & !in
-                    EMG     ,STC     ,DF      ,RSURF   ,LATHEAG  , & !in
-                    GAMMAG   ,RHSUR   ,ILOC    ,JLOC    ,Q2      ,PAHB  , & !in
-                    TGB     ,CMB     ,CHB     ,                   & !inout
-                    TAUXB   ,TAUYB   ,IRB     ,SHB     ,EVB     , & !out
-                    GHB     ,T2MB    ,DX      ,DZ8W    ,VEGTYP  , & !out
-                    QC      ,QSFC    ,PSFC    , & !in
-                    SFCPRS  ,Q2B,   CHB2)                          !in 
-
-    IF (VEG .AND. FVEG > 0) THEN
-        FGEV  = FVEG * EVG       + (1.0 - FVEG) * EVB
-        SSOIL = FVEG * GHV       + (1.0 - FVEG) * GHB
-        FCEV  = EVC
-        FCTR  = TR
-        TG    = FVEG * TGV       + (1.0 - FVEG) * TGB
-        CM    = FVEG * CMV       + (1.0 - FVEG) * CMB      ! better way to average?
-        CH    = FVEG * CHV       + (1.0 - FVEG) * CHB
-    ELSE
-        FGEV  = EVB
-        SSOIL = GHB
-        TG    = TGB
-        FCEV  = 0.0
-        FCTR  = 0.0
-        CM    = CMB
-        CH    = CHB
-        RSSUN = 0.0
-        RSSHA = 0.0
-        TGV   = TGB
-        CHV   = CHB
-    END IF
-
-! 3L snow & 4L soil temperatures
-
-    CALL TSNOSOI (parameters,ICE     ,NSOIL   ,NSNOW   ,ISNOW   ,IST     , & !in
-                  TBOT    ,ZSNSO   ,SSOIL   ,DF      ,HCPCT   , & !in
-                  SAG     ,DT      ,SNOWH   ,DZSNSO  , & !in
-                  TG      ,ILOC    ,JLOC    ,                   & !in
-                  STC     )                                       !inout
-
-
-! Energy released or consumed by snow & frozen soil
-
- CALL PHASECHANGE (parameters,NSNOW   ,NSOIL   ,ISNOW   ,DT      ,FACT    , & !in
-                   DZSNSO  ,HCPCT   ,IST     ,ILOC    ,JLOC    , & !in
-                   STC     ,SNICE   ,SNLIQ   ,SNEQV   ,SNOWH   , & !inout
-                   SMC     ,SH2O    ,                            & !inout
-                   QMELT   ,IMELT   ,PONDING )                     !out
-
-
-
-
-
-
+    CALL ENERGY (parameters,ICE    ,VEGTYP ,IST    ,NSNOW  ,NSOIL  , & !in
+                 ISNOW  ,DT     ,RHOAIR ,SFCPRS ,QAIR   , & !in
+                 SFCTMP ,THAIR  ,LWDN   ,UU     ,VV     ,ZLVL   , & !in
+                 CO2AIR ,O2AIR  ,SOLAD  ,SOLAI  ,COSZ   ,IGS    , & !in
+                 EAIR   ,TBOT   ,ZSNSO  ,ZSOIL  , & !in
+                 ELAI   ,ESAI   ,FWET   ,FOLN   ,         & !in
+                 FVEG   ,PAHV   ,PAHG   ,PAHB   ,                 & !in
+                 QSNOW  ,DZSNSO ,LAT    ,CANLIQ ,CANICE ,iloc, jloc , & !in
+                 Z0WRF  ,                                         &
+                 IMELT  ,SNICEV ,SNLIQV ,EPORE  ,T2M    ,FSNO   , & !out
+                 SAV    ,SAG    ,QMELT  ,FSA    ,FSR    ,TAUX   , & !out
+                 TAUY   ,FIRA   ,FSH    ,FCEV   ,FGEV   ,FCTR   , & !out
+                 TRAD   ,PSN    ,APAR   ,SSOIL  ,BTRANI ,BTRAN  , & !out
+                 PONDING,TS     ,LATHEAV , LATHEAG , frozen_canopy,frozen_ground,& !out
+                 TV     ,TG     ,STC    ,SNOWH  ,EAH    ,TAH    , & !inout
+                 SNEQVO ,SNEQV  ,SH2O   ,SMC    ,SNICE  ,SNLIQ  , & !inout
+                 ALBOLD ,CM     ,CH     ,DX     ,DZ8W   ,Q2     , & !inout
+                 TAUSS  ,LAISUN ,LAISHA ,RB ,                     & !inout
+!jref:start
+                 QC     ,QSFC   ,PSFC   , & !in 
+                 T2MV   ,T2MB  ,FSRV   , &
+                 FSRG   ,RSSUN   ,RSSHA ,ALBSND  ,ALBSNI, BGAP   ,WGAP,TGV,TGB,&
+                 Q1     ,Q2V    ,Q2B    ,Q2E    ,CHV   ,CHB     , & !out
+                 EMISSI ,PAH    ,                                 &
+                 SHG,SHC,SHB,EVG,EVB,GHV,GHB,IRG,IRC,IRB,TR,EVC,CHLEAF,CHUC,CHV2,CHB2 ) !out
+!jref:end
 
 !!!============================ Energy module end
 
@@ -1318,17 +1239,33 @@ endif
 
  
 !!!============================ Error balance check
+!!! extracted from ERROR subroutine
+! add energy balance check
+  ERRSW   = SWDOWN - (FSA + FSR)
+  if ( abs(ERRSW) > 0.01 ) then
+     print*, 'SW energy not balanced ...'
+     stop 'error'
+  endif
+
+  ERRENG = SAV+SAG-(FIRA+FSH+FCEV+FGEV+FCTR+SSOIL+FIRR) +PAH
+  if ( abs(ERRENG) > 0.01 ) then
+     print*, 'Surface energy not balanced ...'
+     stop 'error'
+  endif
+
 ! balance check for soil and snow layers  
     totalwat = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA + CANLIQ + CANICE    ! total soil+snow water+canopy water [mm]
     errwat = (RAIN+SNOW+IRMIRATE*1000/DT+IRFIRATE*1000/DT-EDIR-ETRAN-RUNSRF-RUNSUB-QTLDRN-ECAN)*DT - (totalwat - tw0)  ! accum error [mm]
-   if (abs(errwat) > 0.1) print*,'water not balanced ....'
+   if (abs(errwat) > 0.1) then
+      print*,'water not balanced ....'
+      stop 'error'
+   endif
 
 !!!============================
 
   !---------------------------------------------------------------------
   ! add to output file
   !---------------------------------------------------------------------
-
   call add_to_output(itime,NSOIL,NSNOW,ISNOW,CANLIQ,CANICE,TV,SNOWH,SNEQV,&
                      SNICE,SNLIQ,STC,ZSNSO,SH2O,SMC,SICE,ZWT,WA,WT,DZSNSO,&
                      WSLAKE,SMCWTD,DEEPRECH,RECH,IRAMTFI,IRAMTMI,IRFIRATE,IRMIRATE,&
@@ -1336,14 +1273,15 @@ endif
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,EDIR,&
+                     SNICEV,SNLIQV,EPORE,LAISUN,LAISHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
-                     TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
+                     TAH,TGV,EAH,CM,CHV,CH,QSFC,RSSUN,RSSHA,IRG,IRC,SHG,SHC,&
+                     EVG,EVC,TR,GHV,T2MV,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CHB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT,&
+                     ERRSW,ERRENG,T2M,FSNO,TAUX,TAUY,FIRA,FSH,FCEV,FGEV,FCTR,TRAD,PSN,APAR,&
+                     BTRANI,BTRAN,TS,Q2E,EMISSI,PAH,Z0WRF)
 
- 
   end do ! time loop
 
   call finalize_output()

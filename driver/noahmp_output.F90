@@ -11,15 +11,14 @@ module noahmp_output
   integer           :: snow_dim
   integer           :: snso_dim
   integer           :: band_dim
+! water variables
   integer           :: ISNOW_id
   integer           :: CANLIQ_id
   integer           :: CANICE_id
-  integer           :: TV_id
   integer           :: SNOWH_id
   integer           :: SNEQV_id
   integer           :: SNICE_id
   integer           :: SNLIQ_id
-  integer           :: STC_id
   integer           :: ZSNSO_id
   integer           :: SH2O_id
   integer           :: SMC_id
@@ -71,92 +70,118 @@ module noahmp_output
   integer           :: RAIN_id
   integer           :: SNOW_id
   integer           :: IREVPLOS_id
-  integer           :: FIRR_id
   integer           :: EIRR_id
   integer           :: SNOWHIN_id
-  integer           :: TG_id
   integer           :: QINTR_id
   integer           :: QDRIPR_id
   integer           :: QTHROR_id
   integer           :: QINTS_id
   integer           :: QDRIPS_id
   integer           :: QTHROS_id
-  integer           :: PAHV_id
-  integer           :: PAHG_id
-  integer           :: PAHB_id
-  integer           :: EDIR_id
-! thermoprop new vars
-  integer           :: DF_id
-  integer           :: HCPCT_id
+! Energy variables
+  integer           :: FIRR_id
+  integer           :: TV_id
+  integer           :: STC_id
+  integer           :: TG_id
+  integer           :: IMELT_id
   integer           :: SNICEV_id
   integer           :: SNLIQV_id
   integer           :: EPORE_id
-  integer           :: FACT_id
-! radiation new vars
-  integer           :: ALBOLD_id
-  integer           :: TAUSS_id
-  integer           :: FSUN_id
-  integer           :: LAISUN_id
-  integer           :: LAISHA_id
-  integer           :: PARSUN_id
-  integer           :: PARSHA_id
   integer           :: SAV_id
   integer           :: SAG_id
+  integer           :: QMELT_id
   integer           :: FSA_id
   integer           :: FSR_id
+  integer           :: SSOIL_id
+  integer           :: PONDING_id
+  integer           :: EAH_id
+  integer           :: TAH_id
+  integer           :: SNEQVO_id
+  integer           :: ALBOLD_id
+  integer           :: CM_id
+  integer           :: CH_id
+  integer           :: TAUSS_id
+  integer           :: LAISUN_id
+  integer           :: LAISHA_id
+  integer           :: QSFC_id
+  integer           :: T2MV_id
+  integer           :: T2MB_id
   integer           :: FSRV_id
   integer           :: FSRG_id
-  integer           :: BGAP_id
-  integer           :: WGAP_id
-  integer           :: ALBSND_id
-  integer           :: ALBSNI_id
-  integer           :: SNEQVO_id
-! vege_flux new vars
-  integer           :: TAH_id
-  integer           :: TGV_id
-  integer           :: EAH_id
-  integer           :: CMV_id
-  integer           :: CM_id
-  integer           :: CHV_id
-  integer           :: CH_id
-  integer           :: QSFC_id
   integer           :: RSSUN_id
   integer           :: RSSHA_id
-  integer           :: TAUXV_id
-  integer           :: TAUYV_id
-  integer           :: IRG_id
-  integer           :: IRC_id
+  integer           :: ALBSND_id
+  integer           :: ALBSNI_id
+  integer           :: BGAP_id
+  integer           :: WGAP_id
+  integer           :: TGV_id
+  integer           :: TGB_id
+  integer           :: Q2V_id
+  integer           :: Q2B_id
+  integer           :: CHV_id
+  integer           :: CHB_id
   integer           :: SHG_id
   integer           :: SHC_id
+  integer           :: SHB_id
   integer           :: EVG_id
+  integer           :: EVB_id
   integer           :: EVC_id
-  integer           :: TR_id
   integer           :: GHV_id
-  integer           :: T2MV_id
-  integer           :: PSNSUN_id
-  integer           :: PSNSHA_id
-  integer           :: Q2V_id
-  integer           :: CHV2_id
+  integer           :: GHB_id
+  integer           :: IRG_id
+  integer           :: IRC_id
+  integer           :: IRB_id
+  integer           :: TR_id
   integer           :: CHLEAF_id
   integer           :: CHUC_id
-! bare_flux new vars
-  integer           :: TGB_id
-  integer           :: CMB_id
-  integer           :: CHB_id
-  integer           :: TAUXB_id
-  integer           :: TAUYB_id
-  integer           :: IRB_id
-  integer           :: SHB_id
-  integer           :: EVB_id
-  integer           :: GHB_id
-  integer           :: T2MB_id
-  integer           :: Q2B_id
+  integer           :: CHV2_id
   integer           :: CHB2_id
-  integer           :: SSOIL_id
-! phasechange new vars
-  integer           :: QMELT_id
-  integer           :: IMELT_id
-  integer           :: PONDING_id
+  integer           :: EDIR_id
+! new vars
+  integer           :: ERRSW_id
+  integer           :: ERRENG_id
+  integer           :: T2M_id
+  integer           :: FSNO_id
+  integer           :: TAUX_id
+  integer           :: TAUY_id
+  integer           :: FIRA_id
+  integer           :: FSH_id
+  integer           :: FCEV_id
+  integer           :: FGEV_id
+  integer           :: FCTR_id
+  integer           :: TRAD_id
+  integer           :: PSN_id
+  integer           :: APAR_id
+  integer           :: BTRANI_id
+  integer           :: BTRAN_id
+  integer           :: TS_id
+  integer           :: Q2E_id
+  integer           :: EMISSI_id
+  integer           :: PAH_id
+  integer           :: Z0WRF_id
+
+! not direct Energy output
+!  integer           :: PAHV_id
+!  integer           :: PAHG_id
+!  integer           :: PAHB_id
+! thermoprop new vars
+!  integer           :: DF_id
+!  integer           :: HCPCT_id
+!  integer           :: FACT_id
+! radiation new vars
+!  integer           :: FSUN_id
+!  integer           :: PARSUN_id
+!  integer           :: PARSHA_id
+! vege_flux new vars
+!  integer           :: CMV_id
+!  integer           :: TAUXV_id
+!  integer           :: TAUYV_id
+!  integer           :: PSNSUN_id
+!  integer           :: PSNSHA_id
+! bare_flux new vars
+!  integer           :: CMB_id
+!  integer           :: TAUXB_id
+!  integer           :: TAUYB_id
 
 contains
 
@@ -244,25 +269,26 @@ contains
     iret = nf90_def_var(ncid, "QINTS",       NF90_FLOAT, (/time_dim/), QINTS_id)
     iret = nf90_def_var(ncid, "QDRIPS",      NF90_FLOAT, (/time_dim/), QDRIPS_id)
     iret = nf90_def_var(ncid, "QTHROS",      NF90_FLOAT, (/time_dim/), QTHROS_id)
-    iret = nf90_def_var(ncid, "PAHV",        NF90_FLOAT, (/time_dim/), PAHV_id)
-    iret = nf90_def_var(ncid, "PAHG",        NF90_FLOAT, (/time_dim/), PAHG_id)
-    iret = nf90_def_var(ncid, "PAHB",        NF90_FLOAT, (/time_dim/), PAHB_id)
+! precip heat new vars
+    !iret = nf90_def_var(ncid, "PAHV",        NF90_FLOAT, (/time_dim/), PAHV_id)
+    !iret = nf90_def_var(ncid, "PAHG",        NF90_FLOAT, (/time_dim/), PAHG_id)
+    !iret = nf90_def_var(ncid, "PAHB",        NF90_FLOAT, (/time_dim/), PAHB_id)
     iret = nf90_def_var(ncid, "EDIR",        NF90_FLOAT, (/time_dim/), EDIR_id)
 ! thermoprop new vars
-    iret = nf90_def_var(ncid, "DF",          NF90_FLOAT, (/time_dim,snso_dim/), DF_id)
-    iret = nf90_def_var(ncid, "HCPCT",       NF90_FLOAT, (/time_dim,snso_dim/), HCPCT_id)
-    iret = nf90_def_var(ncid, "FACT",        NF90_FLOAT, (/time_dim,snso_dim/), FACT_id)
+    !iret = nf90_def_var(ncid, "DF",          NF90_FLOAT, (/time_dim,snso_dim/), DF_id)
+    !iret = nf90_def_var(ncid, "HCPCT",       NF90_FLOAT, (/time_dim,snso_dim/), HCPCT_id)
+    !iret = nf90_def_var(ncid, "FACT",        NF90_FLOAT, (/time_dim,snso_dim/), FACT_id)
     iret = nf90_def_var(ncid, "SNLIQV",      NF90_FLOAT, (/time_dim,snow_dim/), SNLIQV_id)
     iret = nf90_def_var(ncid, "EPORE",       NF90_FLOAT, (/time_dim,snow_dim/), EPORE_id)
     iret = nf90_def_var(ncid, "SNICEV",      NF90_FLOAT, (/time_dim,snow_dim/), SNICEV_id)
 ! radiation new vars
     iret = nf90_def_var(ncid, "ALBOLD",      NF90_FLOAT, (/time_dim/), ALBOLD_id)
     iret = nf90_def_var(ncid, "TAUSS",       NF90_FLOAT, (/time_dim/), TAUSS_id)
-    iret = nf90_def_var(ncid, "FSUN",        NF90_FLOAT, (/time_dim/), FSUN_id)
+    !iret = nf90_def_var(ncid, "FSUN",        NF90_FLOAT, (/time_dim/), FSUN_id)
     iret = nf90_def_var(ncid, "LAISUN",      NF90_FLOAT, (/time_dim/), LAISUN_id)
     iret = nf90_def_var(ncid, "LAISHA",      NF90_FLOAT, (/time_dim/), LAISHA_id)
-    iret = nf90_def_var(ncid, "PARSUN",      NF90_FLOAT, (/time_dim/), PARSUN_id)
-    iret = nf90_def_var(ncid, "PARSHA",      NF90_FLOAT, (/time_dim/), PARSHA_id)
+    !iret = nf90_def_var(ncid, "PARSUN",      NF90_FLOAT, (/time_dim/), PARSUN_id)
+    !iret = nf90_def_var(ncid, "PARSHA",      NF90_FLOAT, (/time_dim/), PARSHA_id)
     iret = nf90_def_var(ncid, "SAV",         NF90_FLOAT, (/time_dim/), SAV_id)
     iret = nf90_def_var(ncid, "SAG",         NF90_FLOAT, (/time_dim/), SAG_id)
     iret = nf90_def_var(ncid, "FSA",         NF90_FLOAT, (/time_dim/), FSA_id)
@@ -278,15 +304,15 @@ contains
     iret = nf90_def_var(ncid, "TAH",         NF90_FLOAT, (/time_dim/), TAH_id)
     iret = nf90_def_var(ncid, "TGV",         NF90_FLOAT, (/time_dim/), TGV_id)
     iret = nf90_def_var(ncid, "EAH",         NF90_FLOAT, (/time_dim/), EAH_id)
-    iret = nf90_def_var(ncid, "CMV",         NF90_FLOAT, (/time_dim/), CMV_id)
+    !iret = nf90_def_var(ncid, "CMV",         NF90_FLOAT, (/time_dim/), CMV_id)
     iret = nf90_def_var(ncid, "CM",          NF90_FLOAT, (/time_dim/), CM_id)
     iret = nf90_def_var(ncid, "CHV",         NF90_FLOAT, (/time_dim/), CHV_id)
     iret = nf90_def_var(ncid, "CH",          NF90_FLOAT, (/time_dim/), CH_id)
     iret = nf90_def_var(ncid, "QSFC",        NF90_FLOAT, (/time_dim/), QSFC_id)
     iret = nf90_def_var(ncid, "RSSUN",       NF90_FLOAT, (/time_dim/), RSSUN_id)
     iret = nf90_def_var(ncid, "RSSHA",       NF90_FLOAT, (/time_dim/), RSSHA_id)
-    iret = nf90_def_var(ncid, "TAUXV",       NF90_FLOAT, (/time_dim/), TAUXV_id)
-    iret = nf90_def_var(ncid, "TAUYV",       NF90_FLOAT, (/time_dim/), TAUYV_id)
+    !iret = nf90_def_var(ncid, "TAUXV",       NF90_FLOAT, (/time_dim/), TAUXV_id)
+    !iret = nf90_def_var(ncid, "TAUYV",       NF90_FLOAT, (/time_dim/), TAUYV_id)
     iret = nf90_def_var(ncid, "IRG",         NF90_FLOAT, (/time_dim/), IRG_id)
     iret = nf90_def_var(ncid, "IRC",         NF90_FLOAT, (/time_dim/), IRC_id)
     iret = nf90_def_var(ncid, "SHG",         NF90_FLOAT, (/time_dim/), SHG_id)
@@ -296,18 +322,18 @@ contains
     iret = nf90_def_var(ncid, "TR",          NF90_FLOAT, (/time_dim/), TR_id)
     iret = nf90_def_var(ncid, "GHV",         NF90_FLOAT, (/time_dim/), GHV_id)
     iret = nf90_def_var(ncid, "T2MV",        NF90_FLOAT, (/time_dim/), T2MV_id)
-    iret = nf90_def_var(ncid, "PSNSUN",      NF90_FLOAT, (/time_dim/), PSNSUN_id)
-    iret = nf90_def_var(ncid, "PSNSHA",      NF90_FLOAT, (/time_dim/), PSNSHA_id)
+    !iret = nf90_def_var(ncid, "PSNSUN",      NF90_FLOAT, (/time_dim/), PSNSUN_id)
+    !iret = nf90_def_var(ncid, "PSNSHA",      NF90_FLOAT, (/time_dim/), PSNSHA_id)
     iret = nf90_def_var(ncid, "Q2V",         NF90_FLOAT, (/time_dim/), Q2V_id)
     iret = nf90_def_var(ncid, "CHV2",        NF90_FLOAT, (/time_dim/), CHV2_id)
     iret = nf90_def_var(ncid, "CHLEAF",      NF90_FLOAT, (/time_dim/), CHLEAF_id)
     iret = nf90_def_var(ncid, "CHUC",        NF90_FLOAT, (/time_dim/), CHUC_id)
 ! bare_flux new vars
     iret = nf90_def_var(ncid, "TGB",         NF90_FLOAT, (/time_dim/), TGB_id)
-    iret = nf90_def_var(ncid, "CMB",         NF90_FLOAT, (/time_dim/), CMB_id)
+    !iret = nf90_def_var(ncid, "CMB",         NF90_FLOAT, (/time_dim/), CMB_id)
     iret = nf90_def_var(ncid, "CHB",         NF90_FLOAT, (/time_dim/), CHB_id)
-    iret = nf90_def_var(ncid, "TAUXB",       NF90_FLOAT, (/time_dim/), TAUXB_id)
-    iret = nf90_def_var(ncid, "TAUYB",       NF90_FLOAT, (/time_dim/), TAUYB_id)
+    !iret = nf90_def_var(ncid, "TAUXB",       NF90_FLOAT, (/time_dim/), TAUXB_id)
+    !iret = nf90_def_var(ncid, "TAUYB",       NF90_FLOAT, (/time_dim/), TAUYB_id)
     iret = nf90_def_var(ncid, "IRB",         NF90_FLOAT, (/time_dim/), IRB_id)
     iret = nf90_def_var(ncid, "SHB",         NF90_FLOAT, (/time_dim/), SHB_id)
     iret = nf90_def_var(ncid, "EVB",         NF90_FLOAT, (/time_dim/), EVB_id)
@@ -320,6 +346,28 @@ contains
     iret = nf90_def_var(ncid, "QMELT",       NF90_FLOAT, (/time_dim/), QMELT_id)
     iret = nf90_def_var(ncid, "IMELT",       NF90_FLOAT, (/time_dim,snso_dim/), IMELT_id)
     iret = nf90_def_var(ncid, "PONDING",     NF90_FLOAT, (/time_dim/), PONDING_id)
+! Energy main new vars
+    iret = nf90_def_var(ncid, "BTRANI",      NF90_FLOAT, (/time_dim,soil_dim/), BTRANI_id)
+    iret = nf90_def_var(ncid, "ERRSW",       NF90_FLOAT, (/time_dim/), ERRSW_id)
+    iret = nf90_def_var(ncid, "ERRENG",      NF90_FLOAT, (/time_dim/), ERRENG_id)
+    iret = nf90_def_var(ncid, "T2M",         NF90_FLOAT, (/time_dim/), T2M_id)
+    iret = nf90_def_var(ncid, "FSNO",        NF90_FLOAT, (/time_dim/), FSNO_id)
+    iret = nf90_def_var(ncid, "TAUX",        NF90_FLOAT, (/time_dim/), TAUX_id)
+    iret = nf90_def_var(ncid, "TAUY",        NF90_FLOAT, (/time_dim/), TAUY_id)
+    iret = nf90_def_var(ncid, "FIRA",        NF90_FLOAT, (/time_dim/), FIRA_id)
+    iret = nf90_def_var(ncid, "FSH",         NF90_FLOAT, (/time_dim/), FSH_id)
+    iret = nf90_def_var(ncid, "FCEV",        NF90_FLOAT, (/time_dim/), FCEV_id)
+    iret = nf90_def_var(ncid, "FGEV",        NF90_FLOAT, (/time_dim/), FGEV_id)
+    iret = nf90_def_var(ncid, "FCTR",        NF90_FLOAT, (/time_dim/), FCTR_id)
+    iret = nf90_def_var(ncid, "TRAD",        NF90_FLOAT, (/time_dim/), TRAD_id)
+    iret = nf90_def_var(ncid, "PSN",         NF90_FLOAT, (/time_dim/), PSN_id)
+    iret = nf90_def_var(ncid, "APAR",        NF90_FLOAT, (/time_dim/), APAR_id)
+    iret = nf90_def_var(ncid, "BTRAN",       NF90_FLOAT, (/time_dim/), BTRAN_id)
+    iret = nf90_def_var(ncid, "TS",          NF90_FLOAT, (/time_dim/), TS_id)
+    iret = nf90_def_var(ncid, "Q2E",         NF90_FLOAT, (/time_dim/), Q2E_id)
+    iret = nf90_def_var(ncid, "EMISSI",      NF90_FLOAT, (/time_dim/), EMISSI_id)
+    iret = nf90_def_var(ncid, "PAH",         NF90_FLOAT, (/time_dim/), PAH_id)
+    iret = nf90_def_var(ncid, "Z0WRF",       NF90_FLOAT, (/time_dim/), Z0WRF_id)
 
 
     iret = nf90_enddef(ncid)
@@ -333,12 +381,14 @@ contains
                      QSNBOT,QTLDRN,QINSUR,QSEVA,QSDEW,QSNFRO,QSNSUB,ETRANI,&
                      WCND,QDRAIN,SNOFLOW,FCRMAX,FICEOLD,errwat,QRAIN,QSNOW,QVAP,&
                      IRAMTSI,IRSIRATE,IRCNTSI,IRCNTMI,IRCNTFI,RAIN,SNOW,IREVPLOS,FIRR,EIRR,&
-                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,PAHV,PAHG,PAHB,EDIR,&
-                     DF,HCPCT,SNICEV,SNLIQV,EPORE,FACT,FSUN,LAISUN,LAISHA,PARSUN,PARSHA,SAV,&
+                     SNOWHIN,TG,QINTR,QDRIPR,QTHROR,QINTS,QDRIPS,QTHROS,EDIR,&
+                     SNICEV,SNLIQV,EPORE,LAISUN,LAISHA,SAV,&
                      SAG,FSA,FSR,FSRV,FSRG,BGAP,WGAP,ALBSND,ALBSNI,ALBOLD,TAUSS,SNEQVO,&
-                     TAH,TGV,EAH,CMV,CM,CHV,CH,QSFC,RSSUN,RSSHA,TAUXV,TAUYV,IRG,IRC,SHG,SHC,&
-                     EVG,EVC,TR,GHV,T2MV,PSNSUN,PSNSHA,Q2V,CHV2,CHLEAF,CHUC,&
-                     TGB,CMB,CHB,TAUXB,TAUYB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT)
+                     TAH,TGV,EAH,CM,CHV,CH,QSFC,RSSUN,RSSHA,IRG,IRC,SHG,SHC,&
+                     EVG,EVC,TR,GHV,T2MV,Q2V,CHV2,CHLEAF,CHUC,&
+                     TGB,CHB,IRB,SHB,EVB,GHB,T2MB,Q2B,CHB2,SSOIL,QMELT,PONDING,IMELT,&
+                     ERRSW,ERRENG,T2M,FSNO,TAUX,TAUY,FIRA,FSH,FCEV,FGEV,FCTR,TRAD,PSN,APAR,&
+                     BTRANI,BTRAN,TS,Q2E,EMISSI,PAH,Z0WRF)
 
      integer                       :: itime
      integer                       :: nsoil
@@ -413,14 +463,14 @@ contains
      real                          :: QINTS
      real                          :: QDRIPS
      real                          :: QTHROS
-     real                          :: PAHV
-     real                          :: PAHG
-     real                          :: PAHB
+     !real                          :: PAHV
+     !real                          :: PAHG
+     !real                          :: PAHB
      real                          :: EDIR
 ! thermoprop new vars
-     real, dimension(nsoil+nsnow)  :: DF
-     real, dimension(nsoil+nsnow)  :: HCPCT
-     real, dimension(nsoil+nsnow)  :: FACT
+     !real, dimension(nsoil+nsnow)  :: DF
+     !real, dimension(nsoil+nsnow)  :: HCPCT
+     !real, dimension(nsoil+nsnow)  :: FACT
      real, dimension(nsnow)        :: SNICEV
      real, dimension(nsnow)        :: SNLIQV
      real, dimension(nsnow)        :: EPORE
@@ -428,11 +478,11 @@ contains
      real                          :: SNEQVO 
      real                          :: ALBOLD  
      real                          :: TAUSS   
-     REAL                          :: FSUN    
+     !REAL                          :: FSUN    
      REAL                          :: LAISUN  
      REAL                          :: LAISHA  
-     REAL                          :: PARSUN  
-     REAL                          :: PARSHA  
+     !REAL                          :: PARSUN  
+     !REAL                          :: PARSHA  
      REAL                          :: SAV     
      REAL                          :: SAG     
      REAL                          :: FSA     
@@ -447,15 +497,15 @@ contains
      REAL                          :: TAH
      REAL                          :: TGV
      REAL                          :: EAH
-     REAL                          :: CMV
+     !REAL                          :: CMV
      REAL                          :: CM
      REAL                          :: CHV
      REAL                          :: CH
      REAL                          :: QSFC
      REAL                          :: RSSUN
      REAL                          :: RSSHA
-     REAL                          :: TAUXV
-     REAL                          :: TAUYV
+     !REAL                          :: TAUXV
+     !REAL                          :: TAUYV
      REAL                          :: IRG
      REAL                          :: IRC
      REAL                          :: SHG
@@ -465,18 +515,18 @@ contains
      REAL                          :: TR
      REAL                          :: GHV
      REAL                          :: T2MV
-     REAL                          :: PSNSUN
-     REAL                          :: PSNSHA
+     !REAL                          :: PSNSUN
+     !REAL                          :: PSNSHA
      REAL                          :: Q2V
      REAL                          :: CHV2
      REAL                          :: CHLEAF
      REAL                          :: CHUC
 ! bare_flux new vars
      REAL                          :: TGB ! bare ground temperature
-     REAL                          :: CMB     ! momentum drag coefficient
+     !REAL                          :: CMB     ! momentum drag coefficient
      REAL                          :: CHB      !sensible heat exchange coefficient
-     REAL                          :: TAUXB  !wind stress: e-w (n/m2)
-     REAL                          :: TAUYB  !wind stress: n-s (n/m2)
+     !REAL                          :: TAUXB  !wind stress: e-w (n/m2)
+     !REAL                          :: TAUYB  !wind stress: n-s (n/m2)
      REAL                          :: IRB
      REAL                          :: SHB
      REAL                          :: EVB
@@ -489,8 +539,28 @@ contains
      integer, dimension(nsoil+nsnow) :: IMELT
      REAL                            :: QMELT
      REAL                            :: PONDING
-
-
+! Energy main new vars
+     REAL                            :: ERRSW
+     REAL                            :: ERRENG
+     REAL                            :: T2M
+     REAL                            :: FSNO
+     REAL                            :: TAUX
+     REAL                            :: TAUY
+     REAL                            :: FIRA
+     REAL                            :: FSH
+     REAL                            :: FCEV
+     REAL                            :: FGEV
+     REAL                            :: FCTR
+     REAL                            :: TRAD
+     REAL                            :: PSN
+     REAL                            :: APAR
+     real, dimension(nsoil)          :: BTRANI
+     REAL                            :: BTRAN
+     REAL                            :: TS
+     REAL                            :: Q2E
+     REAL                            :: EMISSI
+     REAL                            :: PAH
+     real                            :: Z0WRF
 
 ! assign values
      iret = nf90_put_var(ncid, ISNOW_id,    ISNOW,         start=(/itime+1/))
@@ -563,25 +633,25 @@ contains
      iret = nf90_put_var(ncid, QINTS_id,    QINTS,         start=(/itime+1/))
      iret = nf90_put_var(ncid, QDRIPS_id,   QDRIPS,        start=(/itime+1/))
      iret = nf90_put_var(ncid, QTHROS_id,   QTHROS,        start=(/itime+1/))
-     iret = nf90_put_var(ncid, PAHV_id,     PAHV,          start=(/itime+1/))
-     iret = nf90_put_var(ncid, PAHG_id,     PAHG,          start=(/itime+1/))
-     iret = nf90_put_var(ncid, PAHB_id,     PAHB,          start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PAHV_id,     PAHV,          start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PAHG_id,     PAHG,          start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PAHB_id,     PAHB,          start=(/itime+1/))
      iret = nf90_put_var(ncid, EDIR_id,     EDIR,          start=(/itime+1/))
 ! thermoprop new vars
-     iret = nf90_put_var(ncid, DF_id,       DF,            start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
-     iret = nf90_put_var(ncid, HCPCT_id,    HCPCT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
-     iret = nf90_put_var(ncid, FACT_id,     FACT,          start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     !iret = nf90_put_var(ncid, DF_id,       DF,            start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     !iret = nf90_put_var(ncid, HCPCT_id,    HCPCT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
+     !iret = nf90_put_var(ncid, FACT_id,     FACT,          start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
      iret = nf90_put_var(ncid, SNICEV_id,   SNICEV,        start=(/itime+1,1/), count=(/1,nsnow/))
      iret = nf90_put_var(ncid, SNLIQV_id,   SNLIQV,        start=(/itime+1,1/), count=(/1,nsnow/))
      iret = nf90_put_var(ncid, EPORE_id,    EPORE,         start=(/itime+1,1/), count=(/1,nsnow/))
 ! radiation new vars
      iret = nf90_put_var(ncid, ALBOLD_id,   ALBOLD,        start=(/itime+1/))
      iret = nf90_put_var(ncid, TAUSS_id,    TAUSS,         start=(/itime+1/))
-     iret = nf90_put_var(ncid, FSUN_id,     FSUN,          start=(/itime+1/))
+     !iret = nf90_put_var(ncid, FSUN_id,     FSUN,          start=(/itime+1/))
      iret = nf90_put_var(ncid, LAISUN_id,   LAISUN,        start=(/itime+1/))
      iret = nf90_put_var(ncid, LAISHA_id,   LAISHA,        start=(/itime+1/))
-     iret = nf90_put_var(ncid, PARSUN_id,   PARSUN,        start=(/itime+1/))
-     iret = nf90_put_var(ncid, PARSHA_id,   PARSHA,        start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PARSUN_id,   PARSUN,        start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PARSHA_id,   PARSHA,        start=(/itime+1/))
      iret = nf90_put_var(ncid, SAV_id,      SAV,           start=(/itime+1/))
      iret = nf90_put_var(ncid, SAG_id,      SAG,           start=(/itime+1/))
      iret = nf90_put_var(ncid, FSA_id,      FSA,           start=(/itime+1/))
@@ -597,15 +667,15 @@ contains
      iret = nf90_put_var(ncid, TAH_id,      TAH,           start=(/itime+1/))
      iret = nf90_put_var(ncid, TGV_id,      TGV,           start=(/itime+1/))
      iret = nf90_put_var(ncid, EAH_id,      EAH,           start=(/itime+1/))
-     iret = nf90_put_var(ncid, CMV_id,      CMV,           start=(/itime+1/))
+     !iret = nf90_put_var(ncid, CMV_id,      CMV,           start=(/itime+1/))
      iret = nf90_put_var(ncid, CM_id,       CM,            start=(/itime+1/))
      iret = nf90_put_var(ncid, CHV_id,      CHV,           start=(/itime+1/))
      iret = nf90_put_var(ncid, CH_id,       CH,            start=(/itime+1/))
      iret = nf90_put_var(ncid, QSFC_id,     QSFC,          start=(/itime+1/))
      iret = nf90_put_var(ncid, RSSUN_id,    RSSUN,         start=(/itime+1/))
      iret = nf90_put_var(ncid, RSSHA_id,    RSSHA,         start=(/itime+1/))
-     iret = nf90_put_var(ncid, TAUXV_id,    TAUXV,         start=(/itime+1/))
-     iret = nf90_put_var(ncid, TAUYV_id,    TAUYV,         start=(/itime+1/))
+     !iret = nf90_put_var(ncid, TAUXV_id,    TAUXV,         start=(/itime+1/))
+     !iret = nf90_put_var(ncid, TAUYV_id,    TAUYV,         start=(/itime+1/))
      iret = nf90_put_var(ncid, IRG_id,      IRG,           start=(/itime+1/))
      iret = nf90_put_var(ncid, IRC_id,      IRC,           start=(/itime+1/))
      iret = nf90_put_var(ncid, SHG_id,      SHG,           start=(/itime+1/))
@@ -615,18 +685,18 @@ contains
      iret = nf90_put_var(ncid, TR_id,       TR,            start=(/itime+1/))
      iret = nf90_put_var(ncid, GHV_id,      GHV,           start=(/itime+1/))
      iret = nf90_put_var(ncid, T2MV_id,     T2MV,          start=(/itime+1/))
-     iret = nf90_put_var(ncid, PSNSUN_id,   PSNSUN,        start=(/itime+1/))
-     iret = nf90_put_var(ncid, PSNSHA_id,   PSNSHA,        start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PSNSUN_id,   PSNSUN,        start=(/itime+1/))
+     !iret = nf90_put_var(ncid, PSNSHA_id,   PSNSHA,        start=(/itime+1/))
      iret = nf90_put_var(ncid, Q2V_id,      Q2V,           start=(/itime+1/))
      iret = nf90_put_var(ncid, CHV2_id,     CHV2,          start=(/itime+1/))
      iret = nf90_put_var(ncid, CHLEAF_id,   CHLEAF,        start=(/itime+1/))
      iret = nf90_put_var(ncid, CHUC_id,     CHUC,          start=(/itime+1/))
 ! bare_flux new vars
      iret = nf90_put_var(ncid, TGB_id,      TGB,           start=(/itime+1/))
-     iret = nf90_put_var(ncid, CMB_id,      CMB,           start=(/itime+1/))
+     !iret = nf90_put_var(ncid, CMB_id,      CMB,           start=(/itime+1/))
      iret = nf90_put_var(ncid, CHB_id,      CHB,           start=(/itime+1/))
-     iret = nf90_put_var(ncid, TAUXB_id,    TAUXB,         start=(/itime+1/))
-     iret = nf90_put_var(ncid, TAUYB_id,    TAUYB,         start=(/itime+1/))
+     !iret = nf90_put_var(ncid, TAUXB_id,    TAUXB,         start=(/itime+1/))
+     !iret = nf90_put_var(ncid, TAUYB_id,    TAUYB,         start=(/itime+1/))
      iret = nf90_put_var(ncid, IRB_id,      IRB,           start=(/itime+1/))
      iret = nf90_put_var(ncid, SHB_id,      SHB,           start=(/itime+1/))
      iret = nf90_put_var(ncid, EVB_id,      EVB,           start=(/itime+1/))
@@ -639,7 +709,28 @@ contains
      iret = nf90_put_var(ncid, IMELT_id,    IMELT,         start=(/itime+1,1/), count=(/1,nsoil+nsnow/))
      iret = nf90_put_var(ncid, QMELT_id,    QMELT,         start=(/itime+1/))
      iret = nf90_put_var(ncid, PONDING_id,  PONDING,       start=(/itime+1/))
-
+! Energy main new vars
+     iret = nf90_put_var(ncid, BTRANI_id,   BTRANI,        start=(/itime+1,1/), count=(/1,nsoil/))
+     iret = nf90_put_var(ncid, ERRSW_id,    ERRSW,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, ERRENG_id,   ERRENG,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, T2M_id,      T2M,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSNO_id,     FSNO,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, TAUX_id,     TAUX,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, TAUY_id,     TAUY,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, FIRA_id,     FIRA,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, FSH_id,      FSH,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, FCEV_id,     FCEV,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, FGEV_id,     FGEV,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, FCTR_id,     FCTR,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, TRAD_id,     TRAD,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, PSN_id,      PSN,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, APAR_id,     APAR,          start=(/itime+1/))
+     iret = nf90_put_var(ncid, BTRAN_id,    BTRAN,         start=(/itime+1/))
+     iret = nf90_put_var(ncid, TS_id,       TS,            start=(/itime+1/))
+     iret = nf90_put_var(ncid, Q2E_id,      Q2E,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, EMISSI_id,   EMISSI,        start=(/itime+1/))
+     iret = nf90_put_var(ncid, PAH_id,      PAH,           start=(/itime+1/))
+     iret = nf90_put_var(ncid, Z0WRF_id,    Z0WRF,         start=(/itime+1/))
 
 
    end subroutine add_to_output
