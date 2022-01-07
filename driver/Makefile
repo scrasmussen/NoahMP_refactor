@@ -1,53 +1,37 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .f90
+.SUFFIXES: .o .F90
 
 include ../user_build_options
 
-OBJS = water_output.o water_driver.o
+OBJS = phenology_output.o phenology_driver.o
 
 all:	$(OBJS)
 
-water_driver.o: water_driver.f90
-
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) -I../src -I./ $(*).f90 
-
-water_output.o: water_output.f90
-
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) -I../src -I./ $(*).f90 
-
-#
-# This command cleans up object (etc) files:
-#
+.F90.o:
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) -I../src -I../utility $(NETCDFMOD) $(*).F90
 
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod *.exe
 
 #
 # Dependencies:
 #
 
-water_output.o: ../src/WaterType.o \
-                ../src/EnergyType.o 
-water_driver.o: water_output.o \
-                        ../src/NamelistRead.o \
-			../src/LevelsType.o \
-			../src/DomainType.o \
-			../src/OptionsType.o \
-			../src/ParametersType.o \
-                        ../src/ForcingType.o \
-                        ../src/EnergyType.o \
-			../src/WaterType.o \
-                        ../src/WaterModule.o \
-                        ../src/CanopyWaterModule.o \
-                        ../src/SnowWaterModule.o   \
-                        ../src/SnowWaterRenew.o \
-                        ../src/SnowLayerChange.o \
-			../src/SoilWaterModule.o \
-			../src/SoilWaterRetentionCoeff.o \
-                        ../src/SurfaceRunoffInfiltration.o \
-			../src/SurfaceRunoffModule.o \
-			../src/SoilWaterMovement.o \
-			../src/SubsurfaceRunoffModule.o
+phenology_output.o: ../utility/Machine.o \
+		../src/NoahmpVarType.o \
+		../src/InputVarType.o
+
+PhenologyDriver.o: ../utility/Machine.o \
+		   ../src/NoahmpVarType.o \
+		   ../src/InputVarType.o \
+		   ../src/ConstantDefineMod.o \
+		   ../src/InputVarInitMod.o \
+                   ../src/ConfigVarInitMod.o \
+                   ../src/EnergyVarInitMod.o \
+                   ../src/WaterVarInitMod.o \
+                   ../src/BiochemVarInitMod.o \
+                   ../src/PhenologyMainMod.o \
+                   phenology_output
 

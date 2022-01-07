@@ -1,4 +1,4 @@
-module EnergyType
+module EnergyVarType
 
 !!! Define column (1-D) Noah-MP Energy variables
 !!! Energy variable initialization is done in EnergyInit.f90
@@ -22,6 +22,12 @@ module EnergyType
 
     ! define specific energy state variables
     real(kind=kind_noahmp) :: TAH
+    real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
+    real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
+    real(kind=kind_noahmp) :: LAI             ! leaf area index
+    real(kind=kind_noahmp) :: SAI             ! stem area index
+    real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
+    real(kind=kind_noahmp) :: TROOT           ! root-zone averaged temperature (k)
 
   end type state_type
 
@@ -30,6 +36,11 @@ module EnergyType
 
     ! define specific energy parameter variables
     real(kind=kind_noahmp) :: RAHC
+    real(kind=kind_noahmp) :: HVT              ! top of canopy (m)
+    real(kind=kind_noahmp) :: HVB              ! bottom of canopy (m)
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
 
   end type parameter_type
 
@@ -37,7 +48,7 @@ module EnergyType
   type :: diagnose_type
 
     ! define specific energy diagnose variables
-    real(kind=kind_noahmp) :: xxx
+    
 
   end type diagnose_type
 
@@ -51,4 +62,4 @@ module EnergyType
 
   end type energy_type
 
-end module EnergyType
+end module EnergyVarType

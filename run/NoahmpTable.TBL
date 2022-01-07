@@ -367,7 +367,21 @@
   BATS_NIR_DIR  = 0.4   !cosz factor for direct NIR snow albedo Yang97 eqn. 16
   RSURF_SNOW = 50.0     !surface resistence for snow [s/m]
   RSURF_EXP = 5.0       !exponent in the shape parameter for soil resistance option 1
-
+  C2_SNOWCOMPACT = 21.e-3 !overburden snow compaction parameter (m3/kg) cenlin
+  C3_SNOWCOMPACT = 2.5e-6 !snow desctructive metamorphism compaction parameter1 [1/s] cenlin 
+  C4_SNOWCOMPACT = 0.04   !snow desctructive metamorphism compaction parameter2 [1/k] cenlin
+  C5_SNOWCOMPACT = 2.0    !snow desctructive metamorphism compaction parameter3  cenlin
+  DM_SNOWCOMPACT = 100.0  !upper Limit on destructive metamorphism compaction [kg/m3] cenlin
+  ETA0_SNOWCOMPACT = 0.8e+6 !snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6 cenlin
+  SNLIQMAXFRAC   = 0.4    !maximum liquid water fraction in snow cenlin
+  SWEMAXGLA    = 5000.0 ! Maximum SWE allowed at glaciers (mm)  cenlin
+  WSLMAX = 5000.0      ! maximum lake water storage (mm)  cenlin
+  ROUS = 0.20   ! specific yield [-] for Niu et al. 2007 groundwater scheme (OPT_RUNSUB=1)
+  CMIC = 0.20   ! microprore content (0.0-1.0), 0.0: close to free drainage
+  SNOWDEN_MIN = 120.0  ! minimum fresh snowfall density (kg/m3)
+  CLASS_ALB_REF = 0.55 ! reference snow albedo in CLASS scheme
+  CLASS_SNO_AGE = 3600.0  ! snow aging e-folding time (s) in CLASS albedo scheme
+  CLASS_ALB_NEW = 0.84  ! fresh snow albedo in CLASS scheme
 /
 
 &noahmp_irrigation_parameters
@@ -409,17 +423,17 @@ GDDS2      =  625.0,  675.0,  718.0,  718.0,  718.0,  ! GDD from seeding to init
 GDDS3      =  933.0, 1183.0,  933.0,  933.0,  933.0,  ! GDD from seeding to post vegetative
 GDDS4      = 1103.0, 1253.0, 1103.0, 1103.0, 1103.0,  ! GDD from seeding to intial reproductive
 GDDS5      = 1555.0, 1605.0, 1555.0, 1555.0, 1555.0,  ! GDD from seeding to pysical maturity
-C3PSN      =    0.0,    1.0,    1.0,    1.0,    1.0,  ! transfer crop-specific photosynthetic parameters
-KC25       =   30.0,   30.0,   30.0,   30.0,   30.0,  ! Zhe Zhang
-AKC        =    2.1,    2.1,    2.1,    2.1,    2.1,  ! 2020-02-05
-KO25       =   3.E4,   3.E4,   3.E4,   3.E4,   3.E4,  !
-AKO        =    1.2,    1.2,    1.2,    1.2,    1.2,  !
-AVCMX      =    2.4,    2.4,    2.4,    2.4,    2.4,  !
-VCMX25     =   60.0,   80.0,   60.0,   60.0,   55.0,  !
-BP         =   4.E4,   1.E4,   2.E3,   2.E3,   2.E3,  !
-MP         =     4.,     9.,     6.,     9.,     9.,  !
-FOLNMX     =    1.5,    1.5,    1.5,    1.5,    1.5,  !
-QE25       =   0.05,   0.06,   0.06,   0.06,   0.06,  !
+C3PSNI     =    0.0,    1.0,    1.0,    1.0,    1.0,  ! transfer crop-specific photosynthetic parameters
+KC25I      =   30.0,   30.0,   30.0,   30.0,   30.0,  ! Zhe Zhang
+AKCI       =    2.1,    2.1,    2.1,    2.1,    2.1,  ! 2020-02-05
+KO25I      =   3.E4,   3.E4,   3.E4,   3.E4,   3.E4,  !
+AKOI       =    1.2,    1.2,    1.2,    1.2,    1.2,  !
+AVCMXI     =    2.4,    2.4,    2.4,    2.4,    2.4,  !
+VCMX25I    =   60.0,   80.0,   60.0,   60.0,   55.0,  !
+BPI        =   4.E4,   1.E4,   2.E3,   2.E3,   2.E3,  !
+MPI        =     4.,     9.,     6.,     9.,     9.,  !
+FOLNMXI    =    1.5,    1.5,    1.5,    1.5,    1.5,  !
+QE25I      =   0.05,   0.06,   0.06,   0.06,   0.06,  !
 C3C4       =      2,      1,      2,      2,      2,  ! photosynthetic pathway:  1. = c3 2. = c4
 Aref       =    7.0,    7.0,    7.0,    7.0,    7.0,  ! reference maximum CO2 assimulation rate
 PSNRF      =   0.85,   0.85,   0.85,   0.85,   0.85,  ! CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
@@ -557,6 +571,7 @@ BIO2LAI    =  0.015,  0.030,  0.015,  0.015,  0.015,  ! leaf are per living leaf
 !-----------------------------------!
 ! For simple drainage model         !
 !-----------------------------------!
+NSOILTYPE = 19  ! num_soil_types
 DRAIN_LAYER_OPT  =  4
     ! 0 - from one specified layer by TD_DEPTH,
     ! 1 - from layers 1 & 2,
@@ -649,23 +664,18 @@ KLAT_FAC   =   1.30,   1.80,   2.10,   2.60,   2.90,   2.50,   2.30,   3.00,   2
  ! this part is originally from GENPARM.TBL
  !-------------------------------------------------
 SLOPE_DATA  = 0.1, 0.6, 1.0, 0.35, 0.55, 0.8, 0.63, 0.0, 0.0 ! slope factor for soil drainage (9 different slope types)
-SBETA_DATA  = -2.0    ! heat flux reduction factor from the overlying green canopy (not used)
-FXEXP_DATA  = 2.0     ! not used
 CSOIL_DATA  = 2.00E+6 ! Soil heat capacity [J m-3 K-1]
-SALP_DATA   = 2.6     ! not used
 REFDK_DATA  = 2.0E-6  ! Parameter in the surface runoff parameterization
 REFKDT_DATA = 3.0     ! Parameter in the surface runoff parameterization
 FRZK_DATA   = 0.15    ! Frozen ground parameter
 ZBOT_DATA   = -8.0    ! Depth [m] of lower boundary soil temperature
 CZIL_DATA   = 0.1     ! Parameter used in the calculation of the roughness length for heat
-SMLOW_DATA  = 0.5     ! not used
-SMHIGH_DATA = 3.0     ! not used
-LVCOEF_DATA = 0.5     ! not used
 
 /
 
 &noahmp_stas_soil_categories
- num_soil_types = 19
+ SLTYPE = "STAS"  ! "STAS" or "STAS_RUC"
+ SLCATS = 19  !num_soil_types
 /
 
 &noahmp_soil_stas_parameters

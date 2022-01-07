@@ -1,4 +1,4 @@
-module WaterType
+module WaterVarType
 
 !!! Define column (1-D) Noah-MP Water variables
 !!! Water variable initialization is done in WaterInit.f90
@@ -13,7 +13,6 @@ module WaterType
   type :: flux_type
 
     ! define specific water flux variables
-    real(kind=kind_noahmp) :: QRAIN
 
   end type flux_type
 
@@ -21,7 +20,8 @@ module WaterType
   type :: state_type
 
     ! define specific water state variables
-    real(kind=kind_noahmp) :: SMC
+
+    real(kind=kind_noahmp) :: SNOWH  !snow height [m]
 
   end type state_type
 
@@ -29,7 +29,6 @@ module WaterType
   type :: parameter_type
 
     ! define specific water parameter variables
-    real(kind=kind_noahmp) :: BEXP
 
   end type parameter_type
 
@@ -37,7 +36,6 @@ module WaterType
   type :: diagnose_type
 
     ! define specific water diagnose variables
-    real(kind=kind_noahmp) :: xxx
 
   end type diagnose_type
 
@@ -51,4 +49,4 @@ module WaterType
 
   end type water_type
 
-end module WaterType
+end module WaterVarType

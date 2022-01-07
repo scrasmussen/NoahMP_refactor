@@ -1,12 +1,12 @@
-module NoahmpType
+module NoahmpVarType
 
 !!! Define column (1-D) Noah-MP model variable data types
 
-  use ForcingType
-  use ConfigType
-  use EnergyType
-  use WaterType
-  use BiochemType
+  !use ForcingVarType
+  use ConfigVarType
+  use EnergyVarType
+  use WaterVarType
+  use BiochemVarType
 
   implicit none
   save
@@ -15,7 +15,7 @@ module NoahmpType
   type, public :: noahmp_type
 
     ! define specific variable types for Noah-MP
-    type(forcing_type)  :: forcing
+    !type(forcing_type)  :: forcing
     type(config_type)   :: config
     type(energy_type)   :: energy
     type(water_type)    :: water
@@ -23,4 +23,4 @@ module NoahmpType
 
   end type noahmp_type
 
-end module NoahmpType
+end module NoahmpVarType

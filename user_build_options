@@ -1,0 +1,24 @@
+#=============================================================================================
+#  Options for Linux with pgf90 serial
+#=============================================================================================
+
+ COMPILERF90	=	mpif90
+ FREESOURCE	=	-free
+ F90FLAGS	=       -convert big_endian -g -O0 -fpe0
+ MODFLAG	=	
+ HYDRO_LIB      =       
+ LDFLAGS	=	
+ CPP		=	cpp
+ CPPFLAGS	=	-P -traditional
+ LIBS		=	
+ LIBJASPER      =       -ljpeg -L/usr/lib64 -ljasper
+ INCJASPER      =       -I/usr/include/jasper
+ NETCDFMOD      =       -I/glade/u/apps/ch/opt/netcdf/4.7.4/intel/19.0.5/include
+ NETCDFLIB      =       -L/glade/u/apps/ch/opt/netcdf/4.7.4/intel/19.0.5/lib -lnetcdf -lnetcdff
+ BZIP2          =       NO
+# BZIP2_LIB      =       -lbz2
+ BZIP2_INCLUDE  =       -I/usr/include
+ BZIP2_LIB      =       -L/usr/lib64 -lbz2
+ RM             =       rm -f
+ CC             =       cc
+

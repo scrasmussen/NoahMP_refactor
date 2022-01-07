@@ -1,4 +1,4 @@
-module BiochemType
+module BiochemVarType
 
 !!! Define column (1-D) Noah-MP Biochemistry (carbon,nitrogen,etc) variables
 !!! Biochemistry variable initialization is done in BiochemInit.f90
@@ -21,7 +21,8 @@ module BiochemType
   type :: state_type
 
     ! define specific biochem state variables
-    real(kind=kind_noahmp) :: TOTLB
+    real(kind=kind_noahmp) :: IGS
+    integer                :: PGS
 
   end type state_type
 
@@ -29,7 +30,9 @@ module BiochemType
   type :: parameter_type
 
     ! define specific biochem parameter variables
+
     real(kind=kind_noahmp) :: PLTDAY
+    real(kind=kind_noahmp) :: TMIN   ! minimum temperature for photosynthesis (k)
 
   end type parameter_type
 
@@ -51,4 +54,4 @@ module BiochemType
 
   end type biochem_type
 
-end module BiochemType
+end module BiochemVarType
