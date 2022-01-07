@@ -286,9 +286,10 @@ contains
   REAL                                   :: T       !current month (1.00, ..., 12.00)
 ! --------------------------------------------------------------------------------------------------
 
-IF (CROPTYPE == 0) THEN
+ 
+ IF (CROPTYPE == 0) THEN
 
-  IF ( DVEG == 1 .or. DVEG == 3 .or. DVEG == 4 ) THEN
+   IF ( DVEG == 1 .or. DVEG == 3 .or. DVEG == 4 ) THEN
 
      IF (LAT >= 0.0) THEN
         ! Northern Hemisphere
@@ -348,11 +349,6 @@ ENDIF   ! CROPTYPE == 0
      ELSE
          IGS = 0.
      ENDIF
-
-     !print*,'ELAI=',ELAI
-     !print*,'ESAI=',ESAI
-     !print*,'LAI=', LAI
-     !print*,'SAI=', SAI
 
   END SUBROUTINE PHENOLOGY
 

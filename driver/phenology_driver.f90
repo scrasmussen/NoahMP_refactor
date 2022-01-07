@@ -93,7 +93,8 @@ use NOAHMP_TABLES
 !------------------------------------------------------------------------------------------!
 ! Transfer veg parameters
 !------------------------------------------------------------------------------------------!
-
+ 
+  parameters%TMIN   =    TMIN_TABLE(VEGTYPE)
   parameters%HVT    =    HVT_TABLE(VEGTYPE)       !top of canopy (m)
   parameters%HVB    =    HVB_TABLE(VEGTYPE)       !bottom of canopy (m)
   parameters%SAIM   =   SAIM_TABLE(VEGTYPE,:)     !monthly stem area index, one-sided
