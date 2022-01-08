@@ -30,6 +30,7 @@ contains
     ! biochem flux variables
     noahmp%biochem%flux%PSNSUN          = huge(1.0)
     noahmp%biochem%flux%PSNSHA          = huge(1.0)
+    noahmp%biochem%flux%PSN             = huge(1.0)
 
     ! biochem parameter variables
     noahmp%biochem%param%PLTDAY         = huge(1  )

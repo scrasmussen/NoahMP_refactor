@@ -18,6 +18,15 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
+    integer                   :: OPT_BTR       ! options for soil moisture factor for stomatal resistance
+                                                 ! 1 -> Noah (soil moisture) 
+                                                 ! 2 -> CLM  (matric potential)
+                                                 ! 3 -> SSiB (matric potential)
+    integer                   :: OPT_RSF       ! options for surface resistent to evaporation/sublimation
+                                                 ! 1 -> Sakaguchi and Zeng, 2009
+                                                 ! 2 -> Sellers (1992)
+                                                 ! 3 -> adjusted Sellers to decrease RSURF for wet soil
+                                                 ! 4 -> option 1 for non-snow; rsurf = rsurf_snow for snow (set in MPTABLE)
     integer                   :: OPT_SFC       ! options for surface layer drag/exchange coeff (CH & CM)
                                                  ! 1 -> Monin-Obukhov (M-O) Similarity Theory (MOST)
                                                  ! 2 -> original Noah (Chen et al. 1997)
@@ -99,6 +108,7 @@ module ConfigVarType
     integer                   :: IST         ! surface type 1-soil; 2-lake
     integer                   :: NBAND       ! number of solar radiation wave bands
     integer                   :: SOILCOLOR   ! soil texture type for albedo
+    integer                   :: ICE         ! flag for seaice point (=1: ice point)
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year

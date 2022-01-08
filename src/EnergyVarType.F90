@@ -25,6 +25,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: PAHV            ! precipitation advected heat - vegetation net (W/m2)
     real(kind=kind_noahmp) :: PAHG            ! precipitation advected heat - under canopy net (W/m2)
     real(kind=kind_noahmp) :: PAHB            ! precipitation advected heat - bare ground net (W/m2)
+    real(kind=kind_noahmp) :: PAH             ! precipitation advected heat - total (W/m2)
     real(kind=kind_noahmp) :: PARSUN          ! average absorbed par for sunlit leaves (w/m2)
     real(kind=kind_noahmp) :: PARSHA          ! average absorbed par for shaded leaves (w/m2)
     real(kind=kind_noahmp) :: SAV             ! solar radiation absorbed by vegetation (w/m2)
@@ -48,6 +49,10 @@ module EnergyVarType
     real(kind=kind_noahmp) :: GHB             ! bare ground heat flux (w/m2) [+ to soil]
     real(kind=kind_noahmp) :: SSOIL           ! soil heat flux (w/m2) [+ to soil]
     real(kind=kind_noahmp) :: EFLXB           ! energy influx from soil bottom (w/m2)
+    real(kind=kind_noahmp) :: FIRA            ! total net LW. rad (w/m2)   [+ to atm]
+    real(kind=kind_noahmp) :: FSH             ! total sensible heat (w/m2) [+ to atm]
+    real(kind=kind_noahmp) :: APAR            ! total photosyn. active energy (w/m2)
+    real(kind=kind_noahmp) :: FIRE            ! emitted outgoing IR (w/m2)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
     real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
@@ -79,6 +84,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FVEG            ! greeness vegetation fraction
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
+    real(kind=kind_noahmp) :: TS              ! surface temperature (K)
     real(kind=kind_noahmp) :: EAIR            ! vapor pressure air (pa)
     real(kind=kind_noahmp) :: FAGE            ! snow age factor
     real(kind=kind_noahmp) :: TAUSS           ! non-dimensional snow age
@@ -116,7 +122,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: UC              ! wind speed at top of canopy (m/s)
     real(kind=kind_noahmp) :: FVV             ! friction velocity (m/s), vegetated
     real(kind=kind_noahmp) :: FVB             ! friction velocity (m/s), bare ground
-    real(kind=kind_noahmp) :: CWP             ! canopy wind absorption parameter
+    real(kind=kind_noahmp) :: CWPC            ! canopy wind extinction coefficient
     real(kind=kind_noahmp) :: MOZG            ! M-O stability parameter ground, below canopy
     real(kind=kind_noahmp) :: MOZV            ! M-O stability parameter (z/L), above ZPD, vegetated
     real(kind=kind_noahmp) :: MOZB            ! M-O stability parameter (z/L), above ZPD, bare ground
@@ -170,17 +176,22 @@ module EnergyVarType
     real(kind=kind_noahmp) :: GAMMAG          ! psychrometric constant (pa/K), ground
     real(kind=kind_noahmp) :: LATHEAG         ! latent heat of vaporization/subli (j/kg), ground
     real(kind=kind_noahmp) :: RHSUR           ! raltive humidity in surface soil/snow air space (-)
-    real(kind=kind_noahmp) :: QSFC            ! water vapor mixing ratio at lowest model layer
+    real(kind=kind_noahmp) :: QSFC            ! water vapor mixing ratio at lowest model layer bare ground
+    real(kind=kind_noahmp) :: Q1              ! water vapor mixing ratio at lowest model layer grid mean
     real(kind=kind_noahmp) :: Q2V             ! water vapor mixing ratio at 2m vegetated
     real(kind=kind_noahmp) :: Q2B             ! water vapor mixing ratio at 2m bare ground
+    real(kind=kind_noahmp) :: Q2E             ! water vapor mixing ratio at 2m grid mean
     real(kind=kind_noahmp) :: TGV             ! vegetated ground (below-canopy) temperature (K)
     real(kind=kind_noahmp) :: TGB             ! bare ground temperature (K)
     real(kind=kind_noahmp) :: TAUXV           ! wind stress: east-west (n/m2) above canopy
     real(kind=kind_noahmp) :: TAUYV           ! wind stress: north-south (n/m2) above canopy
     real(kind=kind_noahmp) :: TAUXB           ! wind stress: east-west (n/m2) bare ground
     real(kind=kind_noahmp) :: TAUYB           ! wind stress: north-south (n/m2) bare ground
+    real(kind=kind_noahmp) :: TAUX            ! wind stress: east-west (n/m2) grid mean
+    real(kind=kind_noahmp) :: TAUY            ! wind stress: north-south (n/m2) grid mean
     real(kind=kind_noahmp) :: T2MV            ! 2 m height air temperature (k), vegetated
     real(kind=kind_noahmp) :: T2MB            ! 2 m height air temperature (k), bare ground
+    real(kind=kind_noahmp) :: T2M             ! 2 m height air temperature (k), grid mean
     real(kind=kind_noahmp) :: CHLEAF          ! leaf sensible heat exchange coefficient (m/s)
     real(kind=kind_noahmp) :: CHUC            ! under canopy sensible heat exchange coefficient (m/s)
     real(kind=kind_noahmp) :: EHB             ! bare ground sensible heat exchange coefficient (m/s)
@@ -190,6 +201,9 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
     real(kind=kind_noahmp) :: TBOT            ! bottom soil temp. at ZBOT (K)
     real(kind=kind_noahmp) :: ZBOTSNO         ! depth of lower boundary condition (m) from snow surface
+    real(kind=kind_noahmp) :: Z0WRF           ! roughness length, momentum, surface, sent to coupled model
+    real(kind=kind_noahmp) :: TRAD            ! radiative temperature (K)
+    real(kind=kind_noahmp) :: EMISSI          ! surface emissivity
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
     real(kind=kind_noahmp), allocatable, dimension(:) :: CVSNO       ! snow layer volumetric specific heat (j/m3/k)
@@ -255,6 +269,11 @@ module EnergyVarType
     real(kind=kind_noahmp) :: CWPVT            ! empirical canopy wind absorption parameter
     real(kind=kind_noahmp) :: Z0SNO            ! snow surface roughness length (m) (0.002)
     real(kind=kind_noahmp) :: ZBOT             ! depth of lower boundary condition (m) from soil surface
+    real(kind=kind_noahmp) :: Z0SOIL           ! Bare-soil roughness length (m) (i.e., under the canopy)
+    real(kind=kind_noahmp) :: Z0LAKE           ! lake surface roughness length (m)
+    real(kind=kind_noahmp) :: EICE             ! ice surface emissivity
+    real(kind=kind_noahmp) :: RSURF_EXP        ! exponent in the shape parameter for soil resistance option 1
+    real(kind=kind_noahmp) :: RSURF_SNOW       ! surface resistance for snow(s/m)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided

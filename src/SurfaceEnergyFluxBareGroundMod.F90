@@ -181,8 +181,8 @@ contains
     enddo loop3 ! end stability iteration
 
     ! if snow on ground and TGB > TFRZ: reset TGB = TFRZ. reevaluate ground fluxes.
-    if ( OPT_STC == 1 .or. OPT_STC == 3 ) then
-       if ( SNOWH > 0.05 .and. TGB > TFRZ ) then
+    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
+       if ( (SNOWH > 0.05) .and. (TGB > TFRZ) ) then
           if ( OPT_STC == 1 ) TGB = TFRZ
           if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * TFRZ  ! MB: allow TG>0C during melt v3.7
           IRB = CIR * TGB**4 - EMG * LWDN
@@ -197,7 +197,7 @@ contains
     TAUYB = -RHOAIR * CM * UR * VV
 
     ! 2m air temperature
-    if ( OPT_SFC == 1 .or. OPT_SFC ==2 ) then
+    if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
        !EHB2 = FV * VKC / LOG((2.0+Z0H)/Z0H)
        EHB2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )
        CQ2B = EHB2

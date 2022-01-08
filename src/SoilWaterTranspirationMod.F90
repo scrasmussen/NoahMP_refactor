@@ -1,0 +1,84 @@
+module SoilWaterTranspirationMod
+
+!!! compute soil water transpiration factor that will be used for 
+!!! stomata resistance and evapotranspiration calculations
+
+  use Machine, only : kind_noahmp
+  use NoahmpVarType
+  use ConstantDefineMod
+
+  implicit none
+
+contains
+
+  subroutine SoilWaterTranspiration(noahmp)
+
+! ------------------------ Code history -----------------------------------
+! Original Noah-MP subroutine: None (embedded in ENERGY subroutine)
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! -------------------------------------------------------------------------
+
+    implicit none
+
+! in & out variables
+    type(noahmp_type), intent(inout) :: noahmp
+
+! local variables
+    integer                          :: IZ       ! loop index
+    real(kind=kind_noahmp)           :: GX       ! temporary variable
+    real(kind=kind_noahmp)           :: MPE      ! minimum threshold to prevent divided by zero
+
+! --------------------------------------------------------------------
+    associate(                                                        &
+              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,    depth of layer-bottom from soil surface
+              OPT_BTR         => noahmp%config%nmlist%OPT_BTR        ,& ! in,    options for soil moisture factor for stomatal resistance
+              NROOT           => noahmp%water%param%NROOT            ,& ! in,    number of soil layers with root present
+              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,    wilting point soil moisture [m3/m3]
+              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
+              PSIWLT          => noahmp%water%param%PSIWLT           ,& ! in,    soil metric potential for wilting point (m)
+              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
+              BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter              
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,    soil water content [m3/m3]
+              BTRANI          => noahmp%water%state%BTRANI           ,& ! out,   soil water transpiration factor (0 to 1)
+              BTRAN           => noahmp%water%state%BTRAN            ,& ! out,   soil water transpiration factor (0 to 1)
+              PSI             => noahmp%water%state%PSI               & ! out,   surface layer soil matrix potential (m)
+             )
+! ----------------------------------------------------------------------
+
+    ! soil moisture factor controlling stomatal resistance and evapotranspiration
+    MPE   = 1.0e-6
+    BTRAN = 0.0
+
+    ! only for soil point
+    if ( IST ==1 ) then
+       do IZ = 1, NROOT
+          if ( OPT_BTR == 1 ) then  ! Noah
+             GX = (SH2O(IZ) - SMCWLT(IZ)) / (SMCREF(IZ) - SMCWLT(IZ))
+          endif
+          if ( OPT_BTR == 2 ) then  ! CLM
+             PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
+             GX      = (1.0 - PSI(IZ)/PSIWLT) / (1.0 + PSISAT(IZ)/PSIWLT)
+          endif
+          if ( OPT_BTR == 3 ) then  ! SSiB
+             PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
+             GX      = 1.0 - exp( -5.8 * (log(PSIWLT/PSI(IZ))) )
+          endif
+          GX = min( 1.0, max(0.0,GX) )
+
+          BTRANI(IZ) = max( MPE, DZSNSO(IZ) / (-ZSOIL(NROOT)) * GX )
+          BTRAN      = BTRAN + BTRANI(IZ)
+       enddo
+
+       BTRAN = max( MPE, BTRAN )
+       BTRANI(1:NROOT) = BTRANI(1:NROOT) / BTRAN
+    endif
+
+    end associate
+
+  end subroutine SoilWaterTranspiration
+
+end module SoilWaterTranspirationMod

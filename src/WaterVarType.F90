@@ -114,7 +114,6 @@ module WaterVarType
     real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
     real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
     real(kind=kind_noahmp) :: BTRAN       ! soil water transpiration factor (0 to 1)
-    real(kind=kind_noahmp) :: PSI         ! surface layer soil matrix potential (m)
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
@@ -136,6 +135,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICEV        ! partial volume of ice [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNLIQV        ! partial volume of liquid water [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SUPERCOOL     ! supercooled water in soil (kg/m2)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: PSI           ! surface layer soil matrix potential (m)
 
   end type state_type
 
@@ -197,6 +197,9 @@ module WaterVarType
     real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger
     real(kind=kind_noahmp) :: SNOWDEN_MIN      ! minimum fresh snowfall density (kg/m3)
     real(kind=kind_noahmp) :: SWEMX            ! new snow mass to fully cover old snow (mm)
+    real(kind=kind_noahmp) :: PSIWLT           ! soil metric potential for wilting point (m)
+    real(kind=kind_noahmp) :: MFSNO            ! snowmelt m parameter
+    real(kind=kind_noahmp) :: SCFFAC           ! snow cover factor (m) (originally hard-coded 2.5*z0 in SCF formulation)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]

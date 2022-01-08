@@ -23,6 +23,8 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_BTR      = huge(1)
+    noahmp%config%nmlist%OPT_RSF      = huge(1)
     noahmp%config%nmlist%OPT_SFC      = huge(1)
     noahmp%config%nmlist%OPT_CRS      = huge(1)
     noahmp%config%nmlist%OPT_ALB      = huge(1)
@@ -52,6 +54,7 @@ contains
     noahmp%config%domain%IST          = huge(1)
     noahmp%config%domain%NBAND        = huge(1)
     noahmp%config%domain%SOILCOLOR    = huge(1)
+    noahmp%config%domain%ICE          = huge(1)
     noahmp%config%domain%DT           = huge(1.0)
     noahmp%config%domain%DX           = huge(1.0)
     noahmp%config%domain%JULIAN       = huge(1.0)
@@ -77,6 +80,8 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_BTR    = input%OPT_BTRIn
+    noahmp%config%nmlist%OPT_RSF    = input%OPT_RSFIn
     noahmp%config%nmlist%OPT_SFC    = input%OPT_SFCIn
     noahmp%config%nmlist%OPT_CRS    = input%OPT_CRSIn
     noahmp%config%nmlist%OPT_ALB    = input%OPT_ALBIn
@@ -108,6 +113,7 @@ contains
     noahmp%config%domain%VEGTYP     = input%VEGTYPEIn
     noahmp%config%domain%CROPTYP    = input%CROPTYPEIn
     noahmp%config%domain%SOILCOLOR  = input%SOILCOLORIn
+    !noahmp%config%domain%ICE        = input%ICEIn
     noahmp%config%domain%JULIAN     = input%JULIANIn
     noahmp%config%domain%ZREF       = input%ZLVLIn
     !noahmp%config%domain%DZ8W      = input%DZ8WIn

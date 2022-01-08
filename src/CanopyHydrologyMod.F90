@@ -111,7 +111,7 @@ contains
 
 !=== phase change
     ! canopy ice melting
-    if ( CANICE > 1.0e-6 .and. TV > TFRZ) then
+    if ( (CANICE > 1.0e-6) .and. (TV > TFRZ) ) then
        QMELTC = min( CANICE/DT, (TV-TFRZ)*CICE*CANICE/DENICE/(DT*HFUS) )
        CANICE = max( 0.0, CANICE - QMELTC*DT )
        CANLIQ = max( 0.0, CANLIQ + QMELTC*DT )
@@ -119,7 +119,7 @@ contains
     endif
 
     ! canopy water refreeezing
-    if ( CANLIQ > 1.0e-6 .and. TV < TFRZ) then
+    if ( (CANLIQ > 1.0e-6) .and. (TV < TFRZ) ) then
        QFRZC  = min( CANLIQ/DT, (TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS) )
        CANLIQ = max( 0.0, CANLIQ - QFRZC*DT )
        CANICE = max( 0.0, CANICE + QFRZC*DT )

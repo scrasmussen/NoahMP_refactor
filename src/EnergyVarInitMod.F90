@@ -37,8 +37,6 @@ contains
     noahmp%energy%state%SAI             = huge(1.0)
     noahmp%energy%state%VAI             = huge(1.0)
     noahmp%energy%state%FVEG            = huge(1.0)
-    noahmp%energy%state%TG              = huge(1.0)
-    noahmp%energy%state%TV              = huge(1.0)
     noahmp%energy%state%EAIR            = huge(1.0)
     noahmp%energy%state%FAGE            = huge(1.0)
     noahmp%energy%state%TAUSS           = huge(1.0)
@@ -76,7 +74,7 @@ contains
     noahmp%energy%state%Z0HB            = huge(1.0)
     noahmp%energy%state%FVV             = huge(1.0)
     noahmp%energy%state%FVB             = huge(1.0)
-    noahmp%energy%state%CWP             = huge(1.0)
+    noahmp%energy%state%CWPC            = huge(1.0)
     noahmp%energy%state%MOZG            = huge(1.0)
     noahmp%energy%state%MOZV            = huge(1.0)
     noahmp%energy%state%MOZB            = huge(1.0)
@@ -136,20 +134,31 @@ contains
     noahmp%energy%state%LATHEAG         = huge(1.0)
     noahmp%energy%state%RHSUR           = huge(1.0)
     noahmp%energy%state%QSFC            = huge(1.0)
+    noahmp%energy%state%Q1              = huge(1.0)
     noahmp%energy%state%Q2V             = huge(1.0)
     noahmp%energy%state%Q2B             = huge(1.0)
+    noahmp%energy%state%Q2E             = huge(1.0)
+    noahmp%energy%state%TS              = huge(1.0)
+    noahmp%energy%state%TG              = huge(1.0)
+    noahmp%energy%state%TV              = huge(1.0)
     noahmp%energy%state%TGV             = huge(1.0)
     noahmp%energy%state%TGB             = huge(1.0)
     noahmp%energy%state%TAUXV           = huge(1.0)
     noahmp%energy%state%TAUYV           = huge(1.0)
     noahmp%energy%state%TAUXB           = huge(1.0)
     noahmp%energy%state%TAUYB           = huge(1.0)
+    noahmp%energy%state%TAUX            = huge(1.0)
+    noahmp%energy%state%TAUY            = huge(1.0)
     noahmp%energy%state%T2MV            = huge(1.0)
     noahmp%energy%state%T2MB            = huge(1.0)
+    noahmp%energy%state%T2M             = huge(1.0)
     noahmp%energy%state%ZLVL            = huge(1.0)
     noahmp%energy%state%FB_snow         = huge(1.0)
     noahmp%energy%state%TBOT            = huge(1.0)
     noahmp%energy%state%ZBOTSNO         = huge(1.0)
+    noahmp%energy%state%Z0WRF           = huge(1.0)
+    noahmp%energy%state%TRAD            = huge(1.0)
+    noahmp%energy%state%EMISSI          = huge(1.0)
 
     allocate( noahmp%energy%state%STC     (-NSNOW+1:NSOIL) )
     allocate( noahmp%energy%state%DF      (-NSNOW+1:NSOIL) )
@@ -197,6 +206,7 @@ contains
     noahmp%energy%flux%PAHV             = huge(1.0)
     noahmp%energy%flux%PAHG             = huge(1.0)
     noahmp%energy%flux%PAHB             = huge(1.0)
+    noahmp%energy%flux%PAH              = huge(1.0)
     noahmp%energy%flux%PARSUN           = huge(1.0)
     noahmp%energy%flux%PARSHA           = huge(1.0)
     noahmp%energy%flux%SAV              = huge(1.0)
@@ -220,6 +230,10 @@ contains
     noahmp%energy%flux%GHB              = huge(1.0)
     noahmp%energy%flux%SSOIL            = huge(1.0)
     noahmp%energy%flux%EFLXB            = huge(1.0)
+    noahmp%energy%flux%FIRA             = huge(1.0)
+    noahmp%energy%flux%FSH              = huge(1.0)
+    noahmp%energy%flux%APAR             = huge(1.0)
+    noahmp%energy%flux%FIRE             = huge(1.0)
 
     allocate( noahmp%energy%flux%FABD    (1:NBAND) )
     allocate( noahmp%energy%flux%FABI    (1:NBAND) )
@@ -289,6 +303,11 @@ contains
     noahmp%energy%param%CWPVT           = huge(1.0)
     noahmp%energy%param%Z0SNO           = huge(1.0)
     noahmp%energy%param%ZBOT            = huge(1.0)
+    noahmp%energy%param%Z0SOIL          = huge(1.0)
+    noahmp%energy%param%Z0LAKE          = huge(1.0)
+    noahmp%energy%param%EICE            = huge(1.0)
+    noahmp%energy%param%RSURF_EXP       = huge(1.0)
+    noahmp%energy%param%RSURF_SNOW      = huge(1.0)
 
     allocate( noahmp%energy%param%LAIM   (1:12   ) )
     allocate( noahmp%energy%param%SAIM   (1:12   ) )
@@ -404,6 +423,11 @@ contains
     noahmp%energy%param%EG                 = input%EG_TABLE
     noahmp%energy%param%Z0SNO              = input%Z0SNO_TABLE
     noahmp%energy%param%ZBOT               = input%ZBOT_TABLE
+    noahmp%energy%param%Z0SOIL             = input%Z0SOIL_TABLE
+    noahmp%energy%param%Z0LAKE             = input%Z0LAKE_TABLE
+    noahmp%energy%param%EICE               = input%EICE_TABLE
+    noahmp%energy%param%RSURF_EXP          = input%RSURF_EXP_TABLE
+    noahmp%energy%param%RSURF_SNOW         = input%RSURF_SNOW_TABLE
 
     noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)

@@ -316,7 +316,7 @@ contains
        if ( LITER == 1 ) then
           exit loop1
        endif
-       if ( ITER >= 5 .and. abs(DTV) <= 0.01 .and. LITER == 0 ) then
+       if ( (ITER >= 5) .and. (abs(DTV) <= 0.01) .and. (LITER == 0) ) then
           LITER = 1
        endif
     enddo loop1  ! end stability iteration
@@ -354,8 +354,8 @@ contains
     !TAH = (CAH*SFCTMP + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
 
     ! if snow on ground and TGV > TFRZ: reset TGV = TFRZ. reevaluate ground fluxes.
-    if ( OPT_STC == 1 .or. OPT_STC == 3 ) then
-       if ( SNOWH > 0.05 .and. TGV > TFRZ ) then
+    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
+       if ( (SNOWH > 0.05) .and. (TGV > TFRZ) ) then
           if ( OPT_STC == 1 ) TGV = TFRZ
           if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * TFRZ   ! MB: allow TGV>0C during melt v3.7
           IRG = CIR * TGV**4 - EMG * (1.0-EMV) * LWDN - EMG * EMV * SB * TV**4
@@ -376,7 +376,7 @@ contains
     ! QFX = (QSFC-QAIR) * RHOAIR * CAW !*CPAIR/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
-    if ( OPT_SFC == 1 .or. OPT_SFC == 2 ) then
+    if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
        ! CAH2 = FV * 1.0 / VKC * log((2.0+Z0H)/Z0H)
        ! CAH2 = FV * VKC / log((2.0+Z0H)/Z0H)
        CAH2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )

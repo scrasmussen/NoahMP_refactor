@@ -89,7 +89,7 @@ contains
           endif ! if(J /= 0)
 
           ! shift all elements above this down by one.
-          if ( J > ISNOW+1 .and. ISNOW < -1 ) then
+          if ( (J > ISNOW+1) .and. (ISNOW < -1) ) then
              do I = J, ISNOW+2, -1
                 STC(I)    = STC(I-1)
                 SNLIQ(I)  = SNLIQ(I-1)
@@ -123,8 +123,8 @@ contains
     enddo
 
 ! check the snow depth - all snow gone, the liquid water assumes ponding on soil surface.
-    !if ( SNOWH < 0.05 .and. ISNOW < 0 ) then
-    if ( SNOWH < 0.025 .and. ISNOW < 0 ) then ! MB: change limit
+    !if ( (SNOWH < 0.05) .and. (ISNOW < 0) ) then
+    if ( (SNOWH < 0.025) .and. (ISNOW < 0) ) then ! MB: change limit
        ISNOW    = 0
        SNEQV    = ZWICE
        PONDING2 = ZWLIQ                ! LIMIT OF ISNOW < 0 MEANS INPUT PONDING
@@ -159,7 +159,7 @@ contains
                                       DZSNSO(L), SNLIQ(L), SNICE(L), STC(L) )
 
              ! Now shift all elements above this down one.
-             if ( J-1 > ISNOW+1 ) then
+             if ( (J-1) > (ISNOW+1) ) then
                 do K = J-1, ISNOW+2, -1
                    STC(K)    = STC(K-1)
                    SNICE(K)  = SNICE(K-1)

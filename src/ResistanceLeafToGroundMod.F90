@@ -33,11 +33,11 @@ contains
     real(kind=kind_noahmp)                :: TMPRAH2      ! temporary calculation for aerodynamic resistances
     real(kind=kind_noahmp)                :: TMPRB        ! temporary calculation for rb
     real(kind=kind_noahmp)                :: FHGNEW       ! temporary vars
-    real(kind=kind_noahmp)                :: CWPC         ! temporary vars
 
 ! --------------------------------------------------------------------
     associate(                                                        &
               DLEAF           => noahmp%energy%param%DLEAF           ,& ! in,    characteristic leaf dimension (m)
+              CWPVT           => noahmp%energy%param%CWPVT           ,& ! in,    canopy wind extinction parameter
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (K)
               TAH             => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
@@ -48,8 +48,8 @@ contains
               Z0H             => noahmp%energy%state%Z0HV            ,& ! in,    roughness length, sensible heat (m), vegetated
               Z0HG            => noahmp%energy%state%Z0HG            ,& ! in,    roughness length, sensible heat ground (m), below canopy
               FV              => noahmp%energy%state%FVV             ,& ! in,    friction velocity (m/s), vegetated
-              CWP             => noahmp%energy%state%CWP             ,& ! in,    canopy wind absorption parameter
               FHG             => noahmp%energy%state%FHG             ,& ! inout, stability correction ground, below canopy
+              CWPC            => noahmp%energy%state%CWPC            ,& ! out,   canopy wind extinction coefficient
               MOZG            => noahmp%energy%state%MOZG            ,& ! out,   Monin-Obukhov stability parameter ground, below canopy
               MOLG            => noahmp%energy%state%MOLG            ,& ! out,   Monin-Obukhov length (m), ground, below canopy
               RAMG            => noahmp%energy%state%RAMG            ,& ! out,   ground aerodynamic resistance for momentum (s/m)
@@ -83,7 +83,7 @@ contains
     endif
 
     ! wind attenuation within canopy
-    CWPC    = (CWP * VAI * HCAN * FHG)**0.5
+    CWPC    = (CWPVT * VAI * HCAN * FHG)**0.5
     TMP1    = exp( -CWPC * Z0HG / HCAN )
     TMP2    = exp( -CWPC * (Z0H + ZPD) / HCAN )
     TMPRAH2 = HCAN * exp(CWPC) / CWPC * (TMP1-TMP2)

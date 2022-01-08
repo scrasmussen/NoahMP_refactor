@@ -45,14 +45,14 @@ contains
     NEWNODE  = 0
 
 ! shallow snow / no layer
-    if ( ISNOW == 0 .and. QSNOW > 0.0) then
+    if ( (ISNOW == 0) .and. (QSNOW > 0.0) ) then
        SNOWH = SNOWH + SNOWHIN * DT
        SNEQV = SNEQV + QSNOW * DT
     endif
 
 ! creating a new layer
-    if ( ISNOW == 0  .and. QSNOW > 0.0 .and. SNOWH >= 0.025) then !MB: change limit
-!   if ( ISNOW == 0  .and. QSNOW > 0.0 .and. SNOWH >= 0.05) then
+    if ( (ISNOW == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.025) ) then !MB: change limit
+!   if ( (ISNOW == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.05) ) then
        ISNOW     = -1
        NEWNODE   =  1
        DZSNSO(0) = SNOWH
@@ -63,7 +63,7 @@ contains
     endif
 
 ! snow with layers
-    if ( ISNOW < 0 .and. NEWNODE == 0 .and. QSNOW > 0.0) then
+    if ( (ISNOW < 0) .and. (NEWNODE == 0) .and. (QSNOW > 0.0) ) then
        SNICE(ISNOW+1)  = SNICE(ISNOW+1)   + QSNOW   * DT
        DZSNSO(ISNOW+1) = DZSNSO(ISNOW+1)  + SNOWHIN * DT
     endif

@@ -99,7 +99,8 @@ contains
        EFLXB2 = DF(NSOIL) * (TBOT - STC(NSOIL)) / (0.5 * (ZSNSO(NSOIL-1)+ZSNSO(NSOIL)) - ZBOTSNO)
     endif
 
-    ! Skip the energy balance check for now, until we can make it work right for small time steps.
+
+    !---- Skip the energy balance check for now, until we can make it work right for small time steps.
     return
 
     ! energy balance check
@@ -107,7 +108,7 @@ contains
     do IZ = ISNOW+1, NSOIL
        ERR_EST = ERR_EST + (STC(IZ)-TBEG(IZ)) * DZSNSO(IZ) * HCPCT(IZ) / DT
     enddo
-    if ( OPT_STC == 1 .or. OPT_STC == 3 ) then  ! semi-implicit
+    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then  ! semi-implicit
        ERR_EST = ERR_EST - (SSOIL + EFLXB)
     else  ! full-implicit
        SSOIL2  = DF(ISNOW+1) * (TG - STC(ISNOW+1)) / (0.5 * DZSNSO(ISNOW+1))   !M. Barlage

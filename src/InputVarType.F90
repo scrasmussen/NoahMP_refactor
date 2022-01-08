@@ -167,7 +167,8 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: OMEGAS_TABLE      ! two-stream parameter omega for snow
     real(kind=kind_noahmp)                              :: BETADS_TABLE      ! two-stream parameter betad for snow
     real(kind=kind_noahmp)                              :: BETAIS_TABLE      ! two-stream parameter betad for snow
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: EG_TABLE          ! emissivity
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: EG_TABLE          ! emissivity soil surface
+    real(kind=kind_noahmp)                              :: EICE_TABLE        ! ice surface emissivity
 
     ! original MPTABLE.TBL global parameters
     real(kind=kind_noahmp)                              :: CO2_TABLE                 ! co2 partial pressure
@@ -207,6 +208,9 @@ module InputVarType
     real(kind=kind_noahmp)                              :: CLASS_ALB_REF_TABLE       ! reference snow albedo in CLASS scheme
     real(kind=kind_noahmp)                              :: CLASS_SNO_AGE_TABLE       ! snow aging e-folding time (s) in CLASS albedo scheme
     real(kind=kind_noahmp)                              :: CLASS_ALB_NEW_TABLE       ! fresh snow albedo in CLASS scheme
+    real(kind=kind_noahmp)                              :: PSIWLT_TABLE              ! soil metric potential for wilting point (m)
+    real(kind=kind_noahmp)                              :: Z0SOIL_TABLE              ! Bare-soil roughness length (m) (i.e., under the canopy)
+    real(kind=kind_noahmp)                              :: Z0LAKE_TABLE              ! Lake surface roughness length (m)
 
     ! original MPTABLE.TBL irrigation parameters
     integer                                             :: IRR_HAR_TABLE             ! number of days before harvest date to stop irrigation 
@@ -367,6 +371,7 @@ module InputVarType
     integer                                             :: IRCNTMIIn
     integer                                             :: IRCNTFIIn
     integer                                             :: NBANDIn
+    integer                                             :: ICEIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
     real(kind=kind_noahmp)                              :: DZ8WIn
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)

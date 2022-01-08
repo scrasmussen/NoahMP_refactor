@@ -57,7 +57,7 @@ contains
 
     ! find the layer where the water table is
     do IZ = NSOIL, 1, -1
-       if ( WTD + 1.0e-6 < ZSOIL0(IZ) ) exit
+       if ( (WTD + 1.0e-6) < ZSOIL0(IZ) ) exit
     enddo
     IWTD = IZ
 
@@ -112,7 +112,7 @@ contains
              RECH = RECH - (WTDOLD-WTD) * (SMCMAX(NSOIL)-SMCEQDEEP)
           endif
        endif
-    else if ( WTD >= ZSOIL0(NSOIL)-DZSNSO(NSOIL) ) then
+    else if ( WTD >= (ZSOIL0(NSOIL)-DZSNSO(NSOIL)) ) then
     ! if wtd was already below the bottom of the resolved soil crust
        WTDOLD = WTD
        SMCEQDEEP = SMCMAX(NSOIL) * ( -PSISAT(NSOIL) / (-PSISAT(NSOIL)-DZSNSO(NSOIL)) ) ** (1.0/BEXP(NSOIL))
@@ -131,9 +131,9 @@ contains
        endif
     endif
 
-    if ( IWTD < NSOIL .and. IWTD > 0 ) then
+    if ( (IWTD < NSOIL) .and. (IWTD > 0) ) then
        SMCWTD = SMCMAX(IWTD)
-    else if ( IWTD < NSOIL .and. IWTD <= 0) then
+    else if ( (IWTD < NSOIL) .and. (IWTD <= 0) ) then
        SMCWTD = SMCMAX(1)
     endif
 

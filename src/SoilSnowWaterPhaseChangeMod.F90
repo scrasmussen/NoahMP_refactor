@@ -120,14 +120,14 @@ contains
 
     !--- determine melting or freezing state
     do J = ISNOW+1, NSOIL
-       if ( MICE(J) > 0.0 .and. STC(J) >= TFRZ ) then
+       if ( (MICE(J) > 0.0) .and. (STC(J) >= TFRZ) ) then
           IMELT(J) = 1  ! melting
        endif
-       if ( MLIQ(J) > SUPERCOOL(J) .and. STC(J) < TFRZ ) then
+       if ( (MLIQ(J) > SUPERCOOL(J)) .and. (STC(J) < TFRZ) ) then
           IMELT(J) = 2  ! freezing
        endif
        ! If snow exists, but its thickness is not enough to create a layer
-       if ( ISNOW == 0 .and. SNEQV > 0.0 .and. J == 1 ) then
+       if ( (ISNOW == 0) .and. (SNEQV > 0.0) .and. (J == 1) ) then
           if ( STC(J) >= TFRZ ) then
              IMELT(J) = 1
           endif
@@ -140,11 +140,11 @@ contains
           HM(J)  = (STC(J) - TFRZ) / FACT(J)
           STC(J) = TFRZ
        endif
-       if ( IMELT(J) == 1 .and. HM(J) < 0.0 ) then
+       if ( (IMELT(J) == 1) .and. (HM(J) < 0.0) ) then
           HM(J)    = 0.0
           IMELT(J) = 0
        endif
-       if ( IMELT(J) == 2 .and. HM(J) > 0.0 ) then
+       if ( (IMELT(J) == 2) .and. (HM(J) > 0.0) ) then
           HM(J)    = 0.0
           IMELT(J) = 0
        endif
@@ -152,7 +152,7 @@ contains
     enddo
 
     !--- The rate of melting and freezing for snow without a layer, needs more work.
-    if ( ISNOW == 0 .and. SNEQV > 0.0 .and. XM(1) > 0.0 ) then
+    if ( (ISNOW == 0) .and. (SNEQV > 0.0) .and. (XM(1) > 0.0) ) then
        TEMP1  = SNEQV
        SNEQV  = max( 0.0, TEMP1-XM(1) )
        PROPOR = SNEQV / TEMP1
@@ -173,7 +173,7 @@ contains
 
     ! The rate of melting and freezing for multi-layer snow and soil
     do J = ISNOW+1, NSOIL
-       if ( IMELT(J) > 0 .and. abs(HM(J)) > 0.0 ) then
+       if ( (IMELT(J) > 0) .and. (abs(HM(J)) > 0.0) ) then
           HEATR = 0.0
           if ( XM(J) > 0.0 ) then
              MICE(J) = max( 0.0, WICE0(J)-XM(J) )
@@ -197,7 +197,7 @@ contains
           if ( abs(HEATR) > 0.0 ) then
              STC(J) = STC(J) + FACT(J) * HEATR
              if ( J <= 0 ) then  ! snow
-                if ( MLIQ(J)*MICE(J) > 0.0 ) STC(J) = TFRZ
+                if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = TFRZ
                 if ( MICE(J) == 0.0 ) then         ! BARLAGE
                    STC(J)  = TFRZ                  ! BARLAGE
                    HM(J+1) = HM(J+1) + HEATR       ! BARLAGE

@@ -331,7 +331,7 @@
  BETADS     =   0.5                                                            ! two-stream parameter betad for snow
  BETAIS     =   0.5                                                            ! two-stream parameter betaI for snow
  EG         =   0.97,   0.98                                                   ! emissivity soil surface 1-soil;2-lake
-
+ EICE       =   0.98                                                           ! emissivity ICE surface
 /
 
 &noahmp_global_parameters
@@ -382,6 +382,9 @@
   CLASS_ALB_REF = 0.55 ! reference snow albedo in CLASS scheme
   CLASS_SNO_AGE = 3600.0  ! snow aging e-folding time (s) in CLASS albedo scheme
   CLASS_ALB_NEW = 0.84  ! fresh snow albedo in CLASS scheme
+  PSIWLT = -150.0  !metric potential for wilting point (m)
+  Z0SOIL = 0.002  ! Bare-soil roughness length (m) (i.e., under the canopy)
+  Z0LAKE = 0.01   ! Lake surface roughness length (m)
 /
 
 &noahmp_irrigation_parameters

@@ -115,10 +115,10 @@ contains
                    - WDF(K-1) * DSMDZ(K-1) - WCND(K-1) + ETRANI(K)
        else
           DENOM(K) = (ZSOIL(K-1) - ZSOIL(K))
-          if ( OPT_RUNSUB == 1 .or. OPT_RUNSUB == 2 ) then
+          if ( (OPT_RUNSUB == 1) .or. (OPT_RUNSUB == 2) ) then
              QDRAIN = 0.0
           endif
-          if ( OPT_RUNSUB == 3 .or. OPT_RUNSUB == 6 .or. OPT_RUNSUB == 7 .or. OPT_RUNSUB == 8 ) then
+          if ( (OPT_RUNSUB == 3) .or. (OPT_RUNSUB == 6) .or. (OPT_RUNSUB == 7) .or. (OPT_RUNSUB) == 8 ) then
              QDRAIN = SLOPE * WCND(K)
           endif
           if ( OPT_RUNSUB == 4 ) then
@@ -126,7 +126,7 @@ contains
           endif
           if ( OPT_RUNSUB == 5 ) then   !gmm new m-m&f water table dynamics formulation
              TEMP1  = 2.0 * DENOM(K)
-             if ( ZWT < ZSOIL(NSOIL)-DENOM(NSOIL) ) then
+             if ( ZWT < (ZSOIL(NSOIL)-DENOM(NSOIL)) ) then
                 ! gmm interpolate from below, midway to the water table, 
                 ! to the middle of the auxiliary layer below the soil bottom
                 SMXBOT = SMX(K) - (SMX(K) - SMXWTD) * DENOM(K) * 2.0 / (DENOM(K) + ZSOIL(K) - ZWT)

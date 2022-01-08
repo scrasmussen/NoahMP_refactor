@@ -44,7 +44,7 @@ contains
           EX    = exp(-2.0 * I * TD_X)
           TERM  = (4.0 * EX) / ( I* (1.0-EX) )
           TD_FX = TD_FX + TERM
-          if ( TERM < 1.0e-6) then
+          if ( TERM < 1.0e-6 ) then
              TD_DE = ( (PII*TD_L) / 8.0 ) / ( log(TD_L/(PII*TD_RD)) + TD_FX )
              exit
           endif
@@ -56,7 +56,7 @@ contains
        TD_DE = ( (PII*TD_L) / 8.0 ) / ( log(TD_L/(PII*TD_RD)) + TD_FX )
     endif
 
-    if ( TD_DE < 0.0 .and. I <= 2 ) TD_DE = TD_D
+    if ( (TD_DE < 0.0) .and. (I <= 2) ) TD_DE = TD_D
 
   end subroutine TileDrainageEquiDepth
 

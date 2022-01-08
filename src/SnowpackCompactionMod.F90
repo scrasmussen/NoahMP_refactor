@@ -71,7 +71,7 @@ contains
        VOID    = 1.0 - ( SNICE(J)/DENICE + SNLIQ(J)/DENH2O ) / DZSNSO(J)
 
        ! Allow compaction only for non-saturated node and higher ice lens node.
-       if ( VOID > 0.001 .and. SNICE(J) > 0.1) then
+       if ( (VOID > 0.001) .and. (SNICE(J) > 0.1) ) then
           BI    = SNICE(J) / DZSNSO(J)
           TD    = max( 0.0, TFRZ-STC(J) )
 
@@ -79,7 +79,7 @@ contains
           DEXPF   = exp( -C4 * TD )
           DDZ1(J) = -C3 * DEXPF
           if ( BI > DM ) DDZ1(J) = DDZ1(J) * exp( -46.0e-3 * (BI-DM) )
-          if ( SNLIQ(J) > 0.01*DZSNSO(J) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
+          if ( SNLIQ(J) > (0.01*DZSNSO(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
 
           ! Compaction due to overburden
           DDZ2(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden

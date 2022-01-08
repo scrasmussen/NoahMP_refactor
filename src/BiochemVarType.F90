@@ -20,7 +20,7 @@ module BiochemVarType
     ! define specific biochem flux variables
     real(kind=kind_noahmp) :: PSNSUN           ! sunlit leaf photosynthesis (umol co2 /m2/ s)
     real(kind=kind_noahmp) :: PSNSHA           ! shaded leaf photosynthesis (umol co2 /m2 /s)
-
+    real(kind=kind_noahmp) :: PSN              ! total leaf photosynthesis (umol co2 /m2 /s)
 
   end type flux_type
 

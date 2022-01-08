@@ -91,7 +91,13 @@ OBJS = ConstantDefineMod.o \
        SoilSnowTemperatureSolverMod.o \
        SoilSnowThermalDiffusionMod.o \
        SoilSnowWaterPhaseChangeMod.o \
-       SoilWaterSupercoolLiquidMod.o
+       SoilWaterSupercoolLiquidMod.o \
+       SnowCoverGroundNiu07Mod.o \
+       GroundRoughnessPropertyMod.o \
+       SurfaceEmissivityMod.o \
+       PsychrometricVariableMod.o \
+       ResistanceGroundEvaporationMod.o \
+       SoilWaterTranspirationMod.o
 
 all:	$(OBJS)
 
@@ -214,7 +220,9 @@ RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o \
                  SurfaceEnergyFluxBareGroundMod.o SoilSnowTemperatureMainMod.o \
-                 SoilSnowWaterPhaseChangeMod.o
+                 SoilSnowWaterPhaseChangeMod.o SnowCoverGroundNiu07Mod.o SurfaceEmissivityMod.o \
+                 GroundRoughnessPropertyMod.o PsychrometricVariableMod.o ResistanceGroundEvaporationMod.o \
+                 SoilWaterTranspirationMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
@@ -243,4 +251,10 @@ SoilSnowTemperatureMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefin
 SoilWaterSupercoolLiquidMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SoilSnowWaterPhaseChangeMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                SoilWaterSupercoolLiquidMod.o
+GroundRoughnessPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+PsychrometricVariableMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceGroundEvaporationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowCoverGroundNiu07Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SoilWaterTranspirationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SurfaceEmissivityMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 

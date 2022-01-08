@@ -95,7 +95,14 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/SoilSnowTemperatureSolverMod.o \
        ../src/SoilSnowThermalDiffusionMod.o \
        ../src/SoilSnowWaterPhaseChangeMod.o \
-       ../src/SoilWaterSupercoolLiquidMod.o
+       ../src/SoilWaterSupercoolLiquidMod.o \
+       ../src/SnowCoverGroundNiu07Mod.o \
+       ../src/GroundRoughnessPropertyMod.o \
+       ../src/SurfaceEmissivityMod.o \
+       ../src/PsychrometricVariableMod.o \
+       ../src/ResistanceGroundEvaporationMod.o \
+       ../src/SoilWaterTranspirationMod.o
+
 
 
 CMD = noahmp_refac.exe

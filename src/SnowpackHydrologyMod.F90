@@ -82,7 +82,7 @@ contains
 ! for shallow snow without a layer
 ! snow surface sublimation may be larger than existing snow mass. To conserve water,
 ! excessive sublimation is used to reduce soil water. Smaller time steps would tend to aviod this problem.
-    if ( ISNOW == 0 .and. SNEQV > 0.0 ) then
+    if ( (ISNOW == 0) .and. (SNEQV > 0.0) ) then
        TEMP   = SNEQV
        SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
        PROPOR = SNEQV / TEMP
@@ -99,7 +99,7 @@ contains
        endif
     endif
 
-    if ( SNOWH <= 1.0e-8 .or. SNEQV <= 1.0e-6 ) then
+    if ( (SNOWH <= 1.0e-8) .or. (SNEQV <= 1.0e-6) ) then
        SNOWH = 0.0
        SNEQV = 0.0
     endif
@@ -108,7 +108,7 @@ contains
     if ( ISNOW < 0 ) then
       WGDIF          = SNICE(ISNOW+1) - QSNSUB*DT + QSNFRO*DT
       SNICE(ISNOW+1) = WGDIF
-      if ( WGDIF < 1.0e-6 .and. ISNOW < 0 ) call SnowLayerCombine(noahmp)
+      if ( (WGDIF < 1.0e-6) .and. (ISNOW < 0) ) call SnowLayerCombine(noahmp)
       if ( ISNOW < 0 ) then
          SNLIQ(ISNOW+1) = SNLIQ(ISNOW+1) + QRAIN * DT
          SNLIQ(ISNOW+1) = max( 0.0, SNLIQ(ISNOW+1) )

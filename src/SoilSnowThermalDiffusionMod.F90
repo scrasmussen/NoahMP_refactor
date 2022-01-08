@@ -77,7 +77,7 @@ contains
 
     ! compute gradient and flux of soil/snow thermal diffusion
     do K = ISNOW+1, NSOIL
-       if ( K == ISNOW+1 ) then
+       if ( K == (ISNOW+1) ) then
           DENOM(K) = - ZSNSO(K) * HCPCT(K)
           TEMP1    = - ZSNSO(K+1)
           DDZ(K)   = 2.0 / TEMP1
@@ -105,10 +105,10 @@ contains
 
     ! prepare the matrix coefficients for the tri-diagonal matrix
     do K = ISNOW+1, NSOIL
-       if ( K == ISNOW+1 ) then
+       if ( K == (ISNOW+1) ) then
           AI(K) =   0.0
           CI(K) = - DF(K)   * DDZ(K) / DENOM(K)
-          if ( OPT_STC == 1 .or. OPT_STC == 3 ) then
+          if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
              BI(K) = - CI(K)
           endif
           if ( OPT_STC == 2 ) then

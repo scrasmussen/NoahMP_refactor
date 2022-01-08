@@ -100,8 +100,8 @@ contains
                                    DRR  , ZWLIQ   , ZWICE   , TSNO(1) )
 
           ! subdivide a new layer, maximum allowed thickness (20cm) for second snow layer
-          if ( MSNO <= 2 .and. DZ(2) > 0.20 ) then  ! MB: change limit
-          !if ( MSNO <= 2 .and. DZ(2) > 0.10 ) then
+          if ( (MSNO <= 2) .and. (DZ(2) > 0.20) ) then  ! MB: change limit
+          !if ( (MSNO <= 2) .and. (DZ(2) > 0.10) ) then
              MSNO     = 3
              DTDZ     = ( TSNO(1) - TSNO(2) ) / ( (DZ(1)+DZ(2)) / 2.0 )
              DZ(2)    = DZ(2) / 2.0

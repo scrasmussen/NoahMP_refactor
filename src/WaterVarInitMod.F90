@@ -69,7 +69,6 @@ contains
     noahmp%water%state%FP             = huge(1.0)
     noahmp%water%state%FSNO           = huge(1.0)
     noahmp%water%state%BTRAN          = huge(1.0)
-    noahmp%water%state%PSI            = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
@@ -91,6 +90,7 @@ contains
     allocate( noahmp%water%state%FICE_SOIL    (       1:NSOIL) )
     allocate( noahmp%water%state%SMCEQ        (       1:NSOIL) )
     allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
+    allocate( noahmp%water%state%PSI          (       1:NSOIL) )
 
     noahmp%water%state%IMELT(:)       = huge(1)
     noahmp%water%state%SUPERCOOL(:)   = huge(1.0)
@@ -112,6 +112,7 @@ contains
     noahmp%water%state%EPORE_SOIL(:)  = huge(1.0)
     noahmp%water%state%SMCEQ(:)       = huge(1.0)
     noahmp%water%state%BTRANI(:)      = huge(1.0)
+    noahmp%water%state%PSI(:)         = huge(1.0)
 
     ! water flux variable
     noahmp%water%flux%RAIN            = huge(1.0)
@@ -224,6 +225,9 @@ contains
     noahmp%water%param%IR_RAIN          = huge(1.0)
     noahmp%water%param%SNOWDEN_MIN      = huge(1.0)
     noahmp%water%param%SWEMX            = huge(1.0)
+    noahmp%water%param%PSIWLT           = huge(1.0)
+    noahmp%water%param%MFSNO            = huge(1.0)
+    noahmp%water%param%SCFFAC           = huge(1.0)
 
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
@@ -337,6 +341,9 @@ contains
     noahmp%water%param%IR_RAIN           = input%IR_RAIN_TABLE
     noahmp%water%param%SNOWDEN_MIN       = input%SNOWDEN_MIN_TABLE
     noahmp%water%param%SWEMX             = input%SWEMX_TABLE
+    noahmp%water%param%PSIWLT            = input%PSIWLT_TABLE
+    noahmp%water%param%MFSNO             = input%MFSNO_TABLE(VEGTYP)
+    noahmp%water%param%SCFFAC            = input%SCFFAC_TABLE(VEGTYP)
 
     noahmp%water%param%BVIC              = input%BVIC_TABLE(SOILTYP(1))
     noahmp%water%param%AXAJ              = input%AXAJ_TABLE(SOILTYP(1))

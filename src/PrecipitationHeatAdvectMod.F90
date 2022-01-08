@@ -70,7 +70,7 @@ contains
     PAHB = PAH_AG
 
     ! adjust for FVEG
-    if ( FVEG > 0.0 .and. FVEG < 1.0 ) then
+    if ( (FVEG > 0.0) .and. (FVEG < 1.0) ) then
        PAHG = PAHG / FVEG         ! these will be multiplied by fraction later
        PAHB = PAHB / (1.0-FVEG)
     elseif ( FVEG <= 0.0 ) then

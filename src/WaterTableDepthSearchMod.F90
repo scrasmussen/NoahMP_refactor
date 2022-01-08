@@ -50,7 +50,7 @@ contains
     ! calculate/search for water table depth
     do K = NSOIL, 1, -1
        if ( (SMC(K) >= SMCREF(K)) .and. (SMCREF(K) > SMCWLT(K)) ) then
-          if ( (SATLYRCHK == K+1) .or. (K == NSOIL) ) SATLYRCHK = K
+          if ( (SATLYRCHK == (K+1)) .or. (K == NSOIL) ) SATLYRCHK = K
        endif
     enddo
 

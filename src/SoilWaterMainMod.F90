@@ -148,7 +148,7 @@ contains
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
-    if ( PDDUM*DT > DZSNSO(1)*SMCMAX(1) ) then
+    if ( (PDDUM*DT) > (DZSNSO(1)*SMCMAX(1)) ) then
        NITER = NITER*2
     endif
     DTFINE  = DT / NITER
@@ -178,10 +178,10 @@ contains
     QDRAIN = QDRAIN * 1000.0
 
     ! compute tile drainage ! pvk
-    if ( OPT_TDRN == 1 .and. TDFRACMP > 0.3 .and. OPT_RUNSRF == 3 ) then
+    if ( (OPT_TDRN == 1) .and. (TDFRACMP > 0.3) .and. (OPT_RUNSRF == 3) ) then
        call TileDrainageSimple(noahmp)  ! simple tile drainage
     endif
-    if ( OPT_TDRN == 2 .and. TDFRACMP > 0.1 .and. OPT_RUNSRF == 3 ) then
+    if ( (OPT_TDRN == 2) .and. (TDFRACMP > 0.1) .and. (OPT_RUNSRF == 3) ) then
        call TileDrainageHooghoudt(noahmp)  ! Hooghoudt tile drain
     END IF
 
@@ -234,8 +234,8 @@ contains
     if ( OPT_RUNSUB == 1 ) call RunoffSubSurfaceGroundWater(noahmp)
 
     ! compute subsurface runoff based on drainage rate
-    if ( OPT_RUNSUB == 3 .or. OPT_RUNSUB == 4 .or. OPT_RUNSUB == 6 .or. &
-         OPT_RUNSUB == 7 .or. OPT_RUNSUB == 8) then
+    if ( (OPT_RUNSUB == 3) .or. (OPT_RUNSUB == 4) .or. (OPT_RUNSUB == 6) .or. &
+         (OPT_RUNSUB == 7) .or. (OPT_RUNSUB == 8) ) then
          call RunoffSubSurfaceDrainage(noahmp)
     endif
 

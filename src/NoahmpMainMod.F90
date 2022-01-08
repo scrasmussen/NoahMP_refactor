@@ -95,13 +95,13 @@ contains
 
     ! temporarilly extract from phenology to update ELAI and ESAI
     FB_snow = min( max(SNOWH-HVB, 0.0), HVT-HVB ) / max(1.0e-06, HVT-HVB)
-    if ( HVT > 0.0 .and. HVT <= 1.0 ) then    ! MB: change to 1.0 and 0.2 to reflect
+    if ( (HVT > 0.0) .and. (HVT <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect
        FB_snow = min( SNOWH, (HVT*exp(-SNOWH/0.2)) ) / (HVT*exp(-SNOWH/0.2) )
     endif
     ELAI = LAI * (1.0 - FB_snow)
     ESAI = SAI * (1.0 - FB_snow)
-    if ( ESAI < 0.05 .and. CROPTYPE == 0 ) ESAI = 0.0                   ! MB: ESAI CHECK, change to 0.05 v3.6
-    if ( (ELAI < 0.05 .or. ESAI == 0.0) .and. CROPTYPE == 0 ) ELAI = 0.0  ! MB: LAI CHECK
+    if ( (ESAI < 0.05) .and. (CROPTYPE == 0) ) ESAI = 0.0                   ! MB: ESAI CHECK, change to 0.05 v3.6
+    if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CROPTYPE == 0) ) ELAI = 0.0  ! MB: LAI CHECK
 
 
 

@@ -35,6 +35,8 @@ Program NoahmpDriverMod
   real(kind=kind_noahmp) :: errwat     = 0.0   ! water balance error at each timestep [mm]
   logical                :: raining            ! .true. if raining
   logical                :: VEG                ! true if covered by vegetation
+  real(kind=kind_noahmp) :: ERRENG     = 0.0   ! error in surface energy balance [w/m2]
+  real(kind=kind_noahmp) :: ERRSW      = 0.0   ! error in shortwave radiation balance [w/m2]
 
 !---------------------------------------------------------------------
 !  read in input data from table and initial file
@@ -214,8 +216,6 @@ Program NoahmpDriverMod
             SAI             => noahmp%energy%state%SAI             ,& ! inout,  stem area index (m2/m2)
             FB_snow         => noahmp%energy%state%FB_snow         ,& ! out,    fraction of canopy buried by snow
             RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,     density air (kg/m3)
-            CWP             => noahmp%energy%state%CWP             ,& ! in,     canopy wind absorption parameter
-            CWPVT           => noahmp%energy%param%CWPVT           ,& ! in,     canopy wind absorption parameter
             Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,    roughness length, momentum, ground (m)
             Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! out,    snow surface roughness length (m) (0.002)
             VAI             => noahmp%energy%state%VAI             ,& ! in,     one-sided leaf+stem area index (m2/m2)
@@ -284,8 +284,23 @@ Program NoahmpDriverMod
             EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
             SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
             TBOT            => noahmp%energy%state%TBOT            ,& ! in,    bottom soil temp. at ZBOT (K)
-            QMELT           => noahmp%water%flux%QMELT              & ! out,   snowmelt rate [mm/s]
-            )
+            QMELT           => noahmp%water%flux%QMELT             ,& ! out,   snowmelt rate [mm/s]
+            ICE             => noahmp%config%domain%ICE            ,& ! in,    flag for ice point
+            Z0WRF           => noahmp%energy%state%Z0WRF           ,& ! out,   roughness length, momentum, surface, sent to coupled model
+            T2M             => noahmp%energy%state%T2M             ,& ! out,   grid mean 2-m air temperature (K)
+            TAUX            => noahmp%energy%state%TAUX            ,& ! out,   wind stress: east-west (n/m2) grid mean
+            TAUY            => noahmp%energy%state%TAUY            ,& ! out,   wind stress: north-south (n/m2) grid mean
+            FIRA            => noahmp%energy%flux%FIRA             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
+            FSH             => noahmp%energy%flux%FSH              ,& ! out,   total sensible heat (w/m2) [+ to atm]
+            TRAD            => noahmp%energy%state%TRAD            ,& ! out,   radiative temperature (K)
+            PSN             => noahmp%biochem%flux%PSN             ,& ! out,   total leaf photosynthesis (umol co2 /m2 /s)
+            APAR            => noahmp%energy%flux%APAR             ,& ! out,   total photosyn. active energy (w/m2)
+            TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
+            Q2E             => noahmp%energy%state%Q2E             ,& ! out,   grid mean 2-m water vapor mixing ratio
+            EMISSI          => noahmp%energy%state%EMISSI          ,& ! out,   surface emissivity
+            PAH             => noahmp%energy%flux%PAH              ,& ! out,   precipitation advected heat - total (W/m2)
+            Q1              => noahmp%energy%state%Q1               & ! inout, surface layer water vapor mixing ratio
+           )
 !---------------------------------------------------------------------
 
 ! start with a default value at time 0
@@ -419,6 +434,9 @@ Program NoahmpDriverMod
   WGAP     = 0.0
   ALBSND(:)= 0.0
   ALBSNI(:)= 0.0
+! Energy main new vars
+  ICE = 0
+
 
 !====== vege_flux new vars
 !!! in 
@@ -430,7 +448,6 @@ Program NoahmpDriverMod
   QAIR   = Q2
   EAIR   = QAIR * SFCPRS / (0.622 + 0.378*QAIR)
   RHOAIR = (SFCPRS - 0.378*EAIR) / (RAIR*SFCTMP)
-  CWP    = CWPVT
   Z0MG   = 0.002 * (1.0 - FSNO) + FSNO * Z0SNO
 ! needs to update each time step
   VAI    = ELAI + ESAI
@@ -461,8 +478,8 @@ Program NoahmpDriverMod
       Z0M = Z0MG
       ZPD = ZPDG
    endif
-   ZLVL   = max( ZPD, HVT ) + 10.0
-   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
+   !ZLVL   = max( ZPD, HVT ) + 10.0
+   !IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
    EMV    = 1.0 - exp(-(ELAI+ESAI)/1.0)
    EMG    = EG(IST) * (1.0-FSNO) + SNOW_EMIS*FSNO
    RSURF  = FSNO * 1.0 + (1.0-FSNO)* exp(8.25-4.225*(max(0.0,SH2O(1)/SMCMAX(1)))) !Sellers (1992)
@@ -471,8 +488,8 @@ Program NoahmpDriverMod
    CO2AIR = 395.0e-06 * SFCPRS
    O2AIR  = 0.209 * SFCPRS
    BTRAN  = 0.2
-   PSI    = -PSISAT(1)*(max(0.01,SH2O(1))/SMCMAX(1))**(-BEXP(1))
-   RHSUR  = FSNO + (1.0-FSNO) * EXP(PSI*GRAV/(RW*TG))
+   PSI(1) = -PSISAT(1)*(max(0.01,SH2O(1))/SMCMAX(1))**(-BEXP(1))
+   RHSUR  = FSNO + (1.0-FSNO) * EXP(PSI(1)*GRAV/(RW*TG))
    DZ8W   = 20.0
    PSFC   = SFCPRS
 !!! inout
@@ -534,11 +551,29 @@ endif
    IMELT(:) = 0
 !==== phasechange end
 
+!==== Energy Main 
+   ERRENG = 0.0
+   ERRSW  = 0.0
+   Z0WRF  = 0.0
+   T2M    = 0.0
+   TAUX   = 0.0
+   TAUY   = 0.0
+   FIRA   = 0.0
+   FSH    = 0.0
+   TRAD   = 0.0
+   PSN    = 0.0
+   APAR   = 0.0
+   BTRANI = 0.2 ! 0~1
+   BTRAN  = 0.2
+   TS     = 0.0
+   Q2E    = 0.0
+   EMISSI = 0.0
+   PAH    = 0.0
+!==== Energy end
 
 !============================
   QVAP = max( FGEV / LATHEAG, 0.0 )       ! positive part of fgev; Barlage change to ground v3.6
   QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
-  BTRANI(1:nsoil) = 0.2 ! 0~1
   EDIR = QVAP - QDEW   ! net soil evaporation
 
 !============= irrigation related
@@ -627,7 +662,7 @@ endif
 !---------------------------------------------------------------------
 
   call initialize_output(noahmp, input, ntime+1)
-  call add_to_output(0, noahmp, errwat)
+  call add_to_output(0, noahmp, errwat, ERRSW, ERRENG)
 
 
 !---------------------------------------------------------------------
@@ -635,7 +670,6 @@ endif
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
-
 
     tw0 = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA + CANLIQ + CANICE ! [mm] 
 
@@ -686,17 +720,36 @@ endif
 
     FICEOLD(ISNOW+1:0) = SNICE(ISNOW+1:0) /(SNICE(ISNOW+1:0) + SNLIQ(ISNOW+1:0))
 
-! balance check for soil and snow layers  
+!------------------------ balance check  
+! Energy balance check
+!!! extracted from ERROR subroutine
+! add energy balance check
+  ERRSW   = SWDOWN - (FSA + FSR)
+  if ( abs(ERRSW) > 0.01 ) then
+     print*, 'SW energy not balanced ...'
+     stop 'error'
+  endif
+
+  ERRENG = SAV+SAG-(FIRA+FSH+FCEV+FGEV+FCTR+SSOIL+FIRR) +PAH
+  if ( abs(ERRENG) > 0.01 ) then
+     print*, 'Surface energy not balanced ...'
+     stop 'error'
+  endif
+
+! water balance check
     totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA + CANLIQ + CANICE     ! total water storage [mm]
     errwat   = (RAIN+SNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT-EDIR-ETRAN-RUNSRF-RUNSUB-QTLDRN-ECAN)*DT - (totalwat - tw0)  ! water balance error [mm]
 
-  if (abs(errwat) > 0.1) print*,'water not balanced ....'
+   if (abs(errwat) > 0.1) then
+      print*,'water not balanced ....'
+      stop 'error'
+   endif
 
     !---------------------------------------------------------------------
     ! add to output file
     !---------------------------------------------------------------------
 
-    call add_to_output(itime, noahmp, errwat)
+    call add_to_output(itime, noahmp, errwat, ERRSW, ERRENG)
    
   end do ! time loop
 

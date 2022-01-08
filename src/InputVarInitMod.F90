@@ -95,12 +95,12 @@ contains
                                                     CZIL_DATA
 
     ! MPTABLE.TBL radiation parameters
-    real(kind=kind_noahmp)                   :: BETADS, BETAIS
+    real(kind=kind_noahmp)                   :: BETADS, BETAIS, EICE
     real(kind=kind_noahmp), dimension(MBAND) :: ALBICE, ALBLAK, OMEGAS 
     real(kind=kind_noahmp), dimension(2)     :: EG
     real(kind=kind_noahmp), dimension(MSC)   :: ALBSAT_VIS, ALBSAT_NIR, ALBDRY_VIS, ALBDRY_NIR
     namelist / noahmp_rad_parameters /          ALBSAT_VIS, ALBSAT_NIR, ALBDRY_VIS, ALBDRY_NIR, ALBICE, ALBLAK, OMEGAS,      &
-                                                BETADS, BETAIS, EG
+                                                BETADS, BETAIS, EG, EICE
 
     ! MPTABLE.TBL global parameters
     real(kind=kind_noahmp)                   :: CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
@@ -108,13 +108,15 @@ contains
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
+                                                PSIWLT, Z0SOIL, Z0LAKE
     namelist / noahmp_global_parameters /       CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
                                                 GRAIN_GROWTH, EXTRA_GROWTH, DIRT_SOOT, BATS_COSZ, BATS_VIS_NEW,              &
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
+                                                PSIWLT, Z0SOIL, Z0LAKE
 
     ! MPTABLE.TBL irrigation parameters
     integer                                  :: IRR_HAR
@@ -463,6 +465,7 @@ contains
     input%BETADS_TABLE       = -1.0e36
     input%BETAIS_TABLE       = -1.0e36
     input%EG_TABLE           = -1.0e36
+    input%EICE_TABLE         = -1.0e36
 
     ! MPTABLE.TBL global parameters
     input%CO2_TABLE              = -1.0e36
@@ -502,6 +505,9 @@ contains
     input%CLASS_ALB_REF_TABLE    = -1.0e36
     input%CLASS_SNO_AGE_TABLE    = -1.0e36
     input%CLASS_ALB_NEW_TABLE    = -1.0e36
+    input%PSIWLT_TABLE           = -1.0e36
+    input%Z0SOIL_TABLE           = -1.0e36
+    input%Z0LAKE_TABLE           = -1.0e36
 
     ! MPTABLE.TBL irrigation parameters
     input%IRR_HAR_TABLE          = -99999
@@ -829,6 +835,7 @@ contains
     input%BETADS_TABLE      = BETADS
     input%BETAIS_TABLE      = BETAIS
     input%EG_TABLE          = EG
+    input%EICE_TABLE        = EICE
 
     !---------------- MPTABLE.TBL global parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
@@ -880,6 +887,9 @@ contains
     input%CLASS_ALB_REF_TABLE    = CLASS_ALB_REF
     input%CLASS_SNO_AGE_TABLE    = CLASS_SNO_AGE
     input%CLASS_ALB_NEW_TABLE    = CLASS_ALB_NEW
+    input%PSIWLT_TABLE           = PSIWLT
+    input%Z0SOIL_TABLE           = Z0SOIL
+    input%Z0LAKE_TABLE           = Z0LAKE
 
     !---------------- MPTABLE.TBL irrigation parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
