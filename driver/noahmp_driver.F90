@@ -1052,7 +1052,7 @@ endif
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
- 
+
   tw0 = sum(DZSNSO(1:nsoil)*SMC*1000.0) + SNEQV + WA + CANLIQ + CANICE ! [mm] 
 
      IRFIRATE = 0.0
