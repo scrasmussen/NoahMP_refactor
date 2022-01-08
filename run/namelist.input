@@ -1,9 +1,9 @@
     
 &timing ! and output
   dt              = 600.0   ! timestep [seconds]
-  maxtime         = 30      ! total simulation time [hours]
+  maxtime         = 1      ! total simulation time [hours]
   output_filename = 'output.nc'
-  runsnow         = .true. ! true or false whether to run snow cases
+  runsnow         = .false. ! true or false whether to run snow cases
   JULIAN          = 180.0
 /
 

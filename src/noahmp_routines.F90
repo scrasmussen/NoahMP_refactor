@@ -1198,7 +1198,6 @@ contains
                    SMC     ,SH2O    ,                            & !inout
                    QMELT   ,IMELT   ,PONDING )                     !out
 
-
   END SUBROUTINE ENERGY
 
 !==  end of main energy subroutine

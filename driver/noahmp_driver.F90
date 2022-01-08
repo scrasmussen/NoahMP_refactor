@@ -844,8 +844,7 @@ end if
       Z0M  = Z0MG
       ZPD  = ZPDG
    END IF
-   ZLVL = MAX(ZPD,parameters%HVT) + 10.0
-   IF(ZPDG >= ZLVL) ZLVL = ZPDG + 10.0
+   ZLVL = 10.0
    EMV = 1.0 - EXP(-(ELAI+ESAI)/1.0)
    EMG = parameters%EG(IST)*(1.0-FSNO) + parameters%SNOW_EMIS*FSNO
    RSURF = FSNO * 1.0 + (1.0-FSNO)* EXP(8.25-4.225*(MAX(0.0,SH2O(1)/parameters%SMCMAX(1)))) !Sellers (1992)

@@ -13,8 +13,7 @@
  cp ../../../run/SOILPARM.TBL .
  cp ../../../run/noahmp.exe .
 
-#for snownum in 1 2 ; do
-for snownum in 2 ; do
+for snownum in 1 2 ; do
 for btrtp in 1 2 3 ; do
 for stctp in 1 2 ; do
 for rsftp in 1 2 3 4 ; do
