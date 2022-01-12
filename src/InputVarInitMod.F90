@@ -1136,34 +1136,61 @@ contains
 
   !=== declare temporary variable to store namelist values
 
-
-    integer                  :: yearlen
-    integer                  :: pgs
-
-    real(kind=kind_noahmp)   :: maxtime
-    real(kind=kind_noahmp)   :: snowh
-    real(kind=kind_noahmp)   :: tv
-    real(kind=kind_noahmp)   :: lat
-    real(kind=kind_noahmp)   :: troot
+    ! timing
     
-    character(len=256)       :: output_filename
-   
-    ! domain
-    integer                  :: vegtype
-    integer                  :: croptype
+    integer                         :: maxtime
+    integer                         :: YEARLEN
+    integer                         :: ist    !surface type 1->soil; 2->lake     
 
+    ! structure
+    integer                         :: iloc
+    integer                         :: jloc
+    integer                         :: isltyp
+    integer                         :: vegtype,vegtyp
+    integer                         :: croptype
+    integer                         :: nsoil
+    integer                         :: nsnow
+    integer                         :: pgs
 
-    ! namelist options
-    integer                  :: idveg
-
+    ! options
+    integer                         :: idveg
+    integer                         :: iopt_crop
     
+    character*256                   :: output_filename
+
+    real(kind=kind_noahmp)          :: JULIAN
+    real(kind=kind_noahmp)          :: dt
+    real(kind=kind_noahmp)          :: lat
+    real(kind=kind_noahmp)          :: tv
+    real(kind=kind_noahmp)          :: tg
+    real(kind=kind_noahmp)          :: foln
+    real(kind=kind_noahmp)          :: btran
+    real(kind=kind_noahmp)          :: psn
+    real(kind=kind_noahmp)          :: apar
+    real(kind=kind_noahmp)          :: igs
+    real(kind=kind_noahmp)          :: fveg
+    real(kind=kind_noahmp)          :: troot
+    real(kind=kind_noahmp)          :: t2m
+    real(kind=kind_noahmp)          :: soldn
+    real(kind=kind_noahmp)          :: SNOWH
+
+    ! fixed_initial
+    real, allocatable, dimension(:) :: zsoil   ! depth of layer-bottom from soil surface
+    real, allocatable, dimension(:) :: DZSNSO  ! snow/soil layer thickness [m]
+
   !=== arrange structures for reading namelist.input
 
-  namelist / timing          / maxtime, output_filename
-  namelist / forcing         / croptype,vegtype,yearlen,&
-                               snowh,tv,lat,troot, pgs
-  namelist / options         / idveg
+    namelist / timing          / dt,maxtime,output_filename,yearlen
 
+    namelist / forcing         / lat,tv,tg,foln,btran,psn,apar,fveg,troot,&
+                                 ist,t2m,soldn,snowh, pgs
+
+    namelist / structure       / iloc,jloc,isltyp,vegtype,croptype,nsoil,nsnow
+                                 
+                                 
+    namelist / options         / idveg,iopt_crop
+
+    namelist / fixed_initial   / zsoil,dzsnso
 
     !---------------------------------------------------------------
     ! read namelist.input, part 1 for scalars & variable dimension info
@@ -1171,28 +1198,60 @@ contains
 
     open(30, file="namelist.input", form="formatted")
       read(30, timing)
-      read(30, forcing)
+      read(30, structure)
       read(30, options)
     close(30)
 
-    input%yearlen         = yearlen
-    input%pgs             = pgs
+    !---------------------------------------------------------------------
+    !  allocate for dynamic levels
+    !---------------------------------------------------------------------
 
-    input%maxtime         = maxtime
-    input%snowh           = snowh
-    input%tv              = tv
-    input%lat             = lat
-    input%troot           = troot
+    allocate (zsoil (       1:nsoil))   !depth of layer-bottom from soil surface
+    allocate (DZSNSO(-nsnow+1:nsoil))   !snow/soil layer thickness [m]
+    allocate (SMC   (       1:nsoil))   !total soil water content [m3/m3]
+    allocate (STC   (-nsnow+1:nsoil))   !snow/soil layer temperature [k]
+
+    open(30, file="namelist.input", form="formatted")
+      read(30, forcing)
+      read(30, fixed_initial)
+    close(30)
+    !-------------------------------------
+    input%ILOCIn    = iloc
+    input%JLOCIn    = jloc 
+    input%yearlen   = YEARLEN
+    input%psn       = psn
+    input%foln      = foln
+    input%pgs       = pgs
+    input%APAR      = apar
+    input%maxtime   = maxtime
+    input%nsoil     = nsoil 
+    input%nsnow     = nsnow 
+    input%DTIn      = dt
+    input%fveg      = fveg     
+    input%ist       = ist
+    input%t2m       = t2m
+    input%soldn     = soldn
+    input%snowh     = snowh
+    input%tv        = tv
+    input%tg        = tg
+    input%lat       = lat
+    input%troot     = troot
+    input%JULIANIn  = JULIAN
+    input%btran     = btran
     
     input%output_filename = output_filename
    
     ! domain
-    input%VEGTYPEIn       = vegtype
-    input%CROPTYPEIn      = croptype
-
+    input%VEGTYPEIn   = vegtype
+    input%CROPTYPEIn  = croptype
+    input%SOILTYPIn   = isltyp
 
     ! namelist options
-    input%OPT_DVEGIn      = idveg
+    input%OPT_DVEGIn  = idveg
+    input%OPT_CROPIn  = iopt_crop
+
+    input%zsoil       = zsoil     
+    input%DZSNSO      = dzsnso    
 
   end subroutine ReadNamelist
 
@@ -1204,8 +1263,8 @@ contains
     
     type(input_type), intent(inout) :: input
 
-    input%OPT_DVEGIn = 4
-    input%yearlen    = 365
+    input%OPT_DVEGIn  = 4
+    input%OPT_CROPIn  = 0
 
 
   end subroutine InputVarInitDefault

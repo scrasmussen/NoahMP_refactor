@@ -13,21 +13,26 @@ module EnergyVarType
   type :: flux_type
 
     ! define specific energy flux variables
-    real(kind=kind_noahmp) :: SAV
-
+    real(kind=kind_noahmp) :: APAR            ! total photosyn. active energy (w/m2)
+    
   end type flux_type
 
 !=== define "state" sub-type of energy_type (energy%state%variable)
   type :: state_type
 
     ! define specific energy state variables
-    real(kind=kind_noahmp) :: TAH
     real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
     real(kind=kind_noahmp) :: ESAI            ! stem area index, after burying by snow
     real(kind=kind_noahmp) :: LAI             ! leaf area index
     real(kind=kind_noahmp) :: SAI             ! stem area index
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
     real(kind=kind_noahmp) :: TROOT           ! root-zone averaged temperature (k)
+    real(kind=kind_noahmp) :: T2M             ! 2 m height air temperature (k), grid mean
+    real(kind=kind_noahmp) :: TG              ! ground temperature (k)
+    real(kind=kind_noahmp) :: FVEG            ! green vegetation fraction (-)
+ 
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
 
   end type state_type
 
@@ -35,7 +40,6 @@ module EnergyVarType
   type :: parameter_type
 
     ! define specific energy parameter variables
-    real(kind=kind_noahmp) :: RAHC
     real(kind=kind_noahmp) :: HVT              ! top of canopy (m)
     real(kind=kind_noahmp) :: HVB              ! bottom of canopy (m)
 

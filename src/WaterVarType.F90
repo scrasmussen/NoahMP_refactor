@@ -22,6 +22,11 @@ module WaterVarType
     ! define specific water state variables
 
     real(kind=kind_noahmp) :: SNOWH  !snow height [m]
+    real(kind=kind_noahmp) :: BTRAN  !soil water transpiration factor (0 to 1)
+    real(kind=kind_noahmp) :: WROOT  !root zone soil water
+    real(kind=kind_noahmp) :: WSTRES !soil water stress
+
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMC           ! total soil moisture [m3/m3]
 
   end type state_type
 
@@ -29,6 +34,10 @@ module WaterVarType
   type :: parameter_type
 
     ! define specific water parameter variables
+  integer                :: NROOT            ! number of soil layers with root present
+
+  real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
+
 
   end type parameter_type
 

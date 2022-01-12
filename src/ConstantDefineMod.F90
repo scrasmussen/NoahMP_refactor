@@ -27,5 +27,4 @@ module ConstantDefineMod
   real(kind=kind_noahmp), public, parameter :: DENH2O = 1000.     !density of water (kg/m3)
   real(kind=kind_noahmp), public, parameter :: DENICE = 917.      !density of ice (kg/m3)
 
-
 end module ConstantDefineMod

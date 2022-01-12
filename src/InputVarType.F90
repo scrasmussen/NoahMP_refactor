@@ -14,28 +14,41 @@ module InputVarType
    ! domain
     integer                  :: ILOCIn    ! grid index (longitude)
     integer                  :: JLOCIn    ! grid index (latitude)
-
     integer                  :: yearlen
     integer                  :: pgs
+    integer                  :: maxtime
+    integer                  :: nsoil      
+    integer                  :: nsnow      
 
-    real(kind=kind_noahmp)   :: maxtime
+    real(kind=kind_noahmp)   :: psn
+    real(kind=kind_noahmp)   :: APAR
+    real(kind=kind_noahmp)   :: DTIn  
+    real(kind=kind_noahmp)   :: fveg     
+    real(kind=kind_noahmp)   :: ist      
+    real(kind=kind_noahmp)   :: t2m      
+    real(kind=kind_noahmp)   :: soldn    
     real(kind=kind_noahmp)   :: snowh
     real(kind=kind_noahmp)   :: tv
+    real(kind=kind_noahmp)   :: tg
     real(kind=kind_noahmp)   :: lat
     real(kind=kind_noahmp)   :: troot
-    real(kind=kind_noahmp)   :: JULIAN
+    real(kind=kind_noahmp)   :: JULIANIn
+    real(kind=kind_noahmp)   :: btran
     
     character(len=256)       :: output_filename
    
     ! domain
     integer                  :: VEGTYPEIn
     integer                  :: CROPTYPEIn
+    integer                  :: SOILTYPIn
 
 
     ! namelist options
     integer                  :: OPT_DVEGIn
+    integer                  :: OPT_CROPIn
 
-
+    real(kind=kind_noahmp), allocatable, dimension(:) :: zsoil   ! depth of layer-bottom from soil surface
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! snow/soil layer thickness [m]
 
     !----------------------------------------------------------------
     ! Noahmp Table variables

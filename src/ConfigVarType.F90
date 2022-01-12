@@ -24,18 +24,28 @@ module ConfigVarType
     ! define specific domain variables
 
     logical                   :: URBAN_FLAG  ! flag for urban grid
+    integer                   :: ILOC        ! model grid index
+    integer                   :: JLOC        ! model grid index
+    integer                   :: NSOIL       ! number of soil layers
+    integer                   :: NSNOW       ! maximum number of snow layers
     integer                   :: ISWATER     ! flag to identify water
     integer                   :: ISBARREN    ! flag to identify barren land
     integer                   :: ISICE       ! flag to identify ice
     integer                   :: ISCROP      ! flag to identify crop
     integer                   :: EBLFOREST   ! flag to identify EBL Forest
-
+    integer                   :: NSTAGE      ! number of growth stages
     integer                   :: VEGTYP      ! vegetation type
+    integer                   :: SOILTYP     ! soil type   
     integer                   :: CROPTYP     ! crop type
     integer                   :: YEARLEN     ! Number of days in the particular year
+    integer                   :: IST         ! surface type 1->soil; 2->lake
+
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
     real(kind=kind_noahmp)    :: LAT         ! latitude (radians)
+    real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
 
   end type domain_type
 

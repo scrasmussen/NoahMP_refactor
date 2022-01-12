@@ -10,7 +10,7 @@ module PhenologyMainMod
 
 contains
 
-  subroutine PhenologyMain(noahmp)
+  subroutine PhenologyMain (noahmp)
 
 
 ! ------------------------ Code history -----------------------------------
