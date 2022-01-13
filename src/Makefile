@@ -14,10 +14,17 @@ OBJS = InputVarType.o \
        NoahmpVarType.o \
        InputVarInitMod.o \
        ConfigVarInitMod.o \
+       ForcingVarInitMod.o \
        EnergyVarInitMod.o \
        WaterVarInitMod.o \
        BiochemVarInitMod.o \
-       PhenologyMainMod.o       
+       PhenologyMainMod.o  \
+       CarbonAssimilationFluxMod.o \
+       CarbonAssimilationFluxCropMod.o \
+       PhotosynthesisCropMod.o \
+       GrowingDegreeDaysCropMod.o \
+       BiochemMainMod.o \
+       BiochemCropMainMod.o      
 
 all:	$(OBJS)
 
@@ -46,5 +53,11 @@ EnergyVarInitMod.o:     InputVarType.o NoahmpVarType.o
 WaterVarInitMod.o:      InputVarType.o NoahmpVarType.o
 BiochemVarInitMod.o:    InputVarType.o NoahmpVarType.o
 PhenologyMainMod.o:     ../utility/Machine.o NoahmpVarType.o 
-
+CarbonAssimilationFluxMod.o: ../utility/Machine.o NoahmpVarType.o
+CarbonAssimilationFluxCropMod.o: ../utility/Machine.o NoahmpVarType.o
+PhotosynthesisCropMod.o: ../utility/Machine.o NoahmpVarType.o
+GrowingDegreeDaysCropMod.o: ../utility/Machine.o NoahmpVarType.o
+BiochemMainMod.o: ../utility/Machine.o NoahmpVarType.o CarbonAssimilationFluxMod.o
+BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o CarbonAssimilationFluxCropMod.o \
+                      GrowingDegreeDaysCropMod.o PhotosynthesisCropMod.o
 

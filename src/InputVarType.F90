@@ -23,7 +23,8 @@ module InputVarType
     real(kind=kind_noahmp)   :: psn
     real(kind=kind_noahmp)   :: APAR
     real(kind=kind_noahmp)   :: DTIn  
-    real(kind=kind_noahmp)   :: fveg     
+    real(kind=kind_noahmp)   :: fveg
+    real(kind=kind_noahmp)   :: foln     
     real(kind=kind_noahmp)   :: ist      
     real(kind=kind_noahmp)   :: t2m      
     real(kind=kind_noahmp)   :: soldn    

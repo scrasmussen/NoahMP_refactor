@@ -15,7 +15,8 @@ module ConfigVarType
     ! define specific namelist variables
 
     integer                   :: DVEG  
-
+    integer                   :: OPT_CROP
+ 
   end type namelist_type
 
 !=== define "domain" sub-type of config_type (config%domain%variable)
@@ -34,8 +35,7 @@ module ConfigVarType
     integer                   :: ISCROP      ! flag to identify crop
     integer                   :: EBLFOREST   ! flag to identify EBL Forest
     integer                   :: NSTAGE      ! number of growth stages
-    integer                   :: VEGTYP      ! vegetation type
-    integer                   :: SOILTYP     ! soil type   
+    integer                   :: VEGTYP      ! vegetation type   
     integer                   :: CROPTYP     ! crop type
     integer                   :: YEARLEN     ! Number of days in the particular year
     integer                   :: IST         ! surface type 1->soil; 2->lake
@@ -44,6 +44,7 @@ module ConfigVarType
     real(kind=kind_noahmp)    :: LAT         ! latitude (radians)
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
 
+    integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
 

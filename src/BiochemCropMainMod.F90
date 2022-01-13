@@ -4,6 +4,9 @@ module BiochemCropMainMod
         
     use Machine, only : kind_noahmp
     use NoahmpVarType
+    use CarbonAssimilationFluxCropMod
+    use GrowingDegreeDaysCropMod
+    use PhotosynthesisCropMod 
         
     implicit none
         

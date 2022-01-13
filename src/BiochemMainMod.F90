@@ -4,6 +4,7 @@ module BiochemMainMod
     
    use Machine, only : kind_noahmp
    use NoahmpVarType
+   use CarbonAssimilationFluxMod
     
    implicit none
     

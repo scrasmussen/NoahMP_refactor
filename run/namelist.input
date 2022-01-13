@@ -1,19 +1,42 @@
 &timing ! and output
+  dt              = 1
   maxtime         = 365       ! total simulation time [days]
   output_filename = "output.nc"
+  yearlen         = 365
+/
+
+&structure
+  iloc       = 1
+  jloc       = 1
+  isltyp     = 1
+  vegtype    = 12
+  croptype   = 0
+  nsoil      = 4
+  nsnow      = 3
 /
 
 &forcing
-  croptype = 0
-  vegtype  = 7
-  yearlen  = 365
   snowh    = 0.05
-  tv       = 295
+  tv       = 295.0
   lat      = 0.349066
-  troot    = 285
-  pgs      = 3
+  troot    = 285.0  
+  tg       = 280.0
+  foln     = 0.15
+  btran    = 0.5
+  psn      = 0.5
+  apar     = 250.0
+  fveg     = 0.8
+  ist      = 1
+  t2m      = 286.0
+  soldn    = 300.0
+/
+
+&fixed_initial
+ zsoil     = -0.1, -0.4, -1.0, -2.0  ! depth to level interface [m]
+ dzsnso    =  0.0, 0.0,   0.0, 0.1,  0.3,  0.6,  1.0  ! level thickness [m]
 /
 
 &options
-  idveg      = 4
+  idveg      = 5
+  iopt_crop  = 0
 /

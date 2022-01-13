@@ -28,7 +28,7 @@ contains
         associate(                                            &
                  T2M       =>  noahmp%energy%state%T2M       ,&
                  DT        =>  noahmp%config%domain%DT       ,& 
-                 JULIAN    =>  noahmp%config%domain%YEARLEN  ,&
+                 JULIAN    =>  noahmp%config%domain%JULIAN  ,&
                  GDD       =>  noahmp%biochem%state%GDD      ,& 
                  IPA       =>  noahmp%biochem%state%IPA      ,& 
                  IHA       =>  noahmp%biochem%state%IHA      ,&
@@ -49,15 +49,13 @@ contains
         ! Havestindex(0=on,1=off) 
         IPA = 1
         IHA = 1
-        
+
         !turn on/off the planting 
-                  
-        if (JULIAN < PLTDAY)  IPA = 0
+        if(JULIAN < PLTDAY) IPA = 0          
         
         !turn on/off the harvesting
-        
-        if (JULIAN >= HSDAY) IHA = 0
-                    
+        if(JULIAN >= HSDAY) IHA = 0                    
+
         ! Calculate the growing degree days
                    
         if (TC <  GDDTBASE) then
@@ -70,7 +68,7 @@ contains
 
         GDD     = (GDD + TDIFF * DT / 86400.0) * IPA * IHA
         GDDDAY  = GDD
-
+      
         ! Decide corn growth stage, based on Hybrid-Maize 
         !   PGS = 1 : Before planting
         !   PGS = 2 : from tassel initiation to silking

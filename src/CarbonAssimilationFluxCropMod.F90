@@ -21,7 +21,24 @@ contains
         
         type(noahmp_type), intent(inout) :: noahmp
 
-        associate(
+        ! local variable
+        real(kind=kind_noahmp)           :: BF       !parameter for present wood allocation [-]
+        real(kind=kind_noahmp)           :: RSWOODC  !wood respiration coeficient [1/s]
+        real(kind=kind_noahmp)           :: STOVRC   !stem turnover coefficient [1/s]
+        real(kind=kind_noahmp)           :: RSDRYC   !degree of drying that reduces soil respiration [-]
+        real(kind=kind_noahmp)           :: RTOVRC   !root turnover coefficient [1/s]
+        real(kind=kind_noahmp)           :: WSTRC    !water stress coeficient [-]
+        real(kind=kind_noahmp)           :: LAIMIN   !minimum leaf area index [m2/m2]
+        real(kind=kind_noahmp)           :: XSAMIN   !minimum leaf area index [m2/m2]
+        real(kind=kind_noahmp)           :: SC
+        real(kind=kind_noahmp)           :: SD
+        real(kind=kind_noahmp)           :: VEGFRAC
+
+       ! Respiration as a function of temperature
+        real(kind=kind_noahmp)           :: r,x
+        r(x) = exp(0.08*(x-298.16))
+
+        associate(                                             &
                  ADDNPPLF =>  noahmp%biochem%state%ADDNPPLF   ,&
                  ADDNPPST =>  noahmp%biochem%state%ADDNPPST   ,&
                  AUTORS   =>  noahmp%biochem%flux%AUTORS      ,&
@@ -119,27 +136,7 @@ contains
                  BIO2LAI  =>  noahmp%biochem%param%BIO2LAI     & 
                 )
 
-      
-        ! local variable
-        real(kind=kind_noahmp)           :: BF       !parameter for present wood allocation [-]
-        real(kind=kind_noahmp)           :: RSWOODC  !wood respiration coeficient [1/s]
-        real(kind=kind_noahmp)           :: STOVRC   !stem turnover coefficient [1/s]
-        real(kind=kind_noahmp)           :: RSDRYC   !degree of drying that reduces soil respiration [-]
-        real(kind=kind_noahmp)           :: RTOVRC   !root turnover coefficient [1/s]
-        real(kind=kind_noahmp)           :: WSTRC    !water stress coeficient [-]
-        real(kind=kind_noahmp)           :: LAIMIN   !minimum leaf area index [m2/m2]
-        real(kind=kind_noahmp)           :: XSAMIN   !minimum leaf area index [m2/m2]
-        real(kind=kind_noahmp)           :: SC
-        real(kind=kind_noahmp)           :: SD
-        real(kind=kind_noahmp)           :: VEGFRAC
-        real(kind=kind_noahmp)           :: r,x
-
         ! ---------------------------------------------------------------------------------
-
-        ! Respiration as a function of temperature
-
-        r(x) = exp(0.08*(x-298.16))
-
         ! constants
 
         RSDRYC  = 40.0              ! original was 40.0
@@ -183,14 +180,17 @@ contains
         LFTOVR  = LF_OVRC(PGS)*1.0E-6*LFMASS
         RTTOVR  = RT_OVRC(PGS)*1.0E-6*RTMASS
         STTOVR  = ST_OVRC(PGS)*1.0E-6*STMASS
+
         SC  = EXP(-0.3*MAX(0.0,TV-LEFREEZ)) * (LFMASS/120.0)
         SD  = EXP((WSTRES-1.0)*WSTRC)
+
         DIELF = LFMASS*1.0E-6*(DILE_FW(PGS) * SD + DILE_FC(PGS)*SC)
 
         ! Allocation of CBHYDRAFX to leaf, stem, root and grain at each growth stage
 
         ADDNPPLF    = MAX(0.0,LFPT(PGS)*CBHYDRAFX - GRLEAF-RSLEAF)
         ADDNPPLF    = LFPT(PGS)*CBHYDRAFX - GRLEAF-RSLEAF
+
         ADDNPPST    = MAX(0.0,STPT(PGS)*CBHYDRAFX - GRSTEM-RSSTEM)
         ADDNPPST    = STPT(PGS)*CBHYDRAFX - GRSTEM-RSSTEM
     
@@ -198,16 +198,20 @@ contains
 
         LFDEL = (LFMASS - LFMSMN)/DT
         STDEL = (STMASS - STMSMN)/DT
+
         LFTOVR  = MIN(LFTOVR,LFDEL+ADDNPPLF)
         STTOVR  = MIN(STTOVR,STDEL+ADDNPPST)
+
         DIELF = MIN(DIELF,LFDEL+ADDNPPLF-LFTOVR)
 
         ! net primary productivities
 
         NPPL   = MAX(ADDNPPLF,-LFDEL)
         NPPL   = ADDNPPLF
+
         NPPS   = MAX(ADDNPPST,-STDEL)
         NPPS   = ADDNPPST
+
         NPPR   = RTPT(PGS)*CBHYDRAFX - RSROOT - GRROOT
         NPPG  =  GRAINPT(PGS)*CBHYDRAFX - RSGRAIN - GRGRAIN
 
@@ -216,17 +220,22 @@ contains
         LFMASS = LFMASS + (NPPL-LFTOVR-DIELF)*DT
         STMASS = STMASS + (NPPS-STTOVR)*DT                    ! g/m2
         RTMASS = RTMASS + (NPPR-RTTOVR)*DT
+
         GRAIN =  GRAIN + NPPG*DT 
         GPP = CBHYDRAFX* 0.4                                  ! g/m2/s C  0.4=12/30, CH20 to C
+
         LFCONVERT = 0.0                                       ! Zhe Zhang 2020-07-13
         STCONVERT = 0.0
         RTCONVERT = 0.0
+
         LFCONVERT = LFMASS*(LFCT(PGS)*DT/3600.0)
         STCONVERT = STMASS*(STCT(PGS)*DT/3600.0)
         RTCONVERT = RTMASS*(RTCT(PGS)*DT/3600.0)
+
         LFMASS = LFMASS - LFCONVERT
         STMASS = STMASS - STCONVERT
         RTMASS = RTMASS - RTCONVERT
+
         GRAIN  = GRAIN + STCONVERT + RTCONVERT + LFCONVERT
 
         !IF(PGS==6) THEN
@@ -252,7 +261,7 @@ contains
         FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+DIELF)*DT 
         !     END IF
 
-        FST = 2.0**( (STC-283.16)/10.0 )
+        FST = 2.0**( (STC(1)-283.16)/10.0 )
         FSW = WROOT / (0.20+WROOT) * 0.23 / (0.23+WROOT)
         RSSOIL = FSW * FST * MRP* MAX(0.0,FASTCP*1.0E-3)*12.0E-6
         STABLC = 0.1*RSSOIL
@@ -270,7 +279,9 @@ contains
   
         AUTORS = RSROOT + RSGRAIN  + RSLEAF +  &                      !g/m2/s C
                  GRLEAF + GRROOT + GRGRAIN                            !g/m2/s C
+     
         HETERS = RSSOIL                                               !g/m2/s C
+     
         NEE    = (AUTORS + HETERS - GPP)*44.0/30.0                    !g/m2/s CO2
         TOTSC  = FASTCP + STBLCP                                      !g/m2   C
         TOTLB  = LFMASS + RTMASS + GRAIN         

@@ -23,13 +23,13 @@ contains
     allocate( noahmp%water%state%SMC      (1:NSOIL) )
     allocate( noahmp%water%param%SMCMAX   (1:NSOIL) )
 
-    noahmp%water%state%SNOWH   = huge(1.0)
-    noahmp%water%state%BTRAN   = huge(1.0) 
-    noahmp%water%state%WROOT   = huge(1.0) 
-    noahmp%water%state%WSTRES  = huge(1.0)
-    noahmp%water%state%SMC     = huge(1.0)
-    noahmp%water%param%SMCMAX  = huge(1.0)
-    noahmp%water%param%NROOT   = huge(1.0)
+    noahmp%water%state%SNOWH      = huge(1.0)
+    noahmp%water%state%BTRAN      = huge(1.0) 
+    noahmp%water%state%WROOT      = huge(1.0) 
+    noahmp%water%state%WSTRES     = huge(1.0)
+    noahmp%water%state%SMC(:)     = huge(1.0)
+    noahmp%water%param%SMCMAX(:)  = huge(1.0)
+    noahmp%water%param%NROOT      = huge(1  )
 
     end associate
 
@@ -64,7 +64,7 @@ contains
     enddo
 
     if ( URBAN_FLAG .eqv. .true. ) then
-      noahmp%water%param%SMCMAX = 0.45
+      noahmp%water%param%SMCMAX(:) = 0.45
     endif
 
     end associate

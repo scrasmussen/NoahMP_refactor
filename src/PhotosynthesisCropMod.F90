@@ -53,43 +53,47 @@ contains
         TC = T2M - 273.15
         PAR = I2PAR * SOLDN * 0.0036  !w to MJ m-2
         
-        IF(TC < parameters%TASSIM0) THEN
+        if (TC < TASSIM0) then
            Amax = 1E-10
-        ELSEIF(TC >= TASSIM0 .and. TC < TASSIM1) THEN
+        elseif (TC >= TASSIM0 .and. TC < TASSIM1) then
            Amax = (TC - TASSIM0) * Aref / (TASSIM1 - TASSIM0)
-        ELSEIF(TC >= TASSIM1 .and. TC < TASSIM2) THEN
+        elseif (TC >= TASSIM1 .and. TC < TASSIM2) then
            Amax = Aref
-        ELSE
+        else
            Amax= Aref - 0.2 * (T2M - TASSIM2)
-        ENDIF 
+        endif 
                  
         Amax = max(amax,0.01)
 
-        IF(XLAI <= 0.05) THEN
+        if (XLAI <= 0.05) then
            L1 = 0.1127 * 0.05   !use initial LAI(0.05), avoid error
            L2 = 0.5    * 0.05
            L3 = 0.8873 * 0.05
-        ELSE
+        else
            L1 = 0.1127 * XLAI
            L2 = 0.5    * XLAI
            L3 = 0.8873 * XLAI
-        END IF
+        endif
+
         I1 = k * PAR * exp(-k * L1)
         I2 = k * PAR * exp(-k * L2)
         I3 = k * PAR * exp(-k * L3)
+
         I1 = max(I1,1E-10)
         I2 = max(I2,1E-10)
         I3 = max(I3,1E-10)
+
         A1 = Amax * (1 - exp(-epsi * I1 / Amax))
         A2 = Amax * (1 - exp(-epsi * I2 / Amax)) * 1.6
         A3 = Amax * (1 - exp(-epsi * I3 / Amax))
-        IF (XLAI <= 0.05) THEN
+
+        if (XLAI <= 0.05) then
             A  = (A1+A2+A3) / 3.6 * 0.05
-        ELSEIF (XLAI > 0.05 .and. XLAI <= 4.0) THEN
+        elseif (XLAI > 0.05 .and. XLAI <= 4.0) then
             A  = (A1+A2+A3) / 3.6 * XLAI
-        ELSE
+        else
             A = (A1+A2+A3) / 3.6 * 4
-        END IF
+        endif
         
         A = A * PSNRF ! Attainable 
         

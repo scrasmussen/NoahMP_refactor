@@ -187,20 +187,11 @@ contains
              )
 
     ! biochem flux variables       
-    noahmp%biochem%state%PSN            = input%PSN
+    noahmp%biochem%flux%PSN             = input%PSN
 
     ! biochem state variables
     noahmp%biochem%state%PGS            = input%PGS
     noahmp%biochem%state%FOLN           = input%FOLN       
-
-    noahmp%biochem%state%LFMASS         = input%LFMASS
-    noahmp%biochem%state%RTMASS         = input%RTMASS
-    noahmp%biochem%state%STMASS         = input%STMASS
-    noahmp%biochem%state%WOOD           = input%WOOD
-    noahmp%biochem%state%STBLCP         = input%STBLCP
-    noahmp%biochem%state%FASTCP         = input%FASTCP
-    noahmp%biochem%state%GRAIN          = input%GRAIN
-    noahmp%biochem%state%GDD            = input%GDD
     
     ! biochem parameter variables
     noahmp%biochem%param%ARM            = input%ARM_TABLE (VEGTYP) 

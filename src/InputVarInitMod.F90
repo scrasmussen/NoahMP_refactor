@@ -1208,8 +1208,8 @@ contains
 
     allocate (zsoil (       1:nsoil))   !depth of layer-bottom from soil surface
     allocate (DZSNSO(-nsnow+1:nsoil))   !snow/soil layer thickness [m]
-    allocate (SMC   (       1:nsoil))   !total soil water content [m3/m3]
-    allocate (STC   (-nsnow+1:nsoil))   !snow/soil layer temperature [k]
+    !allocate (SMC   (       1:nsoil))   !total soil water content [m3/m3]
+    !allocate (STC   (-nsnow+1:nsoil))   !snow/soil layer temperature [k]
 
     open(30, file="namelist.input", form="formatted")
       read(30, forcing)

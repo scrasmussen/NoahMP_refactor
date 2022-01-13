@@ -16,6 +16,7 @@ contains
     type(noahmp_type) :: noahmp
 
     noahmp%config%nmlist%DVEG            = huge(1)
+    noahmp%config%nmlist%OPT_CROP        = huge(1)
 
     noahmp%config%domain%NSTAGE          = 8   
 
@@ -38,9 +39,6 @@ contains
     noahmp%config%domain%JULIAN          = huge(1.0)
     noahmp%config%domain%LAT             = huge(1.0) 
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
-
   end subroutine ConfigVarInitDefault
 
 !=== initialize with input data or table values
@@ -57,6 +55,7 @@ contains
      )
 
     noahmp%config%nmlist%DVEG            = input%OPT_DVEGIn
+    noahmp%config%nmlist%OPT_CROP        = input%OPT_CROPIn
 
     noahmp%config%domain%URBAN_FLAG      = .false.  
     noahmp%config%domain%ISWATER         = input%ISWATER_TABLE
@@ -74,7 +73,7 @@ contains
     noahmp%config%domain%NSNOW           = input%nsnow              
     noahmp%config%domain%IST             = input%ist         
     noahmp%config%domain%DT              = input%DTIn      
-    noahmp%config%domain%JULIAN          = input%JULIANIn
+    !noahmp%config%domain%JULIAN          = input%JULIANIn
     noahmp%config%domain%LAT             = input%LAT   
 
 
