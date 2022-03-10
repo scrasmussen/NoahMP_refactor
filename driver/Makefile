@@ -24,5 +24,5 @@ clean:
 #
 
 noahmp_driver.o: noahmp_output.o \
-                 ../src/noahmp_routines.o 
+                 ../src/module_sf_noahmplsm.o 
 

@@ -6,7 +6,7 @@
 include ../user_build_options
 
 OBJS = \
-	../src/noahmp_routines.o \
+	../src/module_sf_noahmplsm.o \
 	../driver/noahmp_output.o \
 	../driver/noahmp_driver.o
 

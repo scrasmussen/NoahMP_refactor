@@ -5,7 +5,7 @@
 
 include ../user_build_options
 
-OBJS = noahmp_routines.o
+OBJS = module_sf_noahmplsm.o
 
 all:	$(OBJS)
 
