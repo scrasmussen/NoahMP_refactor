@@ -20,6 +20,9 @@ module WaterVarType
     ! define specific water flux variables
     real(kind=kind_noahmp) :: RAIN          ! liquid rainfall rate (mm/s)
     real(kind=kind_noahmp) :: SNOW          ! snowfall rate (mm/s)
+    real(kind=kind_noahmp) :: PRCP          ! total precipitation (mm/s)
+    real(kind=kind_noahmp) :: QPRECC        ! convective precipitation (mm/s)
+    real(kind=kind_noahmp) :: QPRECL        ! large-scale precipitation (mm/s)
     real(kind=kind_noahmp) :: ECAN          ! evaporation of intercepted water (mm/s) [+]
     real(kind=kind_noahmp) :: ETRAN         ! transpiration rate (mm/s) [+]
     real(kind=kind_noahmp) :: QEVAC         ! canopy water evaporation rate (mm/s)
@@ -114,6 +117,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
     real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
     real(kind=kind_noahmp) :: BTRAN       ! soil water transpiration factor (0 to 1)
+    real(kind=kind_noahmp) :: FPICE       ! fraction of snowfall in total precipitation
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]

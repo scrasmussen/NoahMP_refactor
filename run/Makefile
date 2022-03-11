@@ -101,8 +101,8 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/SurfaceEmissivityMod.o \
        ../src/PsychrometricVariableMod.o \
        ../src/ResistanceGroundEvaporationMod.o \
-       ../src/SoilWaterTranspirationMod.o
-
+       ../src/SoilWaterTranspirationMod.o \
+       ../src/AtmosForcingMod.o
 
 
 CMD = noahmp_refac.exe

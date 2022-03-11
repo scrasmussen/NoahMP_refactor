@@ -18,6 +18,12 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
+    integer                   :: OPT_SNF       ! options for partitioning  precipitation into rainfall & snowfall
+                                                 ! 1 -> Jordan (1991)
+                                                 ! 2 -> BATS: when SFCTMP<TFRZ+2.2 
+                                                 ! 3 -> SFCTMP < TFRZ
+                                                 ! 4 -> Use WRF microphysics output
+                                                 ! 5 -> Use wetbulb temperature (Wang et al., 2019)
     integer                   :: OPT_BTR       ! options for soil moisture factor for stomatal resistance
                                                  ! 1 -> Noah (soil moisture) 
                                                  ! 2 -> CLM  (matric potential)

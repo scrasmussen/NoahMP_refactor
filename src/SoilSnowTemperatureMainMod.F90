@@ -53,7 +53,7 @@ contains
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,    depth of lower boundary condition (m) from soil surface
               SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
-              TBOT            => noahmp%energy%state%TBOT            ,& ! in,    bottom soil temp. at ZBOT (K)
+              TBOT            => noahmp%forcing%TBOT                 ,& ! in,    bottom soil temp. at ZBOT (K)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
               DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
               HCPCT           => noahmp%energy%state%HCPCT           ,& ! in,    heat capacity [j/m3/k] for all soil & snow

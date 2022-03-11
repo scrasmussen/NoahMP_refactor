@@ -48,7 +48,7 @@ contains
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,    depth of snow/soil layer-bottom (m)
               OPT_TBOT        => noahmp%config%nmlist%OPT_TBOT       ,& ! in,    options for lower boundary condition of soil temperature
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
-              TBOT            => noahmp%energy%state%TBOT            ,& ! in,    bottom soil temp. at ZBOT (K)
+              TBOT            => noahmp%forcing%TBOT                 ,& ! in,    bottom soil temp. at ZBOT (K)
               ZBOT            => noahmp%energy%state%ZBOTSNO         ,& ! in,    depth of lower boundary condition (m) from snow surface
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
               DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow

@@ -77,8 +77,6 @@ Program NoahmpDriverMod
             SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
             IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake 
             DX              => noahmp%config%domain%DX             ,& ! in,     noahmp model grid spacing (m)
-            FCEV            => noahmp%energy%flux%FCEV             ,& ! in,     canopy evaporation (w/m2) [+ = to atm]
-            FCTR            => noahmp%energy%flux%FCTR             ,& ! in,     transpiration (w/m2) [+ = to atm]
             PONDING         => noahmp%water%state%PONDING          ,& ! inout,  melting water from snow when there is no layer (mm)
             FICEOLD         => noahmp%water%state%FICEOLD_SNOW     ,& ! in,     ice fraction in snow layers at last timestep
             FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
@@ -128,7 +126,6 @@ Program NoahmpDriverMod
             FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! in,     frozen ground (logical) to define latent heat pathway
             QVAP            => noahmp%water%flux%QVAP              ,& ! in,     soil surface evaporation rate[mm/s]
             QDEW            => noahmp%water%flux%QDEW              ,& ! in,     soil surface dew rate[mm/s]
-            FGEV            => noahmp%energy%flux%FGEV             ,& ! in,     soil evap heat (w/m2) [+ to atm]
             BTRANI          => noahmp%water%state%BTRANI           ,& ! in,     soil water transpiration factor (0 to 1)
             OPT_IRR         => noahmp%config%nmlist%OPT_IRR        ,& ! in,     options for irrigation
             OPT_IRRM        => noahmp%config%nmlist%OPT_IRRM       ,& ! in,     options for irrigation method
@@ -283,7 +280,7 @@ Program NoahmpDriverMod
             Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
             EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
             SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
-            TBOT            => noahmp%energy%state%TBOT            ,& ! in,    bottom soil temp. at ZBOT (K)
+            TBOT            => noahmp%forcing%TBOT                 ,& ! in,    bottom soil temp. at ZBOT (K)
             QMELT           => noahmp%water%flux%QMELT             ,& ! out,   snowmelt rate [mm/s]
             ICE             => noahmp%config%domain%ICE            ,& ! in,    flag for ice point
             Z0WRF           => noahmp%energy%state%Z0WRF           ,& ! out,   roughness length, momentum, surface, sent to coupled model
@@ -337,9 +334,6 @@ Program NoahmpDriverMod
 ! others
   IST     = 1                     ! surface type 1-soil; 2-lake
   DX      = 4000.0                ! grid spacing 4km
-  FCEV    = input%FCEVIn          ! canopy evaporation (w/m2) [+ to atm ]
-  FCTR    = input%FCTRIn          ! transpiration (w/m2) [+ to atm]
-  FGEV    = input%FGEVIn          ! soil evap heat (w/m2) [+ to atm]
   LAI     = LAIM(6)               ! June LAI as an example
   SAI     = SAIM(6)               ! June SAI
   ELAI    = LAI * (1.0 - FB_snow) ! leaf area index, after burying by snow
@@ -571,11 +565,6 @@ endif
    PAH    = 0.0
 !==== Energy end
 
-!============================
-  QVAP = max( FGEV / LATHEAG, 0.0 )       ! positive part of fgev; Barlage change to ground v3.6
-  QDEW = abs(min(FGEV / LATHEAG, 0.0))    ! negative part of fgev
-  EDIR = QVAP - QDEW   ! net soil evaporation
-
 !============= irrigation related
   if ( OPT_IRR > 0) then
      IRRFRA = 1.0  ! irrigation fraction
@@ -720,30 +709,8 @@ endif
 
     FICEOLD(ISNOW+1:0) = SNICE(ISNOW+1:0) /(SNICE(ISNOW+1:0) + SNLIQ(ISNOW+1:0))
 
-!------------------------ balance check  
-! Energy balance check
 !!! extracted from ERROR subroutine
-! add energy balance check
-  ERRSW   = SWDOWN - (FSA + FSR)
-  if ( abs(ERRSW) > 0.01 ) then
-     print*, 'SW energy not balanced ...'
-     stop 'error'
-  endif
-
-  ERRENG = SAV+SAG-(FIRA+FSH+FCEV+FGEV+FCTR+SSOIL+FIRR) +PAH
-  if ( abs(ERRENG) > 0.01 ) then
-     print*, 'Surface energy not balanced ...'
-     stop 'error'
-  endif
-
-! water balance check
-    totalwat = sum(DZSNSO(1:NSOIL) * SMC * 1000.0) + SNEQV + WA + CANLIQ + CANICE     ! total water storage [mm]
-    errwat   = (RAIN+SNOW+IRMIRATE*1000.0/DT+IRFIRATE*1000.0/DT-EDIR-ETRAN-RUNSRF-RUNSUB-QTLDRN-ECAN)*DT - (totalwat - tw0)  ! water balance error [mm]
-
-   if (abs(errwat) > 0.1) then
-      print*,'water not balanced ....'
-      stop 'error'
-   endif
+! add energy balance check to NoahmpMain
 
     !---------------------------------------------------------------------
     ! add to output file

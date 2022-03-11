@@ -199,7 +199,6 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EMB             ! bare ground momentum exchange coefficient (m/s)
     real(kind=kind_noahmp) :: ZLVL            ! surface reference height  (m)
     real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
-    real(kind=kind_noahmp) :: TBOT            ! bottom soil temp. at ZBOT (K)
     real(kind=kind_noahmp) :: ZBOTSNO         ! depth of lower boundary condition (m) from snow surface
     real(kind=kind_noahmp) :: Z0WRF           ! roughness length, momentum, surface, sent to coupled model
     real(kind=kind_noahmp) :: TRAD            ! radiative temperature (K)

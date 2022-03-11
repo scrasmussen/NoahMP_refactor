@@ -97,7 +97,8 @@ OBJS = ConstantDefineMod.o \
        SurfaceEmissivityMod.o \
        PsychrometricVariableMod.o \
        ResistanceGroundEvaporationMod.o \
-       SoilWaterTranspirationMod.o
+       SoilWaterTranspirationMod.o \
+       AtmosForcingMod.o
 
 all:	$(OBJS)
 
@@ -225,7 +226,7 @@ EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  SoilWaterTranspirationMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
-                 PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o
+                 PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o
 HumiditySaturationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyChen97Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -257,4 +258,5 @@ ResistanceGroundEvaporationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantD
 SnowCoverGroundNiu07Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SoilWaterTranspirationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SurfaceEmissivityMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+AtmosForcingMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 

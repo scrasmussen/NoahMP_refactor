@@ -6,6 +6,7 @@ module NoahmpMainMod
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
+  use AtmosForcingMod,            only : ProcessAtmosForcing
   use IrrigationTriggerMod,       only : IrrigationTrigger
   use IrrigationSprinklerMod,     only : SprinklerIrrigation
   use CanopyWaterInterceptMod,    only : CanopyWaterIntercept
@@ -74,10 +75,15 @@ contains
 ! ----------------------------------------------------------------------
 
     !---------------------------------------------------------------------
-    ! call atmospheric forcing processing
+    ! Atmospheric forcing processing
     !--------------------------------------------------------------------- 
 
-    ! temporarilly extract from NOAHMP_SFLX
+    call ProcessAtmosForcing(noahmp)
+
+    !---------------------------------------------------------------------
+    ! Initialize key soil variables
+    !--------------------------------------------------------------------- 
+
     ! snow/soil layer thickness (m)
     do IZ = ISNOW+1, NSOIL
        if ( IZ == ISNOW+1 ) then
@@ -90,7 +96,7 @@ contains
 
 
     !---------------------------------------------------------------------
-    ! call phenology
+    ! Phenology
     !--------------------------------------------------------------------- 
 
     ! temporarilly extract from phenology to update ELAI and ESAI
@@ -106,7 +112,7 @@ contains
 
 
     !---------------------------------------------------------------------
-    ! call irrigation trigger and sprinkler irrigation
+    ! Irrigation trigger and sprinkler irrigation
     !--------------------------------------------------------------------- 
 
     if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. (RAIN < (IR_RAIN/3600.0)) .and. &
@@ -130,20 +136,20 @@ contains
     endif
 
     !---------------------------------------------------------------------
-    ! call canopy water interception and precip heat advection
+    ! Canopy water interception and precip heat advection
     !--------------------------------------------------------------------- 
 
     call CanopyWaterIntercept(noahmp)
     call PrecipitationHeatAdvect(noahmp)
 
     !---------------------------------------------------------------------
-    ! call the main energy routine
+    ! Energy processes
     !--------------------------------------------------------------------- 
 
     call EnergyMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! prepare for water module
+    ! prepare for water process
     !--------------------------------------------------------------------- 
     SICE(:) = max(0.0, SMC(:)-SH2O(:))
     SNEQVO  = SNEQV
@@ -152,18 +158,18 @@ contains
     EDIR    = QVAP - QDEW
 
     !---------------------------------------------------------------------
-    ! call the main water routine
+    ! Water processes
     !--------------------------------------------------------------------- 
 
     call WaterMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! call the main biochem and crop routine
+    ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
 
     !---------------------------------------------------------------------
-    ! call the main ERROR balance check  routine
+    ! Balance check for energy and water
     !--------------------------------------------------------------------- 
 
 

@@ -1,7 +1,7 @@
 module ForcingVarType
 
 !!! Define column (1-D) Noah-MP forcing variables
-!!! Forcing variable initialization is done in ForcingInit.f90
+!!! Forcing variable initialization is done in ForcingVarInit.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
@@ -24,6 +24,14 @@ module ForcingVarType
     real(kind=kind_noahmp) :: SFCPRS          ! surface pressure (pa)
     real(kind=kind_noahmp) :: LWDN            ! downward longwave radiation [w/m2]
     real(kind=kind_noahmp) :: PSFC            ! pressure at lowest model layer (pa)
+    real(kind=kind_noahmp) :: SOLDN           ! downward shortwave radiation [w/m2]
+    real(kind=kind_noahmp) :: PRCPCONV        ! convective precipitation entering  [mm/s]
+    real(kind=kind_noahmp) :: PRCPNONC        ! non-convective precipitation entering [mm/s]
+    real(kind=kind_noahmp) :: PRCPSHCV        ! shallow convective precip entering  [mm/s]
+    real(kind=kind_noahmp) :: PRCPSNOW        ! snow entering land model [mm/s]
+    real(kind=kind_noahmp) :: PRCPGRPL        ! graupel entering land model [mm/s] 
+    real(kind=kind_noahmp) :: PRCPHAIL        ! hail entering land model [mm/s]  
+    real(kind=kind_noahmp) :: TBOT            ! bottom condition for soil temp. [K]
 
   end type forcing_type
 

@@ -24,6 +24,7 @@ module InputVarType
     integer                  :: ILOCIn    ! grid index (longitude)
     integer                  :: JLOCIn    ! grid index (latitude)
     real(kind=kind_noahmp)   :: DXIn      ! grid spacing (m)
+    real(kind=kind_noahmp)   :: COSZIn
     ! timing
     integer                  :: maxtime
     real(kind=kind_noahmp)   :: DTIn
@@ -38,12 +39,18 @@ module InputVarType
     real(kind=kind_noahmp)   :: UUIn
     real(kind=kind_noahmp)   :: VVIn
     real(kind=kind_noahmp)   :: SFCPRSIn
-    real(kind=kind_noahmp)   :: FCEVIn
-    real(kind=kind_noahmp)   :: FCTRIn
-    real(kind=kind_noahmp)   :: FGEVIn
     real(kind=kind_noahmp)   :: Q2In
-    real(kind=kind_noahmp)   :: SWDOWNIn 
+    real(kind=kind_noahmp)   :: SOLDNIn 
     real(kind=kind_noahmp)   :: LWDNIn
+    real(kind=kind_noahmp)   :: PSFCIn
+    real(kind=kind_noahmp)   :: TBOTIn
+    real(kind=kind_noahmp)   :: SFCTMPIn
+    real(kind=kind_noahmp)   :: PRCPCONVIn
+    real(kind=kind_noahmp)   :: PRCPNONCIn
+    real(kind=kind_noahmp)   :: PRCPSHCVIn
+    real(kind=kind_noahmp)   :: PRCPSNOWIn
+    real(kind=kind_noahmp)   :: PRCPGRPLIn
+    real(kind=kind_noahmp)   :: PRCPHAILIn
     ! structure
     integer                  :: VEGTYPEIn
     integer                  :: SOILCOLORIn
@@ -58,7 +65,6 @@ module InputVarType
     ! state variables
     integer               , allocatable, dimension(:) :: SOILTYPEIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOILIn 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSOIn
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSOIn
     ! namelist options
     integer                  :: OPT_DVEGIn
@@ -365,6 +371,7 @@ module InputVarType
     !----------------------------------------------------------------
     ! Noahmp State variables from restart or initial input files
     !----------------------------------------------------------------
+
     integer                                             :: ISNOWIn           ! snow layer index (0 : no snow, -1~-3 : 1~3 snow layers)
     integer                                             :: ISTIn             ! surface type 1-soil; 2-lake
     integer                                             :: IRCNTSIIn
@@ -401,14 +408,12 @@ module InputVarType
     real(kind=kind_noahmp)                              :: SAIIn
     real(kind=kind_noahmp)                              :: FVEGIn
     real(kind=kind_noahmp)                              :: TAUSSIn
-    real(kind=kind_noahmp)                              :: COSZIn
     real(kind=kind_noahmp)                              :: SNEQVOIn
     real(kind=kind_noahmp)                              :: ALBOLDIn
     real(kind=kind_noahmp)                              :: EAHIn
     real(kind=kind_noahmp)                              :: TAHIn
     real(kind=kind_noahmp)                              :: CHIn
     real(kind=kind_noahmp)                              :: CMIn
-    real(kind=kind_noahmp)                              :: TBOTIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

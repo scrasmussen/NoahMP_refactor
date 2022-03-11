@@ -1169,9 +1169,6 @@ contains
     real(kind=kind_noahmp) :: uwind
     real(kind=kind_noahmp) :: vwind
     real(kind=kind_noahmp) :: sfcpres
-    real(kind=kind_noahmp) :: fcev_e
-    real(kind=kind_noahmp) :: fctr_e
-    real(kind=kind_noahmp) :: fgev_e
     real(kind=kind_noahmp) :: Q2
     real(kind=kind_noahmp) :: SWDOWN
     real(kind=kind_noahmp) :: LWDOWN
@@ -1191,7 +1188,6 @@ contains
     real(kind=kind_noahmp) :: zlvl
     ! fixed_initial
     real(kind=kind_noahmp), allocatable, dimension(:) :: zsoil   ! depth of layer-bottom from soil surface
-    real(kind=kind_noahmp), allocatable, dimension(:) :: dzsnso  ! snow/soil layer thickness [m]
     ! uniform_initial
     logical                :: initial_uniform                 ! initial all levels the same
     real(kind=kind_noahmp) :: initial_sh2o_value              ! constant sh2o value
@@ -1204,10 +1200,10 @@ contains
     !=== arrange structures for reading namelist.input
     namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
-                                 raining,uwind,vwind,sfcpres,fcev_e,fctr_e,fgev_e,Q2,SWDOWN,LWDOWN
+                                 raining,uwind,vwind,sfcpres,Q2,SWDOWN,LWDOWN
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
                                  nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax,zlvl
-    namelist / fixed_initial   / zsoil,dzsnso
+    namelist / fixed_initial   / zsoil
     namelist / uniform_initial / initial_uniform,initial_sh2o_value,initial_sice_value
     namelist / options         / idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
                                  iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
@@ -1225,7 +1221,6 @@ contains
     close(30)
 
     allocate (zsoil (       1:nsoil))
-    allocate (dzsnso(-nsnow+1:nsoil))
 
     if ( structure_option == 1 ) then       ! user-defined levels
        open(30, file="namelist.input", form="formatted")
@@ -1269,9 +1264,6 @@ contains
     input%UUIn             = uwind
     input%VVIn             = vwind
     input%SFCPRSIn         = sfcpres
-    input%FCEVIn           = fcev_e
-    input%FCTRIn           = fctr_e
-    input%FGEVIn           = fgev_e
     input%VEGTYPEIn        = vegtype
     input%SOILCOLORIn      = soilcolor
     input%SLOPETYPEIn      = slopetype
@@ -1283,18 +1275,26 @@ contains
     input%SHDMAXIn         = shdmax
     input%JULIANIn         = JULIAN
     input%Q2In             = Q2
-    input%SWDOWNIn         = SWDOWN
+    input%SOLDNIn          = SWDOWN
     input%LWDNIn           = LWDOWN
+    input%PSFCIn           = sfcpres
     input%ZLVLIn           = zlvl
+    input%SFCTMPIn         = huge(1.0)
+    input%PRCPCONVIn       = huge(1.0)
+    input%PRCPNONCIn       = huge(1.0)
+    input%PRCPSHCVIn       = huge(1.0)
+    input%PRCPSNOWIn       = huge(1.0)
+    input%PRCPGRPLIn       = huge(1.0)
+    input%PRCPHAILIn       = huge(1.0)
+    input%TBOTIn           = huge(1.0)
+    input%COSZIn           = huge(1.0)
 
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))
     allocate( input%SH2OIn    (       1:nsoil))
     allocate( input%SICEIn    (       1:nsoil))
     allocate( input%ZSNSOIn   (-nsnow+1:nsoil))
-    allocate( input%DZSNSOIn  (-nsnow+1:nsoil))
     input%ZSOILIn(1:nsoil)         = zsoil(1:nsoil)
-    input%DZSNSOIn(-nsnow+1:nsoil) = dzsnso(-nsnow+1:nsoil)
     input%ZSNSOIn(-nsnow+1:0)      = 0.0
     input%ZSNSOIn(1:nsoil)         = zsoil(1:nsoil)
     input%SOILTYPEIn(1:nsoil)      = isltyp    

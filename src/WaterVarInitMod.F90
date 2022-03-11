@@ -69,6 +69,7 @@ contains
     noahmp%water%state%FP             = huge(1.0)
     noahmp%water%state%FSNO           = huge(1.0)
     noahmp%water%state%BTRAN          = huge(1.0)
+    noahmp%water%state%FPICE          = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
@@ -115,8 +116,11 @@ contains
     noahmp%water%state%PSI(:)         = huge(1.0)
 
     ! water flux variable
+    noahmp%water%flux%PRCP            = huge(1.0)
     noahmp%water%flux%RAIN            = huge(1.0)
     noahmp%water%flux%SNOW            = huge(1.0)
+    noahmp%water%flux%QPRECC          = huge(1.0)
+    noahmp%water%flux%QPRECL          = huge(1.0)
     noahmp%water%flux%ECAN            = huge(1.0)
     noahmp%water%flux%ETRAN           = huge(1.0)
     noahmp%water%flux%QEVAC           = huge(1.0)

@@ -23,6 +23,7 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_SNF      = huge(1)
     noahmp%config%nmlist%OPT_BTR      = huge(1)
     noahmp%config%nmlist%OPT_RSF      = huge(1)
     noahmp%config%nmlist%OPT_SFC      = huge(1)
@@ -80,6 +81,7 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_SNF    = input%OPT_SNFIn
     noahmp%config%nmlist%OPT_BTR    = input%OPT_BTRIn
     noahmp%config%nmlist%OPT_RSF    = input%OPT_RSFIn
     noahmp%config%nmlist%OPT_SFC    = input%OPT_SFCIn
@@ -117,7 +119,7 @@ contains
     noahmp%config%domain%JULIAN     = input%JULIANIn
     noahmp%config%domain%ZREF       = input%ZLVLIn
     !noahmp%config%domain%DZ8W      = input%DZ8WIn
-    !noahmp%config%domain%COSZ       = input%COSZIn
+    noahmp%config%domain%COSZ       = input%COSZIn
     !noahmp%config%domain%ISNOW      = input%ISNOWIn
     !noahmp%config%domain%IST        = input%ISTIn
     !noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
@@ -136,7 +138,6 @@ contains
 
     noahmp%config%domain%SOILTYP(       1:NSOIL) = input%SOILTYPEIn(1:NSOIL)
     noahmp%config%domain%ZSOIL  (       1:NSOIL) = input%ZSOILIn(1:NSOIL)
-    noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) = input%DZSNSOIn(-NSNOW+1:NSOIL)
     noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = input%ZSNSOIn(-NSNOW+1:NSOIL)
 
     end associate

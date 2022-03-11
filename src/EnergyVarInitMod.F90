@@ -154,7 +154,6 @@ contains
     noahmp%energy%state%T2M             = huge(1.0)
     noahmp%energy%state%ZLVL            = huge(1.0)
     noahmp%energy%state%FB_snow         = huge(1.0)
-    noahmp%energy%state%TBOT            = huge(1.0)
     noahmp%energy%state%ZBOTSNO         = huge(1.0)
     noahmp%energy%state%Z0WRF           = huge(1.0)
     noahmp%energy%state%TRAD            = huge(1.0)
@@ -362,9 +361,6 @@ contains
               NBAND       => noahmp%config%domain%NBAND         &
              )
 
-    ! temporary energy flux initialization
-    noahmp%energy%flux%SWDOWN              = input%SWDOWNIn  ! to be removed after merging with forcing
-
     ! energy state variable
     !noahmp%energy%state%LAI               = input%LAIIn
     !noahmp%energy%state%SAI               = input%SAIIn
@@ -378,7 +374,6 @@ contains
     !noahmp%energy%state%TAH               = input%TAHIn
     !noahmp%energy%state%CH                = input%CHIn
     !noahmp%energy%state%CM                = input%CMIn
-    !noahmp%energy%state%TBOT              = input%TBOTIn
     noahmp%energy%state%CO2AIR             = input%CO2_TABLE * input%SFCPRSIn
     noahmp%energy%state%O2AIR              = input%O2_TABLE * input%SFCPRSIn
 
