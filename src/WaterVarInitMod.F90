@@ -66,12 +66,16 @@ contains
     noahmp%water%state%WSLAKE         = huge(1.0)
     noahmp%water%state%sfcheadrt      = huge(1.0)
     noahmp%water%state%IRRFRA         = huge(1.0)
+    noahmp%water%state%SIFRA          = huge(1.0)
+    noahmp%water%state%MIFRA          = huge(1.0)
+    noahmp%water%state%FIFRA          = huge(1.0)
     noahmp%water%state%FP             = huge(1.0)
     noahmp%water%state%FSNO           = huge(1.0)
     noahmp%water%state%BTRAN          = huge(1.0)
     noahmp%water%state%FPICE          = huge(1.0)
     noahmp%water%state%WROOT          = huge(1.0)
     noahmp%water%state%WSTRES         = huge(1.0)
+    noahmp%water%state%BEG_WB         = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
@@ -292,11 +296,11 @@ contains
     noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(1:NSOIL)
     !noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(1:NSOIL)
     !noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(1:NSOIL)
-    !noahmp%water%state%FIFAC                    = input%FIFACIn
+    noahmp%water%state%FIFRA                    = input%FIFRAIn
     !noahmp%water%state%IRAMTFI                  = input%IRAMTFIIn
-    !noahmp%water%state%MIFAC                    = input%MIFACIn
+    noahmp%water%state%MIFRA                    = input%MIFRAIn
     !noahmp%water%state%IRAMTMI                  = input%IRAMTMIIn
-    !noahmp%water%state%SIFAC                    = input%SIFACIn
+    noahmp%water%state%SIFRA                    = input%SIFRAIn
     !noahmp%water%state%IRAMTSI                  = input%IRAMTSIIn
     !noahmp%water%state%ZWT                      = input%ZWTIn
     !noahmp%water%state%SMCWTD                   = input%SMCWTDIn
@@ -309,7 +313,7 @@ contains
     !noahmp%water%state%WSLAKE                   = input%WSLAKEIn
     !noahmp%water%state%PONDING                  = input%PONDINGIn
     !noahmp%water%state%sfcheadrt                = input%sfcheadrtIn
-    !noahmp%water%state%IRRFRA                   = input%IRRFRAIn
+    noahmp%water%state%IRRFRA                   = input%IRRFRAIn
     !noahmp%water%state%IRCNTSI                  = input%IRCNTSIIn
     !noahmp%water%state%IRCNTMI                  = input%IRCNTMIIn
     !noahmp%water%state%IRCNTFI                  = input%IRCNTFIIn

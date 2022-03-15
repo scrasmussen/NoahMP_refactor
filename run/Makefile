@@ -109,7 +109,8 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/CarbonFluxCropMod.o \
        ../src/CarbonFluxNatureVegMod.o \
        ../src/CropGrowDegreeDayMod.o \
-       ../src/CropPhotosynthesisMod.o
+       ../src/CropPhotosynthesisMod.o \
+       ../src/IrrigationPrepareMod.o
 
 
 CMD = noahmp_refac.exe

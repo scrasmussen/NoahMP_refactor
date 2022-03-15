@@ -114,12 +114,16 @@ module WaterVarType
     real(kind=kind_noahmp) :: WSLAKE      ! water storage in lake (can be -) (mm) 
     real(kind=kind_noahmp) :: sfcheadrt   ! surface water head (mm)
     real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
+    real(kind=kind_noahmp) :: SIFRA       ! sprinkler irrigation fraction from input
+    real(kind=kind_noahmp) :: MIFRA       ! micro irrigation fraction from input
+    real(kind=kind_noahmp) :: FIFRA       ! flood irrigation fraction from input
     real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
     real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
     real(kind=kind_noahmp) :: BTRAN       ! soil water transpiration factor (0 to 1)
     real(kind=kind_noahmp) :: FPICE       ! fraction of snowfall in total precipitation
     real(kind=kind_noahmp) :: WROOT       ! root zone soil water
     real(kind=kind_noahmp) :: WSTRES      ! soil water stress
+    real(kind=kind_noahmp) :: BEG_WB      ! total water storage at the begining before NoahMP process
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]

@@ -63,6 +63,11 @@ contains
              )
 !-----------------------------------------------------------------------
 
+    ! initialize
+    NEE = 0.0
+    NPP = 0.0
+    GPP = 0.0
+
     ! no biogeochemistry in non-vegetated points
     if ( (VEGTYP == ISWATER) .or. (VEGTYP == ISBARREN) .or. &
          (VEGTYP == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then

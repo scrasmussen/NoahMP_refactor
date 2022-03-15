@@ -121,35 +121,36 @@ module ConfigVarType
   type :: domain_type
 
     ! define specific domain variables
-    logical                   :: URBAN_FLAG  ! flag for urban grid
-    logical                   :: CROPLU      ! flag to identify croplands
-    logical                   :: CROP_ACTIVE ! flag to activate crop model
-    logical                   :: DVEG_ACTIVE ! flag to activate dynamic vegetation model
-    integer                   :: ILOC        ! model grid index
-    integer                   :: JLOC        ! model grid index
-    integer                   :: VEGTYP      ! vegetation type
-    integer                   :: CROPTYP     ! crop type
-    integer                   :: NSOIL       ! number of soil layers
-    integer                   :: NSNOW       ! maximum number of snow layers
-    integer                   :: ISNOW       ! actual number of snow layers
-    integer                   :: IST         ! surface type 1-soil; 2-lake
-    integer                   :: NBAND       ! number of solar radiation wave bands
-    integer                   :: SOILCOLOR   ! soil texture type for albedo
-    integer                   :: ICE         ! flag for seaice point (=1: ice point)
-    integer                   :: ISWATER     ! flag to identify water
-    integer                   :: ISBARREN    ! flag to identify barren land
-    integer                   :: ISICE       ! flag to identify ice
-    integer                   :: ISCROP      ! flag to identify crop
-    integer                   :: EBLFOREST   ! flag to identify EBL Forest
-    integer                   :: NSTAGE      ! number of growth stages
-    integer                   :: YEARLEN     ! Number of days in the particular year
-    real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
-    real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
-    real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
-    real(kind=kind_noahmp)    :: COSZ        ! cosine solar zenith angle
-    real(kind=kind_noahmp)    :: ZREF        ! reference height  (m)
-    real(kind=kind_noahmp)    :: DZ8W        ! thickness of surface atmospheric layers [m]
-    real(kind=kind_noahmp)    :: LAT         ! latitude (radians)
+    character(len=256)        :: LLANDUSE      ! landuse data name (USGS or MODIS_IGBP)
+    logical                   :: URBAN_FLAG    ! flag for urban grid
+    logical                   :: CROPLU        ! flag to identify croplands
+    logical                   :: CROP_ACTIVE   ! flag to activate crop model
+    logical                   :: DVEG_ACTIVE   ! flag to activate dynamic vegetation model
+    integer                   :: ILOC          ! model grid index
+    integer                   :: JLOC          ! model grid index
+    integer                   :: VEGTYP        ! vegetation type
+    integer                   :: CROPTYP       ! crop type
+    integer                   :: NSOIL         ! number of soil layers
+    integer                   :: NSNOW         ! maximum number of snow layers
+    integer                   :: ISNOW         ! actual number of snow layers
+    integer                   :: IST           ! surface type 1-soil; 2-lake
+    integer                   :: NBAND         ! number of solar radiation wave bands
+    integer                   :: SOILCOLOR     ! soil texture type for albedo
+    integer                   :: ICE           ! flag for seaice point (=1: ice point)
+    integer                   :: ISWATER       ! flag to identify water
+    integer                   :: ISBARREN      ! flag to identify barren land
+    integer                   :: ISICE         ! flag to identify ice
+    integer                   :: ISCROP        ! flag to identify crop
+    integer                   :: EBLFOREST     ! flag to identify EBL Forest
+    integer                   :: NSTAGE        ! number of growth stages
+    integer                   :: YEARLEN       ! Number of days in the particular year
+    real(kind=kind_noahmp)    :: DT            ! noahmp timestep (s)
+    real(kind=kind_noahmp)    :: DX            ! noahmp model grid spacing (m)
+    real(kind=kind_noahmp)    :: JULIAN        ! julian day of the year
+    real(kind=kind_noahmp)    :: COSZ          ! cosine solar zenith angle
+    real(kind=kind_noahmp)    :: ZREF          ! reference height  (m)
+    real(kind=kind_noahmp)    :: DZ8W          ! thickness of surface atmospheric layers [m]
+    real(kind=kind_noahmp)    :: LAT           ! latitude (radians)
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

@@ -378,7 +378,7 @@ module InputVarType
     !----------------------------------------------------------------
     ! Noahmp State variables from restart or initial input files
     !----------------------------------------------------------------
-
+    character(len=256)                                  :: LLANDUSEIn
     integer                                             :: ISNOWIn           ! snow layer index (0 : no snow, -1~-3 : 1~3 snow layers)
     integer                                             :: ISTIn             ! surface type 1-soil; 2-lake
     integer                                             :: IRCNTSIIn
@@ -396,11 +396,11 @@ module InputVarType
     real(kind=kind_noahmp)                              :: CANICEIn
     real(kind=kind_noahmp)                              :: SNEQVIn
     real(kind=kind_noahmp)                              :: SNOWHIn
-    real(kind=kind_noahmp)                              :: FIFACIn
+    real(kind=kind_noahmp)                              :: FIFRAIn
     real(kind=kind_noahmp)                              :: IRAMTFIIn
-    real(kind=kind_noahmp)                              :: MIFACIn
+    real(kind=kind_noahmp)                              :: MIFRAIn
     real(kind=kind_noahmp)                              :: IRAMTMIIn
-    real(kind=kind_noahmp)                              :: SIFACIn
+    real(kind=kind_noahmp)                              :: SIFRAIn
     real(kind=kind_noahmp)                              :: IRAMTSIIn
     real(kind=kind_noahmp)                              :: ZWTIn
     real(kind=kind_noahmp)                              :: SMCWTDIn

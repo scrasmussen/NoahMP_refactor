@@ -1348,6 +1348,11 @@ contains
     input%LATIn            = 0.0
     input%PGSIn            = 0
     input%FOLNIn           = 1.0
+    input%LLANDUSEIn       = "MODIFIED_IGBP_MODIS_NOAH"
+    input%IRRFRAIn         = 0.0
+    input%SIFRAIn          = 0.0
+    input%MIFRAIn          = 0.0
+    input%FIFRAIn          = 0.0
 
   end subroutine InputVarInitDefault
 

@@ -1,14 +1,14 @@
 module NoahmpMainMod
 
 !!! Main NoahMP module including all column model processes
-!!! atmos forcing -> canopy intercept -> precip heat advect -> main energy -> main water -> main carbon -> balance check
+!!! atmos forcing -> canopy intercept -> precip heat advect -> main energy -> main water -> main biogeochemistry -> balance check
 
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
   use AtmosForcingMod,            only : ProcessAtmosForcing
   use PhenologyMainMod,           only : PhenologyMain
-  use IrrigationTriggerMod,       only : IrrigationTrigger
+  use IrrigationPrepareMod,       only : IrrigationPrepare
   use IrrigationSprinklerMod,     only : SprinklerIrrigation
   use CanopyWaterInterceptMod,    only : CanopyWaterIntercept
   use PrecipitationHeatAdvectMod, only : PrecipitationHeatAdvect
@@ -39,14 +39,16 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
+              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
               CROPTYPE        => noahmp%config%domain%CROPTYP        ,& ! in,     crop type
               DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
               DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE    ,& ! in,     flag to activate dynamic vegetation model
               CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE    ,& ! in,     flag to activate dynamic crop model
               OPT_CROP        => noahmp%config%nmlist%OPT_CROP       ,& ! in,     crop option
               HVB             => noahmp%energy%param%HVB             ,& ! in,     bottom of canopy (m)
               HVT             => noahmp%energy%param%HVT             ,& ! in,     top of canopy (m)
+              NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
               IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigation fraction
@@ -62,6 +64,9 @@ contains
               SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
               SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil moisture [m3/m3]
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
+              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! inout,  intercepted liquid water (mm)
+              CANICE          => noahmp%water%state%CANICE           ,& ! inout,  intercepted ice mass (mm)
+              WA              => noahmp%water%state%WA               ,& ! inout,  water storage in aquifer [mm]
               RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
               EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
@@ -69,14 +74,18 @@ contains
               FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               LAI             => noahmp%energy%state%LAI             ,& ! inout,  leaf area index (m2/m2)
               SAI             => noahmp%energy%state%SAI             ,& ! inout,  stem area index (m2/m2)
+              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
+              CROPLU          => noahmp%config%domain%CROPLU         ,& ! out,    flag to identify croplands
               FB_snow         => noahmp%energy%state%FB_snow         ,& ! out,    fraction of canopy buried by snow
               ELAI            => noahmp%energy%state%ELAI            ,& ! out,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! out,    stem area index, after burying by snow
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,    latent heat of vaporization/subli (j/kg), ground
+              TROOT           => noahmp%energy%state%TROOT           ,& ! out,    root-zone averaged temperature (k)
               FGEV            => noahmp%energy%flux%FGEV             ,& ! out,    soil evap heat (w/m2) [+ to atm]
               QVAP            => noahmp%water%flux%QVAP              ,& ! out,    soil surface evaporation rate[mm/s]
               QDEW            => noahmp%water%flux%QDEW              ,& ! out,    soil surface dew rate[mm/s]
-              EDIR            => noahmp%water%flux%EDIR               & ! out,    net direct soil evaporation (mm/s)
+              EDIR            => noahmp%water%flux%EDIR              ,& ! out,    net direct soil evaporation (mm/s)
+              BEG_WB          => noahmp%water%state%BEG_WB            & ! out,    total water storage at the beginning
              )
 ! ----------------------------------------------------------------------
 
@@ -99,28 +108,39 @@ contains
        endif
     enddo
 
+    ! root-zone soil temperature
+    TROOT = 0.0
+    do IZ = 1, NROOT
+       TROOT = TROOT + STC(IZ) * DZSNSO(IZ) / (-ZSOIL(NROOT))
+    enddo
 
+    !---------------------------------------------------------------------
+    ! Prepare for water balance check
+    !--------------------------------------------------------------------- 
+
+    ! compute total water storage before NoahMP processes
+    if ( IST == 1 ) then  ! soil
+       BEG_WB = CANLIQ + CANICE + SNEQV + WA
+       do IZ = 1, NSOIL
+          BEG_WB = BEG_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
+       enddo
+    endif
 
     !---------------------------------------------------------------------
     ! Phenology
     !--------------------------------------------------------------------- 
 
-    call PhenologyMain (noahmp)
+    call PhenologyMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! Irrigation trigger and sprinkler irrigation
+    ! Irrigation prepare including trigger
     !--------------------------------------------------------------------- 
 
-    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. (RAIN < (IR_RAIN/3600.0)) .and. &
-         ((IRAMTSI+IRAMTMI+IRAMTFI) == 0.0) ) then
-       call IrrigationTrigger(noahmp)
-    endif
-    ! set irrigation off if larger than IR_RAIN mm/h for this time step and irr triggered last time step
-    if ( (RAIN >= (IR_RAIN/3600.0)) .or. (IRRFRA < IRR_FRAC) ) then
-        IRAMTSI = 0.0
-        IRAMTMI = 0.0
-        IRAMTFI = 0.0
-    endif
+    call IrrigationPrepare(noahmp)
+
+    !---------------------------------------------------------------------
+    ! Sprinkler irrigation
+    !--------------------------------------------------------------------- 
 
     ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
     if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) then

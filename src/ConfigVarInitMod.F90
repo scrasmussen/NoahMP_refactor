@@ -47,6 +47,7 @@ contains
     noahmp%config%nmlist%OPT_PEDO     = huge(1)
 
     ! config domain variable
+    noahmp%config%domain%LLANDUSE     = "MODIFIED_IGBP_MODIS_NOAH"
     noahmp%config%domain%URBAN_FLAG   = .false.
     noahmp%config%domain%CROPLU       = .false.
     noahmp%config%domain%CROP_ACTIVE  = .false.
@@ -130,6 +131,7 @@ contains
     noahmp%config%domain%NBAND      = input%NBANDIn    
     noahmp%config%domain%DT         = input%DTIn
     noahmp%config%domain%DX         = input%DXIn
+    noahmp%config%domain%LLANDUSE   = input%LLANDUSEIn
     noahmp%config%domain%VEGTYP     = input%VEGTYPEIn
     noahmp%config%domain%CROPTYP    = input%CROPTYPEIn
     noahmp%config%domain%SOILCOLOR  = input%SOILCOLORIn

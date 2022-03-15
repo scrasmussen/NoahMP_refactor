@@ -173,6 +173,7 @@ contains
     CHLEAF  = 0.0
     CHUC    = 0.0
     CHV2    = 0.0
+    PAH     = 0.0
 
     ! wind speed at reference height: ur >= 1
     UR = max( sqrt(UU**2.0 + VV**2.0), 1.0 )
