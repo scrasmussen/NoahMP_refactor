@@ -1,7 +1,7 @@
 module ConfigVarInitMod
 
 !!! Initialize column (1-D) Noah-MP configuration variables
-!!! Configuration variables should be first defined in ConfigType.f90
+!!! Configuration variables should be first defined in ConfigVarType.f90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
@@ -23,6 +23,7 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_DVEG     = huge(1)
     noahmp%config%nmlist%OPT_SNF      = huge(1)
     noahmp%config%nmlist%OPT_BTR      = huge(1)
     noahmp%config%nmlist%OPT_RSF      = huge(1)
@@ -41,10 +42,15 @@ contains
     noahmp%config%nmlist%OPT_TDRN     = huge(1)
     noahmp%config%nmlist%OPT_IRR      = huge(1)
     noahmp%config%nmlist%OPT_IRRM     = huge(1)
+    noahmp%config%nmlist%OPT_CROP     = huge(1)
+    noahmp%config%nmlist%OPT_SOIL     = huge(1)
+    noahmp%config%nmlist%OPT_PEDO     = huge(1)
 
     ! config domain variable
     noahmp%config%domain%URBAN_FLAG   = .false.
     noahmp%config%domain%CROPLU       = .false.
+    noahmp%config%domain%CROP_ACTIVE  = .false.
+    noahmp%config%domain%DVEG_ACTIVE  = .false.
     noahmp%config%domain%NSNOW        = huge(1)
     noahmp%config%domain%NSOIL        = huge(1)
     noahmp%config%domain%ILOC         = huge(1)
@@ -56,12 +62,20 @@ contains
     noahmp%config%domain%NBAND        = huge(1)
     noahmp%config%domain%SOILCOLOR    = huge(1)
     noahmp%config%domain%ICE          = huge(1)
+    noahmp%config%domain%NSTAGE       = huge(1)
+    noahmp%config%domain%ISWATER      = huge(1)
+    noahmp%config%domain%ISBARREN     = huge(1)
+    noahmp%config%domain%ISICE        = huge(1)
+    noahmp%config%domain%ISCROP       = huge(1)
+    noahmp%config%domain%EBLFOREST    = huge(1)
+    noahmp%config%domain%YEARLEN      = huge(1)
     noahmp%config%domain%DT           = huge(1.0)
     noahmp%config%domain%DX           = huge(1.0)
     noahmp%config%domain%JULIAN       = huge(1.0)
     noahmp%config%domain%COSZ         = huge(1.0)
     noahmp%config%domain%ZREF         = huge(1.0)
     noahmp%config%domain%DZ8W         = huge(1.0)
+    noahmp%config%domain%LAT          = huge(1.0)
 
   end subroutine ConfigVarInitDefault
 
@@ -81,6 +95,7 @@ contains
              )
 
     ! config namelist variable
+    noahmp%config%nmlist%OPT_DVEG   = input%OPT_DVEGIn
     noahmp%config%nmlist%OPT_SNF    = input%OPT_SNFIn
     noahmp%config%nmlist%OPT_BTR    = input%OPT_BTRIn
     noahmp%config%nmlist%OPT_RSF    = input%OPT_RSFIn
@@ -97,6 +112,9 @@ contains
     noahmp%config%nmlist%OPT_TDRN   = input%OPT_TDRNIn
     noahmp%config%nmlist%OPT_IRR    = input%OPT_IRRIn
     noahmp%config%nmlist%OPT_IRRM   = input%OPT_IRRMIn
+    noahmp%config%nmlist%OPT_CROP   = input%OPT_CROPIn
+    noahmp%config%nmlist%OPT_SOIL   = input%OPT_SOILIn
+    noahmp%config%nmlist%OPT_PEDO   = input%OPT_PEDOIn
     noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
     noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
     if ( input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn ) then
@@ -123,7 +141,14 @@ contains
     !noahmp%config%domain%ISNOW      = input%ISNOWIn
     !noahmp%config%domain%IST        = input%ISTIn
     !noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
-    
+    noahmp%config%domain%ISWATER    = input%ISWATER_TABLE
+    noahmp%config%domain%ISBARREN   = input%ISBARREN_TABLE
+    noahmp%config%domain%ISICE      = input%ISICE_TABLE
+    noahmp%config%domain%ISCROP     = input%ISCROP_TABLE
+    noahmp%config%domain%EBLFOREST  = input%EBLFOREST_TABLE
+    noahmp%config%domain%YEARLEN    = input%YEARLENIn
+    noahmp%config%domain%LAT        = input%LATIn
+ 
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
     allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
@@ -139,6 +164,15 @@ contains
     noahmp%config%domain%SOILTYP(       1:NSOIL) = input%SOILTYPEIn(1:NSOIL)
     noahmp%config%domain%ZSOIL  (       1:NSOIL) = input%ZSOILIn(1:NSOIL)
     noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = input%ZSNSOIn(-NSNOW+1:NSOIL)
+
+    if ( (input%VEGTYPEIn == input%ISURBAN_TABLE) .or. (input%VEGTYPEIn == input%LCZ_1_TABLE) .or. &
+         (input%VEGTYPEIn == input%LCZ_2_TABLE)   .or. (input%VEGTYPEIn == input%LCZ_3_TABLE) .or. &
+         (input%VEGTYPEIn == input%LCZ_4_TABLE)   .or. (input%VEGTYPEIn == input%LCZ_5_TABLE) .or. &
+         (input%VEGTYPEIn == input%LCZ_6_TABLE)   .or. (input%VEGTYPEIn == input%LCZ_7_TABLE) .or. &
+         (input%VEGTYPEIn == input%LCZ_8_TABLE)   .or. (input%VEGTYPEIn == input%LCZ_9_TABLE) .or. &
+         (input%VEGTYPEIn == input%LCZ_10_TABLE)  .or. (input%VEGTYPEIn == input%LCZ_11_TABLE) ) then
+       noahmp%config%domain%URBAN_FLAG = .true.
+    endif
 
     end associate
 

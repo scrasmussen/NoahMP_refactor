@@ -164,6 +164,13 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: HS_TABLE          ! Parameter used in vapor pressure deficit function
     real(kind=kind_noahmp), allocatable, dimension(:)   :: TOPT_TABLE        ! Optimum transpiration air temperature [K]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: RSMAX_TABLE       ! Maximal stomatal resistance [s m-1]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RTOVRC_TABLE      ! root turnover coefficient [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RSDRYC_TABLE      ! degree of drying that reduces soil respiration [-]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: RSWOODC_TABLE     ! wood respiration coeficient [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: BF_TABLE          ! parameter for present wood allocation [-]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: WSTRC_TABLE       ! water stress coeficient [-]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: LAIMIN_TABLE      ! minimum leaf area index [m2/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:)   :: XSAMIN_TABLE      ! minimum stem area index [m2/m2]
 
     ! original MPTABLE.TBL radiation parameters
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBSAT_TABLE      ! saturated soil albedos: 1=vis, 2=nir
@@ -288,6 +295,7 @@ module InputVarType
     integer                                             :: DEFAULT_CROP_TABLE        ! Default crop index
     integer               , allocatable, dimension(:)   :: PLTDAY_TABLE              ! Planting date
     integer               , allocatable, dimension(:)   :: HSDAY_TABLE               ! Harvest date
+    integer               , allocatable, dimension(:)   :: C3C4_TABLE                ! photosynthetic pathway:  1. = c3 2. = c4
     real(kind=kind_noahmp), allocatable, dimension(:)   :: PLANTPOP_TABLE            ! Plant density [per ha] - used?
     real(kind=kind_noahmp), allocatable, dimension(:)   :: IRRI_TABLE                ! Irrigation strategy 0= non-irrigation 1=irrigation (no water-stress)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: GDDTBASE_TABLE            ! Base temperature for GDD accumulation [C]
@@ -308,7 +316,6 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: MPI_TABLE                 ! slope of conductance-to-photosynthesis relationship
     real(kind=kind_noahmp), allocatable, dimension(:)   :: QE25I_TABLE               ! quantum efficiency at 25c (umol co2 / umol photon)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: FOLNMXI_TABLE             ! foliage nitrogen concentration when
-    integer               , allocatable, dimension(:)   :: C3C4_TABLE                ! photosynthetic pathway:  1. = c3 2. = c4
     real(kind=kind_noahmp), allocatable, dimension(:)   :: AREF_TABLE                ! reference maximum CO2 assimulation rate 
     real(kind=kind_noahmp), allocatable, dimension(:)   :: PSNRF_TABLE               ! CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: I2PAR_TABLE               ! Fraction of incoming solar radiation to photosynthetically active radiation
@@ -379,6 +386,8 @@ module InputVarType
     integer                                             :: IRCNTFIIn
     integer                                             :: NBANDIn
     integer                                             :: ICEIn
+    integer                                             :: PGSIn
+    integer                                             :: YEARLENIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
     real(kind=kind_noahmp)                              :: DZ8WIn
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
@@ -414,6 +423,9 @@ module InputVarType
     real(kind=kind_noahmp)                              :: TAHIn
     real(kind=kind_noahmp)                              :: CHIn
     real(kind=kind_noahmp)                              :: CMIn
+    real(kind=kind_noahmp)                              :: FOLNIn
+    real(kind=kind_noahmp)                              :: SHDFACIn
+    real(kind=kind_noahmp)                              :: LATIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: STCIn             ! soil/snow layer temperature (K)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn

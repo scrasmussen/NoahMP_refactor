@@ -98,7 +98,14 @@ OBJS = ConstantDefineMod.o \
        PsychrometricVariableMod.o \
        ResistanceGroundEvaporationMod.o \
        SoilWaterTranspirationMod.o \
-       AtmosForcingMod.o
+       AtmosForcingMod.o \
+       PhenologyMainMod.o \
+       BiochemCropMainMod.o \
+       BiochemNatureVegMainMod.o \
+       CarbonFluxCropMod.o \
+       CarbonFluxNatureVegMod.o \
+       CropGrowDegreeDayMod.o \
+       CropPhotosynthesisMod.o
 
 all:	$(OBJS)
 
@@ -226,7 +233,8 @@ EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  SoilWaterTranspirationMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationTriggerMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
-                 PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o
+                 PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o \
+                 BiochemCropMainMod.o BiochemNatureVegMainMod.o PhenologyMainMod.o
 HumiditySaturationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyChen97Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -259,4 +267,11 @@ SnowCoverGroundNiu07Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMo
 SoilWaterTranspirationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SurfaceEmissivityMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 AtmosForcingMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-
+PhenologyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+CropPhotosynthesisMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+CropGrowDegreeDayMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+CarbonFluxNatureVegMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+CarbonFluxCropMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+BiochemNatureVegMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o CarbonFluxNatureVegMod.o
+BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o CarbonFluxCropMod.o \
+                      CropGrowDegreeDayMod.o CropPhotosynthesisMod.o

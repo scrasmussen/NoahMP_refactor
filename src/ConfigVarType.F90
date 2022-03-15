@@ -1,7 +1,7 @@
 module ConfigVarType
 
 !!! Define column (1-D) Noah-MP configuration variables
-!!! Configuration variable initialization is done in ConfigInit.f90
+!!! Configuration variable initialization is done in ConfigVarInit.f90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
@@ -18,6 +18,16 @@ module ConfigVarType
   type :: namelist_type
 
     ! define specific namelist variables
+    integer                   :: OPT_DVEG      ! options for dynamic vegetation
+                                                 ! 1 -> off (use table LAI; use FVEG = SHDFAC from input)
+                                                 ! 2 -> on  (together with OPT_CRS = 1)
+                                                 ! 3 -> off (use table LAI; calculate FVEG)
+                                                 ! 4 -> off (use table LAI; use maximum vegetation fraction)
+                                                 ! 5 -> on  (use maximum vegetation fraction)
+                                                 ! 6 -> on  (use FVEG = SHDFAC from input)
+                                                 ! 7 -> off (use input LAI; use FVEG = SHDFAC from input)
+                                                 ! 8 -> off (use input LAI; calculate FVEG)
+                                                 ! 9 -> off (use input LAI; use maximum vegetation fraction)
     integer                   :: OPT_SNF       ! options for partitioning  precipitation into rainfall & snowfall
                                                  ! 1 -> Jordan (1991)
                                                  ! 2 -> BATS: when SFCTMP<TFRZ+2.2 
@@ -94,7 +104,16 @@ module ConfigVarType
                                                  ! 1 -> sprinkler method
                                                  ! 2 -> micro/drip irrigation
                                                  ! 3 -> surface flooding
-
+    integer                   :: OPT_CROP      ! options for crop model
+                                                 ! 0 -> No crop model, will run default dynamic vegetation
+                                                 ! 1 -> Liu, et al. 2016
+    integer                   :: OPT_SOIL      ! options for defining soil properties
+                                                 ! 1 -> use input dominant soil texture
+                                                 ! 2 -> use input soil texture that varies with depth
+                                                 ! 3 -> use soil composition (sand, clay, orgm) and pedotransfer functions (OPT_PEDO)
+                                                 ! 4 -> use input soil properties (BEXP_3D, SMCMAX_3D, etc.)
+    integer                   :: OPT_PEDO      ! options for pedotransfer functions (used when OPT_SOIL = 3)
+                                                 ! 1 -> Saxton and Rawls (2006)
 
   end type namelist_type
 
@@ -104,6 +123,8 @@ module ConfigVarType
     ! define specific domain variables
     logical                   :: URBAN_FLAG  ! flag for urban grid
     logical                   :: CROPLU      ! flag to identify croplands
+    logical                   :: CROP_ACTIVE ! flag to activate crop model
+    logical                   :: DVEG_ACTIVE ! flag to activate dynamic vegetation model
     integer                   :: ILOC        ! model grid index
     integer                   :: JLOC        ! model grid index
     integer                   :: VEGTYP      ! vegetation type
@@ -115,12 +136,20 @@ module ConfigVarType
     integer                   :: NBAND       ! number of solar radiation wave bands
     integer                   :: SOILCOLOR   ! soil texture type for albedo
     integer                   :: ICE         ! flag for seaice point (=1: ice point)
+    integer                   :: ISWATER     ! flag to identify water
+    integer                   :: ISBARREN    ! flag to identify barren land
+    integer                   :: ISICE       ! flag to identify ice
+    integer                   :: ISCROP      ! flag to identify crop
+    integer                   :: EBLFOREST   ! flag to identify EBL Forest
+    integer                   :: NSTAGE      ! number of growth stages
+    integer                   :: YEARLEN     ! Number of days in the particular year
     real(kind=kind_noahmp)    :: DT          ! noahmp timestep (s)
     real(kind=kind_noahmp)    :: DX          ! noahmp model grid spacing (m)
     real(kind=kind_noahmp)    :: JULIAN      ! julian day of the year
     real(kind=kind_noahmp)    :: COSZ        ! cosine solar zenith angle
     real(kind=kind_noahmp)    :: ZREF        ! reference height  (m)
     real(kind=kind_noahmp)    :: DZ8W        ! thickness of surface atmospheric layers [m]
+    real(kind=kind_noahmp)    :: LAT         ! latitude (radians)
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface

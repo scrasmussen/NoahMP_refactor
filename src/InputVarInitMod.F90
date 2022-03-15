@@ -52,14 +52,16 @@ contains
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
+                                              XSAMIN, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
     namelist / noahmp_usgs_veg_categories /   VEG_DATASET_DESCRIPTION, NVEG
     namelist / noahmp_usgs_parameters     /   ISURBAN, ISWATER, ISBARREN, ISICE, ISCROP, EBLFOREST, NATURAL,                 &
                                               LCZ_1, LCZ_2, LCZ_3, LCZ_4, LCZ_5, LCZ_6, LCZ_7, LCZ_8, LCZ_9, LCZ_10, LCZ_11, &
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,  &
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
+                                              XSAMIN, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,                           &
                                               SAI_JUN, SAI_JUL, SAI_AUG, SAI_SEP, SAI_OCT, SAI_NOV, SAI_DEC, LAI_JAN,        &
                                               LAI_FEB, LAI_MAR, LAI_APR, LAI_MAY, LAI_JUN, LAI_JUL, LAI_AUG, LAI_SEP,        &
                                               LAI_OCT, LAI_NOV, LAI_DEC, RHOL_VIS, RHOL_NIR, RHOS_VIS, RHOS_NIR, TAUL_VIS,   &
@@ -70,7 +72,8 @@ contains
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,  &
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
+                                              XSAMIN, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,                           &
                                               SAI_JUN, SAI_JUL, SAI_AUG, SAI_SEP, SAI_OCT, SAI_NOV, SAI_DEC, LAI_JAN,        &
                                               LAI_FEB, LAI_MAR, LAI_APR, LAI_MAY, LAI_JUN, LAI_JUL, LAI_AUG, LAI_SEP,        &
                                               LAI_OCT, LAI_NOV, LAI_DEC, RHOL_VIS, RHOL_NIR, RHOS_VIS, RHOS_NIR, TAUL_VIS,   &
@@ -255,6 +258,13 @@ contains
     allocate( input%HS_TABLE(MVT) )
     allocate( input%TOPT_TABLE(MVT) )
     allocate( input%RSMAX_TABLE(MVT) )
+    allocate( input%RTOVRC_TABLE(MVT) )
+    allocate( input%RSDRYC_TABLE(MVT) )
+    allocate( input%RSWOODC_TABLE(MVT) )
+    allocate( input%BF_TABLE(MVT) )
+    allocate( input%WSTRC_TABLE(MVT) )
+    allocate( input%LAIMIN_TABLE(MVT) )
+    allocate( input%XSAMIN_TABLE(MVT) )
 
     ! SOILPARM.TBL parameters
     allocate( input%BEXP_TABLE(MAX_SOILTYP) )
@@ -301,6 +311,7 @@ contains
     ! MPTABLE.TBL crop parameters
     allocate( input%PLTDAY_TABLE(NCROP) )
     allocate( input%HSDAY_TABLE(NCROP) )
+    allocate( input%C3C4_TABLE(NCROP) )
     allocate( input%PLANTPOP_TABLE(NCROP) )
     allocate( input%IRRI_TABLE(NCROP) )
     allocate( input%GDDTBASE_TABLE(NCROP) )
@@ -321,7 +332,6 @@ contains
     allocate( input%MPI_TABLE(NCROP) )
     allocate( input%QE25I_TABLE(NCROP) )
     allocate( input%FOLNMXI_TABLE(NCROP) )
-    allocate( input%C3C4_TABLE(NCROP) )
     allocate( input%AREF_TABLE(NCROP) )
     allocate( input%PSNRF_TABLE(NCROP) )
     allocate( input%I2PAR_TABLE(NCROP) )
@@ -351,7 +361,6 @@ contains
     allocate( input%STCT_TABLE(NCROP,NSTAGE) )
     allocate( input%RTCT_TABLE(NCROP,NSTAGE) )
     allocate( input%BIO2LAI_TABLE(NCROP) )
-
 
     !---------------------------------------------------------------
     ! intialization to bad value, so that if the namelist read fails,
@@ -426,6 +435,13 @@ contains
     input%HS_TABLE           = -1.0e36
     input%TOPT_TABLE         = -1.0e36
     input%RSMAX_TABLE        = -1.0e36
+    input%RTOVRC_TABLE       = -1.0e36
+    input%RSDRYC_TABLE       = -1.0e36
+    input%RSWOODC_TABLE      = -1.0e36
+    input%BF_TABLE           = -1.0e36
+    input%WSTRC_TABLE        = -1.0e36
+    input%LAIMIN_TABLE       = -1.0e36
+    input%XSAMIN_TABLE       = -1.0e36
 
     ! SOILPARM.TBL soil parameters
     input%SLCATS_TABLE       = -99999
@@ -718,6 +734,14 @@ contains
     input%HS_TABLE(1:NVEG)      = HS(1:NVEG)
     input%TOPT_TABLE(1:NVEG)    = TOPT(1:NVEG)
     input%RSMAX_TABLE(1:NVEG)   = RSMAX(1:NVEG)
+    input%RTOVRC_TABLE(1:NVEG)  = RTOVRC(1:NVEG)
+    input%RSDRYC_TABLE(1:NVEG)  = RSDRYC(1:NVEG)
+    input%RSWOODC_TABLE(1:NVEG) = RSWOODC(1:NVEG)
+    input%BF_TABLE(1:NVEG)      = BF(1:NVEG)
+    input%WSTRC_TABLE(1:NVEG)   = WSTRC(1:NVEG)
+    input%LAIMIN_TABLE(1:NVEG)  = LAIMIN(1:NVEG)
+    input%XSAMIN_TABLE(1:NVEG)  = XSAMIN(1:NVEG)
+
     input%SAIM_TABLE(1:NVEG, 1) = SAI_JAN(1:NVEG)
     input%SAIM_TABLE(1:NVEG, 2) = SAI_FEB(1:NVEG)
     input%SAIM_TABLE(1:NVEG, 3) = SAI_MAR(1:NVEG)
@@ -1272,22 +1296,14 @@ contains
     input%NSNOWIn          = nsnow
     input%VEGFRAIn         = vegfra
     input%VEGMAXIn         = vegmax
-    input%SHDMAXIn         = shdmax
+    input%SHDMAXIn         = shdmax / 100.0
+    input%SHDFACIn         = vegfra / 100.0
     input%JULIANIn         = JULIAN
     input%Q2In             = Q2
     input%SOLDNIn          = SWDOWN
     input%LWDNIn           = LWDOWN
     input%PSFCIn           = sfcpres
     input%ZLVLIn           = zlvl
-    input%SFCTMPIn         = huge(1.0)
-    input%PRCPCONVIn       = huge(1.0)
-    input%PRCPNONCIn       = huge(1.0)
-    input%PRCPSHCVIn       = huge(1.0)
-    input%PRCPSNOWIn       = huge(1.0)
-    input%PRCPGRPLIn       = huge(1.0)
-    input%PRCPHAILIn       = huge(1.0)
-    input%TBOTIn           = huge(1.0)
-    input%COSZIn           = huge(1.0)
 
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))
@@ -1313,12 +1329,25 @@ contains
 
     type(input_type), intent(inout) :: input
 
-    input%ILOCIn   = 1
-    input%JLOCIn   = 1
-    input%DXIn     = 4000.0
-    input%NSOILIn  = 4
-    input%NSNOWIn  = 3
-    input%NBANDIn  = 2
+    input%ILOCIn           = 1
+    input%JLOCIn           = 1
+    input%DXIn             = 4000.0
+    input%NSOILIn          = 4
+    input%NSNOWIn          = 3
+    input%NBANDIn          = 2
+    input%SFCTMPIn         = huge(1.0)
+    input%PRCPCONVIn       = huge(1.0)
+    input%PRCPNONCIn       = huge(1.0)
+    input%PRCPSHCVIn       = huge(1.0)
+    input%PRCPSNOWIn       = huge(1.0)
+    input%PRCPGRPLIn       = huge(1.0)
+    input%PRCPHAILIn       = huge(1.0)
+    input%TBOTIn           = huge(1.0)
+    input%COSZIn           = huge(1.0)
+    input%YEARLENIn        = 365
+    input%LATIn            = 0.0
+    input%PGSIn            = 0
+    input%FOLNIn           = 1.0
 
   end subroutine InputVarInitDefault
 

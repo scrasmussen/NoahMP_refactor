@@ -143,6 +143,7 @@ contains
     noahmp%energy%state%TV              = huge(1.0)
     noahmp%energy%state%TGV             = huge(1.0)
     noahmp%energy%state%TGB             = huge(1.0)
+    noahmp%energy%state%TROOT           = huge(1.0)
     noahmp%energy%state%TAUXV           = huge(1.0)
     noahmp%energy%state%TAUYV           = huge(1.0)
     noahmp%energy%state%TAUXB           = huge(1.0)
@@ -307,6 +308,8 @@ contains
     noahmp%energy%param%EICE            = huge(1.0)
     noahmp%energy%param%RSURF_EXP       = huge(1.0)
     noahmp%energy%param%RSURF_SNOW      = huge(1.0)
+    noahmp%energy%param%SHDMAX          = huge(1.0)
+    noahmp%energy%param%SHDFAC          = huge(1.0)
 
     allocate( noahmp%energy%param%LAIM   (1:12   ) )
     allocate( noahmp%energy%param%SAIM   (1:12   ) )
@@ -364,7 +367,6 @@ contains
     ! energy state variable
     !noahmp%energy%state%LAI               = input%LAIIn
     !noahmp%energy%state%SAI               = input%SAIIn
-    !noahmp%energy%state%FVEG              = input%FVEGIn
     !noahmp%energy%state%TG                = input%TGIn
     !noahmp%energy%state%TV                = input%TVIn
     !noahmp%energy%state%STC               = input%STCIn
@@ -423,6 +425,8 @@ contains
     noahmp%energy%param%EICE               = input%EICE_TABLE
     noahmp%energy%param%RSURF_EXP          = input%RSURF_EXP_TABLE
     noahmp%energy%param%RSURF_SNOW         = input%RSURF_SNOW_TABLE
+    noahmp%energy%param%SHDMAX             = input%SHDMAXIn
+    noahmp%energy%param%SHDFAC             = input%SHDFACIn
 
     noahmp%energy%param%LAIM(1:12)         = input%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = input%SAIM_TABLE(VEGTYP,1:12)

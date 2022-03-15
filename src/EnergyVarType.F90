@@ -85,6 +85,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
     real(kind=kind_noahmp) :: TS              ! surface temperature (K)
+    real(kind=kind_noahmp) :: TROOT           ! root-zone averaged temperature (k)
     real(kind=kind_noahmp) :: EAIR            ! vapor pressure air (pa)
     real(kind=kind_noahmp) :: FAGE            ! snow age factor
     real(kind=kind_noahmp) :: TAUSS           ! non-dimensional snow age
@@ -273,6 +274,8 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EICE             ! ice surface emissivity
     real(kind=kind_noahmp) :: RSURF_EXP        ! exponent in the shape parameter for soil resistance option 1
     real(kind=kind_noahmp) :: RSURF_SNOW       ! surface resistance for snow(s/m)
+    real(kind=kind_noahmp) :: SHDFAC           ! vegetation fraction
+    real(kind=kind_noahmp) :: SHDMAX           ! yearly maximum vegetation fraction
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided

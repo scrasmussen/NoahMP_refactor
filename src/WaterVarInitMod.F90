@@ -70,6 +70,8 @@ contains
     noahmp%water%state%FSNO           = huge(1.0)
     noahmp%water%state%BTRAN          = huge(1.0)
     noahmp%water%state%FPICE          = huge(1.0)
+    noahmp%water%state%WROOT          = huge(1.0)
+    noahmp%water%state%WSTRES         = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )

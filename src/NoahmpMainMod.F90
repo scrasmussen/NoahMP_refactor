@@ -7,12 +7,15 @@ module NoahmpMainMod
   use NoahmpVarType
   use ConstantDefineMod
   use AtmosForcingMod,            only : ProcessAtmosForcing
+  use PhenologyMainMod,           only : PhenologyMain
   use IrrigationTriggerMod,       only : IrrigationTrigger
   use IrrigationSprinklerMod,     only : SprinklerIrrigation
   use CanopyWaterInterceptMod,    only : CanopyWaterIntercept
   use PrecipitationHeatAdvectMod, only : PrecipitationHeatAdvect
   use EnergyMainMod,              only : EnergyMain
   use WaterMainMod,               only : WaterMain
+  use BiochemNatureVegMainMod,    only : BiochemNatureVegMain
+  use BiochemCropMainMod,         only : BiochemCropMain
  
   implicit none
 
@@ -39,6 +42,9 @@ contains
               CROPTYPE        => noahmp%config%domain%CROPTYP        ,& ! in,     crop type
               DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
+              DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE    ,& ! in,     flag to activate dynamic vegetation model
+              CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE    ,& ! in,     flag to activate dynamic crop model
+              OPT_CROP        => noahmp%config%nmlist%OPT_CROP       ,& ! in,     crop option
               HVB             => noahmp%energy%param%HVB             ,& ! in,     bottom of canopy (m)
               HVT             => noahmp%energy%param%HVT             ,& ! in,     top of canopy (m)
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
@@ -99,17 +105,7 @@ contains
     ! Phenology
     !--------------------------------------------------------------------- 
 
-    ! temporarilly extract from phenology to update ELAI and ESAI
-    FB_snow = min( max(SNOWH-HVB, 0.0), HVT-HVB ) / max(1.0e-06, HVT-HVB)
-    if ( (HVT > 0.0) .and. (HVT <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect
-       FB_snow = min( SNOWH, (HVT*exp(-SNOWH/0.2)) ) / (HVT*exp(-SNOWH/0.2) )
-    endif
-    ELAI = LAI * (1.0 - FB_snow)
-    ESAI = SAI * (1.0 - FB_snow)
-    if ( (ESAI < 0.05) .and. (CROPTYPE == 0) ) ESAI = 0.0                   ! MB: ESAI CHECK, change to 0.05 v3.6
-    if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CROPTYPE == 0) ) ELAI = 0.0  ! MB: LAI CHECK
-
-
+    call PhenologyMain (noahmp)
 
     !---------------------------------------------------------------------
     ! Irrigation trigger and sprinkler irrigation
@@ -167,6 +163,11 @@ contains
     ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
+    ! for natural vegetation
+    if ( DVEG_ACTIVE .eqv. .true. ) call BiochemNatureVegMain(noahmp)
+
+    ! for crop
+    if ( (OPT_CROP == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)
 
     !---------------------------------------------------------------------
     ! Balance check for energy and water
