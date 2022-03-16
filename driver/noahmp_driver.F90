@@ -870,7 +870,7 @@ USE NOAHMP_TABLES
                    SHG     , SHC     , SHB     , EVG     , EVB     , GHV     , & ! OUT :
                    GHB     , IRG     , IRC     , IRB     , TR      , EVC     , & ! OUT :
                    CHLEAF  , CHUC    , CHV2    , CHB2    , FPICE   , PAHV    , &
-                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB        & ! OUT
+                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB      , SICE  & ! OUT
 #ifdef WRF_HYDRO
                    ,SFCHEADRT, WATBLED                                         & ! IN/OUT :
 #endif
