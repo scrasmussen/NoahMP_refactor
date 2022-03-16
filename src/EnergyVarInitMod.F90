@@ -159,6 +159,9 @@ contains
     noahmp%energy%state%Z0WRF           = huge(1.0)
     noahmp%energy%state%TRAD            = huge(1.0)
     noahmp%energy%state%EMISSI          = huge(1.0)
+    noahmp%energy%state%ALBEDO          = huge(1.0)
+    noahmp%energy%state%ERRENG          = huge(1.0)
+    noahmp%energy%state%ERRSW           = huge(1.0)
 
     allocate( noahmp%energy%state%STC     (-NSNOW+1:NSOIL) )
     allocate( noahmp%energy%state%DF      (-NSNOW+1:NSOIL) )

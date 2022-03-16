@@ -14,7 +14,7 @@ module IrrigationFloodMod
 
 contains
 
-  subroutine FloodIrrigation(noahmp)
+  subroutine IrrigationFlood(noahmp)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: FLOOD_IRRIGATION
@@ -35,6 +35,7 @@ contains
               FIFAC           => noahmp%water%state%FIFAC            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
               FIRTFAC         => noahmp%water%param%FIRTFAC          ,& ! in,     flood application rate factor
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
+              QINSUR          => noahmp%water%flux%QINSUR            ,& ! inout,  water input on soil surface [mm/s]
               IRFIRATE        => noahmp%water%flux%IRFIRATE           & ! inout,  flood irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
@@ -58,8 +59,11 @@ contains
        IRAMTFI  = IRAMTFI - IRFIRATE
     endif
 
+    ! update water flux going to surface soil
+    QINSUR = QINSUR + (IRFIRATE / DT)  ! [m/s]
+
     end associate
 
-  end subroutine FloodIrrigation
+  end subroutine IrrigationFlood
 
 end module IrrigationFloodMod

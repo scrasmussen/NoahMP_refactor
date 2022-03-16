@@ -9,13 +9,14 @@ module NoahmpMainMod
   use AtmosForcingMod,            only : ProcessAtmosForcing
   use PhenologyMainMod,           only : PhenologyMain
   use IrrigationPrepareMod,       only : IrrigationPrepare
-  use IrrigationSprinklerMod,     only : SprinklerIrrigation
+  use IrrigationSprinklerMod,     only : IrrigationSprinkler
   use CanopyWaterInterceptMod,    only : CanopyWaterIntercept
   use PrecipitationHeatAdvectMod, only : PrecipitationHeatAdvect
   use EnergyMainMod,              only : EnergyMain
   use WaterMainMod,               only : WaterMain
   use BiochemNatureVegMainMod,    only : BiochemNatureVegMain
   use BiochemCropMainMod,         only : BiochemCropMain
+  use BalanceErrorCheckMod,       only : BalanceErrorCheck
  
   implicit none
 
@@ -56,7 +57,6 @@ contains
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent (mm)
-              SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
@@ -79,12 +79,7 @@ contains
               FB_snow         => noahmp%energy%state%FB_snow         ,& ! out,    fraction of canopy buried by snow
               ELAI            => noahmp%energy%state%ELAI            ,& ! out,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! out,    stem area index, after burying by snow
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,    latent heat of vaporization/subli (j/kg), ground
               TROOT           => noahmp%energy%state%TROOT           ,& ! out,    root-zone averaged temperature (k)
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! out,    soil evap heat (w/m2) [+ to atm]
-              QVAP            => noahmp%water%flux%QVAP              ,& ! out,    soil surface evaporation rate[mm/s]
-              QDEW            => noahmp%water%flux%QDEW              ,& ! out,    soil surface dew rate[mm/s]
-              EDIR            => noahmp%water%flux%EDIR              ,& ! out,    net direct soil evaporation (mm/s)
               BEG_WB          => noahmp%water%state%BEG_WB            & ! out,    total water storage at the beginning
              )
 ! ----------------------------------------------------------------------
@@ -142,14 +137,8 @@ contains
     ! Sprinkler irrigation
     !--------------------------------------------------------------------- 
 
-    ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
-    if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) then
-       call SprinklerIrrigation(noahmp)
-       RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
-       ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-       FIRR = IREVPLOS * 1000.0 * HVAP / DT   ! heat used for evaporation (W/m2)
-       EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
-    endif
+    ! call sprinkler irrigation before canopy process to have canopy interception
+    if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) call IrrigationSprinkler(noahmp)
 
     !---------------------------------------------------------------------
     ! Canopy water interception and precip heat advection
@@ -165,15 +154,6 @@ contains
     call EnergyMain(noahmp)
 
     !---------------------------------------------------------------------
-    ! prepare for water process
-    !--------------------------------------------------------------------- 
-    SICE(:) = max(0.0, SMC(:)-SH2O(:))
-    SNEQVO  = SNEQV
-    QVAP    = max(FGEV/LATHEAG, 0.0)       ! positive part of fgev; Barlage change to ground v3.6
-    QDEW    = abs(min(FGEV/LATHEAG, 0.0))  ! negative part of fgev
-    EDIR    = QVAP - QDEW
-
-    !---------------------------------------------------------------------
     ! Water processes
     !--------------------------------------------------------------------- 
 
@@ -183,17 +163,18 @@ contains
     ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
-    ! for natural vegetation
-    if ( DVEG_ACTIVE .eqv. .true. ) call BiochemNatureVegMain(noahmp)
-
-    ! for crop
-    if ( (OPT_CROP == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)
+    if ( DVEG_ACTIVE .eqv. .true. ) call BiochemNatureVegMain(noahmp)                     ! for natural vegetation
+    if ( (OPT_CROP == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
 
     !---------------------------------------------------------------------
-    ! Balance check for energy and water
+    ! Error check for energy and water balance
     !--------------------------------------------------------------------- 
 
+    call BalanceErrorCheck(noahmp)
 
+    !---------------------------------------------------------------------
+    ! End of all NoahMP column processes
+    !--------------------------------------------------------------------- 
 
     end associate
 

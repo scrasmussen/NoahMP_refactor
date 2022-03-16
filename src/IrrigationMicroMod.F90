@@ -14,7 +14,7 @@ module IrrigationMicroMod
 
 contains
 
-  subroutine MicroIrrigation(noahmp)
+  subroutine IrrigationMicro(noahmp)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: MICRO_IRRIGATION
@@ -33,8 +33,10 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
               MIFAC           => noahmp%water%state%MIFAC            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
               MICIR_RATE      => noahmp%water%param%MICIR_RATE       ,& ! in,     micro irrigation rate (mm/hr)
+              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
               IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
               IRMIRATE        => noahmp%water%flux%IRMIRATE           & ! inout,  micro irrigation water rate [m/timestep]
              )
@@ -60,8 +62,12 @@ contains
        IRAMTMI = IRAMTMI - IRMIRATE
     endif
 
+    ! update soil moisture
+    ! we implement drip in first layer of the Noah-MP. Change layer 1 moisture wrt to MI rate
+    SH2O(1) = SH2O(1) + ( IRMIRATE / (-1.0*ZSOIL(1)) )
+
     end associate
 
-  end subroutine MicroIrrigation
+  end subroutine IrrigationMicro
 
 end module IrrigationMicroMod

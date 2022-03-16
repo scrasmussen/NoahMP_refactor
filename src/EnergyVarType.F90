@@ -204,6 +204,9 @@ module EnergyVarType
     real(kind=kind_noahmp) :: Z0WRF           ! roughness length, momentum, surface, sent to coupled model
     real(kind=kind_noahmp) :: TRAD            ! radiative temperature (K)
     real(kind=kind_noahmp) :: EMISSI          ! surface emissivity
+    real(kind=kind_noahmp) :: ALBEDO          ! total surface albedo
+    real(kind=kind_noahmp) :: ERRENG          ! error in surface energy balance [w/m2]
+    real(kind=kind_noahmp) :: ERRSW           ! error in shortwave radiation balance [w/m2]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: STC         ! snow and soil layer temperature [k]
     real(kind=kind_noahmp), allocatable, dimension(:) :: CVSNO       ! snow layer volumetric specific heat (j/m3/k)

@@ -63,6 +63,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: QTHROS        ! throughfall of snowfall (mm/s)
     real(kind=kind_noahmp) :: EDIR          ! net direct soil evaporation (mm/s)
     real(kind=kind_noahmp) :: QMELT         ! ground snow melting rate (mm/s)
+    real(kind=kind_noahmp) :: QFX           ! total surface water vapor flux to atmosphere (mm/s)
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
@@ -123,7 +124,9 @@ module WaterVarType
     real(kind=kind_noahmp) :: FPICE       ! fraction of snowfall in total precipitation
     real(kind=kind_noahmp) :: WROOT       ! root zone soil water
     real(kind=kind_noahmp) :: WSTRES      ! soil water stress
-    real(kind=kind_noahmp) :: BEG_WB      ! total water storage at the begining before NoahMP process
+    real(kind=kind_noahmp) :: BEG_WB      ! total water storage (mm) at the begining before NoahMP process
+    real(kind=kind_noahmp) :: ERRWAT      ! water balance error (mm)
+    real(kind=kind_noahmp) :: END_WB      ! total water storage (mm) at the end of NoahMP process
 
     integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]

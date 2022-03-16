@@ -15,7 +15,7 @@ module IrrigationSprinklerMod
 
 contains
 
-  subroutine SprinklerIrrigation(noahmp)
+  subroutine IrrigationSprinkler(noahmp)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: SPRINKLER_IRRIGATION
@@ -44,7 +44,10 @@ contains
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
               SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
               SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
+              FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
+              EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
+              RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
               IREVPLOS        => noahmp%water%flux%IREVPLOS           & ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
              )
@@ -84,9 +87,16 @@ contains
 
     IREVPLOS = IRSIRATE * IRRLOSS * (1.0/100.0)
     IRSIRATE = IRSIRATE - IREVPLOS
-    
+
+    ! include sprinkler water to total rain for canopy process later
+    RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
+
+    ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
+    FIRR = IREVPLOS * 1000.0 * HVAP / DT   ! heat used for evaporation (W/m2)
+    EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
+
     end associate
 
-  end subroutine SprinklerIrrigation
+  end subroutine IrrigationSprinkler
 
 end module IrrigationSprinklerMod

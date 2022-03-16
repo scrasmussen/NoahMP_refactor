@@ -78,9 +78,14 @@ contains
               UU              => noahmp%forcing%UU                   ,& ! in,    east-west direction wind (m/s)
               VV              => noahmp%forcing%VV                   ,& ! in,    north-south direction wind (m/s)
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
+              CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
+              IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
+              IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
+              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
+              FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
               PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
               PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
@@ -125,6 +130,8 @@ contains
               CHLEAF          => noahmp%energy%state%CHLEAF          ,& ! out,   leaf sensible heat exchange coeff (m/s), leaf to canopy air
               CHUC            => noahmp%energy%state%CHUC            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
               CHV2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s) vegetated
+              ALBEDO          => noahmp%energy%state%ALBEDO          ,& ! out,   total shortwave surface albedo
+              FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
               FIRA            => noahmp%energy%flux%FIRA             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
               FSH             => noahmp%energy%flux%FSH              ,& ! out,   total sensible heat (w/m2) [+ to atm]
               FGEV            => noahmp%energy%flux%FGEV             ,& ! out,   soil evap heat (w/m2) [+ to atm]
@@ -308,6 +315,16 @@ contains
 
     ! Phase change and Energy released or consumed by snow & frozen soil
     call SoilSnowWaterPhaseChange(noahmp)
+
+    ! update sensible heat flux due to sprinkler irrigation evaporation
+    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
+
+    ! update total surface albedo
+    if ( SWDOWN > 0.0 ) then
+       ALBEDO = FSR / SWDOWN
+    else
+       ALBEDO = -999.9
+    endif
 
     end associate
 

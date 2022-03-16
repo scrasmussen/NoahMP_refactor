@@ -53,29 +53,29 @@ contains
              )
 ! ----------------------------------------------------------------------
 
-! initialize out-only variables
+    ! initialize out-only variables
     SNOFLOW  = 0.0
     PONDING1 = 0.0
     PONDING2 = 0.0
 
-! snowfall after canopy interception
+    ! snowfall after canopy interception
     call SnowfallAfterCanopyIntercept(noahmp)
 
-! do following snow layer compaction, combination, and division only for multi-layer snowpack
+    ! do following snow layer compaction, combination, and division only for multi-layer snowpack
 
-! snowpack compaction
+    ! snowpack compaction
     if ( ISNOW < 0 ) call SnowpackCompaction(noahmp)
 
-! snow layer combination
+    ! snow layer combination
     if ( ISNOW < 0 ) call SnowLayerCombine(noahmp)
 
-! snow layer division
+    ! snow layer division
     if ( ISNOW < 0 ) call SnowLayerDivide(noahmp)
 
-! snow hydrology for all snow cases
+    ! snow hydrology for all snow cases
     call SnowpackHydrology(noahmp)
 
-! set empty snow layer properties to zero
+    ! set empty snow layer properties to zero
     do IZ = -NSNOW+1, ISNOW
        SNICE(IZ)  = 0.0
        SNLIQ(IZ)  = 0.0
@@ -84,7 +84,7 @@ contains
        ZSNSO(IZ)  = 0.0
     enddo
 
-! to obtain equilibrium state of snow in glacier region
+    ! to obtain equilibrium state of snow in glacier region
     if ( SNEQV > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
        BDSNOW      = SNICE(0) / DZSNSO(0)
        SNOFLOW     = SNEQV - SWEMAXGLA
@@ -93,7 +93,7 @@ contains
        SNOFLOW     = SNOFLOW / DT
     endif
 
-! sum up snow mass for layered snow
+    ! sum up snow mass for layered snow
     if ( ISNOW < 0 ) then  ! MB: only do for multi-layer
        SNEQV = 0.0
        do IZ = ISNOW+1, 0
@@ -101,7 +101,7 @@ contains
        enddo
     endif
 
-! Reset ZSNSO and layer thinkness DZSNSO
+    ! Reset ZSNSO and layer thinkness DZSNSO
     do IZ = ISNOW+1, 0
        DZSNSO(IZ) = -DZSNSO(IZ)
     enddo
@@ -116,6 +116,12 @@ contains
     do IZ = ISNOW+1 ,NSOIL
        DZSNSO(IZ) = -DZSNSO(IZ)
     enddo
+
+    ! update snow quantity
+    if ( (SNOWH <= 1.0e-6) .or. (SNEQV <= 1.0e-3) ) then
+       SNOWH = 0.0
+       SNEQV = 0.0
+    endif
 
     end associate
 

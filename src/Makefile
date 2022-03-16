@@ -106,7 +106,8 @@ OBJS = ConstantDefineMod.o \
        CarbonFluxNatureVegMod.o \
        CropGrowDegreeDayMod.o \
        CropPhotosynthesisMod.o \
-       IrrigationPrepareMod.o
+       IrrigationPrepareMod.o \
+       BalanceErrorCheckMod.o
 
 all:	$(OBJS)
 
@@ -235,7 +236,7 @@ EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationPrepareMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o \
-                 BiochemCropMainMod.o BiochemNatureVegMainMod.o PhenologyMainMod.o
+                 BiochemCropMainMod.o BiochemNatureVegMainMod.o PhenologyMainMod.o BalanceErrorCheckMod.o
 HumiditySaturationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyChen97Mod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceAboveCanopyMostMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -277,4 +278,5 @@ BiochemNatureVegMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMo
 BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o CarbonFluxCropMod.o \
                       CropGrowDegreeDayMod.o CropPhotosynthesisMod.o
 IrrigationPrepareMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o IrrigationTriggerMod.o
+BalanceErrorCheckMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 

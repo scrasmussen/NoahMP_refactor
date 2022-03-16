@@ -76,6 +76,8 @@ contains
     noahmp%water%state%WROOT          = huge(1.0)
     noahmp%water%state%WSTRES         = huge(1.0)
     noahmp%water%state%BEG_WB         = huge(1.0)
+    noahmp%water%state%ERRWAT         = huge(1.0)
+    noahmp%water%state%END_WB         = huge(1.0)
 
     allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
@@ -167,6 +169,7 @@ contains
     noahmp%water%flux%QTHROS          = huge(1.0)
     noahmp%water%flux%EDIR            = huge(1.0)
     noahmp%water%flux%QMELT           = huge(1.0)
+    noahmp%water%flux%QFX             = huge(1.0)
 
     allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
     allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )
