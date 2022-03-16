@@ -483,7 +483,7 @@ contains
 		   SHG     , SHC     , SHB     , EVG     , EVB     , GHV     , & ! OUT :
 		   GHB     , IRG     , IRC     , IRB     , TR      , EVC     , & ! OUT :
 		   CHLEAF  , CHUC    , CHV2    , CHB2    , FPICE   , PAHV    , &
-                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB        & ! OUT
+                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB      , SICE  & ! OUT
 #ifdef WRF_HYDRO
                    ,SFCHEADRT, WATBLED                                         & ! IN/OUT :
 #endif
@@ -651,7 +651,7 @@ contains
   REAL                                           :: BTRAN  !soil water transpiration factor (0 - 1)
   REAL                                           :: QIN    !groundwater recharge [mm/s]
   REAL                                           :: QDIS   !groundwater discharge [mm/s]
-  REAL, DIMENSION(       1:NSOIL)                :: SICE   !soil ice content (m3/m3)
+  REAL, DIMENSION(       1:NSOIL),INTENT(INOUT)  :: SICE   !soil ice content (m3/m3)
   REAL, DIMENSION(-NSNOW+1:    0)                :: SNICEV !partial volume ice of snow [m3/m3]
   REAL, DIMENSION(-NSNOW+1:    0)                :: SNLIQV !partial volume liq of snow [m3/m3]
   REAL, DIMENSION(-NSNOW+1:    0)                :: EPORE  !effective porosity [m3/m3]
