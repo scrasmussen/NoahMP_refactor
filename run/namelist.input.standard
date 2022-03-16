@@ -1,5 +1,4 @@
-    
-&timing ! and output
+&timing
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
   output_filename = 'output.nc'
@@ -15,9 +14,6 @@
   uwind         = 6.0   ! wind speed m/s
   vwind         = 6.0   ! wind speed m/s
   sfcpres       = 90000.0  ! surface pressure Pa
-  fcev_e        = 5.0       ! constant canopy evaporation heat (w/m2) [+ to atm ]
-  fctr_e        = 5.0       ! constant transpiration heat (w/m2) [+ to atm]
-  fgev_e        = 15.0      ! evaporation/sublimation heat (w/m2) [+ to atm]
   Q2            = 0.01
   SWDOWN        = 500.0
   LWDOWN        = 300.0
@@ -33,21 +29,19 @@
  nsnow            = 3       ! number of snow levels
  structure_option = 1       ! 1: use preset zsoil; 2: uniform levels
  soil_depth       = 2.0     ! total soil thickness [m] for structure_option > 1
- vegfra           = 50      ! vegetation fraction 50%
- vegmax           = 50      ! Vegetation fraction annual max [0-1]
- shdmax           = 50      ! yearly max vegetation fraction
+ vegfra           = 30      ! vegetation fraction 50%
+ vegmax           = 60      ! Vegetation fraction annual max [0-1]
+ shdmax           = 60      ! yearly max vegetation fraction
  zlvl             = 10.0    ! reference height (m)
 /
 
 &fixed_initial
  zsoil     = -0.1, -0.4, -1.0, -2.0  ! depth to level interface [m]
- dzsnso    =  0.0, 0.0,   0.0, 0.1,  0.3,  0.6,  1.0  ! level thickness [m]
 /
 
 &uniform_initial
  initial_uniform    = .true.         ! initial all levels the same
  initial_sh2o_value = 0.3            ! constant soil liquid value [vol]
- initial_sice_value = 0.0            ! constant soil ice value [vol]
 /
 
 &options

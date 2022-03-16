@@ -135,14 +135,14 @@ contains
     noahmp%config%domain%VEGTYP     = input%VEGTYPEIn
     noahmp%config%domain%CROPTYP    = input%CROPTYPEIn
     noahmp%config%domain%SOILCOLOR  = input%SOILCOLORIn
-    !noahmp%config%domain%ICE        = input%ICEIn
+    noahmp%config%domain%ICE        = input%ICEIn
     noahmp%config%domain%JULIAN     = input%JULIANIn
     noahmp%config%domain%ZREF       = input%ZLVLIn
-    !noahmp%config%domain%DZ8W      = input%DZ8WIn
+    noahmp%config%domain%DZ8W       = input%DZ8WIn
     noahmp%config%domain%COSZ       = input%COSZIn
     !noahmp%config%domain%ISNOW      = input%ISNOWIn
-    !noahmp%config%domain%IST        = input%ISTIn
-    !noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
+    noahmp%config%domain%IST        = input%ISTIn
+    noahmp%config%domain%URBAN_FLAG = input%URBAN_FLAGIn
     noahmp%config%domain%ISWATER    = input%ISWATER_TABLE
     noahmp%config%domain%ISBARREN   = input%ISBARREN_TABLE
     noahmp%config%domain%ISICE      = input%ISICE_TABLE
@@ -150,7 +150,7 @@ contains
     noahmp%config%domain%EBLFOREST  = input%EBLFOREST_TABLE
     noahmp%config%domain%YEARLEN    = input%YEARLENIn
     noahmp%config%domain%LAT        = input%LATIn
- 
+    noahmp%config%domain%NSTAGE     = input%NSTAGEIn 
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
     allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )

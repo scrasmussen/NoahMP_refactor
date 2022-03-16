@@ -388,6 +388,7 @@ module InputVarType
     integer                                             :: ICEIn
     integer                                             :: PGSIn
     integer                                             :: YEARLENIn
+    integer                                             :: NSTAGEIn
     logical                                             :: URBAN_FLAGIn      ! urban point flag
     real(kind=kind_noahmp)                              :: DZ8WIn
     real(kind=kind_noahmp)                              :: TGIn              ! ground temperature (K)
@@ -431,7 +432,6 @@ module InputVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SNLIQIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: FICEOLDIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SH2OIn
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: SICEIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCIn
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCEQIn
 

@@ -217,6 +217,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SMCREF  ! reference soil moisture (field capacity) (m3/m3)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCDRY  ! dry soil moisture threshold (m3/m3)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DWSAT   ! saturated soil hydraulic diffusivity (m2/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter

@@ -362,6 +362,7 @@ contains
               SOILTYP     => noahmp%config%domain%SOILTYP      ,&
               CROPTYP     => noahmp%config%domain%CROPTYP      ,&
               SOILCOLOR   => noahmp%config%domain%SOILCOLOR    ,&
+              URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG   ,&
               NSNOW       => noahmp%config%domain%NSNOW        ,&
               NSOIL       => noahmp%config%domain%NSOIL        ,&
               NBAND       => noahmp%config%domain%NBAND         &
@@ -446,13 +447,16 @@ contains
        noahmp%energy%param%QUARTZ(ISOIL)   = input%QUARTZ_TABLE(SOILTYP(ISOIL))
     enddo
 
+    if ( URBAN_FLAG .eqv. .true. ) then
+       noahmp%energy%param%CSOIL = 3.0e6
+    endif
+
     if ( CROPTYP > 0 ) then
        noahmp%energy%param%BP              = input%BPI_TABLE(CROPTYP)
        noahmp%energy%param%KC25            = input%KC25I_TABLE(CROPTYP)
        noahmp%energy%param%KO25            = input%KO25I_TABLE(CROPTYP)
        noahmp%energy%param%AKC             = input%AKCI_TABLE(CROPTYP)
        noahmp%energy%param%AKO             = input%AKOI_TABLE(CROPTYP)
-
     endif
 
 

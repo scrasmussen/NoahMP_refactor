@@ -1215,7 +1215,6 @@ contains
     ! uniform_initial
     logical                :: initial_uniform                 ! initial all levels the same
     real(kind=kind_noahmp) :: initial_sh2o_value              ! constant sh2o value
-    real(kind=kind_noahmp) :: initial_sice_value              ! constant sice value
     ! options
     integer                :: idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
                               iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
@@ -1228,7 +1227,7 @@ contains
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
                                  nsnow,structure_option,soil_depth,vegfra,vegmax,shdmax,zlvl
     namelist / fixed_initial   / zsoil
-    namelist / uniform_initial / initial_uniform,initial_sh2o_value,initial_sice_value
+    namelist / uniform_initial / initial_uniform,initial_sh2o_value
     namelist / options         / idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
                                  iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
                                  iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno
@@ -1308,7 +1307,6 @@ contains
     allocate( input%SOILTYPEIn(       1:nsoil))
     allocate( input%ZSOILIn   (       1:nsoil))
     allocate( input%SH2OIn    (       1:nsoil))
-    allocate( input%SICEIn    (       1:nsoil))
     allocate( input%ZSNSOIn   (-nsnow+1:nsoil))
     input%ZSOILIn(1:nsoil)         = zsoil(1:nsoil)
     input%ZSNSOIn(-nsnow+1:0)      = 0.0
@@ -1316,7 +1314,6 @@ contains
     input%SOILTYPEIn(1:nsoil)      = isltyp    
     if ( initial_uniform .eqv. .true. ) then
        input%SH2OIn(1:nsoil) = initial_sh2o_value
-       input%SICEIn(1:nsoil) = initial_sice_value
     endif
 
 
@@ -1343,9 +1340,9 @@ contains
     input%PRCPGRPLIn       = huge(1.0)
     input%PRCPHAILIn       = huge(1.0)
     input%TBOTIn           = huge(1.0)
-    input%COSZIn           = huge(1.0)
+    input%COSZIn           = 0.5
     input%YEARLENIn        = 365
-    input%LATIn            = 0.0
+    input%LATIn            = 40.0 * 3.1415 / 180.0
     input%PGSIn            = 0
     input%FOLNIn           = 1.0
     input%LLANDUSEIn       = "MODIFIED_IGBP_MODIS_NOAH"
@@ -1353,6 +1350,11 @@ contains
     input%SIFRAIn          = 0.0
     input%MIFRAIn          = 0.0
     input%FIFRAIn          = 0.0
+    input%DZ8WIn           = 20.0
+    input%ICEIn            = 0
+    input%ISTIn            = 1
+    input%URBAN_FLAGIn     = .false.
+    input%NSTAGEIn         = 8
 
   end subroutine InputVarInitDefault
 

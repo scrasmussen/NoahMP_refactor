@@ -245,6 +245,7 @@ contains
     allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
     allocate( noahmp%water%param%SMCREF   (       1:NSOIL) )
+    allocate( noahmp%water%param%SMCDRY   (       1:NSOIL) )
     allocate( noahmp%water%param%DWSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%DKSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%BEXP     (       1:NSOIL) )
@@ -253,6 +254,7 @@ contains
     noahmp%water%param%SMCMAX(:)        = huge(1.0)
     noahmp%water%param%SMCWLT(:)        = huge(1.0)
     noahmp%water%param%SMCREF(:)        = huge(1.0)
+    noahmp%water%param%SMCDRY(:)        = huge(1.0)
     noahmp%water%param%DWSAT (:)        = huge(1.0)
     noahmp%water%param%DKSAT (:)        = huge(1.0)
     noahmp%water%param%BEXP  (:)        = huge(1.0)
@@ -296,7 +298,6 @@ contains
     !noahmp%water%state%SNLIQ(-NSNOW+1:0)        = input%SNLIQIn(-NSNOW+1:0)
     !noahmp%water%state%FICEOLD_SNOW(-NSNOW+1:0) = input%FICEOLDIn(-NSNOW+1:0)
     noahmp%water%state%SH2O(1:NSOIL)            = input%SH2OIn(1:NSOIL)
-    noahmp%water%state%SICE(1:NSOIL)            = input%SICEIn(1:NSOIL)
     !noahmp%water%state%SMC(1:NSOIL)             = input%SMCIn(1:NSOIL)
     !noahmp%water%state%SMCEQ(1:NSOIL)           = input%SMCEQIn(1:NSOIL)
     noahmp%water%state%FIFRA                    = input%FIFRAIn
@@ -382,6 +383,7 @@ contains
        noahmp%water%param%SMCMAX(ISOIL)   = input%SMCMAX_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%SMCWLT(ISOIL)   = input%SMCWLT_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%SMCREF(ISOIL)   = input%SMCREF_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%SMCDRY(ISOIL)   = input%SMCDRY_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%DWSAT(ISOIL)    = input%DWSAT_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%DKSAT(ISOIL)    = input%DKSAT_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%BEXP(ISOIL)     = input%BEXP_TABLE(SOILTYP(ISOIL))
@@ -395,6 +397,7 @@ contains
        noahmp%water%param%SMCMAX = 0.45
        noahmp%water%param%SMCREF = 0.42
        noahmp%water%param%SMCWLT = 0.40
+       noahmp%water%param%SMCDRY = 0.40
     endif
     if ( SOILTYP(1) /= 14 ) then
        noahmp%water%param%FRZX = noahmp%water%param%FRZK * &
