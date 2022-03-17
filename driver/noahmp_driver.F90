@@ -321,7 +321,12 @@ USE NOAHMP_TABLES
   parameters%ISCROP     =    ISCROP_TABLE
   parameters%EBLFOREST  = EBLFOREST_TABLE
   parameters%URBAN_FLAG = .FALSE.
-
+  IF( VEGTYPE == ISURBAN_TABLE    .or. VEGTYPE == LCZ_1_TABLE .or. VEGTYPE == LCZ_2_TABLE .or. &
+             VEGTYPE == LCZ_3_TABLE      .or. VEGTYPE == LCZ_4_TABLE .or. VEGTYPE == LCZ_5_TABLE .or. &
+             VEGTYPE == LCZ_6_TABLE      .or. VEGTYPE == LCZ_7_TABLE .or. VEGTYPE == LCZ_8_TABLE .or. &
+             VEGTYPE == LCZ_9_TABLE      .or. VEGTYPE == LCZ_10_TABLE .or. VEGTYPE == LCZ_11_TABLE ) THEN
+      parameters%URBAN_FLAG = .TRUE.
+  ENDIF
 !------------------------------------------------------------------------------------------!
 ! Transfer veg parameters
 !------------------------------------------------------------------------------------------!
@@ -829,6 +834,7 @@ USE NOAHMP_TABLES
   else
      SFCTMP   = 298.0 + (itime-1)* (-0.05)
   endif
+
 
 
 !!!============================================= Start the original NoahMP Subroutine ==========================================

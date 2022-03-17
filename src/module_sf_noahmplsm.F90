@@ -886,6 +886,7 @@ contains
         IRAMTMI = 0.0
         IRAMTFI = 0.0
      END IF
+
 ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
      IF((CROPLU .EQV. .TRUE.) .AND. (IRAMTSI .GT. 0.0)) THEN
         CALL SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,& !in
