@@ -483,7 +483,7 @@ contains
 		   SHG     , SHC     , SHB     , EVG     , EVB     , GHV     , & ! OUT :
 		   GHB     , IRG     , IRC     , IRB     , TR      , EVC     , & ! OUT :
 		   CHLEAF  , CHUC    , CHV2    , CHB2    , FPICE   , PAHV    , &
-                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB      , SICE  & ! OUT
+                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB        & ! OUT
 #ifdef WRF_HYDRO
                    ,SFCHEADRT, WATBLED                                         & ! IN/OUT :
 #endif
@@ -651,7 +651,7 @@ contains
   REAL                                           :: BTRAN  !soil water transpiration factor (0 - 1)
   REAL                                           :: QIN    !groundwater recharge [mm/s]
   REAL                                           :: QDIS   !groundwater discharge [mm/s]
-  REAL, DIMENSION(       1:NSOIL),INTENT(INOUT)  :: SICE   !soil ice content (m3/m3)
+  REAL, DIMENSION(       1:NSOIL)                :: SICE   !soil ice content (m3/m3)
   REAL, DIMENSION(-NSNOW+1:    0)                :: SNICEV !partial volume ice of snow [m3/m3]
   REAL, DIMENSION(-NSNOW+1:    0)                :: SNLIQV !partial volume liq of snow [m3/m3]
   REAL, DIMENSION(-NSNOW+1:    0)                :: EPORE  !effective porosity [m3/m3]
@@ -888,7 +888,7 @@ contains
      END IF
 ! call sprinkler irrigation before CANWAT/PRECIP_HEAT to have canopy interception
      IF((CROPLU .EQV. .TRUE.) .AND. (IRAMTSI .GT. 0.0)) THEN
-        CALL SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,SICE,& !in
+        CALL SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,& !in
                                   SFCTMP,UU,VV,EAIR,SIFAC,          & !in
                                   IRAMTSI,IREVPLOS,IRSIRATE)          !inout
         RAIN = RAIN + (IRSIRATE*1000.0/DT) ![mm/s]
@@ -9111,7 +9111,7 @@ END SUBROUTINE RR2
   
  !============================================================================================================
  
-  SUBROUTINE SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,SICE,& !in
+  SUBROUTINE SPRINKLER_IRRIGATION(parameters,NSOIL,DT,SH2O,SMC,& !in
                                   T2,WINDU,WINDV,EAIR,SIFAC,        & !in
                                   IRAMTSI,IREVPLOS,IRSIRATE)          !inout
   !---------------------------------------------------------------------------------------------
@@ -9131,7 +9131,7 @@ END SUBROUTINE RR2
     REAL,                     INTENT(IN)    :: DT
     REAL, DIMENSION(1:NSOIL), INTENT(IN)    :: SH2O
     REAL, DIMENSION(1:NSOIL), INTENT(IN)    :: SMC
-    REAL, DIMENSION(1:NSOIL), INTENT(IN)    :: SICE
+    REAL, DIMENSION(1:NSOIL)                :: SICE
     REAL,                     INTENT(IN)    :: T2
     REAL,                     INTENT(IN)    :: WINDU
     REAL,                     INTENT(IN)    :: WINDV
@@ -9148,6 +9148,9 @@ END SUBROUTINE RR2
     REAL                                    :: IRRLOSS     !temporary var for irr loss [%]
     REAL                                    :: ESAT1
     !-------------------------------------------------------------------------------------------    
+
+    SICE(:) = MAX(0.0, SMC(:) - SH2O(:))
+
     ! estimate infiltration rate based on Philips Eq.
     CALL IRR_PHILIP_INFIL(parameters,SMC,SH2O,SICE,DT,NSOIL,FSUR)           
     ! irrigation rate of sprinkler

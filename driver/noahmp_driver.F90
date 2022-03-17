@@ -238,7 +238,6 @@ USE NOAHMP_TABLES
   real, allocatable, dimension(:) :: SMCEQ                ! equilibrium soil water content [m3/m3] (used in m-m&f groundwater dynamics)
   real, allocatable, dimension(:) :: STC                  ! snow/soil layer temperature [k]
   real, allocatable, dimension(:) :: SH2O                 ! soil liquid water content [m3/m3]
-  real, allocatable, dimension(:) :: SICE
   real, allocatable, dimension(:) :: SMC                  ! total soil water content [m3/m3]
   real, allocatable, dimension(:) :: ZSNSO                ! depth of snow/soil layer-bottom
   real, allocatable, dimension(:) :: SNICE                ! snow layer ice [mm]
@@ -276,7 +275,6 @@ USE NOAHMP_TABLES
   allocate (STC   (-nsnow+1:nsoil))   !snow/soil layer temperature [k]
   allocate (zsoil (       1:nsoil))   !depth of layer-bottom from soil surface
   allocate (SH2O  (       1:nsoil))   !soil liquid water content [m3/m3]
-  allocate (SICE  (       1:nsoil))   !soil liquid water content [m3/m3]
   allocate (SMC   (       1:nsoil))   !total soil water content [m3/m3]
   allocate (ZSNSO (-nsnow+1:nsoil))   !depth of snow/soil layer-bottom
   allocate (SNICE (-nsnow+1:0    ))   !snow layer ice [mm]
@@ -771,7 +769,6 @@ USE NOAHMP_TABLES
         SMC(isoil) = parameters%SMCMAX(isoil)
      ENDIF
   END DO
-  SICE = 0.0
 
 !!!!!!========= initialization complete ==================================
 
@@ -870,7 +867,7 @@ USE NOAHMP_TABLES
                    SHG     , SHC     , SHB     , EVG     , EVB     , GHV     , & ! OUT :
                    GHB     , IRG     , IRC     , IRB     , TR      , EVC     , & ! OUT :
                    CHLEAF  , CHUC    , CHV2    , CHB2    , FPICE   , PAHV    , &
-                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB      , SICE  & ! OUT
+                   PAHG    , PAHB    , PAH     , LAISUN  , LAISHA  , RB        & ! OUT
 #ifdef WRF_HYDRO
                    ,SFCHEADRT, WATBLED                                         & ! IN/OUT :
 #endif
