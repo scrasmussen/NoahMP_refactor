@@ -44,14 +44,20 @@ contains
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
               SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
               SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
+              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
               FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
               RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
-              IREVPLOS        => noahmp%water%flux%IREVPLOS           & ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+              IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+              SICE            => noahmp%water%state%SICE              & ! out,    soil ice content [m3/m3]
              )
 ! ----------------------------------------------------------------------
+
+    ! initialize
+    SICE(:) = max(0.0, SMC(:)-SH2O(:))
 
     ! estimate infiltration rate based on Philips Eq.
     call IrrigationInfilPhilip(noahmp, DT, FSUR)
@@ -60,12 +66,12 @@ contains
     TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * DT / 3600.0   ! NRCS rate/time step - calibratable
     IRSIRATE  = min( FSUR*DT, IRAMTSI, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
                                                           ! and to the NRCS recommended rate, (m)
-
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
     ! losses from sprinkler irrigation systems under various operating 
     ! conditions. Journal of Applied Sciences, 9(3), 597-600.
     WINDSPEED = sqrt( (WINDU**2.0) + (WINDV**2.0) )                       ! [m/s]
     ESAT1     = 610.8 * exp( (17.27*(T2-273.15)) / (237.3+(T2-273.15)) )  ! [Pa]
+
     if ( T2 > 273.15 ) then ! Equation (3)
        IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.092) ) * ( (T2-273.15)**(-0.102) ) ! [%]
     else ! Equation (4)

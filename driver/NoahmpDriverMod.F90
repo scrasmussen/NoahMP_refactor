@@ -31,7 +31,6 @@ Program NoahmpDriverMod
   integer                :: rain_step  = 0     ! number of timesteps in current event
   integer                :: dry_step   = 0     ! number of timesteps in current event
   logical                :: raining            ! .true. if raining
-  real(kind=kind_noahmp) :: CHB2               ! not used, just for output consistency with default noahmp
 
 !---------------------------------------------------------------------
 !  read in input data from table and initial file
@@ -213,6 +212,7 @@ Program NoahmpDriverMod
             IRFIRATE        => noahmp%water%flux%IRFIRATE          ,& ! inout,  flood irrigation water rate [m/timestep]
             IRMIRATE        => noahmp%water%flux%IRMIRATE          ,& ! inout,  micro irrigation water rate [m/timestep]
             IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
+            CHB2            => noahmp%energy%state%EHB2            ,& ! inout,  origianl CHB2 in NoahMP
             SMCMAX          => noahmp%water%param%SMCMAX            & ! in,     saturated value of soil moisture [m3/m3]
            )
 !---------------------------------------------------------------------
@@ -427,6 +427,7 @@ Program NoahmpDriverMod
   ntime      = nint(input%maxtime * 3600.0 / DT)
   rain_steps = input%rain_duration * 3600.0 / DT
   dry_steps  = input%dry_duration * 3600.0 / DT
+  raining    = input%raining
 
 ! prevent too large SMC initial values
   do isoil = 1, NSOIL
@@ -436,7 +437,6 @@ Program NoahmpDriverMod
      endif
   enddo
 
-
 !!!!!!========= initialization complete ==================================
 
 
@@ -445,7 +445,7 @@ Program NoahmpDriverMod
 !---------------------------------------------------------------------
 
   call initialize_output(noahmp, input, ntime+1)
-  call add_to_output(0, noahmp, CHB2)
+  call add_to_output(0, noahmp)
 
 
 !---------------------------------------------------------------------
@@ -453,7 +453,6 @@ Program NoahmpDriverMod
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
-
 
     IRFIRATE = 0.0
     IRMIRATE = 0.0
@@ -492,7 +491,6 @@ Program NoahmpDriverMod
        SFCTMP = 298.0 + (itime-1)* (-0.05)
     endif
 
-
     !--------------------------------------------------------------------- 
     ! main noahmplsm subroutine below
 
@@ -509,7 +507,7 @@ Program NoahmpDriverMod
     ! add to output file
     !---------------------------------------------------------------------
 
-    call add_to_output(itime, noahmp, CHB2)
+    call add_to_output(itime, noahmp)
 
 
   end do ! time loop

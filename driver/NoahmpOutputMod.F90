@@ -288,13 +288,12 @@ contains
   
   end subroutine initialize_output
 
-  subroutine add_to_output(itime, noahmp, CHB2)
+  subroutine add_to_output(itime, noahmp)
 
     implicit none
 
     integer               , intent(in)    :: itime
     type(noahmp_type)     , intent(inout) :: noahmp
-    real(kind=kind_noahmp), intent(in)    :: CHB2
 
 ! --------------------------------------------------------------------
     associate(                                           &
@@ -425,7 +424,7 @@ contains
      iret = nf90_put_var(ncid, LAISUN_id,   noahmp%energy%state%LAISUN,        start=(/itime+1/))
      iret = nf90_put_var(ncid, LAISHA_id,   noahmp%energy%state%LAISHA,        start=(/itime+1/))
      iret = nf90_put_var(ncid, FICEOLD_id,  noahmp%water%state%FICEOLD_SNOW,   start=(/itime+1,1/), count=(/1,nsnow/))
-     iret = nf90_put_var(ncid, CHB2_id,     CHB2,                              start=(/itime+1/))
+     iret = nf90_put_var(ncid, CHB2_id,     noahmp%energy%state%EHB2,          start=(/itime+1/))
 
     end associate
 
