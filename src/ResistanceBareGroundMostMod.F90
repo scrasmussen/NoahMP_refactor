@@ -57,13 +57,13 @@ contains
               FH              => noahmp%energy%state%FHB             ,& ! inout, M-O sen heat stability correction, above ZPDG, bare ground
               FM2             => noahmp%energy%state%FM2B            ,& ! inout, M-O momentum stability correction, 2m, bare ground
               FH2             => noahmp%energy%state%FH2B            ,& ! inout, M-O sen heat stability correction, 2m, bare ground
+              FV              => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
               MOZ             => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, bare ground
               MOZ2            => noahmp%energy%state%MOZ2B           ,& ! out,   Monin-Obukhov stability (2/L), 2m, bare ground
               MOL             => noahmp%energy%state%MOLB            ,& ! out,   Monin-Obukhov length (m), above ZPD, bare ground
               CM              => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
               CH              => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
               CH2             => noahmp%energy%state%CH2B            ,& ! out,   drag coefficient for heat, 2m, bare ground
-              FV              => noahmp%energy%state%FVB             ,& ! out,   friction velocity (m/s), bare ground
               RAMB            => noahmp%energy%state%RAMB            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
               RAHB            => noahmp%energy%state%RAHB            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
               RAWB            => noahmp%energy%state%RAWB             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground

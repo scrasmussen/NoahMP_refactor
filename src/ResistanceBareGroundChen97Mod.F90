@@ -85,7 +85,7 @@ contains
               AKHS            => noahmp%energy%state%CHB             ,& ! inout, drag coefficient for heat, above ZPD, bare ground
               RLMO            => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, bare ground
               WSTAR2          => noahmp%energy%state%WSTARB          ,& ! inout, friction velocity in vertical direction (m/s), bare ground
-              USTAR           => noahmp%energy%state%FVB             ,& ! out,   friction velocity (m/s), bare ground
+              USTAR           => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
               RAMB            => noahmp%energy%state%RAMB            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
               RAHB            => noahmp%energy%state%RAHB            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
               RAWB            => noahmp%energy%state%RAWB             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground

@@ -57,12 +57,12 @@ contains
               FM2             => noahmp%energy%state%FM2V            ,& ! inout, M-O momentum stability correction, 2m, vegetated
               FH2             => noahmp%energy%state%FH2V            ,& ! inout, M-O sen heat stability correction, 2m, vegetated
               MOZ             => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, vegetated
+              FV              => noahmp%energy%state%FVV             ,& ! inout, friction velocity (m/s), vegetated
               MOZ2            => noahmp%energy%state%MOZ2V           ,& ! out,   Monin-Obukhov stability (2/L), 2m, vegetated
               MOL             => noahmp%energy%state%MOLV            ,& ! out,   Monin-Obukhov length (m), above ZPD, vegetated
               CM              => noahmp%energy%state%CMV             ,& ! out,   drag coefficient for momentum, above ZPD, vegetated
               CH              => noahmp%energy%state%CHV             ,& ! out,   drag coefficient for heat, above ZPD, vegetated
               CH2             => noahmp%energy%state%CH2V            ,& ! out,   drag coefficient for heat, 2m, vegetated
-              FV              => noahmp%energy%state%FVV             ,& ! out,   friction velocity (m/s), vegetated
               RAMC            => noahmp%energy%state%RAMC            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
               RAHC            => noahmp%energy%state%RAHC            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
               RAWC            => noahmp%energy%state%RAWC             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy

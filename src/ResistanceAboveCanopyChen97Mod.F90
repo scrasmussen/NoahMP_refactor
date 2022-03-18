@@ -83,7 +83,7 @@ contains
               AKHS            => noahmp%energy%state%CHV             ,& ! inout, drag coefficient for heat, above ZPD, vegetated
               RLMO            => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, vegetated
               WSTAR2          => noahmp%energy%state%WSTARV          ,& ! inout, friction velocity in vertical direction (m/s), vegetated
-              USTAR           => noahmp%energy%state%FVV             ,& ! out,   friction velocity (m/s), vegetated
+              USTAR           => noahmp%energy%state%FVV             ,& ! inout, friction velocity (m/s), vegetated
               RAMC            => noahmp%energy%state%RAMC            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
               RAHC            => noahmp%energy%state%RAHC            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
               RAWC            => noahmp%energy%state%RAWC             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
