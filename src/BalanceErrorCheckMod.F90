@@ -10,7 +10,51 @@ module BalanceErrorCheckMod
 
 contains
 
-  subroutine BalanceErrorCheck(noahmp)
+!!!! Water balance check initialization
+  subroutine BalanceWaterInit(noahmp)
+
+! ------------------------ Code history -----------------------------------
+! Original Noah-MP subroutine: None (embedded in NOAHMP_SFLX)
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! -------------------------------------------------------------------------
+
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
+
+! local variable
+    integer                      :: IZ      ! loop index
+
+! --------------------------------------------------------------------
+    associate(                                                        &
+              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
+              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
+              CANICE          => noahmp%water%state%CANICE           ,& ! in,    canopy intercepted ice mass (mm)
+              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
+              SMC             => noahmp%water%state%SMC              ,& ! in,    total soil moisture [m3/m3]
+              WA              => noahmp%water%state%WA               ,& ! in,    water storage in aquifer [mm]
+              BEG_WB          => noahmp%water%state%BEG_WB            & ! out,   total water storage at the beginning
+             )
+! ----------------------------------------------------------------------
+
+    ! compute total water storage before NoahMP processes
+    if ( IST == 1 ) then  ! soil
+       BEG_WB = CANLIQ + CANICE + SNEQV + WA
+       do IZ = 1, NSOIL
+          BEG_WB = BEG_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
+       enddo
+    endif
+
+    end associate
+
+  end subroutine BalanceWaterInit
+
+
+!!!! Water balance check and report error
+  subroutine BalanceWaterCheck(noahmp)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: ERROR
@@ -35,25 +79,6 @@ contains
               DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
-              FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
-              FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
-              FSRV            => noahmp%energy%flux%FSRV             ,& ! in,    reflected solar radiation by vegetation (w/m2)
-              FSRG            => noahmp%energy%flux%FSRG             ,& ! in,    reflected solar radiation by ground (w/m2)
-              FIRA            => noahmp%energy%flux%FIRA             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
-              FSH             => noahmp%energy%flux%FSH              ,& ! in,    total sensible heat (w/m2) [+ to atm]
-              FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! in,    ground (soil/snow) evap heat (w/m2) [+ to atm]
-              FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
-              SAV             => noahmp%energy%flux%SAV              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
-              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              PAH             => noahmp%energy%flux%PAH              ,& ! in,    precipitation advected heat - total (W/m2)
-              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
-              PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
-              FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
               ZWT             => noahmp%water%state%ZWT              ,& ! in,    water table depth [m]
               CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
@@ -73,9 +98,7 @@ contains
               IRMIRATE        => noahmp%water%flux%IRMIRATE          ,& ! in,    micro irrigation water rate [m/timestep]
               IRFIRATE        => noahmp%water%flux%IRFIRATE          ,& ! in,    flood irrigation water rate [m/timestep]
               END_WB          => noahmp%water%state%END_WB           ,& ! out,   total water storage at the end
-              ERRWAT          => noahmp%water%state%ERRWAT           ,& ! out,   water balance error (mm) per time step
-              ERRENG          => noahmp%energy%state%ERRENG          ,& ! out,   error in surface energy balance [w/m2]
-              ERRSW           => noahmp%energy%state%ERRSW            & ! out,   error in shortwave radiation balance [w/m2]
+              ERRWAT          => noahmp%water%state%ERRWAT            & ! out,   water balance error (mm) per time step
              )
 ! ----------------------------------------------------------------------
 
@@ -83,6 +106,87 @@ contains
     if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) then
        PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / DT  ! irrigation
     endif
+
+    ! Error in water balance should be < 0.1 mm
+    if ( IST == 1 ) then        !soil
+       END_WB = CANLIQ + CANICE + SNEQV + WA
+       do IZ = 1, NSOIL
+          END_WB = END_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
+       enddo
+       ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * DT
+#ifndef WRF_HYDRO
+       if ( abs(ERRWAT) > 0.1 ) then
+          if ( ERRWAT > 0) then
+             !call wrf_message ('The model is gaining water (ERRWAT is positive)')
+             write(*,*) "The model is gaining water (ERRWAT is positive)"
+          else
+             !call wrf_message('The model is losing water (ERRWAT is negative)')
+             write(*,*) "The model is losing water (ERRWAT is negative)"
+          endif
+          write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
+          !call wrf_message(trim(message))
+          write(*, &
+               '("  I    J   END_WB   BEG_WB     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   ZWT   QTLDRN")')
+          !call wrf_message(trim(message))
+          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)')ILOC,JLOC,END_WB,BEG_WB,PRCP*DT,ECAN*DT,&
+                EDIR*DT,ETRAN*DT,RUNSRF*DT,RUNSUB*DT,ZWT,QTLDRN*DT
+          !call wrf_message(trim(message))
+          !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
+          stop "Error"
+       endif
+#endif
+    else                 !KWM
+       ERRWAT = 0.0      !KWM
+    endif
+
+    end associate
+
+  end subroutine BalanceWaterCheck
+
+
+!!!! Energy balance check and error report
+  subroutine BalanceEnergyCheck(noahmp)
+
+! ------------------------ Code history -----------------------------------
+! Original Noah-MP subroutine: ERROR
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! -------------------------------------------------------------------------
+
+    implicit none
+
+    type(noahmp_type), intent(inout) :: noahmp
+
+! local variable
+    integer                      :: IZ      ! loop index
+
+! --------------------------------------------------------------------
+    associate(                                                        &
+              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
+              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
+              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
+              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
+              FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
+              FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
+              FSRV            => noahmp%energy%flux%FSRV             ,& ! in,    reflected solar radiation by vegetation (w/m2)
+              FSRG            => noahmp%energy%flux%FSRG             ,& ! in,    reflected solar radiation by ground (w/m2)
+              FIRA            => noahmp%energy%flux%FIRA             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
+              FSH             => noahmp%energy%flux%FSH              ,& ! in,    total sensible heat (w/m2) [+ to atm]
+              FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
+              FGEV            => noahmp%energy%flux%FGEV             ,& ! in,    ground (soil/snow) evap heat (w/m2) [+ to atm]
+              FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
+              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
+              SAV             => noahmp%energy%flux%SAV              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
+              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
+              PAH             => noahmp%energy%flux%PAH              ,& ! in,    precipitation advected heat - total (W/m2)
+              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
+              PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
+              PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
+              FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
+              ERRENG          => noahmp%energy%state%ERRENG          ,& ! out,   error in surface energy balance [w/m2]
+              ERRSW           => noahmp%energy%state%ERRSW            & ! out,   error in shortwave radiation balance [w/m2]
+             )
+! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
     ERRSW = SWDOWN - (FSA + FSR)
@@ -133,48 +237,14 @@ contains
        !call wrf_message(trim(message))
        write(*,'(a17,4F10.4)') "Precip advected: ",PAH,PAHV,PAHG,PAHB
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Precip:           ",PRCP
-       !call wrf_message(trim(message))
        write(*,'(a17,F10.4)') "Veg fraction:     ",FVEG
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Energy budget problem in NOAHMP LSM")
        stop "Error"
     endif
 
-    ! Error in water balance shoudl be < 0.1 mm
-    if ( IST == 1 ) then        !soil
-       END_WB = CANLIQ + CANICE + SNEQV + WA
-       do IZ = 1, NSOIL
-          END_WB = END_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
-       enddo
-       ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * DT
-#ifndef WRF_HYDRO
-       if ( abs(ERRWAT) > 0.1 ) then
-          if ( ERRWAT > 0) then
-             !call wrf_message ('The model is gaining water (ERRWAT is positive)')
-             write(*,*) "The model is gaining water (ERRWAT is positive)"
-          else
-             !call wrf_message('The model is losing water (ERRWAT is negative)')
-             write(*,*) "The model is losing water (ERRWAT is negative)"
-          endif
-          write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
-          !call wrf_message(trim(message))
-          write(*, &
-               '("  I    J   END_WB   BEG_WB     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   ZWT   QTLDRN")')
-          !call wrf_message(trim(message))
-          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)')ILOC,JLOC,END_WB,BEG_WB,PRCP*DT,ECAN*DT,&
-                EDIR*DT,ETRAN*DT,RUNSRF*DT,RUNSUB*DT,ZWT,QTLDRN*DT
-          !call wrf_message(trim(message))
-          !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
-          stop "Error"
-       endif
-#endif
-    else                 !KWM
-       ERRWAT = 0.0      !KWM
-    endif
-
     end associate
 
-  end subroutine BalanceErrorCheck
+  end subroutine BalanceEnergyCheck
 
 end module BalanceErrorCheckMod

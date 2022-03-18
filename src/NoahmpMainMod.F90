@@ -7,6 +7,7 @@ module NoahmpMainMod
   use NoahmpVarType
   use ConstantDefineMod
   use AtmosForcingMod,            only : ProcessAtmosForcing
+  use GeneralInitMod,             only : GeneralInit
   use PhenologyMainMod,           only : PhenologyMain
   use IrrigationPrepareMod,       only : IrrigationPrepare
   use IrrigationSprinklerMod,     only : IrrigationSprinkler
@@ -16,7 +17,7 @@ module NoahmpMainMod
   use WaterMainMod,               only : WaterMain
   use BiochemNatureVegMainMod,    only : BiochemNatureVegMain
   use BiochemCropMainMod,         only : BiochemCropMain
-  use BalanceErrorCheckMod,       only : BalanceErrorCheck
+  use BalanceErrorCheckMod,       only : BalanceWaterInit, BalanceWaterCheck, BalanceEnergyCheck 
  
   implicit none
 
@@ -34,31 +35,13 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-! local variable
-    integer                          :: IZ        ! loop index
-
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
               DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE    ,& ! in,     flag to activate dynamic vegetation model
               CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE    ,& ! in,     flag to activate dynamic crop model
               OPT_CROP        => noahmp%config%nmlist%OPT_CROP       ,& ! in,     crop option
-              NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
-              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent (mm)
-              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
-              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil moisture [m3/m3]
-              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! inout,  intercepted liquid water (mm)
-              CANICE          => noahmp%water%state%CANICE           ,& ! inout,  intercepted ice mass (mm)
-              WA              => noahmp%water%state%WA               ,& ! inout,  water storage in aquifer [mm]
-              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! out,    flag to identify croplands
-              TROOT           => noahmp%energy%state%TROOT           ,& ! out,    root-zone averaged temperature (k)
-              BEG_WB          => noahmp%water%state%BEG_WB            & ! out,    total water storage at the beginning
+              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] for sprinkler
+              CROPLU          => noahmp%config%domain%CROPLU          & ! out,    flag to identify croplands
              )
 ! ----------------------------------------------------------------------
 
@@ -69,35 +52,16 @@ contains
     call ProcessAtmosForcing(noahmp)
 
     !---------------------------------------------------------------------
-    ! Initialize key soil variables
+    ! General initialization to prepare key variables
     !--------------------------------------------------------------------- 
 
-    ! snow/soil layer thickness (m)
-    do IZ = ISNOW+1, NSOIL
-       if ( IZ == ISNOW+1 ) then
-          DZSNSO(IZ) = - ZSNSO(IZ)
-       else
-          DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)
-       endif
-    enddo
-
-    ! root-zone soil temperature
-    TROOT = 0.0
-    do IZ = 1, NROOT
-       TROOT = TROOT + STC(IZ) * DZSNSO(IZ) / (-ZSOIL(NROOT))
-    enddo
+    call GeneralInit(noahmp)
 
     !---------------------------------------------------------------------
     ! Prepare for water balance check
     !--------------------------------------------------------------------- 
 
-    ! compute total water storage before NoahMP processes
-    if ( IST == 1 ) then  ! soil
-       BEG_WB = CANLIQ + CANICE + SNEQV + WA
-       do IZ = 1, NSOIL
-          BEG_WB = BEG_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
-       enddo
-    endif
+    call BalanceWaterInit(noahmp)
 
     !---------------------------------------------------------------------
     ! Phenology
@@ -148,7 +112,8 @@ contains
     ! Error check for energy and water balance
     !--------------------------------------------------------------------- 
 
-    call BalanceErrorCheck(noahmp)
+    call BalanceWaterCheck(noahmp)
+    call BalanceEnergyCheck(noahmp) 
 
     !---------------------------------------------------------------------
     ! End of all NoahMP column processes

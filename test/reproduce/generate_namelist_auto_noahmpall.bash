@@ -97,7 +97,7 @@ done
 for dvegtp in 1 2 3 4 5 6 7 8 9; do
 for btrtp in 1 2 3 ; do
 for runtp in 1 2 3 4 5 6 7 8 ; do
-for sfctp in 1 2 3 ; do
+for sfctp in 1 2 ; do
 for frztp in 1 2 ; do
 for inftp in 1 2 ; do
 for radtp in 1 2 3 ; do
