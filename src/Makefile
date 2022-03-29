@@ -5,7 +5,8 @@
 
 include ../user_build_options
 
-OBJS = module_sf_noahmplsm.o
+OBJS = module_sf_noahmplsm.o \
+       module_sf_noahmp_glacier.o
 
 all:	$(OBJS)
 

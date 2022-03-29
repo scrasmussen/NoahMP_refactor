@@ -2,7 +2,6 @@ program noahmp_driver
 
 use noahmp_output
 use module_sf_noahmplsm
-use module_sf_noahmp_glacier
 use NOAHMP_TABLES
 
   implicit none
@@ -15,7 +14,6 @@ use NOAHMP_TABLES
   integer       :: maxtime
   character*256 :: output_filename
   logical       :: runsnow
-  logical       :: runglacier
   real          :: JULIAN
 ! forcing
   real          :: rainrate
@@ -51,12 +49,12 @@ use NOAHMP_TABLES
 ! options
   integer :: idveg,iopt_crs,iopt_btr,iopt_run,iopt_sfc,iopt_frz,&
              iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-             iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_gla
+             iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn
 
   !--------------------!
   !  namelist structure   !
   !--------------------!
-  namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN,runglacier
+  namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
   namelist / forcing         / rainrate,rain_duration,dry_duration,&
                                raining,uwind,vwind,sfcpres,Q2,SWDOWN,LWDOWN
   namelist / structure       / isltyp,VEGTYPE,soilcolor,slopetype,croptype,nsoil,nsnow,structure_option,soil_depth,&
@@ -66,7 +64,7 @@ use NOAHMP_TABLES
                                initial_sice_value
   namelist / options         / idveg,iopt_crs,iopt_btr,iopt_run,iopt_sfc,iopt_frz,&
                                iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-                               iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_gla
+                               iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn
  
 !---------------------------------------------------------------------
 !  inputs end
@@ -89,7 +87,7 @@ use NOAHMP_TABLES
   real                            :: SHDFAC               ! greeness vegetation fraction (-) 
   real                            :: FVGMAX               ! max yearly veg fract
   integer                         :: VEGTYP
-  integer                         :: ICE                  ! value of ist for land ice
+  integer                         :: ICE      = 0         ! value of ist for land ice
   integer                         :: IST      = 1         ! surface type 1-soil; 2-lake
   real                            :: SFCTMP               ! model-level temperature (k)
   real                            :: SFCPRS               ! surface pressure (pa)
@@ -229,7 +227,6 @@ use NOAHMP_TABLES
   REAL                            :: LAISUN               ! sunlit leaf area (-)
   REAL                            :: LAISHA               ! shaded leaf area (-)
   real                            :: RB
-  real                            :: QMELT
 #ifdef WRF_HYDRO
   REAL                            :: sfcheadrt, WATBLED
 #endif
@@ -555,15 +552,6 @@ use NOAHMP_TABLES
     END IF
 
 ! ----------------------------------------
-    ICE = 0
-
-
-!---------------------------------------------------------------------
-! start glacier
-!---------------------------------------------------------------------
-  if (runglacier) then
-     CALL NOAHMP_OPTIONS_GLACIER(IOPT_ALB  ,IOPT_SNF  ,IOPT_TBOT, IOPT_STC, IOPT_GLA )
-  endif
 
 !---------------------------------------------------------------------
 !  initialize required variables
@@ -710,7 +698,6 @@ use NOAHMP_TABLES
   LAISUN      = 0.0
   LAISHA      = 0.0
   RB          = 0.0
-  QMELT       = 0.0
 #ifdef WRF_HYDRO
   sfcheadrt   = 0.0
   WATBLED     = 0.0
@@ -843,46 +830,15 @@ use NOAHMP_TABLES
 
    ! varying temperature forcing
   if (runsnow) then
-     SFCTMP   = 265.0 + (itime-1)*0.1
+     SFCTMP   = 265.0 + (itime-1)*0.05
   else
      SFCTMP   = 298.0 + (itime-1)* (-0.05)
   endif
 
 
-!!!================== start glacier 
-  if (runglacier) then
-     ICE = -1
-     TBOT = MIN(TBOT,263.15)
-     call NOAHMP_GLACIER (&
-                   ILOC    ,JLOC    ,COSZ    ,NSNOW   ,NSOIL   ,DT      , & ! IN : Time/Space/Model-related
-                   SFCTMP  ,SFCPRS  ,UU      ,VV      ,Q2      ,SWDOWN   , & ! IN : Forcing
-                   PRCPNONC,LWDOWN    ,TBOT    ,ZLVL    ,FICEOLD ,ZSOIL   , & ! IN : Forcing
-                   QSNOW   ,SNEQVO  ,ALBOLD  ,CM      ,CH      ,ISNOW   , & ! IN/OUT : 
-                   SNEQV   ,SMC     ,ZSNSO   ,SNOWH   ,SNICE   ,SNLIQ   , & ! IN/OUT :
-                   TG      ,STC     ,SH2O    ,TAUSS   ,QSFC    ,          & ! IN/OUT : 
-                   FSA     ,FSR     ,FIRA    ,FSH     ,FGEV    ,SSOIL   , & ! OUT : 
-                   TRAD    ,EDIR    ,RUNSRF  ,RUNSUB  ,SAG     ,ALBEDO  , & ! OUT :
-                   QSNBOT  ,PONDING ,PONDING1,PONDING2,T2MB    ,Q2B     , & ! OUT :
-                   EMISSI,  FPICE,    CHB2   ,QMELT                       & ! OUT :
-#ifdef WRF_HYDRO
-                   , sfcheadrt                                            &
-#endif
-                   )
 
-         FSNO   = 1.0       
-         TGB    = TG 
-         CHB    = CH 
-         IRB    = FIRA
-         SHB    = FSH
-         EVB    = FGEV
-         GHB    = SSOIL
-         Z0WRF  = 0.002
-
-!!!=========== end glacier
 !!!============================================= Start the original NoahMP Subroutine ==========================================
-  else
-         ICE = 0
-         call NOAHMP_SFLX (parameters, &
+  call NOAHMP_SFLX (parameters, &
                    ILOC    , JLOC    , LAT     , YEARLEN , JULIAN  , COSZ    , & ! IN : Time/Space-related
                    DT      , DX      , DZ8W    , NSOIL   , ZSOIL   , NSNOW   , & ! IN : Model configuration 
                    SHDFAC  , FVGMAX  , VEGTYP  , ICE     , IST     , CROPTYPE, & ! IN : Vegetation/Soil characteristics
@@ -923,7 +879,7 @@ use NOAHMP_TABLES
 #endif
                    )
 
-   endif
+
 !!!============================ end of Noahmplsm main subroutine ============================
 
 
