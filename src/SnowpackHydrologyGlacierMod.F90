@@ -1,4 +1,4 @@
-module SnowpackHydrologyMod
+module SnowpackHydrologyGlacierMod
 
 !!! Snowpack hydrology processes (sublimation/frost, evaporation/dew, meltwater)
 !!! Update snowpack ice and liquid water content
@@ -6,16 +6,16 @@ module SnowpackHydrologyMod
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
-  use SnowLayerCombineMod, only : SnowLayerCombine
+  use SnowLayerCombineGlacierMod, only : SnowLayerCombineGlacier
 
   implicit none
 
 contains
 
-  subroutine SnowpackHydrology(noahmp)
+  subroutine SnowpackHydrologyGlacier(noahmp)
 
 ! ------------------------ Code history -----------------------------------
-! Original Noah-MP subroutine: SNOWH2O
+! Original Noah-MP subroutine: SNOWH2O_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
@@ -36,8 +36,10 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
+              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,     option for glacier treatment
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              FSH             => noahmp%energy%flux%FSH              ,& ! in,     total sensible heat (w/m2) [+ to atm]
               QSNFRO          => noahmp%water%flux%QSNFRO            ,& ! in,     snow surface frost rate[mm/s]
               QSNSUB          => noahmp%water%flux%QSNSUB            ,& ! in,     snow surface sublimation rate[mm/s]
               QRAIN           => noahmp%water%flux%QRAIN             ,& ! in,     snow surface rain rate[mm/s]
@@ -72,10 +74,12 @@ contains
 
     ! for the case when SNEQV becomes '0' after 'COMBINE'
     if ( SNEQV == 0.0 ) then
-       SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * DT / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
-       if ( SICE(1) < 0.0 ) then
-          SH2O(1) = SH2O(1) + SICE(1)
-          SICE(1) = 0.0
+       if ( OPT_GLA == 1 ) then
+          SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * DT / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
+       elseif ( OPT_GLA == 2 ) then
+          FSH    = FSH - (QSNFRO - QSNSUB) * HSUB
+          QSNFRO = 0.0
+          QSNSUB = 0.0
        endif
     endif
 
@@ -83,11 +87,17 @@ contains
     ! snow surface sublimation may be larger than existing snow mass. To conserve water,
     ! excessive sublimation is used to reduce soil water. Smaller time steps would tend to aviod this problem.
     if ( (ISNOW == 0) .and. (SNEQV > 0.0) ) then
-       TEMP   = SNEQV
-       SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
-       PROPOR = SNEQV / TEMP
-       SNOWH  = max( 0.0, PROPOR*SNOWH )
-       SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
+       if ( OPT_GLA == 1 ) then
+          TEMP   = SNEQV
+          SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
+          PROPOR = SNEQV / TEMP
+          SNOWH  = max( 0.0, PROPOR*SNOWH )
+          SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
+       elseif ( OPT_GLA == 2 ) then
+          FSH = FSH - (QSNFRO - QSNSUB) * HSUB
+          QSNFRO = 0.0
+          QSNSUB = 0.0
+       endif
        if ( SNEQV < 0.0 ) then
           SICE(1) = SICE(1) + SNEQV / (DZSNSO(1)*1000.0)
           SNEQV   = 0.0
@@ -108,7 +118,7 @@ contains
     if ( ISNOW < 0 ) then
       WGDIF          = SNICE(ISNOW+1) - QSNSUB*DT + QSNFRO*DT
       SNICE(ISNOW+1) = WGDIF
-      if ( (WGDIF < 1.0e-6) .and. (ISNOW < 0) ) call SnowLayerCombine(noahmp)
+      if ( (WGDIF < 1.0e-6) .and. (ISNOW < 0) ) call SnowLayerCombineGlacier(noahmp)
       if ( ISNOW < 0 ) then
          SNLIQ(ISNOW+1) = SNLIQ(ISNOW+1) + QRAIN * DT
          SNLIQ(ISNOW+1) = max( 0.0, SNLIQ(ISNOW+1) )
@@ -148,6 +158,6 @@ contains
 
     end associate
 
-  end subroutine SnowpackHydrology
+  end subroutine SnowpackHydrologyGlacier
 
-end module SnowpackHydrologyMod
+end module SnowpackHydrologyGlacierMod

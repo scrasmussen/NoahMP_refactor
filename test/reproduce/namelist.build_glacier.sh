@@ -1,4 +1,5 @@
-    
+# define namelist for NoahMP
+export namelist_input="
 &timing ! and output
   dt              = 600.0   ! timestep [seconds]
   maxtime         = 30      ! total simulation time [hours]
@@ -12,7 +13,7 @@
   rainrate      = 20.0    ! rain rate, when raining [mm/hr]
   rain_duration = 3       ! duration of rain events [hours]
   dry_duration  = 3       ! duration of no-rain events [hours]
-  raining       = .true. ! start with rain
+  raining       = .true.  ! start with rain
   uwind         = 6.0     ! wind speed m/s
   vwind         = 6.0     ! wind speed m/s
   sfcpres       = 90000.0 ! surface pressure Pa
@@ -22,11 +23,11 @@
 /
 
 &structure
- isltyp           = 1       ! soil texture class
- vegtype          = 12       ! vegetation type modis
+ isltyp           = ${soiltp}       ! soil texture class
+ vegtype          = ${vegetp}       ! vegetation type modis
  soilcolor        = 4               ! color to decide soil albedo
  slopetype        = 1               ! slope factor for underground runoff
- croptype         = 0       ! no crop
+ croptype         = 0               ! no crop
  nsoil            = 4               ! number of soil levels
  nsnow            = 3               ! number of snow levels
  structure_option = 1               ! 1: use preset zsoil; 2: uniform levels
@@ -56,20 +57,20 @@ iopt_sfc    = 1
 iopt_frz    = 1
 iopt_inf    = 1
 iopt_rad    = 3
-iopt_alb    = 1
-iopt_snf    = 1
-iopt_tbot   = 2
-iopt_stc    = 1
+iopt_alb    = ${albtp}
+iopt_snf    = ${snftp}
+iopt_tbot   = ${tbottp}
+iopt_stc    = ${stctp}
 iopt_rsf    = 1
 iopt_soil   = 1
 iopt_pedo   = 1
 iopt_crop   = 0
 iopt_irr    = 0
 iopt_irrm   = 0
-iopt_infdv  = 0   ! only for runoff=8
-iopt_tdrn   = 0    ! drainage only for runoff=3
+iopt_infdv  = 0  ! only for runoff=8
+iopt_tdrn   = 0  ! drainage only for runoff=3
 iopt_tksno  = 1
-iopt_gla   = 1
+iopt_gla    = ${glatp}
 /
 
-
+"

@@ -12,6 +12,7 @@ Program NoahmpDriverMod
   use BiochemVarInitMod
   use NoahmpOutputMod
   use NoahmpMainMod
+  use NoahmpMainGlacierMod
 
   implicit none
 !---------------------------------------------------------------------
@@ -217,7 +218,6 @@ Program NoahmpDriverMod
            )
 !---------------------------------------------------------------------
 
-
 !---------------------------------------------------------------------
 !  initialize required variables
 !---------------------------------------------------------------------
@@ -236,6 +236,7 @@ Program NoahmpDriverMod
      SH2O(1:4)= 0.2
   endif
 
+  ICE         = 0
   FICEOLD     = 0.0
   STC(1:4)    = SFCTMP
   STC(-2:0)   = 0.0
@@ -486,15 +487,28 @@ Program NoahmpDriverMod
 
     ! varying temperature forcing
     if ( input%runsnow .eqv. .true. ) then
-       SFCTMP = 265.0 + (itime-1)*0.05
+       SFCTMP = 265.0 + (itime-1)*0.1
     else
        SFCTMP = 298.0 + (itime-1)* (-0.05)
     endif
 
     !--------------------------------------------------------------------- 
     ! main noahmplsm subroutine below
-
-    call NoahmpMain(noahmp)
+    if ( input%runglacier .eqv. .true. ) then
+       ICE = -1
+       call NoahmpMainGlacier(noahmp)
+       FSNO   = 1.0       
+       TGB    = TG 
+       CHB    = CH 
+       IRB    = FIRA
+       SHB    = FSH
+       EVB    = FGEV
+       GHB    = SSOIL
+       Z0WRF  = 0.002
+    else
+       ICE = 0
+       call NoahmpMain(noahmp)
+    endif
 
     !---------------------------------------------------------------------
 

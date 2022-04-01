@@ -30,6 +30,7 @@ module InputVarType
     real(kind=kind_noahmp)   :: DTIn
     character(len=256)       :: output_filename
     logical                  :: runsnow
+    logical                  :: runglacier
     real(kind=kind_noahmp)   :: JULIANIn
     ! forcing
     integer                  :: rain_duration
@@ -89,6 +90,7 @@ module InputVarType
     integer                  :: OPT_INFDVIn
     integer                  :: OPT_TDRNIn
     integer                  :: OPT_TKSNOIn
+    integer                  :: OPT_GLAIn
 
     !----------------------------------------------------------------
     ! Noahmp Table variables

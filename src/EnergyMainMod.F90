@@ -42,7 +42,8 @@ module EnergyMainMod
   use SnowCoverGroundNiu07Mod,        only : SnowCoverGroundNiu07
   use GroundRoughnessPropertyMod,     only : GroundRoughnessProperty
   use GroundThermalPropertyMod,       only : GroundThermalProperty
-  use RadiationMainMod,               only : RadiationMain
+  use SurfaceAlbedoMod,               only : SurfaceAlbedo
+  use SurfaceRadiationMod,            only : SurfaceRadiation
   use SurfaceEmissivityMod,           only : SurfaceEmissivity
   use SoilWaterTranspirationMod,      only : SoilWaterTranspiration
   use ResistanceGroundEvaporationMod, only : ResistanceGroundEvaporation
@@ -199,8 +200,11 @@ contains
     ! Thermal properties of soil, snow, lake, and frozen soil
     call GroundThermalProperty(noahmp)
 
-    ! Solar radiation: absorbed & reflected by the ground and canopy
-    call RadiationMain(noahmp)
+    ! Surface shortwave albedo: ground and canopy radiative transfer
+    call SurfaceAlbedo(noahmp)
+
+    ! Surface shortwave radiation: absorbed & reflected by the ground and canopy
+    call SurfaceRadiation(noahmp)
 
     ! longwave emissivity for vegetation, ground, total net surface
     call SurfaceEmissivity(noahmp)
@@ -276,7 +280,7 @@ contains
 
     ! emitted longwave radiation and physical check
     FIRE = LWDN + FIRA
-    if ( FIRE <=0.0 ) then
+    if ( FIRE <= 0.0 ) then
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
        write(6,*) 'input of SHDFAC with LAI'
        write(6,*) 'SHDFAC=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG

@@ -74,7 +74,6 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/NoahmpMainMod.o \
        ../src/CanopyRadiationTwoStreamMod.o \
        ../src/GroundAlbedoMod.o \
-       ../src/RadiationMainMod.o \
        ../src/SnowAgingBatsMod.o \
        ../src/SnowAlbedoBatsMod.o \
        ../src/SnowAlbedoClassMod.o \
@@ -112,7 +111,35 @@ OBJS = ../driver/NoahmpDriverMod.o \
        ../src/CropPhotosynthesisMod.o \
        ../src/IrrigationPrepareMod.o \
        ../src/BalanceErrorCheckMod.o \
-       ../src/GeneralInitMod.o
+       ../src/GeneralInitMod.o \
+       ../src/BalanceErrorCheckGlacierMod.o \
+       ../src/EnergyMainGlacierMod.o \
+       ../src/GeneralInitGlacierMod.o \
+       ../src/GlacierIceThermalPropertyMod.o \
+       ../src/GlacierPhaseChangeMod.o \
+       ../src/GlacierTemperatureMainMod.o \
+       ../src/GlacierTemperatureSolverMod.o \
+       ../src/GlacierThermalDiffusionMod.o \
+       ../src/GroundAlbedoGlacierMod.o \
+       ../src/GroundRoughnessPropertyGlacierMod.o \
+       ../src/GroundThermalPropertyGlacierMod.o \
+       ../src/NoahmpMainGlacierMod.o \
+       ../src/PrecipitationHeatAdvectGlacierMod.o \
+       ../src/PsychrometricVariableGlacierMod.o \
+       ../src/ResistanceGroundEvaporationGlacierMod.o \
+       ../src/SnowCoverGlacierMod.o \
+       ../src/SnowLayerCombineGlacierMod.o \
+       ../src/SnowLayerDivideGlacierMod.o \
+       ../src/SnowWaterMainGlacierMod.o \
+       ../src/SnowfallGlacierMod.o \
+       ../src/SnowpackCompactionGlacierMod.o \
+       ../src/SnowpackHydrologyGlacierMod.o \
+       ../src/SurfaceAlbedoGlacierMod.o \
+       ../src/SurfaceEmissivityGlacierMod.o \
+       ../src/SurfaceEnergyFluxGlacierMod.o \
+       ../src/SurfaceRadiationGlacierMod.o \
+       ../src/WaterMainGlacierMod.o
+
 
 CMD = noahmp_refac.exe
 all:	$(CMD)

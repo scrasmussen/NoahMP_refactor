@@ -1,6 +1,6 @@
-module SurfaceEnergyFluxBareGroundMod
+module SurfaceEnergyFluxGlacierMod
 
-!!! Compute surface energy fluxes and budget for bare ground
+!!! Compute surface energy fluxes and budget for bare ground (glacier)
 !!! Use newton-raphson iteration to solve for ground (tg) temperatures
 !!! Surface energy balance (bare soil):
 !!! Ground level: -SAB + IRB[TG] + SHB[TG] + EVB[TG] + GHB[TG] = 0
@@ -10,16 +10,15 @@ module SurfaceEnergyFluxBareGroundMod
   use ConstantDefineMod
   use VaporPressureSaturationMod,    only : VaporPressureSaturation
   use ResistanceBareGroundMostMod,   only : ResistanceBareGroundMOST
-  use ResistanceBareGroundChen97Mod, only : ResistanceBareGroundChen97
 
   implicit none
 
 contains
 
-  subroutine SurfaceEnergyFluxBareGround(noahmp)
+  subroutine SurfaceEnergyFluxGlacier(noahmp)
 
 ! ------------------------ Code history -----------------------------------
-! Original Noah-MP subroutine: BARE_FLUX
+! Original Noah-MP subroutine: GLACIER_FLUX
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
 ! -------------------------------------------------------------------------
@@ -47,25 +46,26 @@ contains
     real(kind=kind_noahmp)                :: B            ! temporary calculation
     real(kind=kind_noahmp)                :: H            ! temporary sensible heat flux (w/m2)
     real(kind=kind_noahmp)                :: T, TDC       ! Kelvin to degree Celsius with limit -50 to +50
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SICEtemp   ! temporary glacier ice content (m3/m3)
 ! local statement function
     TDC(T) = min( 50.0, max(-50.0, (T - TFRZ)) )
 
 ! --------------------------------------------------------------------
     associate(                                                        &
               DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
+              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of glacier/soil layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
-              OPT_SFC         => noahmp%config%nmlist%OPT_SFC        ,& ! in,    options for surface layer drag coeff (CH & CM)
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
+              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,    options for glacier treatment 
               LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
               UU              => noahmp%forcing%UU                   ,& ! in,    wind speed in eastward direction (m/s)
               VV              => noahmp%forcing%VV                   ,& ! in,    wind speed in northward direction (m/s)
               SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
-              PSFC            => noahmp%forcing%PSFC                 ,& ! in,    pressure at lowest model layer
               SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
+              SMC             => noahmp%water%state%SMC              ,& ! in,    total glacier/soil water content [m3/m3]
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier/soil water content [m3/m3]
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
@@ -118,20 +118,17 @@ contains
     FV     = 0.1
     CIR    = EMG * SB
     CGH    = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
+    allocate(SICEtemp(1:NSOIL))
+    SICEtemp = 0.0
 
     ! begin stability iteration for ground temperature and flux
     loop3: do ITER = 1, NITERB
 
        ! ground roughness length
-       if ( ITER == 1 ) then
-          Z0H = Z0M
-       else
-          Z0H = Z0M !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0M))
-       endif
+       Z0H = Z0M
 
        ! aerodyn resistances between heights zlvl and d+z0v
-       if ( OPT_SFC == 1 ) call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
-       if ( OPT_SFC == 2 ) call ResistanceBareGroundChen97(noahmp, ITER)
+       call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
 
        ! conductance variables for diagnostics         
        EMB = 1.0 / RAMB
@@ -150,7 +147,11 @@ contains
 
        ! ground fluxes and temperature change
        CSH = RHOAIR * CPAIR / RAHB
-       CEV = RHOAIR * CPAIR / GAMMAG / (RSURF + RAWB)
+       if ( (SNOWH > 0.0) .or. (OPT_GLA == 1) ) then
+          CEV = RHOAIR * CPAIR / GAMMAG / (RSURF + RAWB)
+       else
+          CEV = 0.0   ! don't allow any sublimation of glacier in opt_gla=2
+       endif
        IRB = CIR * TGB**4 - EMG * LWDN
        SHB = CSH * (TGB        - SFCTMP      )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
@@ -175,20 +176,25 @@ contains
        else
           ESTG = ESATI
        endif
-       QSFC = 0.622 * (ESTG*RHSUR) / (PSFC - 0.378 * (ESTG*RHSUR))
+       QSFC = 0.622 * (ESTG*RHSUR) / (SFCPRS - 0.378 * (ESTG*RHSUR))
        QFX  = (QSFC - QAIR) * CEV * GAMMAG / CPAIR
 
     enddo loop3 ! end stability iteration
 
     ! if snow on ground and TGB > TFRZ: reset TGB = TFRZ. reevaluate ground fluxes.
+    SICEtemp = SMC - SH2O
     if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
-       if ( (SNOWH > 0.05) .and. (TGB > TFRZ) ) then
-          if ( OPT_STC == 1 ) TGB = TFRZ
-          if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * TFRZ  ! MB: allow TG>0C during melt v3.7
-          IRB = CIR * TGB**4 - EMG * LWDN
-          SHB = CSH * (TGB        - SFCTMP)
-          EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
-          GHB = SAG + PAHB - (IRB + SHB + EVB)
+       if ( (maxval(SICEtemp) > 0.0 .or. SNOWH > 0.05) .and. (TGB > TFRZ) .and. (OPT_GLA == 1) ) then
+          TGB = TFRZ
+          T = TDC(TGB) ! MB: recalculate ESTG
+          call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
+          ESTG = ESATI
+          QSFC = 0.622 * (ESTG*RHSUR) / (SFCPRS - 0.378 * (ESTG*RHSUR))
+          QFX  = (QSFC - QAIR) * CEV * GAMMAG / CPAIR
+          IRB  = CIR * TGB**4 - EMG * LWDN
+          SHB  = CSH * (TGB        - SFCTMP)
+          EVB  = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
+          GHB  = SAG + PAHB - (IRB + SHB + EVB)
        endif
     endif
 
@@ -197,18 +203,14 @@ contains
     TAUYB = -RHOAIR * CM * UR * VV
 
     ! 2m air temperature
-    if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
-       !EHB2 = FV * VKC / LOG((2.0+Z0H)/Z0H)
-       EHB2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )
-       CQ2B = EHB2
-       if ( EHB2 < 1.0e-5 ) then
-          T2MB = TGB
-          Q2B  = QSFC
-       else
-          T2MB = TGB - SHB / (RHOAIR*CPAIR) * 1.0 / EHB2
-          Q2B  = QSFC - EVB / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
-       endif
-       if ( URBAN_FLAG .eqv. .true. ) Q2B = QSFC
+    EHB2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )
+    CQ2B = EHB2
+    if ( EHB2 < 1.0e-5 ) then
+       T2MB = TGB
+       Q2B  = QSFC
+    else
+       T2MB = TGB - SHB / (RHOAIR*CPAIR) * 1.0 / EHB2
+       Q2B  = QSFC - EVB / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
     endif
 
     ! update CH 
@@ -216,6 +218,6 @@ contains
 
     end associate
 
-  end subroutine SurfaceEnergyFluxBareGround
+  end subroutine SurfaceEnergyFluxGlacier
 
-end module SurfaceEnergyFluxBareGroundMod
+end module SurfaceEnergyFluxGlacierMod

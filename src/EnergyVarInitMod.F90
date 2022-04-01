@@ -171,6 +171,8 @@ contains
     allocate( noahmp%energy%state%TKSNO   (-NSNOW+1:0    ) )
     allocate( noahmp%energy%state%CVSOIL  (       1:NSOIL) )
     allocate( noahmp%energy%state%TKSOIL  (       1:NSOIL) )
+    allocate( noahmp%energy%state%CVGLAICE(       1:NSOIL) )
+    allocate( noahmp%energy%state%TKGLAICE(       1:NSOIL) )
     allocate( noahmp%energy%state%ALBSND  (       1:NBAND) )
     allocate( noahmp%energy%state%ALBSNI  (       1:NBAND) )
     allocate( noahmp%energy%state%ALBSOD  (       1:NBAND) )
@@ -190,6 +192,8 @@ contains
     noahmp%energy%state%TKSNO(:)        = huge(1.0)
     noahmp%energy%state%CVSOIL(:)       = huge(1.0)
     noahmp%energy%state%TKSOIL(:)       = huge(1.0)
+    noahmp%energy%state%CVGLAICE(:)     = huge(1.0)
+    noahmp%energy%state%TKGLAICE(:)     = huge(1.0)
     noahmp%energy%state%ALBSND(:)       = huge(1.0)
     noahmp%energy%state%ALBSNI(:)       = huge(1.0)
     noahmp%energy%state%ALBSOD(:)       = huge(1.0)
@@ -326,6 +330,7 @@ contains
     allocate( noahmp%energy%param%TAUL   (1:NBAND) )
     allocate( noahmp%energy%param%TAUS   (1:NBAND) )
     allocate( noahmp%energy%param%EG     (1:2    ) )
+    allocate( noahmp%energy%param%ALBICE (1:NBAND) )
 
     noahmp%energy%param%LAIM(:)         = huge(1.0)
     noahmp%energy%param%SAIM(:)         = huge(1.0)
@@ -339,6 +344,7 @@ contains
     noahmp%energy%param%TAUL(:)         = huge(1.0)
     noahmp%energy%param%TAUS(:)         = huge(1.0)
     noahmp%energy%param%EG(:)           = huge(1.0)
+    noahmp%energy%param%ALBICE(:)       = huge(1.0)
 
     end associate
 
@@ -422,6 +428,7 @@ contains
     noahmp%energy%param%CZIL               = input%CZIL_TABLE
     noahmp%energy%param%SNOW_EMIS          = input%SNOW_EMIS_TABLE
     noahmp%energy%param%EG                 = input%EG_TABLE
+    noahmp%energy%param%ALBICE             = input%ALBICE_TABLE
     noahmp%energy%param%Z0SNO              = input%Z0SNO_TABLE
     noahmp%energy%param%ZBOT               = input%ZBOT_TABLE
     noahmp%energy%param%Z0SOIL             = input%Z0SOIL_TABLE

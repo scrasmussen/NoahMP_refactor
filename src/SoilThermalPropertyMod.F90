@@ -62,9 +62,9 @@ contains
 
        ! ==== soil heat capacity
 
-        SICE_TMP(ISOIL) = SMC(ISOIL) - SH2O(ISOIL)
-        CVSOIL(ISOIL)   = SH2O(ISOIL) * CWAT + (1.0 - SMCMAX(ISOIL)) * CSOIL &
-                          + (SMCMAX(ISOIL) - SMC(ISOIL)) * CPAIR + SICE_TMP(ISOIL) * CICE
+       SICE_TMP(ISOIL) = SMC(ISOIL) - SH2O(ISOIL)
+       CVSOIL(ISOIL)   = SH2O(ISOIL) * CWAT + (1.0 - SMCMAX(ISOIL)) * CSOIL &
+                         + (SMCMAX(ISOIL) - SMC(ISOIL)) * CPAIR + SICE_TMP(ISOIL) * CICE
 
        ! ==== soil thermal conductivity
 

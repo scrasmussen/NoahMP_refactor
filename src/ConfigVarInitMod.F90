@@ -45,6 +45,7 @@ contains
     noahmp%config%nmlist%OPT_CROP     = huge(1)
     noahmp%config%nmlist%OPT_SOIL     = huge(1)
     noahmp%config%nmlist%OPT_PEDO     = huge(1)
+    noahmp%config%nmlist%OPT_GLA      = huge(1)
 
     ! config domain variable
     noahmp%config%domain%LLANDUSE     = "MODIFIED_IGBP_MODIS_NOAH"
@@ -116,6 +117,7 @@ contains
     noahmp%config%nmlist%OPT_CROP   = input%OPT_CROPIn
     noahmp%config%nmlist%OPT_SOIL   = input%OPT_SOILIn
     noahmp%config%nmlist%OPT_PEDO   = input%OPT_PEDOIn
+    noahmp%config%nmlist%OPT_GLA    = input%OPT_GLAIn
     noahmp%config%nmlist%OPT_RUNSRF = input%OPT_RUNSRFIn
     noahmp%config%nmlist%OPT_RUNSUB = input%OPT_RUNSUBIn
     if ( input%OPT_RUNSUBIn /= input%OPT_RUNSRFIn ) then

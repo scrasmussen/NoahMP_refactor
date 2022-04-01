@@ -32,7 +32,7 @@ contains
               FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
-              Z0MVT           => noahmp%energy%param%Z0MVT           ,& ! in,    momentum roughness length (m)
+              Z0MVT           => noahmp%energy%param%Z0MVT           ,& ! in,    momentum roughness length vegetated (m)
               Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! in,    snow surface roughness length (m)
               Z0SOIL          => noahmp%energy%param%Z0SOIL          ,& ! in,    bare-soil roughness length (m) (i.e., under the canopy)
               Z0LAKE          => noahmp%energy%param%Z0LAKE          ,& ! in,    lake surface roughness length (m)

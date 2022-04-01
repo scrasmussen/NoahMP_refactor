@@ -1185,6 +1185,7 @@ contains
     character(len=256)     :: output_filename
     logical                :: runsnow
     real(kind=kind_noahmp) :: JULIAN
+    logical                :: runglacier
     ! forcing
     real(kind=kind_noahmp) :: rainrate
     integer                :: rain_duration
@@ -1217,11 +1218,11 @@ contains
     real(kind=kind_noahmp) :: initial_sh2o_value              ! constant sh2o value
     ! options
     integer                :: idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
-                              iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-                              iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno
+                              iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc,iopt_rsf,iopt_soil,&
+                              iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno,iopt_gla
 
     !=== arrange structures for reading namelist.input
-    namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN
+    namelist / timing          / dt,maxtime,output_filename,runsnow,JULIAN,runglacier
     namelist / forcing         / rainrate,rain_duration,dry_duration,&
                                  raining,uwind,vwind,sfcpres,Q2,SWDOWN,LWDOWN
     namelist / structure       / isltyp,vegtype,soilcolor,slopetype,croptype,nsoil,&
@@ -1229,8 +1230,8 @@ contains
     namelist / fixed_initial   / zsoil
     namelist / uniform_initial / initial_uniform,initial_sh2o_value
     namelist / options         / idveg,iopt_crs,iopt_btr,iopt_runsrf,iopt_runsub,iopt_sfc,iopt_frz,&
-                                 iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc, &
-                                 iopt_rsf,iopt_soil,iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno
+                                 iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc,iopt_rsf,iopt_soil,&
+                                 iopt_pedo,iopt_crop,iopt_irr,iopt_irrm,iopt_infdv,iopt_tdrn,iopt_tksno,iopt_gla
 
     !---------------------------------------------------------------
     ! read namelist.input
@@ -1276,10 +1277,12 @@ contains
     input%OPT_INFDVIn      = iopt_infdv
     input%OPT_TDRNIn       = iopt_tdrn
     input%OPT_TKSNOIn      = iopt_tksno
+    input%OPT_GLAIn        = iopt_gla
     input%output_filename  = output_filename
     input%DTIn             = dt
     input%maxtime          = maxtime
     input%runsnow          = runsnow
+    input%runglacier       = runglacier
     input%rainrate         = rainrate
     input%rain_duration    = rain_duration
     input%dry_duration     = dry_duration

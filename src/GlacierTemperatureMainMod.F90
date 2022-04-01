@@ -1,24 +1,24 @@
-module SoilSnowTemperatureMainMod
+module GlacierTemperatureMainMod
 
-!!! Main module to compute snow (if exists) and soil layer temperature. 
+!!! Main module to compute snow (if exists) and glacier ice temperature. 
 !!! Note that snow temperatures during melting season may exceed melting 
-!!! point (TFRZ) but later in SoilSnowPhaseChange subroutine the snow
+!!! point (TFRZ) but later in GlacierPhaseChange subroutine the snow
 !!! temperatures are reset to TFRZ for melting snow.
 
   use Machine, only : kind_noahmp
   use NoahmpVarType
   use ConstantDefineMod
-  use SoilSnowTemperatureSolverMod, only : SoilSnowTemperatureSolver
-  use SoilSnowThermalDiffusionMod,  only : SoilSnowThermalDiffusion 
+  use GlacierTemperatureSolverMod, only : GlacierTemperatureSolver
+  use GlacierThermalDiffusionMod,  only : GlacierThermalDiffusion 
 
   implicit none
 
 contains
 
-  subroutine SoilSnowTemperatureMain(noahmp)
+  subroutine GlacierTemperatureMain(noahmp)
 
 ! ------------------------ Code history --------------------------------------------------
-! Original Noah-MP subroutine: TSNOSOI
+! Original Noah-MP subroutine: TSNOSOI_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
 ! ----------------------------------------------------------------------------------------
@@ -37,14 +37,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
+              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of glacier/soil layers
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,    depth of lower boundary condition (m) from soil surface
+              ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,    depth of lower boundary condition (m) from glacier/soil surface
               ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,   depth of lower boundary condition (m) from snow surface
-              PHI             => noahmp%energy%flux%PHI               & ! out,   light penetrating through soil/snow water (W/m2)
+              PHI             => noahmp%energy%flux%PHI               & ! out,   light penetrating through snow/ice (W/m2)
              )
 ! ----------------------------------------------------------------------
 
@@ -61,15 +61,15 @@ contains
     ! compute solar penetration through water, needs more work
     PHI(ISNOW+1:NSOIL) = 0.0
 
-    ! adjust ZBOT from soil surface to ZBOTSNO from snow surface
+    ! adjust ZBOT from glacier ice surface to ZBOTSNO from snow surface
     ZBOTSNO = ZBOT - SNOWH
 
     ! compute soil temperatures
-    call SoilSnowThermalDiffusion(noahmp, AI, BI, CI, RHSTS)
-    call SoilSnowTemperatureSolver(noahmp, DT, AI, BI, CI, RHSTS)
+    call GlacierThermalDiffusion(noahmp, AI, BI, CI, RHSTS)
+    call GlacierTemperatureSolver(noahmp, DT, AI, BI, CI, RHSTS)
 
     end associate
 
-  end subroutine SoilSnowTemperatureMain
+  end subroutine GlacierTemperatureMain
 
-end module SoilSnowTemperatureMainMod
+end module GlacierTemperatureMainMod
