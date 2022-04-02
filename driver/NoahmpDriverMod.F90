@@ -454,7 +454,6 @@ Program NoahmpDriverMod
 !---------------------------------------------------------------------
 
   do itime = 1, ntime
-
     IRFIRATE = 0.0
     IRMIRATE = 0.0
     IRSIRATE = 0.0
@@ -496,6 +495,7 @@ Program NoahmpDriverMod
     ! main noahmplsm subroutine below
     if ( input%runglacier .eqv. .true. ) then
        ICE = -1
+       TBOT = min(TBOT,263.15)
        call NoahmpMainGlacier(noahmp)
        FSNO   = 1.0       
        TGB    = TG 

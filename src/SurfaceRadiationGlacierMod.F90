@@ -55,7 +55,6 @@ contains
        REFG = SOLAD(IB) * ALBGRD(IB) + SOLAI(IB) * ALBGRI(IB)
        FSR  = FSR + REFG
     enddo
-
     end associate
 
   end subroutine SurfaceRadiationGlacier

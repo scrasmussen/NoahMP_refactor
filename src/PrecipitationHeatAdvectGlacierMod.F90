@@ -44,17 +44,17 @@ contains
     QSNOW   = SNOW
 
     ! Heat advection for liquid rainfall
-    PAH_AG = QRAIN * (CWAT/1000.0) * (SFCTMP - TG)
+!    PAH_AG = QRAIN * (CWAT/1000.0) * (SFCTMP - TG)
 
     ! Heat advection for snowfall
-    PAH_AG = PAH_AG + QSNOW * (CICE/1000.0) * (SFCTMP - TG)
+!    PAH_AG = PAH_AG + QSNOW * (CICE/1000.0) * (SFCTMP - TG)
 
     ! net heat advection
-    PAHB = PAH_AG
+!    PAHB = PAH_AG
 
     ! Put some artificial limits here for stability
-    PAHB = max( PAHB, -20.0 )
-    PAHB = min( PAHB,  20.0 )
+!    PAHB = max( PAHB, -20.0 )
+!    PAHB = min( PAHB,  20.0 )
 
     end associate
 

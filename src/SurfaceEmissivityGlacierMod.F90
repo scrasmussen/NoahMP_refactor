@@ -34,8 +34,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! ground emissivity
-    EMG = EICE * (1.0 - FSNO) + SNOW_EMIS * FSNO
-
+!    EMG = EICE * (1.0 - FSNO) + SNOW_EMIS * FSNO
+    EMG = 0.98
     ! surface emissivity
     EMISSI = EMG
 

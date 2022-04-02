@@ -98,7 +98,7 @@ contains
 
           ! The change in DZ due to compaction
           DZSNSO(J) = DZSNSO(J) * ( 1.0 + PDZDTC(J) )
-          DZSNSO(J) = max( DZSNSO(J), SNICE(J)/DENICE + SNLIQ(J)/DENH2O )
+!          DZSNSO(J) = max( DZSNSO(J), SNICE(J)/DENICE + SNLIQ(J)/DENH2O )
 
        endif
 

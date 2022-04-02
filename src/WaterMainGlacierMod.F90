@@ -74,6 +74,7 @@ contains
     RUNSUB    = 0.0
     RUNSRF    = 0.0
     SNOWHIN   = 0.0
+    QINSUR    = 0.0
 
     ! prepare for water process
     SICE(:)   = max(0.0, SMC(:)-SH2O(:))
@@ -99,18 +100,18 @@ contains
     call SnowWaterMainGlacier(noahmp)
 
     ! total surface input water to glacier ice
-    QINSUR = (PONDING + PONDING1 + PONDING2) / DT * 0.001  ! convert units (mm/s -> m/s)
+    QINSUR = (PONDING + PONDING1 + PONDING2) / DT
     if ( ISNOW == 0 ) then
-       QINSUR = QINSUR + (QSNBOT + QRAIN) * 0.001
+       QINSUR = QINSUR + QSNBOT + QRAIN
     else
-       QINSUR = QINSUR + QSNBOT * 0.001
+       QINSUR = QINSUR + QSNBOT
     endif
 #ifdef WRF_HYDRO
-    QINSUR = QINSUR + sfcheadrt / DT * 0.001
+    QINSUR = QINSUR + sfcheadrt / DT
 #endif
 
     ! surface runoff
-    RUNSRF = QINSUR * 1000.0   ! mm/s
+    RUNSRF = QINSUR   ! mm/s
 
     ! glacier ice water
     if ( OPT_GLA == 1 ) then

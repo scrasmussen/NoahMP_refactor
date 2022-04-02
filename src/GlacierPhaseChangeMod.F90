@@ -128,7 +128,7 @@ contains
           SNEQV    = max( 0.0, TEMP1-XM(1) )                    ! snow remaining
           PROPOR   = SNEQV / TEMP1                              ! fraction melted
           SNOWH    = max( 0.0, PROPOR*SNOWH )                   ! new snow height
-          SNOWH    = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
+!          SNOWH    = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
           HEATR(1) = HM(1) - HFUS * (TEMP1 - SNEQV) / DT        ! excess heat
           if ( HEATR(1) > 0.0 ) then
              XM(1) = HEATR(1) * DT / HFUS
@@ -161,7 +161,7 @@ contains
              STC(J) = STC(J) + FACT(J) * HEATR(J)
              if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = TFRZ
           endif
-          XMF = XMF + HFUS * (WICE0(J) - MICE(J)) / DT
+!          XMF = XMF + HFUS * (WICE0(J) - MICE(J)) / DT
 
           ! snow melting rate
           QMELT = QMELT + max( 0.0, (WICE0(J)-MICE(J)) ) / DT
@@ -228,7 +228,7 @@ contains
           SNEQV    = max( 0.0, TEMP1-XM(1) )
           PROPOR   = SNEQV / TEMP1
           SNOWH    = max( 0.0, PROPOR*SNOWH )
-          SNOWH    = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
+!          SNOWH    = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
           HEATR(1) = HM(1) - HFUS * (TEMP1 - SNEQV) / DT
           if ( HEATR(1) > 0.0 ) then
              XM(1)    = HEATR(1) * DT / HFUS

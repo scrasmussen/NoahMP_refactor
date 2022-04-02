@@ -59,12 +59,12 @@ contains
           if ( J /= 0 ) then
              SNLIQ(J+1)  = SNLIQ(J+1)  + SNLIQ(J)
              SNICE(J+1)  = SNICE(J+1)  + SNICE(J)
-             DZSNSO(J+1) = DZSNSO(J+1) + DZSNSO(J)
+!             DZSNSO(J+1) = DZSNSO(J+1) + DZSNSO(J)
           else
              if ( ISNOW_OLD < -1 ) then    ! MB/KM: change to ISNOW
                 SNLIQ(J-1)  = SNLIQ(J-1)  + SNLIQ(J)
                 SNICE(J-1)  = SNICE(J-1)  + SNICE(J)
-                DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
+!                DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
              else
                 PONDING1  = PONDING1 +SNLIQ(J)       ! ISNOW WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
                 SNEQV     = SNICE(J)                 ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE

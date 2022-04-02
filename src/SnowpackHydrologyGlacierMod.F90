@@ -92,7 +92,7 @@ contains
           SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
           PROPOR = SNEQV / TEMP
           SNOWH  = max( 0.0, PROPOR*SNOWH )
-          SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
+!          SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
        elseif ( OPT_GLA == 2 ) then
           FSH = FSH - (QSNFRO - QSNSUB) * HSUB
           QSNFRO = 0.0
@@ -129,29 +129,42 @@ contains
     do J = ISNOW+1, 0
        VOL_ICE(J) = min( 1.0, SNICE(J)/(DZSNSO(J)*DENICE) )
        EPORE(J)   = 1.0 - VOL_ICE(J)
+       VOL_LIQ(J) = min( EPORE(J), SNLIQ(J)/(DZSNSO(J)*DENH2O) )
     enddo
 
     ! compute inter-layer snow water flow
     do J = ISNOW+1, 0
        SNLIQ(J)   = SNLIQ(J) + QIN
-       VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*DENH2O)
-       QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * DZSNSO(J) )
-       if ( J == 0 ) then
-          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * DT * QOUT )
-       endif
+!       VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*DENH2O)
+!       QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * DZSNSO(J) )
+!       if ( J == 0 ) then
+!          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * DT * QOUT )
+!       endif
+
+        if (J <= -1) then
+           if (EPORE(J) < 0.05 .or. EPORE(J+1) < 0.05) then
+              QOUT = 0.0
+           else
+              QOUT = max(0.0, (VOL_LIQ(J)-SSI*EPORE(J))*DZSNSO(J))
+              QOUT = min(QOUT, (1.0-VOL_ICE(J+1)-VOL_LIQ(J+1))*DZSNSO(J+1))
+           endif
+        else
+            QOUT = max(0.0,(VOL_LIQ(J) - SSI*EPORE(J))*DZSNSO(J))
+        endif
+
        QOUT     = QOUT * DENH2O
        SNLIQ(J) = SNLIQ(J) - QOUT
-       if ( ( SNLIQ(J) / (SNICE(J)+SNLIQ(J)) ) > SNLIQMAXFRAC ) then
-          QOUT     = QOUT + ( SNLIQ(J) - SNLIQMAXFRAC/(1.0-SNLIQMAXFRAC) * SNICE(J) )
-          SNLIQ(J) = SNLIQMAXFRAC / (1.0 - SNLIQMAXFRAC) * SNICE(J)
-       endif
+!       if ( ( SNLIQ(J) / (SNICE(J)+SNLIQ(J)) ) > SNLIQMAXFRAC ) then
+!          QOUT     = QOUT + ( SNLIQ(J) - SNLIQMAXFRAC/(1.0-SNLIQMAXFRAC) * SNICE(J) )
+!          SNLIQ(J) = SNLIQMAXFRAC / (1.0 - SNLIQMAXFRAC) * SNICE(J)
+!       endif
        QIN = QOUT
     enddo
 
     ! update snow depth
-    do J = ISNOW+1, 0
-       DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/DENH2O + SNICE(J)/DENICE )
-    enddo
+!    do J = ISNOW+1, 0
+!       DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/DENH2O + SNICE(J)/DENICE )
+!    enddo
 
     ! Liquid water from snow bottom to soil (mm/s)
     QSNBOT = QOUT / DT

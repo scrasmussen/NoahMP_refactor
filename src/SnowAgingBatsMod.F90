@@ -52,17 +52,31 @@ contains
 
     if ( SNEQV <= 0.0 ) then
        TAUSS = 0.0
+    elseif ( SNEQV > 800.0 ) then
+       TAUSS = 0.0
     else
-       DELA0 = DT / TAU0
-       ARG   = GRAIN_GROWTH * (1.0/TFRZ - 1.0/TG)
-       AGE1  = exp(ARG)
-       AGE2  = exp( amin1( 0.0, EXTRA_GROWTH*ARG ) )
-       AGE3  = DIRT_SOOT
-       TAGE  = AGE1 + AGE2 + AGE3
-       DELA  = DELA0 * TAGE
-       DELS  = amax1( 0.0, SNEQV-SNEQVO ) / SWEMX
-       SGE   = (TAUSS + DELA) * (1.0 - DELS)
-       TAUSS = amax1( 0.0, SGE )
+!       DELA0 = DT / TAU0
+!       ARG   = GRAIN_GROWTH * (1.0/TFRZ - 1.0/TG)
+!       AGE1  = exp(ARG)
+!       AGE2  = exp( amin1( 0.0, EXTRA_GROWTH*ARG ) )
+!       AGE3  = DIRT_SOOT
+!       TAGE  = AGE1 + AGE2 + AGE3
+!       DELA  = DELA0 * TAGE
+!       DELS  = amax1( 0.0, SNEQV-SNEQVO ) / SWEMX
+!       SGE   = (TAUSS + DELA) * (1.0 - DELS)
+!       TAUSS = amax1( 0.0, SGE )
+
+          DELA0 = 1.E-6*DT
+          ARG   = 5.E3*(1./TFRZ-1./TG)
+          AGE1  = EXP(ARG)
+          AGE2  = EXP(AMIN1(0.,10.*ARG))
+          AGE3  = 0.3
+          TAGE  = AGE1+AGE2+AGE3
+          DELA  = DELA0*TAGE
+          DELS  = AMAX1(0.0,SNEQV-SNEQVO) / SWEMX
+          SGE   = (TAUSS+DELA)*(1.0-DELS)
+          TAUSS = AMAX1(0.,SGE)
+
     endif
 
     FAGE = TAUSS / (TAUSS + 1.0)

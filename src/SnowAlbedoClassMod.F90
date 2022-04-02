@@ -25,7 +25,7 @@ contains
 ! local variable
     integer                          :: IB          ! waveband class
     real(kind=kind_noahmp)           :: ALB         ! temporal albedo
-
+    real(kind=kind_noahmp)           :: QSNOWt
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
@@ -44,14 +44,15 @@ contains
     ! initialization
     ALBSND(1: NBAND) = 0.0
     ALBSNI(1: NBAND) = 0.0
+    QSNOWt = 5.5555557E-03
 
     ! when cosz > 0
     ALB = CLASS_ALB_REF + (ALBOLD - CLASS_ALB_REF) * exp( -0.01 * DT / CLASS_SNO_AGE )
 
     ! 1 mm fresh snow(SWE) -- 10mm snow depth, assumed the fresh snow density 100kg/m3
     ! here assume 1cm snow depth will fully cover the old snow
-    if ( QSNOW > 0.0 ) then
-       ALB = ALB + min(QSNOW, SWEMX/DT) * (CLASS_ALB_NEW - ALB) / (SWEMX/DT)
+    if ( QSNOWt > 0.0 ) then
+       ALB = ALB + min(QSNOWt, SWEMX/DT) * (CLASS_ALB_NEW - ALB) / (SWEMX/DT)
     endif
 
     ALBSNI(1)= ALB         ! vis diffuse

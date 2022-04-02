@@ -62,15 +62,16 @@ contains
     call SnowfallGlacier(noahmp)
 
     ! do following snow layer compaction, combination, and division only for multi-layer snowpack
-
+    if ( ISNOW < 0 ) then 
     ! snowpack compaction
-    if ( ISNOW < 0 ) call SnowpackCompactionGlacier(noahmp)
+       call SnowpackCompactionGlacier(noahmp)
 
     ! snow layer combination
-    if ( ISNOW < 0 ) call SnowLayerCombineGlacier(noahmp)
+       call SnowLayerCombineGlacier(noahmp)
 
     ! snow layer division
-    if ( ISNOW < 0 ) call SnowLayerDivideGlacier(noahmp)
+       call SnowLayerDivideGlacier(noahmp)
+    endif
 
     ! snow hydrology for all snow cases
     call SnowpackHydrologyGlacier(noahmp)
