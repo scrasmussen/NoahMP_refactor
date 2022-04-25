@@ -1,0 +1,127 @@
+module ResistanceCanopyStomataJarvisMod
+
+!!! Compute canopy stomatal resistance and foliage photosynthesis based on Jarvis scheme
+!!! Canopy resistance which depends on incoming solar radiation, air temperature,
+!!! atmospheric water vapor pressure deficit at the lowest model level, and soil moisture (preferably
+!!! unfrozen soil moisture rather than total). 
+!!! Source: Jarvis (1976), Noilhan and Planton (1989), Jacquemin and Noilhan (1990). 
+!!! See also Chen et al (1996, JGR, Vol 101(D3), 7251-7268): Eqns 12-14 and Table 2 of Sec. 3.1.2
+
+  use Machine, only : kind_noahmp
+  use NoahmpVarType
+  use ConstantDefineMod
+  use HumiditySaturationMod, only : HumiditySaturation
+
+  implicit none
+
+contains
+
+  subroutine ResistanceCanopyStomataJarvis(noahmp, IndexShade)
+
+! ------------------------ Code history -----------------------------------
+! Original Noah-MP subroutine: CANRES
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! -------------------------------------------------------------------------
+
+    implicit none
+
+    integer          , intent(in   ) :: IndexShade   ! index for sunlit/shaded (0=sunlit;1=shaded)
+    type(noahmp_type), intent(inout) :: noahmp
+
+! local variable
+    real(kind=kind_noahmp)           :: RCQ          ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: RCS          ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: RCT          ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: FF
+    real(kind=kind_noahmp)           :: Q2           ! water vapor mixing ratio (kg/kg)
+    real(kind=kind_noahmp)           :: Q2SAT        ! saturation Q2
+    real(kind=kind_noahmp)           :: DQSDT2       ! d(Q2SAT)/d(T)
+
+! --------------------------------------------------------------------
+    associate(                                                        &
+              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
+              RGL             => noahmp%energy%param%RGL             ,& ! in,    Parameter used in radiation stress function
+              RSMIN           => noahmp%energy%param%RSMIN           ,& ! in,    Minimum stomatal resistance [s m-1]
+              RSMAX           => noahmp%energy%param%RSMAX           ,& ! in,    Maximal stomatal resistance [s m-1]
+              TOPT            => noahmp%energy%param%TOPT            ,& ! in,    Optimum transpiration air temperature [K]
+              HS              => noahmp%energy%param%HS              ,& ! in,    Parameter used in vapor pressure deficit function
+              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
+              EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
+              PARSUN          => noahmp%energy%flux%PARSUN           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
+              PARSHA          => noahmp%energy%flux%PARSHA           ,& ! in,    average absorbed par for shaded leaves (w/m2)
+              RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
+              RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
+              PSNSUN          => noahmp%biochem%flux%PSNSUN          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
+              PSNSHA          => noahmp%biochem%flux%PSNSHA           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+             )
+! ----------------------------------------------------------------------
+
+    ! initialization
+    RCS    = 0.0
+    RCT    = 0.0
+    RCQ    = 0.0
+
+    ! Sunlit case
+    if ( IndexShade == 0 ) then
+       RSSUN  = 0.0
+
+       ! compute Q2 and Q2SAT
+       Q2 = 0.622 *  EAH  / (SFCPRS - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
+       call HumiditySaturation(TV, SFCPRS, Q2SAT, DQSDT2)
+
+       ! contribution due to incoming solar radiation
+       FF  = 2.0 * PARSUN / RGL
+       RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
+       RCS = max( RCS, 0.0001 )
+
+       ! contribution due to air temperature
+       RCT = 1.0 - 0.0016 * ( (TOPT - TV)**2.0 )
+       RCT = max( RCT, 0.0001 )
+
+       ! contribution due to vapor pressure deficit
+       RCQ = 1.0 / ( 1.0 + HS * max(0.0, Q2SAT-Q2) )
+       RCQ = max( RCQ, 0.01 )
+
+       ! determine canopy resistance due to all factors
+       RSSUN  = RSMIN / (RCS * RCT * RCQ * BTRAN)
+       PSNSUN = -999.99       ! PSN not applied for dynamic carbon
+
+    endif ! IndexShade == 0
+
+    ! Shaded case
+    ! same as Sunlit case but using different input (PARSHA) and output (RSSHA,PSNSHA)
+    if ( IndexShade == 1 ) then
+       RSSHA  = 0.0
+       
+       ! compute Q2 and Q2SAT
+       Q2 = 0.622 *  EAH  / (SFCPRS - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
+       call HumiditySaturation(TV, SFCPRS, Q2SAT, DQSDT2)
+
+       ! contribution due to incoming solar radiation
+       FF  = 2.0 * PARSHA / RGL
+       RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
+       RCS = max( RCS, 0.0001 )
+
+       ! contribution due to air temperature
+       RCT = 1.0 - 0.0016 * ( (TOPT - TV)**2.0 )
+       RCT = max( RCT, 0.0001 )
+
+       ! contribution due to vapor pressure deficit
+       RCQ = 1.0 / ( 1.0 + HS * max(0.0, Q2SAT-Q2) )
+       RCQ = max( RCQ, 0.01 )
+
+       ! determine canopy resistance due to all factors
+       RSSHA  = RSMIN / (RCS * RCT * RCQ * BTRAN)
+       PSNSHA = -999.99       ! PSN not applied for dynamic carbon
+
+    endif ! IndexShade == 1
+
+    end associate
+
+  end subroutine ResistanceCanopyStomataJarvis
+
+end module ResistanceCanopyStomataJarvisMod
