@@ -10,6 +10,7 @@ module ForcingVarInitMod
 
   use NoahmpIOVarType
   use NoahmpVarType
+  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -72,9 +73,9 @@ contains
     
     ! precipitation preprocess: ! MB/AN : v3.7 
     PRCP                       = NoahmpIO%RAINBL   (I,J) / NoahmpIO%DTBL
-    if (present(NoahmpIO%MP_RAINC) .and. present(NoahmpIO%MP_RAINNC) .and. &
-        present(NoahmpIO%MP_SHCV)  .and. present(NoahmpIO%MP_SNOW)   .and. &
-        present(NoahmpIO%MP_GRAUP) .and. present(NoahmpIO%MP_HAIL)) then  
+    !if (present(NoahmpIO%MP_RAINC) .and. present(NoahmpIO%MP_RAINNC) .and. &
+    !    present(NoahmpIO%MP_SHCV)  .and. present(NoahmpIO%MP_SNOW)   .and. &
+    !    present(NoahmpIO%MP_GRAUP) .and. present(NoahmpIO%MP_HAIL))  then  
         
        noahmp%forcing%PRCPCONV    = NoahmpIO%MP_RAINC (I,J)
        noahmp%forcing%PRCPNONC    = NoahmpIO%MP_RAINNC(I,J)
@@ -90,15 +91,16 @@ contains
        noahmp%forcing%PRCPNONC  = noahmp%forcing%PRCPNONC + PRCPOTHR
        noahmp%forcing%PRCPSNOW  = noahmp%forcing%PRCPSNOW + NoahmpIO%SR(I,J) * PRCPOTHR 
        
-    elseif
-       noahmp%forcing%PRCPCONV    = 0.0
-       noahmp%forcing%PRCPNONC    = PRCP
-       noahmp%forcing%PRCPSHCV    = 0.0
-       noahmp%forcing%PRCPSNOW    = NoahmpIO%SR(I,J) * PRCP
-       noahmp%forcing%PRCPGRPL    = 0.0
-       noahmp%forcing%PRCPHAIL    = 0.0    
-    endif
-    
+    !elseif
+    !   noahmp%forcing%PRCPCONV    = 0.0
+    !   noahmp%forcing%PRCPNONC    = PRCP
+    !   noahmp%forcing%PRCPSHCV    = 0.0
+    !   noahmp%forcing%PRCPSNOW    = NoahmpIO%SR(I,J) * PRCP
+    !   noahmp%forcing%PRCPGRPL    = 0.0
+    !   noahmp%forcing%PRCPHAIL    = 0.0    
+    !endif
+    end associate
+ 
   end subroutine ForcingVarInitTransfer
 
 end module ForcingVarInitMod

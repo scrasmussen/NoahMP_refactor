@@ -5,10 +5,10 @@ module NoahmpInitMainMod
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine only : kind_noahmp
+  use Machine, only : kind_noahmp
   use NoahmpIOVarType
-  use NoahmpInitMainMod
-  
+  use NoahmpSnowInitMod
+ 
   implicit none
   
 contains
@@ -22,9 +22,26 @@ contains
 ! ------------------------------------------------------------------------- 
 
     implicit none 
-    
-    type(noahmp_type)      :: noahmp
+   
     type(NoahmpIO_type)    :: NoahmpIO
+
+    !local
+    integer                                     :: ids, ide, jds, jde, kds, kde, &
+                                                   ims, ime, jms, jme, kms, kme, &
+                                                   its, ite, jts, jte, kts, kte
+    integer                                     :: errflag,i,j,itf,jtf,ns
+    logical                                     :: restart, allowed_to_read
+
+    real(kind=kind_noahmp), dimension(1:NoahmpIO%NSOIL) :: ZSOIL      ! Depth of the soil layer bottom (m) from
+    !                                                           the surface (negative)
+    real(kind=kind_noahmp)                      :: BEXP, SMCMAX, PSISAT
+    real(kind=kind_noahmp)                      :: FK, masslai, masssai
+    real(kind=kind_noahmp), parameter           :: BLIM  = 5.5
+    real(kind=kind_noahmp), parameter           :: HLICE = 3.335E5
+    real(kind=kind_noahmp), parameter           :: GRAV = 9.81
+    real(kind=kind_noahmp), parameter           :: T0 = 273.15
+    character(len=240)                          :: err_message
+    character(len=4)                            :: MMINSL
     
     associate(MMINLU            => NoahmpIO%LLANDUSE,          &
               SNOW              => NoahmpIO%SNOW,              &
@@ -120,22 +137,6 @@ contains
               pexpxy            => NoahmpIO%pexpxy,            &
               rechclim          => NoahmpIO%rechclim           &
              )                                                          
- 
-    integer                                     :: ids, ide, jds, jde, kds, kde, &
-                                                   ims, ime, jms, jme, kms, kme, &
-                                                   its, ite, jts, jte, kts, kte
-    integer                                     :: errflag,i,j,itf,jtf,ns
-    logical                                     :: restart, allowed_to_read   
-    real(kind=kind_noahmp) dimension(1:NSOIL)   :: ZSOIL      ! Depth of the soil layer bottom (m) from 
-    !                                                           the surface (negative)
-    real(kind=kind_noahmp)                      :: BEXP, SMCMAX, PSISAT
-    real(kind=kind_noahmp)                      :: FK, masslai, masssai
-    real(kind=kind_noahmp), parameter           :: BLIM  = 5.5
-    real(kind=kind_noahmp), parameter           :: HLICE = 3.335E5
-    real(kind=kind_noahmp), parameter           :: GRAV = 9.81
-    real(kind=kind_noahmp), parameter           :: T0 = 273.15
-    character(len=240)                          :: err_message
-    character(len=4)                            :: MMINSL
     
 !--------------------------------------------------------------------------------------- 
 
@@ -215,23 +216,23 @@ contains
 
        do J = jts , jtf
           do I = its , itf
-	         if(IVGTYP(I,J)==NoahmpIO%ISICE_TABLE .AND. XICE(I,J) <= 0.0) then
-                do NS=1, NSOIL
-	               SMOIS(I,NS,J) = 1.0                     ! glacier starts all frozen
-	               SH2O(I,NS,J) = 0.0
-	               TSLB(I,NS,J) = MIN(TSLB(I,NS,J),263.15) ! set glacier temp to at most -10C
-                enddo
-	            !TMN(I,J) = MIN(TMN(I,J),263.15)           ! set deep temp to at most -10C
-		        SNOW(I,J) = MAX(SNOW(I,J), 10.0)           ! set SWE to at least 10mm
-                SNOWH(I,J)=SNOW(I,J)*0.01                  ! SNOW in mm and SNOWH in m
-	         else
-	      
-                BEXP   = NoahmpIO%BEXP_TABLE  (ISLTYP(I,J))
-                SMCMAX = NoahmpIO%SMCMAX_TABLE(ISLTYP(I,J))
-                PSISAT = NoahmpIO%PSISAT_TABLE(ISLTYP(I,J))
+          if(IVGTYP(I,J)==NoahmpIO%ISICE_TABLE .AND. XICE(I,J) <= 0.0) then
+             do NS=1, NSOIL
+                SMOIS(I,NS,J) = 1.0                     ! glacier starts all frozen
+                SH2O(I,NS,J) = 0.0
+                TSLB(I,NS,J) = MIN(TSLB(I,NS,J),263.15) ! set glacier temp to at most -10C
+             enddo
+            !TMN(I,J) = MIN(TMN(I,J),263.15)           ! set deep temp to at most -10C
+             SNOW(I,J) = MAX(SNOW(I,J), 10.0)           ! set SWE to at least 10mm
+             SNOWH(I,J)=SNOW(I,J)*0.01                  ! SNOW in mm and SNOWH in m
+          else
+      
+             BEXP   = NoahmpIO%BEXP_TABLE  (ISLTYP(I,J))
+             SMCMAX = NoahmpIO%SMCMAX_TABLE(ISLTYP(I,J))
+             PSISAT = NoahmpIO%PSISAT_TABLE(ISLTYP(I,J))
 
                 do NS=1, NSOIL
-	               if ( SMOIS(I,NS,J) > SMCMAX )  SMOIS(I,NS,J) = SMCMAX
+                  if ( SMOIS(I,NS,J) > SMCMAX )  SMOIS(I,NS,J) = SMCMAX
                 enddo
                 if ( ( BEXP > 0.0 ) .AND. ( SMCMAX > 0.0 ) .AND. ( PSISAT > 0.0 ) ) then
                   do NS=1, NSOIL
@@ -257,21 +258,21 @@ contains
           do I = its,itf
              qtdrain    (I,J) = 0.
              tvxy       (I,J) = TSK(I,J)
-	       if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tvxy(I,J) = 273.15
+             if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tvxy(I,J) = 273.15
              tgxy       (I,J) = TSK(I,J)
-	       if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tgxy(I,J) = 273.15
+             if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tgxy(I,J) = 273.15
              CANWAT     (I,J) = 0.0
              canliqxy   (I,J) = CANWAT(I,J)
              canicexy   (I,J) = 0.
              eahxy      (I,J) = 2000. 
              tahxy      (I,J) = TSK(I,J)
-	       if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tahxy(I,J) = 273.15
+             if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) tahxy(I,J) = 273.15
 !             tahxy      (I,J) = 287.
 
              t2mvxy     (I,J) = TSK(I,J)
-	       if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) t2mvxy(I,J) = 273.15
+             if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) t2mvxy(I,J) = 273.15
              t2mbxy     (I,J) = TSK(I,J)
-	       if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) t2mbxy(I,J) = 273.15
+             if(snow(i,j) > 0.0 .and. tsk(i,j) > 273.15) t2mbxy(I,J) = 273.15
              chstarxy   (I,J) = 0.1
 
            cmxy       (I,J) = 0.0
@@ -294,9 +295,9 @@ contains
            endif
 
            if(IVGTYP(I,J) == NoahmpIO%ISBARREN_TABLE .OR. IVGTYP(I,J) == NoahmpIO%ISICE_TABLE .OR. &
-	         (NoahmpIO%SF_URBAN_PHYSICS == 0 .AND. IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE)     .OR. &
-	         IVGTYP(I,J) == NoahmpIO%ISWATER_TABLE ) then
-	         lai        (I,J) = 0.0
+             (NoahmpIO%SF_URBAN_PHYSICS == 0 .AND. IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE)     .OR. &
+              IVGTYP(I,J) == NoahmpIO%ISWATER_TABLE ) then
+             lai        (I,J) = 0.0
              xsaixy     (I,J) = 0.0
              lfmassxy   (I,J) = 0.0
              stmassxy   (I,J) = 0.0
@@ -306,11 +307,11 @@ contains
              fastcpxy   (I,J) = 0.0
              grainxy    (I,J) = 1E-10
              gddxy      (I,J) = 0
-	         cropcat    (I,J) = 0
+             cropcat    (I,J) = 0
 
-	       else
-	     
-	         lai        (I,J) = max(lai(i,j),0.05)                      ! at least start with 0.05 for arbitrary initialization (v3.7)
+           else
+     
+             lai        (I,J) = max(lai(i,j),0.05)                      ! at least start with 0.05 for arbitrary initialization (v3.7)
              xsaixy     (I,J) = max(0.1*lai(I,J),0.05)                  ! MB: arbitrarily initialize SAI using input LAI (v3.7)
              masslai = 1000. / max(NoahmpIO%SLA_TABLE(IVGTYP(I,J)),1.0) ! conversion from lai to mass  (v3.7)
              lfmassxy   (I,J) = lai(i,j)*masslai                        ! use LAI to initialize (v3.7)
@@ -325,34 +326,34 @@ contains
 
 ! Initialize crop for Liu crop model
 
-	         if(iopt_crop == 1 ) then
-	            cropcat    (i,j) = NoahmpIO%default_crop_table
+                if(iopt_crop == 1 ) then
+                   cropcat    (i,j) = NoahmpIO%default_crop_table
                 if(croptype(i,5,j) >= 0.5) then
                    rtmassxy(i,j) = 0.0
                    woodxy  (i,j) = 0.0                    
 
-	               if(croptype(i,1,j) > croptype(i,2,j) .and. &
-		              croptype(i,1,j) > croptype(i,3,j) .and. &
-		              croptype(i,1,j) > croptype(i,4,j) ) then        ! choose corn
+                if(croptype(i,1,j) > croptype(i,2,j) .and. &
+                   croptype(i,1,j) > croptype(i,3,j) .and. &
+                   croptype(i,1,j) > croptype(i,4,j) ) then        ! choose corn
 
-		              cropcat (i,j) = 1
+                      cropcat (i,j) = 1
                       lfmassxy(i,j) =    lai(i,j)/0.015               ! Initialize lfmass Zhe Zhang 2020-07-13
                       stmassxy(i,j) = xsaixy(i,j)/0.003
 
-	               elseif(croptype(i,2,j) > croptype(i,1,j) .and. &
-		              croptype(i,2,j) > croptype(i,3,j) .and. &
-		              croptype(i,2,j) > croptype(i,4,j) ) then        ! choose soybean
-		              cropcat (i,j) = 2
-                      lfmassxy(i,j) =    lai(i,j)/0.030               ! Initialize lfmass Zhe Zhang 2020-07-13
-                      stmassxy(i,j) = xsaixy(i,j)/0.003
+                elseif(croptype(i,2,j) > croptype(i,1,j) .and. &
+                       croptype(i,2,j) > croptype(i,3,j) .and. &
+                       croptype(i,2,j) > croptype(i,4,j) ) then        ! choose soybean
+                       cropcat (i,j) = 2
+                       lfmassxy(i,j) =    lai(i,j)/0.030               ! Initialize lfmass Zhe Zhang 2020-07-13
+                       stmassxy(i,j) = xsaixy(i,j)/0.003
 
-	               else
-		              cropcat (i,j) = default_crop_table
+               else
+                      cropcat (i,j) = NoahmpIO%default_crop_table
                       lfmassxy(i,j) =    lai(i,j)/0.035
                       stmassxy(i,j) = xsaixy(i,j)/0.003
-	               end if
-	            end if
-	         end if
+               end if
+            end if
+         end if
 
 ! Noah-MP irrigation scheme !pvk
              if(iopt_irr >= 1 .and. iopt_irr <= 3) then
@@ -371,7 +372,7 @@ contains
                    irfivol(i,j) = 0.
                 end if
              end if
-	       endif
+            endif
           enddo
        enddo
        
@@ -396,35 +397,35 @@ contains
        !initialize arrays for groundwater dynamics iopt_run=5
 
        if(iopt_run.eq.5) then
-          if( PRESENT(smoiseq)   .AND. &
-            PRESENT(smcwtdxy)    .AND. &
-            PRESENT(rechxy)      .AND. &
-            PRESENT(deeprechxy)  .AND. &
-            PRESENT(areaxy)      .AND. &
-            PRESENT(dx)          .AND. &
-            PRESENT(dy)          .AND. &
-            PRESENT(msftx)       .AND. &
-            PRESENT(msfty)       .AND. &
-            PRESENT(wtddt)       .AND. &
-            PRESENT(stepwtd)     .AND. &
-            PRESENT(dt)          .AND. &
-            PRESENT(qrfsxy)      .AND. &
-            PRESENT(qspringsxy)  .AND. &
-            PRESENT(qslatxy)     .AND. &
-            PRESENT(fdepthxy)    .AND. &
-            PRESENT(ht)          .AND. &
-            PRESENT(riverbedxy)  .AND. &
-            PRESENT(eqzwt)       .AND. &
-            PRESENT(rivercondxy) .AND. &
-            PRESENT(pexpxy)      .AND. &
-            PRESENT(rechclim)    ) then
+         ! if( PRESENT(smoiseq)   .AND. &
+         !   PRESENT(smcwtdxy)    .AND. &
+         !   PRESENT(rechxy)      .AND. &
+         !   PRESENT(deeprechxy)  .AND. &
+         !   PRESENT(areaxy)      .AND. &
+         !   PRESENT(dx)          .AND. &
+         !   PRESENT(dy)          .AND. &
+         !   PRESENT(msftx)       .AND. &
+         !   PRESENT(msfty)       .AND. &
+         !   PRESENT(wtddt)       .AND. &
+         !   PRESENT(stepwtd)     .AND. &
+         !   PRESENT(dt)          .AND. &
+         !   PRESENT(qrfsxy)      .AND. &
+         !   PRESENT(qspringsxy)  .AND. &
+         !   PRESENT(qslatxy)     .AND. &
+         !   PRESENT(fdepthxy)    .AND. &
+         !   PRESENT(ht)          .AND. &
+         !   PRESENT(riverbedxy)  .AND. &
+         !   PRESENT(eqzwt)       .AND. &
+         !   PRESENT(rivercondxy) .AND. &
+         !   PRESENT(pexpxy)      .AND. &
+         !   PRESENT(rechclim)    ) then
 
              STEPWTD = nint(WTDDT*60./DT)
              STEPWTD = max(STEPWTD,1)
 
-          else
-             call wrf_error_fatal ('Not enough fields to use groundwater option in Noah-MP')
-          endif
+          !else
+          !   call wrf_error_fatal ('Not enough fields to use groundwater option in Noah-MP')
+          !endif
        endif
     endif
 

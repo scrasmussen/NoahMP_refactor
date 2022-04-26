@@ -10,6 +10,8 @@ module WaterVarInitMod
 
   use NoahmpIOVarType
   use NoahmpVarType
+  use PedoTransferSR2006
+  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -250,6 +252,7 @@ contains
     allocate( noahmp%water%param%DKSAT    (       1:NSOIL) )
     allocate( noahmp%water%param%BEXP     (       1:NSOIL) )
     allocate( noahmp%water%param%PSISAT   (       1:NSOIL) )
+    allocate( noahmp%water%param%QUARTZ   (       1:NSOIL) )
 
     noahmp%water%param%SMCMAX(:)        = huge(1.0)
     noahmp%water%param%SMCWLT(:)        = huge(1.0)
@@ -259,7 +262,7 @@ contains
     noahmp%water%param%DKSAT (:)        = huge(1.0)
     noahmp%water%param%BEXP  (:)        = huge(1.0)
     noahmp%water%param%PSISAT(:)        = huge(1.0)
-
+    noahmp%water%param%QUARTZ(:)        = huge(1.0)
     ! water diagnostic variable
 
 
@@ -276,8 +279,11 @@ contains
     type(noahmp_type),   intent(inout) :: noahmp
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
 
-    ! local loop index
-    integer                          :: ISOIL
+    ! local loop 
+    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: SAND
+    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: CLAY
+    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: ORGM
+    integer                                               :: ISOIL
 
     associate(                                                  &
               I           => noahmp%config%domain%ILOC         ,&
@@ -395,6 +401,7 @@ contains
        noahmp%water%param%DKSAT(ISOIL)    = NoahmpIO%DKSAT_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%BEXP(ISOIL)     = NoahmpIO%BEXP_TABLE(SOILTYP(ISOIL))
        noahmp%water%param%PSISAT(ISOIL)   = NoahmpIO%PSISAT_TABLE(SOILTYP(ISOIL))
+       noahmp%water%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SOILTYP(ISOIL))
     enddo
 
     ! derived parameters
@@ -415,6 +422,16 @@ contains
     noahmp%water%state%FICEOLD_SNOW(ISNOW+1:0) = NoahmpIO%SNICEXY(I,ISNOW+1:0,J)   &  ! snow ice fraction  
                                                  /(NoahmpIO%SNICEXY(I,ISNOW+1:0,J) &
                                                  + NoahmpIO%SNLIQXY(I,ISNOW+1:0,J))
+
+    if(NoahmpIO%iopt_soil == 3 .and. .not. noahmp%config%domain%urban_flag) then
+       sand = 0.01 * NoahmpIO%soilcomp(I,1:4,J)
+       clay = 0.01 * NoahmpIO%soilcomp(I,5:8,J)
+       orgm = 0.0
+
+       if(NoahmpIO%iopt_pedo == 1) call pedotransfer_sr2006(NoahmpIO,noahmp,              &
+                                                            noahmp%config%domain%SOILTYP, &
+                                                            sand,clay,orgm)
+    end if
 
     end associate
 
@@ -439,7 +456,7 @@ contains
               NSOIL       => noahmp%config%domain%NSOIL         &
              )
              
-	NoahmpIO%SMSTAV   (I,J)            = 0.0  ! [maintained as Noah consistency] water
+    NoahmpIO%SMSTAV   (I,J)            = 0.0  ! [maintained as Noah consistency] water
     NoahmpIO%SMSTOT   (I,J)            = 0.0  ! [maintained as Noah consistency] water
     NoahmpIO%SFCRUNOFF(I,J)            = NoahmpIO%SFCRUNOFF(I,J) + (noahmp%water%flux%RUNSRF * NoahmpIO%DTBL)  
     NoahmpIO%UDRUNOFF (I,J)            = NoahmpIO%UDRUNOFF (I,J) + (noahmp%water%flux%RUNSUB * NoahmpIO%DTBL)  
@@ -450,7 +467,7 @@ contains
     NoahmpIO%SNOW     (I,J)            = noahmp%water%state%SNEQV
     NoahmpIO%SNOWH    (I,J)            = noahmp%water%state%SNOWH 
     NoahmpIO%CANWAT   (I,J)            = noahmp%water%state%CANLIQ + noahmp%water%state%CANICE
-    NoahmpIO%ACSNOW   (I,J)            = NoahmpIO%ACSNOW(I,J) + (NoahmpIO%RAINBL* noahmp%water%state%FPICE)
+    NoahmpIO%ACSNOW   (I,J)            = NoahmpIO%ACSNOW(I,J) + (NoahmpIO%RAINBL (I,J) * noahmp%water%state%FPICE)
     NoahmpIO%ACSNOM   (I,J)            = NoahmpIO%ACSNOM(I,J) + (noahmp%water%flux%QSNBOT * NoahmpIO%DTBL) + &
                                          noahmp%water%state%PONDING + noahmp%water%state%PONDING1 +          &
                                          noahmp%water%state%PONDING2

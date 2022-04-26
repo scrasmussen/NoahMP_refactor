@@ -6,6 +6,13 @@ MODULE module_sf_noahmp_groundwater
 ! Module written by Gonzalo Miguez-Macho , U. de Santiago de Compostela, Galicia, Spain
 ! November 2012 
 !===============================================================================
+  use NoahmpIOVarType
+  use NoahmpVarType
+  use Machine, only : kind_noahmp
+
+  implicit none
+
+  type(NoahmpIO_type) :: NoahmpIO
 
 CONTAINS
 
@@ -20,7 +27,7 @@ CONTAINS
                                 its,ite, jts,jte, kts,kte                     )
 
 ! ----------------------------------------------------------------------
-  USE NOAHMP_TABLES, ONLY: BEXP_TABLE, DKSAT_TABLE, SMCMAX_TABLE,PSISAT_TABLE, SMCWLT_TABLE
+!  USE NOAHMP_TABLES, ONLY: BEXP_TABLE, DKSAT_TABLE, SMCMAX_TABLE,PSISAT_TABLE, SMCWLT_TABLE
 ! ----------------------------------------------------------------------
   IMPLICIT NONE
 ! ----------------------------------------------------------------------
@@ -135,13 +142,13 @@ CALL LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA       &
        DO I=its,ite
           IF(LANDMASK(I,J).GT.0)THEN
 
-            BEXP   = BEXP_TABLE   (ISLTYP(I,J))
-            DKSAT  = DKSAT_TABLE  (ISLTYP(I,J))
-            PSISAT = -1.0*PSISAT_TABLE (ISLTYP(I,J))
-            SMCMAX = SMCMAX_TABLE (ISLTYP(I,J))
-            SMCWLT = SMCWLT_TABLE (ISLTYP(I,J))
+            BEXP   = NoahmpIO%BEXP_TABLE   (ISLTYP(I,J))
+            DKSAT  = NoahmpIO%DKSAT_TABLE  (ISLTYP(I,J))
+            PSISAT = -1.0*NoahmpIO%PSISAT_TABLE (ISLTYP(I,J))
+            SMCMAX = NoahmpIO%SMCMAX_TABLE (ISLTYP(I,J))
+            SMCWLT = NoahmpIO%SMCWLT_TABLE (ISLTYP(I,J))
 
-             IF(IVGTYP(I,J)==ISURBAN)THEN
+             IF(IVGTYP(I,J)==NoahmpIO%ISURBAN)THEN
                  SMCMAX = 0.45
                  SMCWLT = 0.40
              ENDIF
@@ -206,7 +213,7 @@ END  SUBROUTINE WTABLE_mmf_noahmp
                            ,ims,ime,jms,jme,kms,kme                      &
                            ,its,ite,jts,jte,kts,kte                      )
 ! ----------------------------------------------------------------------
-  USE NOAHMP_TABLES, ONLY : DKSAT_TABLE
+!  USE NOAHMP_TABLES, ONLY : DKSAT_TABLE
 ! ----------------------------------------------------------------------
   IMPLICIT NONE
 ! ----------------------------------------------------------------------
@@ -241,7 +248,7 @@ jteh=min(jte+1,jde-1)
     DO J=jtsh,jteh
        DO I=itsh,iteh
            IF(FDEPTH(I,J).GT.0.)THEN
-                 KLAT = DKSAT_TABLE(ISLTYP(I,J)) * KLATFACTOR(ISLTYP(I,J))
+                 KLAT = NoahmpIO%DKSAT_TABLE(ISLTYP(I,J)) * KLATFACTOR(ISLTYP(I,J))
                  IF(WTD(I,J) < -1.5)THEN
                      KCELL(I,J) = FDEPTH(I,J) * KLAT * EXP( (WTD(I,J) + 1.5) / FDEPTH(I,J) )
                  ELSE

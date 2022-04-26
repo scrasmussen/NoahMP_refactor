@@ -1,6 +1,6 @@
-module SnowLayerCombineMod
+module SnowLayerCombineGlacierMod
 
-!!! Snowpack layer combination process
+!!! Snowpack layer combination process over glacier
 !!! Update snow ice, snow water, snow thickness, snow temperature
 
   use Machine, only : kind_noahmp
@@ -12,10 +12,10 @@ module SnowLayerCombineMod
 
 contains
 
-  subroutine SnowLayerCombine(noahmp)
+  subroutine SnowLayerCombineGlacier(noahmp)
 
 ! ------------------------ Code history -----------------------------------
-! Original Noah-MP subroutine: COMBINE
+! Original Noah-MP subroutine: COMBINE_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
@@ -32,8 +32,8 @@ contains
     real(kind=kind_noahmp) :: ZWICE        ! total ice mass in snow
     real(kind=kind_noahmp) :: ZWLIQ        ! total liquid water in snow
     real(kind=kind_noahmp) :: DZMIN(3)     ! minimum thickness of each snow layer
-    data DZMIN /0.025, 0.025, 0.1/         ! MB: change limit
-    !data DZMIN /0.045, 0.05, 0.2/
+    !data DZMIN /0.025, 0.025, 0.1/         ! MB: change limit
+    data DZMIN /0.045, 0.05, 0.2/
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -66,19 +66,9 @@ contains
                 SNICE(J-1)  = SNICE(J-1)  + SNICE(J)
                 DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
              else
-                if ( SNICE(J) >= 0.0 ) then
-                   PONDING1 = SNLIQ(J)       ! ISNOW WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
-                   SNEQV    = SNICE(J)       ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
-                   SNOWH    = DZSNSO(J)      ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
-                else  ! SNICE OVER-SUBLIMATED EARLIER
-                   PONDING1 = SNLIQ(J) + SNICE(J)
-                   if ( PONDING1 < 0.0 ) then  ! IF SNICE AND SNLIQ SUBLIMATES REMOVE FROM SOIL
-                      SICE(1)  = max( 0.0, SICE(1)+PONDING1/(DZSNSO(1)*1000.0) )
-                      PONDING1 = 0.0
-                   endif
-                   SNEQV = 0.0
-                   SNOWH = 0.0
-                endif ! if(SNICE(J) >= 0.0)
+                PONDING1  = PONDING1 +SNLIQ(J)       ! ISNOW WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
+                SNEQV     = SNICE(J)                 ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
+                SNOWH     = DZSNSO(J)                ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
                 SNLIQ(J)  = 0.0
                 SNICE(J)  = 0.0
                 DZSNSO(J) = 0.0
@@ -123,8 +113,8 @@ contains
     enddo
 
 ! check the snow depth - all snow gone, the liquid water assumes ponding on soil surface.
-    !if ( (SNOWH < 0.05) .and. (ISNOW < 0) ) then
-    if ( (SNOWH < 0.025) .and. (ISNOW < 0) ) then ! MB: change limit
+    if ( (SNOWH < 0.05) .and. (ISNOW < 0) ) then
+    !if ( (SNOWH < 0.025) .and. (ISNOW < 0) ) then ! MB: change limit
        ISNOW    = 0
        SNEQV    = ZWICE
        PONDING2 = ZWLIQ                ! LIMIT OF ISNOW < 0 MEANS INPUT PONDING
@@ -179,6 +169,6 @@ contains
 
     end associate
 
-  end subroutine SnowLayerCombine
+  end subroutine SnowLayerCombineGlacier
 
-end module SnowLayerCombineMod
+end module SnowLayerCombineGlacierMod

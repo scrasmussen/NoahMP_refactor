@@ -17,7 +17,9 @@ module NoahmpDriverMainMod
   use WaterVarInitMod
   use BiochemVarInitMod
   use NoahmpMainMod
+  use NoahmpMainGlacierMod
   use module_ra_gfdleta,  only: cal_mon_day
+  use module_sf_urban,    only: IRI_SCHEME 
 !-------------------------------
 #if ( WRF_CHEM == 1 )
   USE module_data_gocart_dust
@@ -28,7 +30,7 @@ module NoahmpDriverMainMod
   
 contains  
 
-  subroutine NoahmpDriverMain (noahmp,NoahmpIO)
+  subroutine NoahmpDriverMain (NoahmpIO)
   
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: noahmplsm
@@ -38,10 +40,11 @@ contains
  
     implicit none 
     
-    type(noahmp_type)      :: noahmp
-    type(NoahmpIO_type)    :: NoahmpIO
+    type(NoahmpIO_type)                 :: NoahmpIO
     
     !local
+    type(noahmp_type)                   :: noahmp
+
     integer                             :: I
     integer                             :: J
     integer                             :: K
@@ -96,7 +99,7 @@ contains
        NoahmpIO%J = J
        if(NoahmpIO%ITIMESTEP == 1)then
           do I=NoahmpIO%its,NoahmpIO%ite
-             if((NoahmpIO%XLAND(I,J)-1.5) >= 0.)then      ! Open water case
+             if((NoahmpIO%XLAND(I,J)-1.5) >= 0.)then          ! Open water case
                 if(NoahmpIO%XICE(I,J) == 1. .AND. IPRINT) print*,' sea-ice at water point, I=',I,'J=',J
                 NoahmpIO%SMSTAV(I,J) = 1.0
                 NoahmpIO%SMSTOT(I,J) = 1.0
@@ -105,7 +108,7 @@ contains
                    NoahmpIO%TSLB(I,K,J) = 273.16
                 enddo
              else
-                if(NoahmpIO%XICE(I,J) == 1.)then          ! Sea-ice case
+                if(NoahmpIO%XICE(I,J) == 1.)then              ! Sea-ice case
                    NoahmpIO%SMSTAV(I,J) = 1.0
                    NoahmpIO%SMSTOT(I,J) = 1.0
                    do K = 1, NoahmpIO%NSOIL
@@ -114,15 +117,15 @@ contains
                 endif
              endif
           enddo
-       endif                                            ! end of initialization over ocean
+       endif                                                  ! end of initialization over ocean
 !-----------------------------------------------------------------------
        ILOOP : do I = NoahmpIO%its, NoahmpIO%ite
        NoahmpIO%I = I
        if (NoahmpIO%XICE(I,J) >= NoahmpIO%XICE_THRESHOLD)then
-          NoahmpIO%ICE                 = 1                    ! Sea-ice point
-          NoahmpIO%SH2O  (i,1:NSOIL,j) = 1.0
-          NoahmpIO%LAI(i,j)            = 0.01
-          cycle ILOOP ! Skip any processing at sea-ice points
+          NoahmpIO%ICE                          = 1           ! Sea-ice point
+          NoahmpIO%SH2O (I,1:NoahmpIO%NSOIL,J)  = 1.0
+          NoahmpIO%LAI  (I,J)                   = 0.01
+          cycle ILOOP                                         ! Skip any processing at sea-ice points
        else
           if((NoahmpIO%XLAND(I,J)-1.5) >= 0.) cycle ILOOP     ! Open water case
 
@@ -142,24 +145,24 @@ contains
           !  irrigate vegetaion only in urban area, MAY-SEP, 9-11pm
           !---------------------------------------------------------------------
           
-          if(NoahmpIO%IVGTYP(I,J) == ISURBAN_TABLE .or. NoahmpIO%IVGTYP(I,J) == LCZ_1_TABLE  .or. &
-             NoahmpIO%IVGTYP(I,J) == LCZ_2_TABLE   .or. NoahmpIO%IVGTYP(I,J) == LCZ_3_TABLE  .or. &
-             NoahmpIO%IVGTYP(I,J) == LCZ_4_TABLE   .or. NoahmpIO%IVGTYP(I,J) == LCZ_5_TABLE  .or. &
-             NoahmpIO%IVGTYP(I,J) == LCZ_6_TABLE   .or. NoahmpIO%IVGTYP(I,J) == LCZ_7_TABLE  .or. &
-             NoahmpIO%IVGTYP(I,J) == LCZ_8_TABLE   .or. NoahmpIO%IVGTYP(I,J) == LCZ_9_TABLE  .or. &
-             NoahmpIO%IVGTYP(I,J) == LCZ_10_TABLE  .or. NoahmpIO%IVGTYP(I,J) == LCZ_11_TABLE ) THEN
+          if(NoahmpIO%IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_1_TABLE  .or. &
+             NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_2_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_3_TABLE  .or. &
+             NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_4_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_5_TABLE  .or. &
+             NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_6_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_7_TABLE  .or. &
+             NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_8_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_9_TABLE  .or. &
+             NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_10_TABLE  .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_11_TABLE ) THEN
 
-          if(NoahmpIO%SF_URBAN_PHYSICS > 0 .AND. IRI_SCHEME == 1 ) then
-	         SOLAR_TIME = (NoahmpIO%JULIAN - INT(NoahmpIO%JULIAN))*24 + NoahmpIO%XLONG(I,J)/15.0
-	        if(SOLAR_TIME < 0.) SOLAR_TIME = SOLAR_TIME + 24.
-               call CAL_MON_DAY(INT(NoahmpIO%JULIAN),NoahmpIO%YR,JMONTH,JDAY)
-               if (SOLAR_TIME >= 21. .AND. SOLAR_TIME <= 23. .AND. JMONTH >= 5 .AND. JMONTH <= 9) then
-                  noahmp%water%state%SMC(1) = &
-                    max(noahmp%water%state%SMC(1),noahmp%water%param%parameters%SMCREF(1))
-                  noahmp%water%state%SMC(2) = &
-                    max(noahmp%water%state%SMC(2),noahmp%water%param%parameters%SMCREF(2))
-               endif
-            endif
+             if(NoahmpIO%SF_URBAN_PHYSICS > 0 .AND. IRI_SCHEME == 1 ) then
+                SOLAR_TIME = (NoahmpIO%JULIAN - INT(NoahmpIO%JULIAN))*24 + NoahmpIO%XLONG(I,J)/15.0
+                if(SOLAR_TIME < 0.) SOLAR_TIME = SOLAR_TIME + 24.
+                call CAL_MON_DAY(INT(NoahmpIO%JULIAN),NoahmpIO%YR,JMONTH,JDAY)
+                if (SOLAR_TIME >= 21. .AND. SOLAR_TIME <= 23. .AND. JMONTH >= 5 .AND. JMONTH <= 9) then
+                    noahmp%water%state%SMC(1) = &
+                      max(noahmp%water%state%SMC(1),noahmp%water%param%SMCREF(1))
+                    noahmp%water%state%SMC(2) = &
+                      max(noahmp%water%state%SMC(2),noahmp%water%param%SMCREF(2))
+                endif
+             endif
           endif
 
           !------------------------------------------------------------------------
@@ -234,8 +237,8 @@ contains
        call WaterVarOutTransfer  (noahmp, NoahmpIO)
        call BiochemVarOutTransfer(noahmp, NoahmpIO) 
        
-      enddo     ! I loop
-    enddo       ! J loop
+      enddo ILOOP    ! I loop
+    enddo  JLOOP     ! J loop
               
   end subroutine NoahmpDriverMain
   

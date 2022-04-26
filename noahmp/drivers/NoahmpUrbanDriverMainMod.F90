@@ -5,10 +5,12 @@ module NoahmpUrbanDriverMainMod
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine only : kind_noahmp
-  use NoahmpIOVarType
-  
+  use Machine, only : kind_noahmp
+  use NoahmpIOVarType 
+ 
   implicit none
+
+  type(NoahmpIO_type)    :: NoahmpIO
   
 contains
 
@@ -16,16 +18,16 @@ contains
                                  DT,     COSZ_URB2D,     XLAT_URB2D,                        & ! IN : Time/Space-related
                                 T3D,           QV3D,          U_PHY,      V_PHY,   SWDOWN,  & ! IN : Forcing
                              SWDDIR,         SWDDIF,                                        &
-		                        GLW,          P8W3D,         RAINBL,       DZ8W,      ZNT,  & ! IN : Forcing
+                                GLW,          P8W3D,         RAINBL,       DZ8W,      ZNT,  & ! IN : Forcing
                                 TSK,            HFX,            QFX,         LH,   GRDFLX,  & ! IN/OUT : LSM 
-		                     ALBEDO,          EMISS,           QSFC,                        & ! IN/OUT : LSM 
+                             ALBEDO,          EMISS,           QSFC,                        & ! IN/OUT : LSM 
                             ids,ide,        jds,jde,        kds,kde,                        &
                             ims,ime,        jms,jme,        kms,kme,                        &
                             its,ite,        jts,jte,        kts,kte,                        &
                          cmr_sfcdif,     chr_sfcdif,     cmc_sfcdif,                        &
-	                     chc_sfcdif,    cmgr_sfcdif,    chgr_sfcdif,                        &
+                         chc_sfcdif,    cmgr_sfcdif,    chgr_sfcdif,                        &
                            tr_urb2d,       tb_urb2d,       tg_urb2d,                        & !H urban
-	                       tc_urb2d,       qc_urb2d,       uc_urb2d,                        & !H urban
+                           tc_urb2d,       qc_urb2d,       uc_urb2d,                        & !H urban
                          xxxr_urb2d,     xxxb_urb2d,     xxxg_urb2d, xxxc_urb2d,            & !H urban
                           trl_urb3d,      tbl_urb3d,      tgl_urb3d,                        & !H urban
                            sh_urb2d,       lh_urb2d,        g_urb2d,   rn_urb2d,  ts_urb2d, & !H urban

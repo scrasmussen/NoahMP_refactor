@@ -214,6 +214,8 @@ module EnergyVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: TKSNO       ! snow layer thermal conductivity (w/m/k)
     real(kind=kind_noahmp), allocatable, dimension(:) :: CVSOIL      ! soil layer volumetric specific heat (j/m3/k)
     real(kind=kind_noahmp), allocatable, dimension(:) :: TKSOIL      ! soil layer thermal conductivity (w/m/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CVGLAICE    ! glacier ice layer volumetric specific heat (j/m3/k)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TKGLAICE    ! glacier ice thermal conductivity (w/m/k)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DF          ! thermal conductivity [w/m/k] for all soil and snow layers
     real(kind=kind_noahmp), allocatable, dimension(:) :: HCPCT       ! heat capacity [j/m3/k] for all snow and soil layers
     real(kind=kind_noahmp), allocatable, dimension(:) :: FACT        ! energy factor for soil and snow phase change
@@ -293,7 +295,7 @@ module EnergyVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: TAUL        ! leaf transmittance: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: TAUS        ! stem transmittance: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: EG          ! emissivity soil surface: 1=soil, 2=lake
-
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBICE      ! land/glacier ice albedo: 1=vis, 2=nir
 
   end type parameter_type
 

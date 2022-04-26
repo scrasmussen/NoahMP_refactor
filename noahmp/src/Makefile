@@ -75,7 +75,6 @@ OBJS = ConstantDefineMod.o \
        CanopyRadiationTwoStreamMod.o \
        SurfaceAlbedoMod.o \
        SurfaceRadiationMod.o \
-       RadiationMainMod.o \
        HumiditySaturationMod.o \
        ResistanceAboveCanopyChen97Mod.o \
        ResistanceAboveCanopyMostMod.o \
@@ -108,7 +107,36 @@ OBJS = ConstantDefineMod.o \
        CropPhotosynthesisMod.o \
        IrrigationPrepareMod.o \
        BalanceErrorCheckMod.o \
-       GeneralInitMod.o
+       GeneralInitMod.o \
+       module_sf_noahmp_groundwater.o \
+       PedoTransferSR2006.o \
+       BalanceErrorCheckGlacierMod.o \
+       EnergyMainGlacierMod.o \
+       GeneralInitGlacierMod.o \
+       GlacierIceThermalPropertyMod.o \
+       GlacierPhaseChangeMod.o \
+       GlacierTemperatureMainMod.o \
+       GlacierTemperatureSolverMod.o \
+       GlacierThermalDiffusionMod.o \
+       GroundAlbedoGlacierMod.o \
+       GroundRoughnessPropertyGlacierMod.o \
+       GroundThermalPropertyGlacierMod.o \
+       NoahmpMainGlacierMod.o \
+       PrecipitationHeatAdvectGlacierMod.o \
+       PsychrometricVariableGlacierMod.o \
+       ResistanceGroundEvaporationGlacierMod.o \
+       SnowCoverGlacierMod.o \
+       SnowLayerCombineGlacierMod.o \
+       SnowLayerDivideGlacierMod.o \
+       SnowWaterMainGlacierMod.o \
+       SnowfallGlacierMod.o \
+       SnowpackCompactionGlacierMod.o \
+       SnowpackHydrologyGlacierMod.o \
+       SurfaceAlbedoGlacierMod.o \
+       SurfaceEmissivityGlacierMod.o \
+       SurfaceEnergyFluxGlacierMod.o \
+       SurfaceRadiationGlacierMod.o \
+       WaterMainGlacierMod.o
 
 all:	$(OBJS)
 
@@ -133,10 +161,10 @@ NoahmpVarType.o:        ConfigVarType.o ForcingVarType.o EnergyVarType.o \
                         WaterVarType.o BiochemVarType.o
 NoahmpIOVarInitMod.o:   ../utility/Machine.o NoahmpIOVarType.o
 PedoTransferSR2006.o:   ../utility/Machine.o NoahmpIOVarType.o
-ConfigVarInitMod.o:     NoahmpIOVarType.o NoahmpVarType.o PedoTransferSR2006.o
+ConfigVarInitMod.o:     NoahmpIOVarType.o NoahmpVarType.o
 ForcingVarInitMod.o:    NoahmpIOVarType.o NoahmpVarType.o
 EnergyVarInitMod.o:     NoahmpIOVarType.o NoahmpVarType.o
-WaterVarInitMod.o:      NoahmpIOVarType.o NoahmpVarType.o
+WaterVarInitMod.o:      NoahmpIOVarType.o NoahmpVarType.o PedoTransferSR2006.o
 BiochemVarInitMod.o:    NoahmpIOVarType.o NoahmpVarType.o
 CanopyHydrologyMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GroundWaterTopModelMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -227,14 +255,12 @@ SurfaceAlbedoMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                     SnowAgingBatsMod.o SnowAlbedoBatsMod.o SnowAlbedoClassMod.o \
                     GroundAlbedoMod.o CanopyRadiationTwoStreamMod.o
 SurfaceRadiationMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-RadiationMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
-                    SurfaceAlbedoMod.o SurfaceRadiationMod.o
 EnergyMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
-                 GroundThermalPropertyMod.o RadiationMainMod.o SurfaceEnergyFluxVegetatedMod.o \
+                 GroundThermalPropertyMod.o SurfaceEnergyFluxVegetatedMod.o \
                  SurfaceEnergyFluxBareGroundMod.o SoilSnowTemperatureMainMod.o \
                  SoilSnowWaterPhaseChangeMod.o SnowCoverGroundNiu07Mod.o SurfaceEmissivityMod.o \
                  GroundRoughnessPropertyMod.o PsychrometricVariableMod.o ResistanceGroundEvaporationMod.o \
-                 SoilWaterTranspirationMod.o
+                 SoilWaterTranspirationMod.o SurfaceAlbedoMod.o SurfaceRadiationMod.o
 NoahmpMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                  IrrigationPrepareMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                  PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o \
@@ -283,4 +309,44 @@ BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o C
 IrrigationPrepareMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o IrrigationTriggerMod.o
 BalanceErrorCheckMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GeneralInitMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+module_sf_noahmp_groundwater.o: ../utility/Machine.o NoahmpVarType.o
+BalanceErrorCheckGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+EnergyMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowCoverGlacierMod.o \
+                        GroundRoughnessPropertyGlacierMod.o GroundThermalPropertyGlacierMod.o \
+                        SurfaceAlbedoGlacierMod.o SurfaceRadiationGlacierMod.o SurfaceEmissivityGlacierMod.o \
+                        ResistanceGroundEvaporationGlacierMod.o PsychrometricVariableGlacierMod.o \
+                        SurfaceEnergyFluxGlacierMod.o GlacierTemperatureMainMod.o GlacierPhaseChangeMod.o
+GeneralInitGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GlacierIceThermalPropertyMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GlacierPhaseChangeMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GlacierTemperatureMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                             GlacierTemperatureSolverMod.o GlacierThermalDiffusionMod.o
+GlacierTemperatureSolverMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o MatrixSolverTriDiagonalMod.o
+GlacierThermalDiffusionMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GroundAlbedoGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GroundRoughnessPropertyGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+GroundThermalPropertyGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                   SnowThermalPropertyMod.o GlacierIceThermalPropertyMod.o
+NoahmpMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o AtmosForcingMod.o \
+                        GeneralInitGlacierMod.o PrecipitationHeatAdvectGlacierMod.o EnergyMainGlacierMod.o \
+                        WaterMainGlacierMod.o BalanceErrorCheckGlacierMod.o
+PrecipitationHeatAdvectGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+PsychrometricVariableGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+ResistanceGroundEvaporationGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowCoverGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowLayerCombineGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowLayerWaterComboMod.o
+SnowLayerDivideGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowLayerWaterComboMod.o
+SnowWaterMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowfallGlacierMod.o \
+                           SnowpackCompactionGlacierMod.o SnowLayerCombineGlacierMod.o SnowLayerDivideGlacierMod.o \
+                           SnowpackHydrologyGlacierMod.o 
+SnowfallGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowpackCompactionGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowpackHydrologyGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowLayerCombineGlacierMod.o
+SurfaceAlbedoGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowAgingBatsMod.o \
+                           SnowAlbedoBatsMod.o SnowAlbedoClassMod.o GroundAlbedoGlacierMod.o
+SurfaceEmissivityGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SurfaceEnergyFluxGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                               VaporPressureSaturationMod.o ResistanceBareGroundMostMod.o
+SurfaceRadiationGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+WaterMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowWaterMainGlacierMod.o
 

@@ -5,7 +5,7 @@ module NoahmpGroundwaterInitMod
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine only : kind_noahmp
+  use Machine, only : kind_noahmp
   use NoahmpIOVarType
   
   implicit none
@@ -32,8 +32,8 @@ contains
 
     implicit none 
     
-    type(NoahmpIO_type)    :: NoahmpIO
-    type(domain), target   :: grid                                                    ! state
+    type(NoahmpIO_type), intent(inout)    :: NoahmpIO
+    type(domain), target                  :: grid                                                    ! state
     
 ! local
     integer                :: I,J,K,ITER,itf,jtf, NITER, NCOUNT,NS
@@ -42,14 +42,14 @@ contains
     real(kind=kind_noahmp) :: DELTAT,RCOND,TOTWATER
     real(kind=kind_noahmp) :: AA,BBB,CC,DD,DX,FUNC,DFUNC,DDZ,EXPON,SMC,FLUX
 
-    real(kind=kind_noahmp), 
+    real(kind=kind_noahmp),&            
       dimension(1:NoahmpIO%NSOIL)                                     :: SMCEQ,ZSOIL
-    real(kind=kind_noahmp), 
+    real(kind=kind_noahmp),& 
       dimension(NoahmpIO%ims:NoahmpIO%ime, NoahmpIO%jms:NoahmpIO%jme) :: QLAT, QRF
-    integer,               
+    integer,               &              
       dimension(NoahmpIO%ims:NoahmpIO%ime, NoahmpIO%jms:NoahmpIO%jme) :: LANDMASK     !-1 for water (ice or no ice) and glacial areas, 1 for land where the LSM does its soil moisture calculations  
     
-    associate(
+    associate(                                        &
               NSOIL      => NoahmpIO%num_soil_layers, &
               DZS        => NoahmpIO%dzs,             &
               ISLTYP     => NoahmpIO%isltyp,          &
@@ -110,7 +110,7 @@ contains
     itf=min0(ite,ide-1)
     jtf=min0(jte,jde-1)
 
-    where(IVGTYP.NE.ISWATER_TABLE.AND.IVGTYP.NE.ISICE_TABLE)
+    where(IVGTYP.NE.NoahmpIO%ISWATER_TABLE.AND.IVGTYP.NE.NoahmpIO%ISICE_TABLE)
          LANDMASK=1
     elsewhere
          LANDMASK=-1
@@ -238,18 +238,18 @@ contains
 
        do J = jts,jtf
           do I = its,itf
-             BEXP   =   BEXP_TABLE(ISLTYP(I,J))
-             SMCMAX = SMCMAX_TABLE(ISLTYP(I,J))
-             SMCWLT = SMCWLT_TABLE(ISLTYP(I,J))
+             BEXP   = NoahmpIO%BEXP_TABLE(ISLTYP(I,J))
+             SMCMAX = NoahmpIO%SMCMAX_TABLE(ISLTYP(I,J))
+             SMCWLT = NoahmpIO%SMCWLT_TABLE(ISLTYP(I,J))
              
-             if(IVGTYP(I,J)==ISURBAN_TABLE)then
+             if(IVGTYP(I,J)==NoahmpIO%ISURBAN_TABLE)then
                 SMCMAX = 0.45         
                 SMCWLT = 0.40         
              endif 
              
-             DWSAT  =   DWSAT_TABLE(ISLTYP(I,J))
-             DKSAT  =   DKSAT_TABLE(ISLTYP(I,J))
-             PSISAT = -PSISAT_TABLE(ISLTYP(I,J))
+             DWSAT  = NoahmpIO%DWSAT_TABLE(ISLTYP(I,J))
+             DKSAT  = NoahmpIO%DKSAT_TABLE(ISLTYP(I,J))
+             PSISAT = -NoahmpIO%PSISAT_TABLE(ISLTYP(I,J))
              if ( ( BEXP > 0.0 ) .AND. ( smcmax > 0.0 ) .AND. ( -psisat > 0.0 ) ) then
                 !initialize equilibrium soil moisture for water table diagnostic
                 call EquilibriumSoilMoisture(NSOIL,  ZSOIL, SMCMAX, SMCWLT, &
@@ -344,7 +344,7 @@ contains
     real(kind=kind_noahmp),  dimension(1:NSOIL), intent(out) :: SMCEQ  !equilibrium soil water  content [m3/m3]
 !local
     integer                                                  :: K, ITER
-    real(kind=kind_noahmp),                                  :: DDZ  , SMC, FUNC, &
+    real(kind=kind_noahmp)                                   :: DDZ  , SMC, FUNC, &
                                                                 DFUNC, AA , BB  , &
                                                                 EXPON, DX
                                                               

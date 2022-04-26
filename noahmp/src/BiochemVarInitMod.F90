@@ -300,7 +300,7 @@ contains
        noahmp%biochem%param%RT_OVRC     = NoahmpIO%RT_OVRC_TABLE(CROPTYP,:)
     endif
 
-    if(NoahmpIO%iopt_crop == 1 .and. noahmp%config%domain%CROPTYPE > 0) then
+    if(NoahmpIO%iopt_crop == 1 .and. noahmp%config%domain%CROPTYP > 0) then
        noahmp%biochem%param%PLTDAY = NoahmpIO%PLANTING(I,J)
        noahmp%biochem%param%HSDAY  = NoahmpIO%HARVEST (I,J)
        noahmp%biochem%param%GDDS1  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
@@ -315,7 +315,7 @@ contains
                                      noahmp%biochem%param%GDDS5
     end if
 
-    if(iopt_irr == 2) then
+    if(NoahmpIO%iopt_irr == 2) then
        noahmp%biochem%param%PLTDAY = NoahmpIO%PLANTING(I,J)
        noahmp%biochem%param%HSDAY  = NoahmpIO%HARVEST (I,J)
     end if
@@ -337,7 +337,7 @@ contains
 
     associate(                                       &
               I        => noahmp%config%domain%ILOC ,&
-              J        => noahmp%config%domain%JLOC ,&
+              J        => noahmp%config%domain%JLOC  &
              )
              
     NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LFMASS

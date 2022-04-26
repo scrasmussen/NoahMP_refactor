@@ -10,6 +10,7 @@ module EnergyVarInitMod
 
   use NoahmpIOVarType
   use NoahmpVarType
+  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -172,6 +173,8 @@ contains
     allocate( noahmp%energy%state%TKSNO   (-NSNOW+1:0    ) )
     allocate( noahmp%energy%state%CVSOIL  (       1:NSOIL) )
     allocate( noahmp%energy%state%TKSOIL  (       1:NSOIL) )
+    allocate( noahmp%energy%state%CVGLAICE(       1:NSOIL) )
+    allocate( noahmp%energy%state%TKGLAICE(       1:NSOIL) )
     allocate( noahmp%energy%state%ALBSND  (       1:NBAND) )
     allocate( noahmp%energy%state%ALBSNI  (       1:NBAND) )
     allocate( noahmp%energy%state%ALBSOD  (       1:NBAND) )
@@ -191,6 +194,8 @@ contains
     noahmp%energy%state%TKSNO(:)        = huge(1.0)
     noahmp%energy%state%CVSOIL(:)       = huge(1.0)
     noahmp%energy%state%TKSOIL(:)       = huge(1.0)
+    noahmp%energy%state%CVGLAICE(:)     = huge(1.0)
+    noahmp%energy%state%TKGLAICE(:)     = huge(1.0)
     noahmp%energy%state%ALBSND(:)       = huge(1.0)
     noahmp%energy%state%ALBSNI(:)       = huge(1.0)
     noahmp%energy%state%ALBSOD(:)       = huge(1.0)
@@ -327,6 +332,7 @@ contains
     allocate( noahmp%energy%param%TAUL   (1:NBAND) )
     allocate( noahmp%energy%param%TAUS   (1:NBAND) )
     allocate( noahmp%energy%param%EG     (1:2    ) )
+    allocate( noahmp%energy%param%ALBICE (1:NBAND) )
 
     noahmp%energy%param%LAIM(:)         = huge(1.0)
     noahmp%energy%param%SAIM(:)         = huge(1.0)
@@ -340,6 +346,7 @@ contains
     noahmp%energy%param%TAUL(:)         = huge(1.0)
     noahmp%energy%param%TAUS(:)         = huge(1.0)
     noahmp%energy%param%EG(:)           = huge(1.0)
+    noahmp%energy%param%ALBICE          = huge(1.0)
 
     end associate
 
@@ -360,6 +367,7 @@ contains
     associate(                                                  &
               I           => noahmp%config%domain%ILOC         ,&
               J           => noahmp%config%domain%JLOC         ,&
+              KTS         => NoahmpIO%KTS                      ,&
               VEGTYP      => noahmp%config%domain%VEGTYP       ,&
               SOILTYP     => noahmp%config%domain%SOILTYP      ,&
               CROPTYP     => noahmp%config%domain%CROPTYP      ,&
@@ -431,6 +439,7 @@ contains
     noahmp%energy%param%CZIL               = NoahmpIO%CZIL_TABLE
     noahmp%energy%param%SNOW_EMIS          = NoahmpIO%SNOW_EMIS_TABLE
     noahmp%energy%param%EG                 = NoahmpIO%EG_TABLE
+    noahmp%energy%param%ALBICE             = NoahmpIO%ALBICE_TABLE
     noahmp%energy%param%Z0SNO              = NoahmpIO%Z0SNO_TABLE
     noahmp%energy%param%ZBOT               = NoahmpIO%ZBOT_TABLE
     noahmp%energy%param%Z0SOIL             = NoahmpIO%Z0SOIL_TABLE
@@ -438,8 +447,8 @@ contains
     noahmp%energy%param%EICE               = NoahmpIO%EICE_TABLE
     noahmp%energy%param%RSURF_EXP          = NoahmpIO%RSURF_EXP_TABLE
     noahmp%energy%param%RSURF_SNOW         = NoahmpIO%RSURF_SNOW_TABLE
-    noahmp%energy%param%SHDMAX             = NoahmpIO%SHDMAXIn
-    noahmp%energy%param%SHDFAC             = NoahmpIO%SHDFACIn
+    noahmp%energy%param%SHDMAX             = noahmp%energy%state%FVGMAX
+    noahmp%energy%param%SHDFAC             = noahmp%energy%state%FVEG
 
     noahmp%energy%param%LAIM(1:12)         = NoahmpIO%LAIM_TABLE(VEGTYP,1:12)
     noahmp%energy%param%SAIM(1:12)         = NoahmpIO%SAIM_TABLE(VEGTYP,1:12)
@@ -490,7 +499,7 @@ contains
     associate(                                                  &
               I           => noahmp%config%domain%ILOC         ,&
               J           => noahmp%config%domain%JLOC         ,&
-              NSOIL       => noahmp%config%domain%NSOIL        ,&
+              NSOIL       => noahmp%config%domain%NSOIL         &
              )
 
              NoahmpIO%TSK      (I,J)         = noahmp%energy%state%TRAD
@@ -567,7 +576,7 @@ contains
              NoahmpIO%CHUCXY   (I,J)   = noahmp%energy%state%CHUC
              NoahmpIO%CHV2XY   (I,J)   = noahmp%energy%state%CHV2
              NoahmpIO%CHB2XY   (I,J)   = noahmp%energy%state%EHB2             
-             NoahmpIO%IRRSPLH  (I,J)   = IRRSPLH(I,J) + &
+             NoahmpIO%IRRSPLH  (I,J)   = NoahmpIO%IRRSPLH(I,J) + &
                                          (noahmp%energy%flux%FIRR*noahmp%config%domain%DT) ! Joules/m^2               
   
     end associate

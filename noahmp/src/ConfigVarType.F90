@@ -114,6 +114,9 @@ module ConfigVarType
                                                  ! 4 -> use input soil properties (BEXP_3D, SMCMAX_3D, etc.)
     integer                   :: OPT_PEDO      ! options for pedotransfer functions (used when OPT_SOIL = 3)
                                                  ! 1 -> Saxton and Rawls (2006)
+    integer                   :: OPT_GLA       ! options for glacier treatment
+                                                 ! 1 -> include phase change of ice
+                                                 ! 2 -> ice treatment more like original Noah
 
   end type namelist_type
 
@@ -151,6 +154,7 @@ module ConfigVarType
     real(kind=kind_noahmp)    :: COSZ          ! cosine solar zenith angle
     real(kind=kind_noahmp)    :: ZREF          ! reference height  (m)
     real(kind=kind_noahmp)    :: DZ8W          ! thickness of surface atmospheric layers [m]
+    real(kind=kind_noahmp)    :: ZLVL          ! thickness of surface atmospheric layers [m]
     real(kind=kind_noahmp)    :: LAT           ! latitude (radians)
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer

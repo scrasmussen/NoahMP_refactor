@@ -15,14 +15,7 @@ module NoahmpIOVarInitMod
   implicit none
 
 contains
-!=== initialize with default values
-  subroutine NoahmpIOVarInitDefault(NoahmpIO)
-  
-    implicit none
 
-    type(NoahmpIO_type), intent(inout)  :: NoahmpIO
-
-!=================================================================================================================================================================================
 !=== read Noahmp Table values
   subroutine ReadNoahmpTable(NoahmpIO)
 
@@ -1179,6 +1172,7 @@ contains
   end subroutine ReadNoahmpTable
 
 !=== read namelist values
+
   subroutine ReadNamelist(NoahmpIO)
 
     implicit none
@@ -1193,6 +1187,7 @@ contains
     
     character(len=256)      :: indir = '.'
 
+    integer                 :: ierr
     integer                 :: NSOIL                 ! number of soil layers
     integer                 :: forcing_timestep
     integer                 :: noah_timestep
@@ -1245,11 +1240,14 @@ contains
     integer                 :: canopy_stomatal_resistance_option  = 1
     integer                 :: btr_option                         = 1
     integer                 :: runoff_option                      = 3
+    integer                 :: surface_runoff_option              = 3
+    integer                 :: subsurface_runoff_option           = 3
     integer                 :: surface_drag_option                = 1
     integer                 :: supercooled_water_option           = 1
     integer                 :: frozen_soil_option                 = 1
     integer                 :: radiative_transfer_option          = 3
     integer                 :: snow_albedo_option                 = 1
+    integer                 :: snow_thermal_conductivity          = 1
     integer                 :: pcp_partition_option               = 1
     integer                 :: tbot_option                        = 2
     integer                 :: temp_time_scheme_option            = 1
@@ -1292,8 +1290,9 @@ contains
          forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P,      &
          forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN,                 &
          dynamic_veg_option, canopy_stomatal_resistance_option,                           &
-         btr_option, runoff_option, surface_drag_option, supercooled_water_option,        &
+         btr_option, surface_drag_option, supercooled_water_option,        &
          frozen_soil_option, radiative_transfer_option, snow_albedo_option,               &
+         snow_thermal_conductivity, surface_runoff_option, subsurface_runoff_option,      &
          pcp_partition_option, tbot_option, temp_time_scheme_option,                      &
          glacier_option, surface_resistance_option,                                       &
          irrigation_option, irrigation_method, dvic_infiltration_option,                  &
@@ -1312,22 +1311,22 @@ contains
     !  Initialize namelist variables to dummy values, so we can tell
     !  if they have not been set properly.
     !---------------------------------------------------------------
-    nsoil                   = -999
-    soil_thick_input        = -999
-    dtbl                    = -999
-    start_year              = -999
-    start_month             = -999
-    start_day               = -999
-    start_hour              = -999
-    start_min               = -999
-    khour                   = -999
-    kday                    = -999
-    zlvl                    = -999
-    forcing_timestep        = -999
-    noah_timestep           = -999
-    output_timestep         = -999
-    spinup_loops            = 0
-    restart_frequency_hours = -999
+    NoahmpIO%nsoil                   = -999
+    NoahmpIO%soil_thick_input        = -999
+    NoahmpIO%dtbl                    = -999
+    NoahmpIO%start_year              = -999
+    NoahmpIO%start_month             = -999
+    NoahmpIO%start_day               = -999
+    NoahmpIO%start_hour              = -999
+    NoahmpIO%start_min               = -999
+    NoahmpIO%khour                   = -999
+    NoahmpIO%kday                    = -999
+    NoahmpIO%zlvl                    = -999
+    NoahmpIO%forcing_timestep        = -999
+    NoahmpIO%noah_timestep           = -999
+    NoahmpIO%output_timestep         = -999
+    NoahmpIO%spinup_loops            = 0
+    NoahmpIO%restart_frequency_hours = -999
 
     !---------------------------------------------------------------
     ! read namelist.input
@@ -1343,8 +1342,10 @@ contains
     endif
     close(30)
   
-    dtbl = real(noah_timestep)
-    num_soil_layers = nsoil      ! because surface driver uses the long form
+    NoahmpIO%dtbl  = real(noah_timestep)
+    NoahmpIO%num_soil_layers = nsoil      ! because surface driver uses the long form
+    NoahmpIO%NSOIL = nsoil
+
     !---------------------------------------------------------------------
     !  NAMELIST end
     !---------------------------------------------------------------------
@@ -1353,7 +1354,7 @@ contains
     !  NAMELIST check begin
     !---------------------------------------------------------------------
     NoahmpIO%update_lai = .true.   ! default: use LAI if present in forcing file
-    if (dynamic_veg_option == 1 .or. dynamic_veg_option == 2 .or. &
+    if(dynamic_veg_option == 1 .or. dynamic_veg_option == 2 .or. &
        dynamic_veg_option == 3 .or. dynamic_veg_option == 4 .or. &
        dynamic_veg_option == 5 .or. dynamic_veg_option == 6) &    ! remove dveg=10 and add dveg=1,3,4 into the update_lai flag false condition
        NoahmpIO%update_lai = .false.
@@ -1468,7 +1469,7 @@ contains
        endif
        NoahmpIO%num_urban_atmosphere = int(zlvl/urban_atmosphere_thickness)
        if (zlvl - NoahmpIO%num_urban_atmosphere*urban_atmosphere_thickness >= 0.5*urban_atmosphere_thickness)  &
-            NoahmpIO%num_urban_atmosphere = NoahmpIO%num_urban_atmosphere + 1
+           NoahmpIO%num_urban_atmosphere = NoahmpIO%num_urban_atmosphere + 1
        if ( NoahmpIO%num_urban_atmosphere <= 2) then
          write(*, *)
          write(*, '(" ***** Namelist error: ******************************************************")')
@@ -1487,13 +1488,15 @@ contains
     NoahmpIO%IDVEG                             = dynamic_veg_option 
     NoahmpIO%IOPT_CRS                          = canopy_stomatal_resistance_option       ! this block should be deletd when variable renaming
     NoahmpIO%IOPT_BTR                          = btr_option
-    NoahmpIO%IOPT_RUN                          = runoff_option
+    NoahmpIO%IOPT_RUNSRF                       = surface_runoff_option
+    NoahmpIO%IOPT_RUNSUB                       = subsurface_runoff_option
     NoahmpIO%IOPT_SFC                          = surface_drag_option
     NoahmpIO%IOPT_FRZ                          = supercooled_water_option
     NoahmpIO%IOPT_INF                          = frozen_soil_option
     NoahmpIO%IOPT_RAD                          = radiative_transfer_option
     NoahmpIO%IOPT_ALB                          = snow_albedo_option
     NoahmpIO%IOPT_SNF                          = pcp_partition_option
+    NoahmpIO%IOPT_TKSNO                        = snow_thermal_conductivity 
     NoahmpIO%IOPT_TBOT                         = tbot_option
     NoahmpIO%IOPT_STC                          = temp_time_scheme_option
     NoahmpIO%IOPT_GLA                          = glacier_option
@@ -1515,6 +1518,9 @@ contains
     NoahmpIO%frozen_soil_option                = frozen_soil_option
     NoahmpIO%radiative_transfer_option         = radiative_transfer_option
     NoahmpIO%snow_albedo_option                = snow_albedo_option
+    NoahmpIO%snow_thermal_conductivity         = snow_thermal_conductivity
+    NoahmpIO%surface_runoff_option             = surface_runoff_option
+    NoahmpIO%subsurface_runoff_option          = subsurface_runoff_option
     NoahmpIO%pcp_partition_option              = pcp_partition_option
     NoahmpIO%tbot_option                       = tbot_option
     NoahmpIO%temp_time_scheme_option           = temp_time_scheme_option
@@ -1633,7 +1639,7 @@ contains
               NSOIL   =>  NoahmpIO%NSOIL    ,&
               NSNOW   =>  NoahmpIO%NSNOW     &
              )
-
+    allocate ( NoahmpIO%soil_thick_input (NoahmpIO%MAX_SOIL_LEVELS) )    ! depth to soil interfaces from namelist [m]
     allocate ( NoahmpIO%COSZEN       (XSTART:XEND,YSTART:YEND) )    ! cosine zenith angle
     allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )    ! latitude [rad]
     
@@ -1782,7 +1788,6 @@ contains
     allocate ( NoahmpIO%XSAIXY       (XSTART:XEND,YSTART:YEND) )  ! stem area index
     allocate ( NoahmpIO%TAUSSXY      (XSTART:XEND,YSTART:YEND) )  ! snow age factor
 
-    allocate ( NoahmpIO%gecros_state (XSTART:XEND,60,YSTART:YEND) )   ! gecros crop model packed state vector
 ! irrigation
     allocate ( NoahmpIO%IRFRACT      (XSTART:XEND,YSTART:YEND) )  ! irrigation fraction
     allocate ( NoahmpIO%SIFRACT      (XSTART:XEND,YSTART:YEND) )  ! sprinkler irrigation fraction
@@ -2016,16 +2021,15 @@ contains
 
        !IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
          
-       allocate ( NoahmpIO%trb_urb4d      (XSTART:XEND,urban_map_zrd,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tw1_urb4d      (XSTART:XEND,urban_map_zwd,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tw2_urb4d      (XSTART:XEND,urban_map_zwd,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tgb_urb4d      (XSTART:XEND,urban_map_gd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfw1_urb3d     (XSTART:XEND,urban_map_zd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfw2_urb3d     (XSTART:XEND,urban_map_zd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfg_urb3d      (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
-
-       allocate ( NoahmpIO%hi_urb2d       (XSTART:XEND, num_urban_hi,   YSTART:YEND) )  !
+       allocate ( NoahmpIO%trb_urb4d      (XSTART:XEND,NoahmpIO%urban_map_zrd,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tw1_urb4d      (XSTART:XEND,NoahmpIO%urban_map_zwd,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tw2_urb4d      (XSTART:XEND,NoahmpIO%urban_map_zwd,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tgb_urb4d      (XSTART:XEND,NoahmpIO%urban_map_gd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfw1_urb3d     (XSTART:XEND,NoahmpIO%urban_map_zd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfw2_urb3d     (XSTART:XEND,NoahmpIO%urban_map_zd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfr_urb3d      (XSTART:XEND,NoahmpIO%urban_map_zdf,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfg_urb3d      (XSTART:XEND,NoahmpIO%num_urban_ndm,YSTART:YEND) )  !
+       allocate ( NoahmpIO%hi_urb2d       (XSTART:XEND,NoahmpIO%num_urban_hi, YSTART:YEND) )  !
 
        allocate ( NoahmpIO%theta_urban    (XSTART:XEND,KDS:KDE,         YSTART:YEND) )  !
        allocate ( NoahmpIO%    u_urban    (XSTART:XEND,KDS:KDE,         YSTART:YEND) )  !
@@ -2053,34 +2057,34 @@ contains
 
         !IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
          
-       allocate ( NoahmpIO%tlev_urb3d     (XSTART:XEND,urban_map_bd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%qlev_urb3d     (XSTART:XEND,urban_map_bd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tw1lev_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tw2lev_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tglev_urb3d    (XSTART:XEND,urban_map_gbd,YSTART:YEND) )  !
-       allocate ( NoahmpIO%tflev_urb3d    (XSTART:XEND,urban_map_fbd,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sf_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%lf_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%cm_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfvent_urb3d   (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%lfvent_urb3d   (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfwin1_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfwin2_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tlev_urb3d     (XSTART:XEND,NoahmpIO%urban_map_bd  ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%qlev_urb3d     (XSTART:XEND,NoahmpIO%urban_map_bd  ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tw1lev_urb3d   (XSTART:XEND,NoahmpIO%urban_map_wd  ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tw2lev_urb3d   (XSTART:XEND,NoahmpIO%urban_map_wd  ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tglev_urb3d    (XSTART:XEND,NoahmpIO%urban_map_gbd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%tflev_urb3d    (XSTART:XEND,NoahmpIO%urban_map_fbd ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sf_ac_urb3d    (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%lf_ac_urb3d    (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%cm_ac_urb3d    (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfvent_urb3d   (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%lfvent_urb3d   (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfwin1_urb3d   (XSTART:XEND,NoahmpIO%urban_map_wd  ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfwin2_urb3d   (XSTART:XEND,NoahmpIO%urban_map_wd  ,YSTART:YEND) )  !
        ! new urban variables greenroof & solar panel for BEM
-       allocate ( NoahmpIO%ep_pv_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%t_pv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%trv_urb4d      (XSTART:XEND,urban_map_zgrd,YSTART:YEND) ) !
-       allocate ( NoahmpIO%qr_urb4d       (XSTART:XEND,urban_map_zgrd,YSTART:YEND) ) !
-       allocate ( NoahmpIO%qgr_urb3d      (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%tgr_urb3d      (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%drain_urb4d    (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%draingr_urb3d  (XSTART:XEND,              YSTART:YEND) )  !
-       allocate ( NoahmpIO%sfrv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%lfrv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%dgr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%dg_urb3d       (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
-       allocate ( NoahmpIO%lfr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
-       allocate ( NoahmpIO%lfg_urb3d      (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
+       allocate ( NoahmpIO%ep_pv_urb3d    (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%t_pv_urb3d     (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%trv_urb4d      (XSTART:XEND,NoahmpIO%urban_map_zgrd,YSTART:YEND) ) !
+       allocate ( NoahmpIO%qr_urb4d       (XSTART:XEND,NoahmpIO%urban_map_zgrd,YSTART:YEND) ) !
+       allocate ( NoahmpIO%qgr_urb3d      (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%tgr_urb3d      (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%drain_urb4d    (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%draingr_urb3d  (XSTART:XEND,                        YSTART:YEND) )  !
+       allocate ( NoahmpIO%sfrv_urb3d     (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%lfrv_urb3d     (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%dgr_urb3d      (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%dg_urb3d       (XSTART:XEND,NoahmpIO%num_urban_ndm ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%lfr_urb3d      (XSTART:XEND,NoahmpIO%urban_map_zdf ,YSTART:YEND) )  !
+       allocate ( NoahmpIO%lfg_urb3d      (XSTART:XEND,NoahmpIO%num_urban_ndm ,YSTART:YEND) )  !
 
     endif
 

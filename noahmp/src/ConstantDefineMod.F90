@@ -26,7 +26,7 @@ module ConstantDefineMod
   real(kind=kind_noahmp), public, parameter :: CPAIR  = 1004.64        ! heat capacity dry air at const pres (j/kg/k)
   real(kind=kind_noahmp), public, parameter :: TKWAT  = 0.6            ! thermal conductivity of water (w/m/k)
   real(kind=kind_noahmp), public, parameter :: TKICE  = 2.2            ! thermal conductivity of ice (w/m/k)
-  real(kind=kind_noahmp), public, parameter :: TKAIR  = 0.023          ! thermal conductivity of air (w/m/k) (not used MB: 20140718)
+  real(kind=kind_noahmp), public, parameter :: TKAIR  = 0.023          ! thermal conductivity of air (w/m/k)
   real(kind=kind_noahmp), public, parameter :: RAIR   = 287.04         ! gas constant for dry air (j/kg/k)
   real(kind=kind_noahmp), public, parameter :: RW     = 461.269        ! gas constant for  water vapor (j/kg/k)
   real(kind=kind_noahmp), public, parameter :: DENH2O = 1000.0         ! density of water (kg/m3)

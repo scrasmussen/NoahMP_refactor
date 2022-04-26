@@ -3,7 +3,7 @@
 .SUFFIXES:
 .SUFFIXES: .o .F90
 
-include ../user_build_options
+include ../../hrldas/user_build_options
 
 OBJS = Machine.o \
        CheckNanMod.o

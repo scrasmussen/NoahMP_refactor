@@ -222,6 +222,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter
     real(kind=kind_noahmp), allocatable, dimension(:) :: PSISAT  ! saturated soil matric potential (m)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: QUARTZ  !soil quartz content
 
   end type parameter_type
 

@@ -33,13 +33,16 @@ module NoahmpIOVarType
     integer                                                ::  IDVEG               ! dynamic vegetation (1 -> off ; 2 -> on) with opt_crs = 1   
     integer                                                ::  IOPT_CRS            ! canopy stomatal resistance (1-> Ball-Berry; 2->Jarvis)   
     integer                                                ::  IOPT_BTR            ! soil moisture factor for stomatal resistance (1-> Noah; 2-> CLM; 3-> SSiB)
-    integer                                                ::  IOPT_RUN            ! runoff and groundwater (1->SIMGM; 2->SIMTOP; 3->Schaake96; 4->BATS)
+    integer                                                ::  IOPT_RUNSRF         ! surface runoff and groundwater (1->SIMGM; 2->SIMTOP; 3->Schaake96; 4->BATS)
+    integer                                                ::  IOPT_RUNSUB         ! subsurface runoff option
     integer                                                ::  IOPT_SFC            ! surface layer drag coeff (CH & CM) (1->M-O; 2->Chen97)
     integer                                                ::  IOPT_FRZ            ! supercooled liquid water (1-> NY06; 2->Koren99)
     integer                                                ::  IOPT_INF            ! frozen soil permeability (1-> NY06; 2->Koren99)
     integer                                                ::  IOPT_RAD            ! radiation transfer (1->gap=F(3D,cosz); 2->gap=0; 3->gap=1-Fveg)
     integer                                                ::  IOPT_ALB            ! snow surface albedo (1->BATS; 2->CLASS)
     integer                                                ::  IOPT_SNF            ! rainfall & snowfall (1-Jordan91; 2->BATS; 3->Noah)
+! options for snow thermal conductivity
+    integer                                                ::  IOPT_TKSNO          ! 1 -> Stieglitz(yen,1965) scheme (default), 2 -> Anderson, 1976 scheme, 3 -> constant, 4 -> Verseghy (1991) scheme, 5 -> Douvill(Yen, 1981) scheme
     integer                                                ::  IOPT_TBOT           ! lower boundary of soil temperature (1->zero-flux; 2->Noah)
     integer                                                ::  IOPT_STC            ! snow/soil temperature time scheme
     integer                                                ::  IOPT_GLA            ! glacier option (1->phase change; 2->simple)
@@ -88,12 +91,12 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  SNOWNCV             ! non-covective snow forcing (subset of rainncv) [mm]
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  GRAUPELNCV          ! non-convective graupel forcing (subset of rainncv) [mm]
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  HAILNCV             ! non-convective hail forcing (subset of rainncv) [mm]
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_RAINC      ! convective precipitation entering land model [mm] ! MB/AN : v3.7
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_RAINNC     ! large-scale precipitation entering land model [mm]! MB/AN : v3.7
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_SHCV       ! shallow conv precip entering land model [mm]      ! MB/AN : v3.7
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_SNOW       ! snow precipitation entering land model [mm]       ! MB/AN : v3.7 
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_GRAUP      ! graupel precipitation entering land model [mm]    ! MB/AN : v3.7
-    real(kind=kind_noahmp), allocatable, dimension(:,:), optional :: MP_HAIL       ! hail precipitation entering land model [mm]       ! MB/AN : v3.7 
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_RAINC            ! convective precipitation entering land model [mm] ! MB/AN : v3.7
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_RAINNC           ! large-scale precipitation entering land model [mm]! MB/AN : v3.7
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_SHCV             ! shallow conv precip entering land model [mm]      ! MB/AN : v3.7
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_SNOW             ! snow precipitation entering land model [mm]       ! MB/AN : v3.7 
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_GRAUP            ! graupel precipitation entering land model [mm]    ! MB/AN : v3.7
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  MP_HAIL             ! hail precipitation entering land model [mm]       ! MB/AN : v3.7 
     
 #ifdef WRF_HYDRO
     real(kind=kind_noahmp), allocatable, dimension(:,:)    :: infxsrt
@@ -551,7 +554,7 @@ module NoahmpIOVarType
     integer                                                ::  J
     integer                                                ::  SLOPETYP
     integer                                                ::  YEARLEN
-    integer, parameter                                     ::  NSNOW = 3            ! number of snow layers fixed to 3
+    integer                                                ::  NSNOW = 3            ! number of snow layers fixed to 3
     logical                                                ::  update_lai, &
                                                                update_veg
     integer                                                ::  spinup_loop
@@ -656,11 +659,15 @@ module NoahmpIOVarType
     integer                                                ::  canopy_stomatal_resistance_option
     integer                                                ::  btr_option
     integer                                                ::  runoff_option
+    integer                                                ::  surface_runoff_option
+    integer                                                ::  subsurface_runoff_option
     integer                                                ::  surface_drag_option
     integer                                                ::  supercooled_water_option
     integer                                                ::  frozen_soil_option
     integer                                                ::  radiative_transfer_option
     integer                                                ::  snow_albedo_option
+    integer                                                ::  snow_thermal_conductivity
+    integer                                                ::  glacier_treatment_option
     integer                                                ::  pcp_partition_option
     integer                                                ::  tbot_option
     integer                                                ::  temp_time_scheme_option
@@ -692,9 +699,8 @@ module NoahmpIOVarType
     integer                                                ::  ystart = 1
     integer                                                ::  xend = 0
     integer                                                ::  yend = 0
-    integer, parameter                                     ::  MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
-    real(kind=kind_noahmp), dimension(MAX_SOIL_LEVELS)     ::  soil_thick_input       ! depth to soil interfaces from namelist [m]
- 
+    integer                                                ::  MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
+    real(kind=kind_noahmp),  allocatable, dimension(:)     ::  soil_thick_input
     !----------------------------------------------------------------
     ! Noahmp Parameters Table 
     !----------------------------------------------------------------

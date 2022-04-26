@@ -10,7 +10,6 @@ module ConfigVarInitMod
 
   use NoahmpIOVarType
   use NoahmpVarType
-  use PedoTransferSR2006
 
   implicit none
 
@@ -46,6 +45,7 @@ contains
     noahmp%config%nmlist%OPT_CROP     = huge(1)
     noahmp%config%nmlist%OPT_SOIL     = huge(1)
     noahmp%config%nmlist%OPT_PEDO     = huge(1)
+    noahmp%config%nmlist%OPT_GLA      = huge(1)
 
     ! config domain variable
     noahmp%config%domain%LLANDUSE     = "MODIFIED_IGBP_MODIS_NOAH"
@@ -90,12 +90,8 @@ contains
 
     type(NoahmpIO_type) , intent(inout) :: NoahmpIO
     type(noahmp_type),    intent(inout) :: noahmp
-
-    ! local variable
-    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: SAND
-    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: CLAY
-    real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: ORGM
-    
+    integer                             :: IPRINT = .false.   
+ 
     associate(                                      &
               I     => NoahmpIO%I                  ,&
               J     => NoahmpIO%J                  ,&
@@ -104,7 +100,7 @@ contains
              )
 
     ! config namelist variable
-    noahmp%config%nmlist%OPT_DVEG   = NoahmpIO%IOPT_DVEG
+    noahmp%config%nmlist%OPT_DVEG   = NoahmpIO%IDVEG
     noahmp%config%nmlist%OPT_SNF    = NoahmpIO%IOPT_SNF
     noahmp%config%nmlist%OPT_BTR    = NoahmpIO%IOPT_BTR
     noahmp%config%nmlist%OPT_RSF    = NoahmpIO%IOPT_RSF
@@ -126,8 +122,9 @@ contains
     noahmp%config%nmlist%OPT_PEDO   = NoahmpIO%IOPT_PEDO
     noahmp%config%nmlist%OPT_RUNSRF = NoahmpIO%IOPT_RUNSRF
     noahmp%config%nmlist%OPT_RUNSUB = NoahmpIO%IOPT_RUNSUB
-    
-    if ( NoahmpIO%OPT_RUNSUB /= NoahmpIO%IOPT_RUNSRF ) then
+    noahmp%config%nmlist%OPT_GLA    = NoahmpIO%IOPT_GLA
+
+    if ( NoahmpIO%IOPT_RUNSUB /= NoahmpIO%IOPT_RUNSRF ) then
        noahmp%config%nmlist%OPT_RUNSUB = NoahmpIO%IOPT_RUNSRF
        print*,'reset OPT_RUNSUB to be the same as OPT_RUNSRF for now ...'
     endif
@@ -147,12 +144,12 @@ contains
     noahmp%config%domain%CROPTYP    = NoahmpIO%CROPCAT  (I,  J)
     noahmp%config%domain%ICE        = NoahmpIO%ICE
     noahmp%config%domain%JULIAN     = NoahmpIO%JULIAN
-    noahmp%config%domain%ZLVL       = 0.5*NoahmpIO%DZ8W (I,1,J) 
+    noahmp%config%domain%ZREF       = 0.5*NoahmpIO%DZ8W (I,1,J) 
     noahmp%config%domain%DZ8W       = NoahmpIO%DZ8W     (I,1,J)
     noahmp%config%domain%COSZ       = NoahmpIO%COSZEN   (I,  J)
     noahmp%config%domain%ISNOW      = NoahmpIO%ISNOWXY  (I,  J)
   
-    noahmp%config%domain%URBAN_FLAG = NoahmpIO%URBAN_FLAG
+    noahmp%config%domain%URBAN_FLAG = .false. !NoahmpIO%URBAN_FLAG
     noahmp%config%domain%ISWATER    = NoahmpIO%ISWATER_TABLE
     noahmp%config%domain%ISBARREN   = NoahmpIO%ISBARREN_TABLE
     noahmp%config%domain%ISICE      = NoahmpIO%ISICE_TABLE
@@ -161,7 +158,7 @@ contains
     noahmp%config%domain%YEARLEN    = NoahmpIO%YEARLEN
     noahmp%config%domain%SLOPETYP   = NoahmpIO%SLOPETYP
     noahmp%config%domain%LAT        = NoahmpIO%XLAT(I,J)
-    noahmp%config%domain%NSTAGE     = NoahmpIO%NSTAGE
+    noahmp%config%domain%NSTAGE     = 8
 
     allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
     allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
@@ -205,10 +202,10 @@ contains
        noahmp%config%domain%URBAN_FLAG = .true.
        
        if(NoahmpIO%SF_URBAN_PHYSICS == 0 ) then
-           noahmp%config%domain%VEGTYP = ISURBAN_TABLE
+           noahmp%config%domain%VEGTYP = NoahmpIO%ISURBAN_TABLE
        else
-           noahmp%config%domain%VEGTYP = NATURAL_TABLE  ! set urban vegetation type based on table natural
-           noahmp%energy%state%FVGMAX = 0.96 
+           noahmp%config%domain%VEGTYP = NoahmpIO%NATURAL_TABLE  ! set urban vegetation type based on table natural
+           noahmp%energy%state%FVGMAX  = 0.96 
        endif
          
     endif
@@ -218,7 +215,7 @@ contains
        noahmp%config%domain%CROPTYP = NoahmpIO%DEFAULT_CROP_TABLE   
        
     if (NoahmpIO%IOPT_CROP > 0 .and. NoahmpIO%CROPCAT(I,J) > 0) then
-       noahmp%config%domain%CROPTYPE = NoahmpIO%CROPCAT(I,J)             
+       noahmp%config%domain%CROPTYP  = NoahmpIO%CROPCAT(I,J)             
        noahmp%config%domain%VEGTYP   = NoahmpIO%ISCROP_TABLE
        noahmp%energy%state%FVGMAX    = 0.95
        noahmp%energy%state%FVEG      = 0.95
@@ -229,16 +226,6 @@ contains
       if(IPRINT) print *, I,J,'RESET SOIL in surfce.F'
       noahmp%config%domain%SOILTYP = 7
     endif
-
-    if(NoahmpIO%iopt_soil == 3 .and. .not. noahmp%config%domain%%urban_flag) then
-       sand = 0.01 * NoahmpIO%soilcomp(I,1:4,J)
-       clay = 0.01 * NoahmpIO%soilcomp(I,5:8,J)
-       orgm = 0.0
-
-       if(NoahmpIO%iopt_pedo == 1) call pedotransfer_sr2006(NoahmpIO,                     &
-                                                            noahmp%config%domain%SOILTYP, &
-                                                            sand,clay,orgm)
-    end if
 
     end associate
 

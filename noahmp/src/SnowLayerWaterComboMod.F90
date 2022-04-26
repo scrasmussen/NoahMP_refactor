@@ -48,7 +48,7 @@ contains
 
     HC = H + H2
     if ( HC < 0.0 ) then
-       TC = TFRZ + HC/(CICE*WICEC + CWAT*WLIQC)
+       TC = TFRZ + HC / (CICE*WICEC + CWAT*WLIQC)
     else if ( HC <= HFUS*WLIQC ) then
        TC = TFRZ
     else

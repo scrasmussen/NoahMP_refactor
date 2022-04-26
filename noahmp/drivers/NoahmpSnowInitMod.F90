@@ -1,11 +1,11 @@
-module NoahmpSnowinitMainMod
+module NoahmpSnowinitMod
 
 !--------------------------------------------------------------------------
 !  Module to initialize Noah-MP Snow variables
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine only : kind_noahmp
+  use Machine, only : kind_noahmp
   use NoahmpIOVarType
   
   implicit none
@@ -22,15 +22,14 @@ contains
 
     implicit none 
     
-    type(noahmp_type)      :: noahmp
     type(NoahmpIO_type)    :: NoahmpIO
     
 ! Local variables:
 !   DZSNO   holds the thicknesses of the various snow layers.
 !   DZSNOSO holds the thicknesses of the various soil/snow layers.
-    integer                                             :: I,J,IZ
-    real(kind=kind_noahmp),   dimension(-NSNOW+1:    0) :: DZSNO
-    real(kind=kind_noahmp),   dimension(-NSNOW+1:NSOIL) :: DZSNSO    
+    integer                                                               :: I,J,IZ,itf,jtf
+    real(kind=kind_noahmp),   dimension(-NoahmpIO%NSNOW+1:             0) :: DZSNO
+    real(kind=kind_noahmp),   dimension(-NoahmpIO%NSNOW+1:NoahmpIO%NSOIL) :: DZSNSO    
     
     associate(ims      => NoahmpIO%ims,      &
               ime      => NoahmpIO%ime,      & 
@@ -63,8 +62,11 @@ contains
 !   ZNSNOXY is the layer depth from the surface.  
 !------------------------------------------------------------------------------------------
 
-    do J = jts , jtf
-       do I = its , itf
+    itf=min0(NoahmpIO%ite,(NoahmpIO%ide+1)-1)
+    jtf=min0(NoahmpIO%jte,(NoahmpIO%jde+1)-1)
+
+    do J = NoahmpIO%jts , jtf
+       do I = NoahmpIO%its , itf
           if ( SNODEP(I,J) < 0.025 ) then
              ISNOWXY(I,J) = 0
              DZSNO(-NSNOW+1:0) = 0.
@@ -128,5 +130,5 @@ contains
     
   end subroutine NoahmpSnowinitMain
 
-end module NoahmpSnowinitMainMod
+end module NoahmpSnowinitMod
 
