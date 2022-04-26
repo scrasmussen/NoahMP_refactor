@@ -34,5 +34,6 @@ NoahmpDriverMod.o: ../utility/Machine.o \
                   ../src/WaterVarInitMod.o \
                   ../src/BiochemVarInitMod.o \
                   ../src/NoahmpMainMod.o \
+                  ../src/NoahmpMainGlacierMod.o \
                   NoahmpOutputMod.o
 
