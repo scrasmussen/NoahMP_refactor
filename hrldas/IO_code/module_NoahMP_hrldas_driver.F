@@ -1,13 +1,13 @@
 module module_NoahMP_hrldas_driver
 
   USE NoahmpIOVarType
-  USE NoahmpIOVarInitMod
+  USE NoahmpIOVarInitMod, only:ReadNoahmpTable, ReadNamelist, NoahmpIOVarInitDefault
   USE module_hrldas_netcdf_io
   USE NoahmpInitMainMod
   USE NoahmpGroundwaterInitMod
   USE NoahmpDriverMainMod
-  USE module_sf_noahmp_groundwater
-  USE NoahmpUrbanDriverMainMod
+  USE module_sf_noahmp_groundwater, only: WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
+  USE NoahmpUrbanDriverMainMod, only: noahmp_urban
   USE module_sf_urban,     only: urban_param_init, urban_var_init
   USE module_date_utilities
 
@@ -42,12 +42,13 @@ module module_NoahMP_hrldas_driver
   integer ix_tmp, jx_tmp
 #endif
 
-  type(NoahmpIO_type), intent(inout)  :: NoahmpIO
+  type(NoahmpIO_type)                                    :: NoahmpIO
 
-  integer                                                ::  I
-  integer                                                ::  J
+  integer                                                :: I
+  integer                                                :: J
+  integer                                                :: imode
 
-  contains
+contains
 
   subroutine land_driver_ini(NTIME_out,wrfits,wrfite,wrfjts,wrfjte)
 
@@ -197,7 +198,7 @@ module module_NoahMP_hrldas_driver
   NoahmpIO%xstartpar = 1
   NoahmpIO%ystartpar = 1
 
-  call InputVarInitDefault(NoahmpIO)
+  call NoahmpIOVarInitDefault(NoahmpIO)
 
 #ifdef WRF_HYDRO
    allocate( greenfrac   (NoahmpIO%XSTART:NoahmpIO%XEND,NoahmpIO%YSTART:NoahmpIO%YEND))
@@ -213,13 +214,13 @@ module module_NoahMP_hrldas_driver
                       NoahmpIO%ISWATER, NoahmpIO%ISLAKE, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP, NoahmpIO%TERRAIN, NoahmpIO%TMN, &
                       NoahmpIO%XLAT, NoahmpIO%XLONG, NoahmpIO%XLAND, NoahmpIO%SEAICE, NoahmpIO%MSFTX, NoahmpIO%MSFTY)
   
-  WHERE(SEAICE > 0.0) XICE = 1.0
+  WHERE(NoahmpIO%SEAICE > 0.0) NoahmpIO%XICE = 1.0
 
 !------------------------------------------------------------------------
 ! For spatially-varying soil parameters, read in necessary extra fields
 !------------------------------------------------------------------------
 
-  if (soil_data_option == 2) then
+  if (NoahmpIO%soil_data_option == 2) then
     CALL READ_SOIL_TEXTURE(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
                            NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%SOILCL1, NoahmpIO%SOILCL2, NoahmpIO%SOILCL3,      &
                            NoahmpIO%SOILCL4, NoahmpIO%ISICE, NoahmpIO%ISWATER)
@@ -550,12 +551,12 @@ module module_NoahMP_hrldas_driver
                             NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                   & !multi-layer urban
                             NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                       !urban
 
-        NoahmpIO%max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-        IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. NoahmpIO%max_utype_urb2d.gt.3.0) THEN  !new LCZ
+        max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
+        IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
             CALL wrf_error_fatal &
                  ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
         ENDIF
-        IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. NoahmpIO%max_utype_urb2d.le.3.0) THEN  ! new LCZ
+        IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
             CALL wrf_error_fatal &
                  ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
         ENDIF
@@ -600,10 +601,10 @@ module module_NoahMP_hrldas_driver
 
      CALL READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend, &
                           NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,  &
-                          NoahmpIO%OLDDATE, NoahmpIO%LDASIN_VERSION, NoahmpIO%SMOIS,  &
+                          NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,  &
                           NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
                           NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
-	  
+
      NoahmpIO%VEGFRA    =  huge(1.0)
      NoahmpIO%LAI       =  huge(1.0)
      NoahmpIO%GVFMIN    =  huge(1.0)
@@ -643,7 +644,7 @@ module module_NoahMP_hrldas_driver
      
          call NoahmpInitMain(NoahmpIO)
 
-         if(NoahmpIO%iopt_run == 5) then
+         if(NoahmpIO%iopt_runsrf == 5) then
             call NoahmpGroundwaterInitMain(grid, NoahmpIO)
          endif
 
@@ -654,54 +655,54 @@ module module_NoahMP_hrldas_driver
                  CALL urban_param_init(NoahmpIO%DZR,NoahmpIO%DZB,NoahmpIO%DZG,NoahmpIO%num_soil_layers,    &
                                        NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz)
 
-                 CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                             & !urban
+                 CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                                & !urban
                                     NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
-                                    NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%num_soil_layers, NoahmpIO%LCZ_1_TABLE,                 & !urban  
-                                    NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,      & !urban
-		                            NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,      & !urban
-                                    NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,         & !urban
-                                    NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,       & !urban
+                                    NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%num_soil_layers, NoahmpIO%LCZ_1_TABLE,                    & !urban  
+                                    NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,         & !urban
+                                    NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,         & !urban
+                                    NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,               & !urban
+                                    NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,          & !urban
                                     NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
-                                    NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,            & !urban
-                                    NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                & !urban
-                                    NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,              & !urban
-                                    NoahmpIO%urban_map_gd,                                                           & !I multi-layer urban
-                                    NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                 & !I multi-layer urban   
-                                    NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                & !I multi-layer urban
-                                    NoahmpIO%urban_map_zgrd,                                                         & !I multi-layer urban
-                                    NoahmpIO%num_urban_hi,                                                           & !urban
-                                    NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,           & !urban
-                                    NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                           & !urban
-                                    NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                        & !urban
-                                    NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                         & !urban
-                                    NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                      & !urban
-                                    NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                       & !urban
-                                    NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                       & !urban
-                                    NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,         & !urban
-                                    NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                          & !GRZ
-                                    NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,            & !GRZ
-                                    NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                     & !GRZ
-                                    NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,           & !GRZ   
-                                    NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                 & !GRZ
-                                    NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                               & !urban
-                                    NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                            & !urban
-                                    NoahmpIO%LF_URB2D,                                                               & !urban
-                                    NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,         & !urban
-                                    NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                      & !urban
-                                    NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                & !urban
-                                    NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                   & !multi-layer urban
-                                    NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                  & !multi-layer urban
-                                    NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                   & !multi-layer urban
-                                    NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                   & !multi-layer urban
-                                    NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                       !urban
+                                    NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,               & !urban
+                                    NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                   & !urban
+                                    NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,                    & !urban
+                                    NoahmpIO%urban_map_gd,                                                                       & !I multi-layer urban
+                                    NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                       & !I multi-layer urban   
+                                    NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                      & !I multi-layer urban
+                                    NoahmpIO%urban_map_zgrd,                                                                     & !I multi-layer urban
+                                    NoahmpIO%num_urban_hi,                                                                       & !urban
+                                    NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,              & !urban
+                                    NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                                    & !urban
+                                    NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                                 & !urban
+                                    NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                                  & !urban
+                                    NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                            & !urban
+                                    NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                                & !urban
+                                    NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                                & !urban
+                                    NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,            & !urban
+                                    NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                                   & !GRZ
+                                    NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,               & !GRZ
+                                    NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                           & !GRZ
+                                    NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,              & !GRZ   
+                                    NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                          & !GRZ
+                                    NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                                     & !urban
+                                    NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                                  & !urban
+                                    NoahmpIO%LF_URB2D,                                                                           & !urban
+                                    NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,            & !urban
+                                    NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                            & !urban
+                                    NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                      & !urban
+                                    NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                      & !multi-layer urban
+                                    NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                        & !multi-layer urban
+                                    NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                      & !multi-layer urban
+                                    NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
+                                    NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
 
-               NoahmpIO%max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
+               max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
                
-               IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. NoahmpIO%max_utype_urb2d.gt.3.0) THEN  !new LCZ
+               IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
                  CALL wrf_error_fatal &
                  ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
                ENDIF
-               IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. NoahmpIO%max_utype_urb2d.le.3.0) THEN  ! new LCZ
+               IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
                  CALL wrf_error_fatal &
                  ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
                ENDIF
@@ -709,13 +710,13 @@ module module_NoahMP_hrldas_driver
           endif !urban
 
           IF(NoahmpIO%SF_URBAN_PHYSICS > 1 ) THEN  !urban
-	        do i = 1, NoahmpIO%num_urban_atmosphere-1
+            do i = 1, NoahmpIO%num_urban_atmosphere-1
               NoahmpIO%dz_urban(:,i,:) = NoahmpIO%urban_atmosphere_thickness  ! thickness of full levels
-	        end do
-	        NoahmpIO%dz_urban(:,NoahmpIO%num_urban_atmosphere,:) =                                   &
+            end do
+            NoahmpIO%dz_urban(:,NoahmpIO%num_urban_atmosphere,:) =                                   &
                   2*(NoahmpIO%zlvl - NoahmpIO%urban_atmosphere_thickness*(NoahmpIO%num_urban_atmosphere-1))
-	        print*, NoahmpIO%dz_urban(1,:,1)
-	      ENDIF
+            print*, NoahmpIO%dz_urban(1,:,1)
+          ENDIF
 
   endif  ! restart flag
 
@@ -830,7 +831,7 @@ module module_NoahMP_hrldas_driver
                                        NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),     &
                                        NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW,                 &   
                                        NoahmpIO%SWDOWN,NoahmpIO%RAINBL_tmp,NoahmpIO%LAI,NoahmpIO%VEGFRA,        &
-                                       NoahmpIO%SNOWH,NoahmpIO%ITIME,NoahmpIO%FORCING_TIMESTEP,NoahmpIO%prcp0)
+                                       NoahmpIO%SNOWH,ITIME,NoahmpIO%FORCING_TIMESTEP,NoahmpIO%prcp0)
 
            call geth_newdate(NoahmpIO%newdate, forcDate, NoahmpIO%FORCING_TIMESTEP)
            forcDate = NoahmpIO%newdate
@@ -953,7 +954,7 @@ module module_NoahMP_hrldas_driver
        endif
     endif
 
-    IF (NoahmpIO%ITIME == 1 .AND. .NOT. NoahmpIO%RESTART_FLAG ) THEN
+    IF (ITIME == 1 .AND. .NOT. NoahmpIO%RESTART_FLAG ) THEN
       NoahmpIO%EAHXY = (NoahmpIO%P8W(:,1,:)*NoahmpIO%QV_CURR(:,1,:))/(0.622+NoahmpIO%QV_CURR(:,1,:)) ! Initial guess only.
       NoahmpIO%TAHXY = NoahmpIO%T_PHY(:,1,:)                                                         ! Initial guess only.
       NoahmpIO%CHXY = 0.1
@@ -964,7 +965,7 @@ module module_NoahMP_hrldas_driver
 ! Skip model call at t=1 since initial conditions are at start time; First model time is +1
 !------------------------------------------------------------------------
 
-    IF (NoahmpIO%ITIME > 0) THEN
+    IF (ITIME > 0) THEN
 
          NoahmpIO%MP_RAINC  = NoahmpIO%RAINCV 
          NoahmpIO%MP_RAINNC = NoahmpIO%RAINNCV 
@@ -981,11 +982,11 @@ module module_NoahMP_hrldas_driver
 
          ! Timing information for SFLX:
     
-         call system_clock(count=NoahmpIO%count_before_sflx, NoahmpIO%count_rate=NoahmpIO%clock_rate)
+         call system_clock(count=NoahmpIO%count_before_sflx, count_rate=NoahmpIO%clock_rate)
 
-         call NoahmpDriverMain (noahmp,NoahmpIO)                                       
+         call NoahmpDriverMain (NoahmpIO)                                       
 
-         call system_clock(count=NoahmpIO%count_after_sflx, NoahmpIO%count_rate=NoahmpIO%clock_rate)
+         call system_clock(count=NoahmpIO%count_after_sflx, count_rate=NoahmpIO%clock_rate)
          NoahmpIO%sflx_count_sum = NoahmpIO%sflx_count_sum + ( NoahmpIO%count_after_sflx - NoahmpIO%count_before_sflx )
 
          IF(NoahmpIO%SF_URBAN_PHYSICS == 2 .or. NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
@@ -996,20 +997,20 @@ module module_NoahMP_hrldas_driver
 
          IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
-	     call noahmp_urban (NoahmpIO%sf_urban_physics, NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%IVGTYP,               & ! IN : Model configuration 
+            call noahmp_urban (NoahmpIO%sf_urban_physics, NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%IVGTYP,            & ! IN : Model configuration 
                             NoahmpIO%ITIMESTEP, NoahmpIO%DTBL, NoahmpIO%COSZEN, NoahmpIO%XLAT,                  & ! IN : Time/Space-related
                             NoahmpIO%T_PHY, NoahmpIO%QV_CURR, NoahmpIO%U_PHY, NoahmpIO%V_PHY, NoahmpIO%SWDOWN,  & ! IN : Forcing
                             NoahmpIO%SWDDIR, NoahmpIO%SWDDIF,                                                   &
-		                    NoahmpIO%GLW, NoahmpIO%P8W, NoahmpIO%RAINBL, NoahmpIO%DZ8W, NoahmpIO%ZNT,           & ! IN : Forcing
+                            NoahmpIO%GLW, NoahmpIO%P8W, NoahmpIO%RAINBL, NoahmpIO%DZ8W, NoahmpIO%ZNT,           & ! IN : Forcing
                             NoahmpIO%TSK, NoahmpIO%HFX, NoahmpIO%QFX, NoahmpIO%LH, NoahmpIO%GRDFLX,             & ! IN/OUT : LSM 
-		                    NoahmpIO%ALBEDO, NoahmpIO%EMISS, NoahmpIO%QSFC,                                     & ! IN/OUT : LSM 
+                            NoahmpIO%ALBEDO, NoahmpIO%EMISS, NoahmpIO%QSFC,                                     & ! IN/OUT : LSM 
                             NoahmpIO%ids, NoahmpIO%ide, NoahmpIO%jds, NoahmpIO%jde, NoahmpIO%kds, NoahmpIO%kde, &
                             NoahmpIO%ims, NoahmpIO%ime, NoahmpIO%jms, NoahmpIO%jme, NoahmpIO%kms, NoahmpIO%kme, &
                             NoahmpIO%its, NoahmpIO%ite, NoahmpIO%jts, NoahmpIO%jte, NoahmpIO%kts, NoahmpIO%kte, &
                             NoahmpIO%cmr_sfcdif, NoahmpIO%chr_sfcdif, NoahmpIO%cmc_sfcdif,                      &
-	                        NoahmpIO%chc_sfcdif, NoahmpIO%cmgr_sfcdif, NoahmpIO%chgr_sfcdif,                    &
+                            NoahmpIO%chc_sfcdif, NoahmpIO%cmgr_sfcdif, NoahmpIO%chgr_sfcdif,                    &
                             NoahmpIO%tr_urb2d, NoahmpIO%tb_urb2d, NoahmpIO%tg_urb2d,                            & !H urban
-	                        NoahmpIO%tc_urb2d, NoahmpIO%qc_urb2d, NoahmpIO%uc_urb2d,                            & !H urban
+                            NoahmpIO%tc_urb2d, NoahmpIO%qc_urb2d, NoahmpIO%uc_urb2d,                            & !H urban
                             NoahmpIO%xxxr_urb2d, NoahmpIO%xxxb_urb2d, NoahmpIO%xxxg_urb2d,                      & !H urban
                             NoahmpIO%xxxc_urb2d, NoahmpIO%trl_urb3d, NoahmpIO%tbl_urb3d, NoahmpIO%tgl_urb3d,    & !H urban
                             NoahmpIO%sh_urb2d, NoahmpIO%lh_urb2d, NoahmpIO%g_urb2d, NoahmpIO%rn_urb2d,          & !H urban
@@ -1025,7 +1026,7 @@ module module_NoahMP_hrldas_driver
                             NoahmpIO%flxhumr_urb2d, NoahmpIO%flxhumb_urb2d, NoahmpIO%flxhumg_urb2d,             & !H urban
                             NoahmpIO%julday, NoahmpIO%yr,                                                       & !H urban
                             NoahmpIO%frc_urb2d, NoahmpIO%utype_urb2d,                                           & !I urban
-                            NoahmpIO%hs, NoahmpIO%chs2, NoahmpIO%cqs2,                                          & !H
+                            NoahmpIO%chs, NoahmpIO%chs2, NoahmpIO%cqs2,                                          & !H
                             NoahmpIO%num_urban_ndm, NoahmpIO%urban_map_zrd, NoahmpIO%urban_map_zwd,             & !I multi-layer urban
                             NoahmpIO%urban_map_gd,                                                              & !I multi-layer urban 
                             NoahmpIO%urban_map_zd, NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,               & !I multi-layer urban
@@ -1052,22 +1053,22 @@ module module_NoahMP_hrldas_driver
                             NoahmpIO%a_e_bep, NoahmpIO%b_u_bep, NoahmpIO%b_v_bep,                               & !O multi-layer urban
                             NoahmpIO%b_t_bep, NoahmpIO%b_q_bep, NoahmpIO%b_e_bep, NoahmpIO%dlg_bep,             & !O multi-layer urban
                             NoahmpIO%dl_u_bep, NoahmpIO%sf_bep, NoahmpIO%vl_bep)                                  !O multi-layer urban
-	                       
-	ENDIF 
+                       
+         ENDIF 
 
-  IF(NoahmpIO%RUNOFF_OPTION.EQ.5.AND.MOD(NoahmpIO%ITIME,NoahmpIO%STEPWTD).EQ.0)THEN
+  IF(NoahmpIO%RUNOFF_OPTION.EQ.5.AND.MOD(ITIME,NoahmpIO%STEPWTD).EQ.0)THEN
            CALL wrf_message('calling WTABLE' )
 
 !gmm update wtable from lateral flow and shed water to rivers
-           CALL WTABLE_MMF_NOAHMP(                                                &
-	                             NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%XLAND, NoahmpIO%XICE,  & 
+           CALL WTABLE_MMF_NOAHMP(                                                         &
+                                 NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%XLAND, NoahmpIO%XICE,  & 
                                  NoahmpIO%XICE_THRESHOLD, NoahmpIO%ISICE,                  &
                                  NoahmpIO%ISLTYP, NoahmpIO%SMOISEQ, NoahmpIO%DZS,          &       
                                  NoahmpIO%WTDDT, NoahmpIO%FDEPTHXY, NoahmpIO%AREAXY,       &
                                  NoahmpIO%TERRAIN, NoahmpIO%ISURBAN, NoahmpIO%IVGTYP,      &
                                  NoahmpIO%RIVERCONDXY, NoahmpIO%RIVERBEDXY, NoahmpIO%EQZWT,& 
                                  NoahmpIO%PEXPXY, NoahmpIO%SMOIS, NoahmpIO%SH2O,           & 
-                                 NoahmpIO%SMCWTDXY, NoahmpIO%ZWTXY, NoahmpIO%QLATXY,       & 
+                                 NoahmpIO%SMCWTDXY, NoahmpIO%ZWTXY,                        & 
                                  NoahmpIO%QRFXY, NoahmpIO%DEEPRECHXY, NoahmpIO%QSPRINGXY,  &
                                  NoahmpIO%QSLATXY, NoahmpIO%QRFSXY, NoahmpIO%QSPRINGSXY,   &  
                                  NoahmpIO%RECHXY,                                          &
@@ -1128,7 +1129,7 @@ module module_NoahMP_hrldas_driver
 
 ! Output for history
      OUTPUT_FOR_HISTORY: if (NoahmpIO%output_timestep > 0) then
-        if (mod(NoahmpIO%ITIME*NoahmpIO%noah_timestep, NoahmpIO%output_timestep) == 0 &
+        if (mod(ITIME*NoahmpIO%noah_timestep, NoahmpIO%output_timestep) == 0 &
             .and. .not. NoahmpIO%skip_first_output ) then
 
            call prepare_output_file (trim(NoahmpIO%outdir), version,                                   &
@@ -1142,7 +1143,7 @@ module module_NoahMP_hrldas_driver
                                      NoahmpIO%startdate, NoahmpIO%olddate, NoahmpIO%spinup_loop,       &
                                      NoahmpIO%spinup_loops, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP)
 
-           DEFINE_MODE_LOOP : do NoahmpIO%imode = 1, 2
+           DEFINE_MODE_LOOP : do imode = 1, 2
 
               call set_output_define_mode(NoahmpIO%imode)
 
@@ -1299,7 +1300,7 @@ module module_NoahMP_hrldas_driver
               call add_to_output(NoahmpIO%FORCWLSM   , "FORCWLSM", "lowest model wind speed into LSM"                       , "m s{-1}" )
           endif
         ! Irrigation
-            IF (irrigation_option > 0) THEN
+            IF (NoahmpIO%irrigation_option > 0) THEN
               call add_to_output(NoahmpIO%IRNUMSI    , "IRNUMSI" , "Sprinkler irrigation count"             , "-"                   )
               call add_to_output(NoahmpIO%IRNUMMI    , "IRNUMMI" , "Micro irrigation count"                 , "-"                   )
               call add_to_output(NoahmpIO%IRNUMFI    , "IRNUMFI" , "Flood irrigation count"                 , "-"                   )
@@ -1371,7 +1372,7 @@ module module_NoahMP_hrldas_driver
      end if
 
 ! update the timer
-     call system_clock(count=NoahmpIO%clock_count_2, NoahmpIO%count_rate=NoahmpIO%clock_rate)
+     call system_clock(count=NoahmpIO%clock_count_2, count_rate=NoahmpIO%clock_rate)
      NoahmpIO%timing_sum = NoahmpIO%timing_sum + &
                         float(NoahmpIO%clock_count_2-NoahmpIO%clock_count_1)/float(NoahmpIO%clock_rate)
      write(*,'("    Timing: ",f6.2," Cumulative:  ", f10.2, "  SFLX: ", f6.2 )') &
