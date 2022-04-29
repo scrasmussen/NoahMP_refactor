@@ -81,27 +81,27 @@ contains
     noahmp%water%state%ERRWAT         = huge(1.0)
     noahmp%water%state%END_WB         = huge(1.0)
 
-    allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
-    allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
-    allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%SNLIQ        (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%SNICEV       (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%SNLIQV       (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%FICEOLD_SNOW (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%FICE_SNOW    (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%EPORE_SNOW   (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%EPORE_SNOW2  (-NSNOW+1:0)     )
-    allocate( noahmp%water%state%SH2O         (       1:NSOIL) )
-    allocate( noahmp%water%state%SICE         (       1:NSOIL) )
-    allocate( noahmp%water%state%SMC          (       1:NSOIL) )
-    allocate( noahmp%water%state%FCR          (       1:NSOIL) )
-    allocate( noahmp%water%state%WCND         (       1:NSOIL) )
-    allocate( noahmp%water%state%WDF          (       1:NSOIL) )
-    allocate( noahmp%water%state%EPORE_SOIL   (       1:NSOIL) )
-    allocate( noahmp%water%state%FICE_SOIL    (       1:NSOIL) )
-    allocate( noahmp%water%state%SMCEQ        (       1:NSOIL) )
-    allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
-    allocate( noahmp%water%state%PSI          (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%IMELT        ) ) allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%SUPERCOOL    ) ) allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%SNICE        ) ) allocate( noahmp%water%state%SNICE        (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%SNLIQ        ) ) allocate( noahmp%water%state%SNLIQ        (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%SNICEV       ) ) allocate( noahmp%water%state%SNICEV       (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%SNLIQV       ) ) allocate( noahmp%water%state%SNLIQV       (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%FICEOLD_SNOW ) ) allocate( noahmp%water%state%FICEOLD_SNOW (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%FICE_SNOW    ) ) allocate( noahmp%water%state%FICE_SNOW    (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%EPORE_SNOW   ) ) allocate( noahmp%water%state%EPORE_SNOW   (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%EPORE_SNOW2  ) ) allocate( noahmp%water%state%EPORE_SNOW2  (-NSNOW+1:0)     )
+    if( .not. allocated( noahmp%water%state%SH2O         ) ) allocate( noahmp%water%state%SH2O         (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%SICE         ) ) allocate( noahmp%water%state%SICE         (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%SMC          ) ) allocate( noahmp%water%state%SMC          (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%FCR          ) ) allocate( noahmp%water%state%FCR          (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%WCND         ) ) allocate( noahmp%water%state%WCND         (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%WDF          ) ) allocate( noahmp%water%state%WDF          (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%EPORE_SOIL   ) ) allocate( noahmp%water%state%EPORE_SOIL   (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%FICE_SOIL    ) ) allocate( noahmp%water%state%FICE_SOIL    (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%SMCEQ        ) ) allocate( noahmp%water%state%SMCEQ        (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%BTRANI       ) ) allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%state%PSI          ) ) allocate( noahmp%water%state%PSI          (       1:NSOIL) )
 
     noahmp%water%state%IMELT(:)       = huge(1)
     noahmp%water%state%SUPERCOOL(:)   = huge(1.0)
@@ -146,10 +146,10 @@ contains
     noahmp%water%flux%QRAIN           = huge(1.0)
     noahmp%water%flux%QSNBOT          = huge(1.0)
     noahmp%water%flux%SNOFLOW         = huge(1.0)
-    noahmp%water%flux%IRFIRATE        = huge(1.0)
-    noahmp%water%flux%IRMIRATE        = huge(1.0)
-    noahmp%water%flux%IRSIRATE        = huge(1.0)
-    noahmp%water%flux%IREVPLOS        = huge(1.0)
+    noahmp%water%flux%IRFIRATE        = 0.0
+    noahmp%water%flux%IRMIRATE        = 0.0
+    noahmp%water%flux%IRSIRATE        = 0.0
+    noahmp%water%flux%IREVPLOS        = 0.0
     noahmp%water%flux%QINSUR          = huge(1.0)
     noahmp%water%flux%RUNSRF          = huge(1.0)
     noahmp%water%flux%RUNSUB          = huge(1.0)
@@ -162,7 +162,7 @@ contains
     noahmp%water%flux%QVAP            = huge(1.0)
     noahmp%water%flux%QDEW            = huge(1.0)
     noahmp%water%flux%QSDEW           = huge(1.0)
-    noahmp%water%flux%EIRR            = huge(1.0)
+    noahmp%water%flux%EIRR            = 0.0
     noahmp%water%flux%QINTR           = huge(1.0)
     noahmp%water%flux%QDRIPR          = huge(1.0)
     noahmp%water%flux%QTHROR          = huge(1.0)
@@ -173,11 +173,11 @@ contains
     noahmp%water%flux%QMELT           = huge(1.0)
     noahmp%water%flux%QFX             = huge(1.0)
 
-    allocate( noahmp%water%flux%DDZ1     (-NSNOW+1:0)     )
-    allocate( noahmp%water%flux%DDZ2     (-NSNOW+1:0)     )
-    allocate( noahmp%water%flux%DDZ3     (-NSNOW+1:0)     )
-    allocate( noahmp%water%flux%PDZDTC   (-NSNOW+1:0)     )
-    allocate( noahmp%water%flux%ETRANI   (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%flux%DDZ1   ) ) allocate( noahmp%water%flux%DDZ1   (-NSNOW+1:0) )
+    if( .not. allocated( noahmp%water%flux%DDZ2   ) ) allocate( noahmp%water%flux%DDZ2   (-NSNOW+1:0) )
+    if( .not. allocated( noahmp%water%flux%DDZ3   ) ) allocate( noahmp%water%flux%DDZ3   (-NSNOW+1:0) )
+    if( .not. allocated( noahmp%water%flux%PDZDTC ) ) allocate( noahmp%water%flux%PDZDTC (-NSNOW+1:0) )
+    if( .not. allocated( noahmp%water%flux%ETRANI ) ) allocate( noahmp%water%flux%ETRANI ( 1:NSOIL  ) )
 
     noahmp%water%flux%DDZ1(:)           = huge(1.0)
     noahmp%water%flux%DDZ2(:)           = huge(1.0)
@@ -244,15 +244,15 @@ contains
     noahmp%water%param%MFSNO            = huge(1.0)
     noahmp%water%param%SCFFAC           = huge(1.0)
 
-    allocate( noahmp%water%param%SMCMAX   (       1:NSOIL) )
-    allocate( noahmp%water%param%SMCWLT   (       1:NSOIL) )
-    allocate( noahmp%water%param%SMCREF   (       1:NSOIL) )
-    allocate( noahmp%water%param%SMCDRY   (       1:NSOIL) )
-    allocate( noahmp%water%param%DWSAT    (       1:NSOIL) )
-    allocate( noahmp%water%param%DKSAT    (       1:NSOIL) )
-    allocate( noahmp%water%param%BEXP     (       1:NSOIL) )
-    allocate( noahmp%water%param%PSISAT   (       1:NSOIL) )
-    allocate( noahmp%water%param%QUARTZ   (       1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%SMCMAX ) ) allocate( noahmp%water%param%SMCMAX (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%SMCWLT ) ) allocate( noahmp%water%param%SMCWLT (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%SMCREF ) ) allocate( noahmp%water%param%SMCREF (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%SMCDRY ) ) allocate( noahmp%water%param%SMCDRY (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%DWSAT  ) ) allocate( noahmp%water%param%DWSAT  (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%DKSAT  ) ) allocate( noahmp%water%param%DKSAT  (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%BEXP   ) ) allocate( noahmp%water%param%BEXP   (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%PSISAT ) ) allocate( noahmp%water%param%PSISAT (1:NSOIL) )
+    if( .not. allocated( noahmp%water%param%QUARTZ ) ) allocate( noahmp%water%param%QUARTZ (1:NSOIL) )
 
     noahmp%water%param%SMCMAX(:)        = huge(1.0)
     noahmp%water%param%SMCWLT(:)        = huge(1.0)
@@ -455,7 +455,7 @@ contains
               NSNOW       => noahmp%config%domain%NSNOW        ,&
               NSOIL       => noahmp%config%domain%NSOIL         &
              )
-             
+
     NoahmpIO%SMSTAV   (I,J)            = 0.0  ! [maintained as Noah consistency] water
     NoahmpIO%SMSTOT   (I,J)            = 0.0  ! [maintained as Noah consistency] water
     NoahmpIO%SFCRUNOFF(I,J)            = NoahmpIO%SFCRUNOFF(I,J) + (noahmp%water%flux%RUNSRF * NoahmpIO%DTBL)  
@@ -471,6 +471,7 @@ contains
     NoahmpIO%ACSNOM   (I,J)            = NoahmpIO%ACSNOM(I,J) + (noahmp%water%flux%QSNBOT * NoahmpIO%DTBL) + &
                                          noahmp%water%state%PONDING + noahmp%water%state%PONDING1 +          &
                                          noahmp%water%state%PONDING2
+
     NoahmpIO%CANLIQXY (I,J)            = noahmp%water%state%CANLIQ
     NoahmpIO%CANICEXY (I,J)            = noahmp%water%state%CANICE
     NoahmpIO%FWETXY   (I,J)            = noahmp%water%state%FWET

@@ -35,7 +35,7 @@ module module_NoahMP_hrldas_driver
    integer  :: finemesh, finemesh_factor
 #endif
 
-  character(len=9), parameter :: version = "v20150506"
+  character(len=9), parameter :: version = "v20220501"
   integer :: LDASIN_VERSION
 
 #ifdef MPP_LAND
@@ -198,7 +198,17 @@ contains
   NoahmpIO%xstartpar = 1
   NoahmpIO%ystartpar = 1
 
+!---------------------------------------------------------------------
+!  initialize NoahmpIOVarType data type and variables
+!---------------------------------------------------------------------
+
   call NoahmpIOVarInitDefault(NoahmpIO)
+
+!---------------------------------------------------------------------
+!  read in Noah-MP Parameters from MPTABLE
+!---------------------------------------------------------------------
+
+  call ReadNoahmpTable(NoahmpIO)
 
 #ifdef WRF_HYDRO
    allocate( greenfrac   (NoahmpIO%XSTART:NoahmpIO%XEND,NoahmpIO%YSTART:NoahmpIO%YEND))
@@ -260,7 +270,7 @@ contains
 ! This option is not tested for parallel use in the offline driver
 !------------------------------------------------------------------------
 
-  if (NoahmpIO%runoff_option == 5) then
+  if (NoahmpIO%surface_runoff_option == 5) then
     CALL READ_MMF_RUNOFF(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                          NoahmpIO%FDEPTHXY, NoahmpIO%EQZWT, NoahmpIO%RECHCLIM, NoahmpIO%RIVERBEDXY)
   end if
@@ -504,6 +514,10 @@ contains
 
 ! Must still call NoahmpInitMain even in restart to set up parameter arrays (also done in WRF)
 
+!------------------------------------------------------------------------------------------
+!    Initialize Noah-MP states and variables
+!------------------------------------------------------------------------------------------
+
      CALL NoahmpInitMain(NoahmpIO)
 
      IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
@@ -514,7 +528,7 @@ contains
                             NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
                             NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%num_soil_layers, NoahmpIO%LCZ_1_TABLE,                 & !urban  
                             NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,      & !urban
-	                        NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,      & !urban
+                            NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,      & !urban
                             NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,         & !urban
                             NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,       & !urban
                             NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
@@ -640,12 +654,20 @@ contains
 
 !     SNOW = SNOW * 1000.    ! Convert snow water equivalent to mm. MB: remove v3.7
 
-         NoahmpIO%FNDSOILW = .FALSE.
-     
-         call NoahmpInitMain(NoahmpIO)
+        !----------------------------------------------------------------------------------
+        !   Initialize Noah-MP variables
+        !----------------------------------------------------------------------------------
+       
+        call NoahmpInitMain(NoahmpIO)
+       
+        if(NoahmpIO%surface_runoff_option == 5) then
 
-         if(NoahmpIO%iopt_runsrf == 5) then
+        !----------------------------------------------------------------------------------
+        !   Initialize MMF Groundwater variables
+        !----------------------------------------------------------------------------------
+         
             call NoahmpGroundwaterInitMain(grid, NoahmpIO)
+         
          endif
 
          NoahmpIO%TAUSSXY = 0.0   ! Need to be added to _INIT later
@@ -781,10 +803,10 @@ contains
      implicit  none
      integer :: itime          ! timestep loop
      integer :: I, J, K
+
 !---------------------------------------------------------------------------------
 ! Read the forcing data.
 !---------------------------------------------------------------------------------
-
 ! For HRLDAS, we're assuming (for now) that each time period is in a 
 ! separate file.  So we can open a new one right now.
 
@@ -805,7 +827,7 @@ contains
      call mpp_land_bcast_char(19,forcDate(1:19))
 #endif
      if(finemesh .ne. 0) goto 991
-    
+
      if(forc_typ .eq. 0) then
         CALL READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,    &
                              NoahmpIO%OLDDATE,NoahmpIO%XSTART, NoahmpIO%XEND,        &
@@ -919,7 +941,7 @@ contains
        END DO    
 !      ENDIF
      ENDIF
-
+  
 !------------------------------------------------------------------------
 ! Noah-MP updates we can do before spatial loop.
 !------------------------------------------------------------------------
@@ -970,7 +992,7 @@ contains
          NoahmpIO%MP_RAINC  = NoahmpIO%RAINCV 
          NoahmpIO%MP_RAINNC = NoahmpIO%RAINNCV 
          NoahmpIO%MP_SHCV   = NoahmpIO%RAINSHV
-		 NoahmpIO%MP_SNOW   = NoahmpIO%SNOWNCV
+         NoahmpIO%MP_SNOW   = NoahmpIO%SNOWNCV
          NoahmpIO%MP_GRAUP  = NoahmpIO%GRAUPELNCV
          NoahmpIO%MP_HAIL   = NoahmpIO%HAILNCV 
          
@@ -1056,27 +1078,27 @@ contains
                        
          ENDIF 
 
-  IF(NoahmpIO%RUNOFF_OPTION.EQ.5.AND.MOD(ITIME,NoahmpIO%STEPWTD).EQ.0)THEN
+  IF(NoahmpIO%surface_runoff_option.EQ.5.AND.MOD(ITIME,NoahmpIO%STEPWTD).EQ.0)THEN
            CALL wrf_message('calling WTABLE' )
 
 !gmm update wtable from lateral flow and shed water to rivers
-           CALL WTABLE_MMF_NOAHMP(                                                         &
-                                 NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%XLAND, NoahmpIO%XICE,  & 
-                                 NoahmpIO%XICE_THRESHOLD, NoahmpIO%ISICE,                  &
-                                 NoahmpIO%ISLTYP, NoahmpIO%SMOISEQ, NoahmpIO%DZS,          &       
-                                 NoahmpIO%WTDDT, NoahmpIO%FDEPTHXY, NoahmpIO%AREAXY,       &
-                                 NoahmpIO%TERRAIN, NoahmpIO%ISURBAN, NoahmpIO%IVGTYP,      &
-                                 NoahmpIO%RIVERCONDXY, NoahmpIO%RIVERBEDXY, NoahmpIO%EQZWT,& 
-                                 NoahmpIO%PEXPXY, NoahmpIO%SMOIS, NoahmpIO%SH2O,           & 
-                                 NoahmpIO%SMCWTDXY, NoahmpIO%ZWTXY,                        & 
-                                 NoahmpIO%QRFXY, NoahmpIO%DEEPRECHXY, NoahmpIO%QSPRINGXY,  &
-                                 NoahmpIO%QSLATXY, NoahmpIO%QRFSXY, NoahmpIO%QSPRINGSXY,   &  
-                                 NoahmpIO%RECHXY,                                          &
-                                 NoahmpIO%IDS, NoahmpIO%IDE, NoahmpIO%JDS, NoahmpIO%JDE,   &
-                                 NoahmpIO%KDS, NoahmpIO%KDE, NoahmpIO%IMS, NoahmpIO%IME,   &
-                                 NoahmpIO%JMS,NoahmpIO%JME, NoahmpIO%KMS,NoahmpIO%KME,     &
-                                 NoahmpIO%ITS,NoahmpIO%ITE, NoahmpIO%JTS,NoahmpIO%JTE,     &
-                                 NoahmpIO%KTS,NoahmpIO%KTE)
+           CALL WTABLE_MMF_NOAHMP(NoahmpIO,                                                 &
+                                  NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%XLAND, NoahmpIO%XICE,  & 
+                                  NoahmpIO%XICE_THRESHOLD, NoahmpIO%ISICE,                  &
+                                  NoahmpIO%ISLTYP, NoahmpIO%SMOISEQ, NoahmpIO%DZS,          &       
+                                  NoahmpIO%WTDDT, NoahmpIO%FDEPTHXY, NoahmpIO%AREAXY,       &
+                                  NoahmpIO%TERRAIN, NoahmpIO%ISURBAN, NoahmpIO%IVGTYP,      &
+                                  NoahmpIO%RIVERCONDXY, NoahmpIO%RIVERBEDXY, NoahmpIO%EQZWT,& 
+                                  NoahmpIO%PEXPXY, NoahmpIO%SMOIS, NoahmpIO%SH2O,           & 
+                                  NoahmpIO%SMCWTDXY, NoahmpIO%ZWTXY,                        & 
+                                  NoahmpIO%QRFXY, NoahmpIO%DEEPRECHXY, NoahmpIO%QSPRINGXY,  &
+                                  NoahmpIO%QSLATXY, NoahmpIO%QRFSXY, NoahmpIO%QSPRINGSXY,   &  
+                                  NoahmpIO%RECHXY,                                          &
+                                  NoahmpIO%IDS, NoahmpIO%IDE, NoahmpIO%JDS, NoahmpIO%JDE,   &
+                                  NoahmpIO%KDS, NoahmpIO%KDE, NoahmpIO%IMS, NoahmpIO%IME,   &
+                                  NoahmpIO%JMS,NoahmpIO%JME, NoahmpIO%KMS,NoahmpIO%KME,     &
+                                  NoahmpIO%ITS,NoahmpIO%ITE, NoahmpIO%JTS,NoahmpIO%JTE,     &
+                                  NoahmpIO%KTS,NoahmpIO%KTE)
 
 !         IF(NoahmpIO%SF_URBAN_PHYSICS.eq.1) THEN
 !           DO j=NoahmpIO%jts,NoahmpIO%jte                                           !urban
@@ -1145,7 +1167,7 @@ contains
 
            DEFINE_MODE_LOOP : do imode = 1, 2
 
-              call set_output_define_mode(NoahmpIO%imode)
+              call set_output_define_mode(imode)
 
               ! For 3D arrays, we need to know whether the Z dimension is snow layers, or soil layers.
 
@@ -1311,7 +1333,7 @@ contains
               call add_to_output(NoahmpIO%IRRSPLH    , "IRRSPLH" , "Latent heating due to sprinkler"        , "W m{-2}"             )
             ENDIF
         ! MMF groundwater  model
-	    IF(NoahmpIO%RUNOFF_OPTION == 5) THEN
+	    IF(NoahmpIO%surface_runoff_option == 5) THEN
               call add_to_output(NoahmpIO%SMCWTDXY   , "SMCWTD"   , "soil water content between bottom of the soil and water table", "m3 m{-3}")
               call add_to_output(NoahmpIO%RECHXY     , "RECH"     , "recharge to or from the water table when shallow"             , "m"       )
               call add_to_output(NoahmpIO%DEEPRECHXY , "DEEPRECH" , "recharge to or from the water table when deep"                , "m"       )
@@ -1321,19 +1343,19 @@ contains
               call add_to_output(NoahmpIO%QSPRINGXY  , "QSPRING"  , "instantaneous seeping water"                                  , "m"       )
               call add_to_output(NoahmpIO%QSLATXY    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"      )
               call add_to_output(NoahmpIO%QLATXY     , "QLAT"     , "instantaneous lateral flow"                                   , "m"       )
-	    ENDIF
-	! For now, no urban output variables included
+            ENDIF
+        ! For now, no urban output variables included
 
            enddo DEFINE_MODE_LOOP
 
            call finalize_output_file(NoahmpIO%split_output_count,itime)
                    
-	endif
-	   
-	if(NoahmpIO%skip_first_output) NoahmpIO%skip_first_output = .false.
+        endif
+   
+        if(NoahmpIO%skip_first_output) NoahmpIO%skip_first_output = .false.
 
      endif OUTPUT_FOR_HISTORY
-
+ 
      if (NoahmpIO%IVGTYP(NoahmpIO%xstart,NoahmpIO%ystart)==NoahmpIO%ISWATER) then
        write(*,'(" ***DATE=", A19)', advance="NO") NoahmpIO%olddate
      else
@@ -1349,7 +1371,9 @@ contains
       if ( (NoahmpIO%restart_frequency_hours .gt. 0) .and. &
            (mod(ITIME, int(NoahmpIO%restart_frequency_hours*3600./nint(NoahmpIO%dtbl))) == 0)) then
        call lsm_restart()
+
       else
+
        if (NoahmpIO%restart_frequency_hours <= 0) then
           if ( (NoahmpIO%olddate( 9:10) == "01") .and. (NoahmpIO%olddate(12:13) == "00") .and. &
                (NoahmpIO%olddate(15:16) == "00") .and. (NoahmpIO%olddate(18:19) == "00") ) then

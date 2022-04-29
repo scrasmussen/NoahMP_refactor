@@ -73,16 +73,17 @@ contains
     
     ! precipitation preprocess: ! MB/AN : v3.7 
     PRCP                       = NoahmpIO%RAINBL   (I,J) / NoahmpIO%DTBL
+
     !if (present(NoahmpIO%MP_RAINC) .and. present(NoahmpIO%MP_RAINNC) .and. &
     !    present(NoahmpIO%MP_SHCV)  .and. present(NoahmpIO%MP_SNOW)   .and. &
     !    present(NoahmpIO%MP_GRAUP) .and. present(NoahmpIO%MP_HAIL))  then  
         
-       noahmp%forcing%PRCPCONV    = NoahmpIO%MP_RAINC (I,J)
-       noahmp%forcing%PRCPNONC    = NoahmpIO%MP_RAINNC(I,J)
-       noahmp%forcing%PRCPSHCV    = NoahmpIO%MP_SHCV  (I,J)
-       noahmp%forcing%PRCPSNOW    = NoahmpIO%MP_SNOW  (I,J) 
-       noahmp%forcing%PRCPGRPL    = NoahmpIO%MP_GRAUP (I,J) 
-       noahmp%forcing%PRCPHAIL    = NoahmpIO%MP_HAIL  (I,J) 
+       noahmp%forcing%PRCPCONV    = NoahmpIO%MP_RAINC (I,J) / NoahmpIO%DTBL
+       noahmp%forcing%PRCPNONC    = NoahmpIO%MP_RAINNC(I,J) / NoahmpIO%DTBL
+       noahmp%forcing%PRCPSHCV    = NoahmpIO%MP_SHCV  (I,J) / NoahmpIO%DTBL
+       noahmp%forcing%PRCPSNOW    = NoahmpIO%MP_SNOW  (I,J) / NoahmpIO%DTBL
+       noahmp%forcing%PRCPGRPL    = NoahmpIO%MP_GRAUP (I,J) / NoahmpIO%DTBL
+       noahmp%forcing%PRCPHAIL    = NoahmpIO%MP_HAIL  (I,J) / NoahmpIO%DTBL
 
        PRCPOTHR  = PRCP - noahmp%forcing%PRCPCONV - &
                    noahmp%forcing%PRCPNONC - noahmp%forcing%PRCPSHCV                     ! take care of other (fog) contained in rainbl

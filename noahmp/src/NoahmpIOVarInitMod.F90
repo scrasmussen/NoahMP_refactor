@@ -1624,6 +1624,7 @@ contains
   end subroutine ReadNamelist
 
 !=== initialize with default values
+
   subroutine NoahmpIOVarInitDefault(NoahmpIO)
 
     implicit none
@@ -1639,12 +1640,9 @@ contains
               NSOIL   =>  NoahmpIO%NSOIL    ,&
               NSNOW   =>  NoahmpIO%NSNOW     &
              )
-    allocate ( NoahmpIO%soil_thick_input (NoahmpIO%MAX_SOIL_LEVELS) )    ! depth to soil interfaces from namelist [m]
     allocate ( NoahmpIO%COSZEN       (XSTART:XEND,YSTART:YEND) )    ! cosine zenith angle
-    allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )    ! latitude [rad]
-    
+    allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )    ! latitude [rad] 
     allocate ( NoahmpIO%DZ8W         (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! thickness of atmo layers [m]
-    
     allocate ( NoahmpIO%DZS          (1:NSOIL)                   )  ! thickness of soil layers [m]
     allocate ( NoahmpIO%ZSOIL        (1:NSOIL)                   )  ! depth to soil interfaces [m] 
     allocate ( NoahmpIO%IVGTYP       (XSTART:XEND,YSTART:YEND) )    ! vegetation type
@@ -1653,7 +1651,7 @@ contains
     allocate ( NoahmpIO%TMN          (XSTART:XEND,YSTART:YEND) )    ! deep soil temperature [K]
     allocate ( NoahmpIO%XLAND        (XSTART:XEND,YSTART:YEND) )    ! =2 ocean; =1 land/seaice
     allocate ( NoahmpIO%XICE         (XSTART:XEND,YSTART:YEND) )    ! fraction of grid that is seaice
-    
+
     allocate ( NoahmpIO%T_PHY        (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D atmospheric temperature valid at mid-levels [K]
     allocate ( NoahmpIO%QV_CURR      (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D water vapor mixing ratio [kg/kg_dry]
     allocate ( NoahmpIO%U_PHY        (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D U wind component [m/s]
@@ -1663,7 +1661,7 @@ contains
     allocate ( NoahmpIO%SWDDIR       (XSTART:XEND,YSTART:YEND) )    ! solar down at surface [W m-2] for new urban solar panel
     allocate ( NoahmpIO%SWDDIF       (XSTART:XEND,YSTART:YEND) )    ! solar down at surface [W m-2] for new urban solar panel
     allocate ( NoahmpIO%GLW          (XSTART:XEND,YSTART:YEND) )    ! longwave down at surface [W m-2]
-    
+
     allocate ( NoahmpIO%P8W          (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D pressure, valid at interface [Pa]
     
     allocate ( NoahmpIO%RAINBL       (XSTART:XEND,YSTART:YEND) )    ! total precipitation entering land model [mm] per time step
@@ -1690,7 +1688,7 @@ contains
     allocate ( NoahmpIO%refkdt_2D    (XSTART:XEND,YSTART:YEND) )            ! Soil Infiltration Parameter
     
     allocate ( NoahmpIO%soilcomp     (XSTART:XEND,1:2*NSOIL,YSTART:YEND) )  ! Soil sand and clay content [fraction]
-    
+
     allocate ( NoahmpIO%soilcl1      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
     allocate ( NoahmpIO%soilcl2      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
     allocate ( NoahmpIO%soilcl3      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
@@ -1769,7 +1767,7 @@ contains
     allocate ( NoahmpIO%SMCWTDXY     (XSTART:XEND,YSTART:YEND) )  ! soil moisture below the bottom of the column (m3m-3)
     allocate ( NoahmpIO%DEEPRECHXY   (XSTART:XEND,YSTART:YEND) )  ! recharge to the water table when deep (m)
     allocate ( NoahmpIO%RECHXY       (XSTART:XEND,YSTART:YEND) )  ! recharge to the water table (diagnostic) (m)
-    
+
     allocate ( NoahmpIO%TSNOXY       (XSTART:XEND,-NSNOW+1:0,    YSTART:YEND) )  ! snow temperature [K]
     allocate ( NoahmpIO%ZSNSOXY      (XSTART:XEND,-NSNOW+1:NSOIL,YSTART:YEND) )  ! snow layer depth [m]
     allocate ( NoahmpIO%SNICEXY      (XSTART:XEND,-NSNOW+1:0,    YSTART:YEND) )  ! snow layer ice [mm]

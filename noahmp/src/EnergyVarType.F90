@@ -82,7 +82,6 @@ module EnergyVarType
     real(kind=kind_noahmp) :: SAI             ! stem area index
     real(kind=kind_noahmp) :: VAI             ! one-sided leaf+stem area index (m2/m2), after burying by snow
     real(kind=kind_noahmp) :: FVEG            ! greeness vegetation fraction
-    real(kind=kind_noahmp) :: FVGMAX          ! Vegetation fraction annual max [0-1] 
     real(kind=kind_noahmp) :: TG              ! ground temperature (k)
     real(kind=kind_noahmp) :: TV              ! vegetation temperature (k)
     real(kind=kind_noahmp) :: TS              ! surface temperature (K)

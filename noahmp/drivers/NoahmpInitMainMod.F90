@@ -108,7 +108,7 @@ contains
               t2mbxy            => NoahmpIO%T2MBXY,            &
               chstarxy          => NoahmpIO%CHSTARXY,          &
               NSOIL             => NoahmpIO%NSOIL,             &
-              iopt_run          => NoahmpIO%runoff_option,     & 
+              IOPT_RUNSRF       => NoahmpIO%IOPT_RUNSRF,       & 
               iopt_crop         => NoahmpIO%crop_option,       &
               iopt_irr          => NoahmpIO%irrigation_option, &
               iopt_irrm         => NoahmpIO%irrigation_method, &
@@ -180,7 +180,7 @@ contains
              enddo
           enddo
        endif
-       
+   
        ! Check if snow/snowh are consistent and cap SWE at 5000mm;
        !  the Noah-MP code does it internally but if we don't do it here, problems ensue
        do J = jts,jtf
@@ -225,8 +225,9 @@ contains
             !TMN(I,J) = MIN(TMN(I,J),263.15)           ! set deep temp to at most -10C
              SNOW(I,J) = MAX(SNOW(I,J), 10.0)           ! set SWE to at least 10mm
              SNOWH(I,J)=SNOW(I,J)*0.01                  ! SNOW in mm and SNOWH in m
+
           else
-      
+
              BEXP   = NoahmpIO%BEXP_TABLE  (ISLTYP(I,J))
              SMCMAX = NoahmpIO%SMCMAX_TABLE(ISLTYP(I,J))
              PSISAT = NoahmpIO%PSISAT_TABLE(ISLTYP(I,J))
@@ -234,8 +235,10 @@ contains
                 do NS=1, NSOIL
                   if ( SMOIS(I,NS,J) > SMCMAX )  SMOIS(I,NS,J) = SMCMAX
                 enddo
+
                 if ( ( BEXP > 0.0 ) .AND. ( SMCMAX > 0.0 ) .AND. ( PSISAT > 0.0 ) ) then
                   do NS=1, NSOIL
+
                      if ( TSLB(I,NS,J) < 273.149 ) then    ! Use explicit as initial soil ice
                         FK = (( (HLICE/(GRAV*(-PSISAT))) *                              &
                              ((TSLB(I,NS,J)-T0)/TSLB(I,NS,J)) )**(-1/BEXP) )*SMCMAX
@@ -244,11 +247,15 @@ contains
                      else
                         SH2O(I,NS,J)=SMOIS(I,NS,J)
                      endif
+
                   enddo
+
                 else
+
                   do NS=1, NSOIL
                      SH2O(I,NS,J)=SMOIS(I,NS,J)
                   enddo
+
                 endif
              endif
           enddo
@@ -284,7 +291,7 @@ contains
            qrainxy    (I,J) = 0.0
            wslakexy   (I,J) = 0.0
 
-           if(iopt_run.ne.5) then 
+           if(IOPT_RUNSRF.ne.5) then 
               waxy       (I,J) = 4900.                                       !???
               wtxy       (I,J) = waxy(i,j)                                   !???
               zwtxy      (I,J) = (25. + 2.0) - waxy(i,j)/1000/0.2            !???
@@ -376,7 +383,6 @@ contains
           enddo
        enddo
        
-
        ! Given the soil layer thicknesses (in DZS), initialize the soil layer
        ! depths from the surface.
        ZSOIL(1)       = -DZS(1)          ! negative
@@ -391,12 +397,12 @@ contains
        !---------------------------------------------------------------------
        ! Initialize Noah-MP Snow
        !--------------------------------------------------------------------- 
-       
+ 
        call NoahmpSnowinitMain (NoahmpIO)
-
+ 
        !initialize arrays for groundwater dynamics iopt_run=5
-
-       if(iopt_run.eq.5) then
+ 
+       if(IOPT_RUNSRF.eq.5) then
          ! if( PRESENT(smoiseq)   .AND. &
          !   PRESENT(smcwtdxy)    .AND. &
          !   PRESENT(rechxy)      .AND. &
@@ -428,7 +434,7 @@ contains
           !endif
        endif
     endif
-
+ 
     endassociate
     
   end subroutine NoahmpInitMain    

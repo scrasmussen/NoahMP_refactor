@@ -143,6 +143,7 @@ contains
     else
        QINSUR = QINSUR + (QSNBOT + QSDEW) * 0.001
     endif
+
 #ifdef WRF_HYDRO
     QINSUR = QINSUR + sfcheadrt / DT * 0.001
 #endif

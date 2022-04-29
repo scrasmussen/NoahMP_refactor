@@ -57,23 +57,6 @@ contains
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: SAND
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: CLAY
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: ORGM
-
-
-    !---------------------------------------------------------------------
-    !  read in Noah-MP Parameters from MPTABLE
-    !---------------------------------------------------------------------  
-
-    call ReadNoahmpTable(NoahmpIO)    
-    
-    !---------------------------------------------------------------------
-    !  initialize Data Types
-    !---------------------------------------------------------------------
-
-    call ConfigVarInitDefault(noahmp)
-    call ForcingVarInitDefault(noahmp)
-    call EnergyVarInitDefault(noahmp)
-    call WaterVarInitDefault(noahmp)
-    call BiochemVarInitDefault(noahmp)
   
     !---------------------------------------------------------------------
     !  Prepare Noah-MP driver
@@ -120,6 +103,7 @@ contains
        endif                                                  ! end of initialization over ocean
 !-----------------------------------------------------------------------
        ILOOP : do I = NoahmpIO%its, NoahmpIO%ite
+
        NoahmpIO%I = I
        if (NoahmpIO%XICE(I,J) >= NoahmpIO%XICE_THRESHOLD)then
           NoahmpIO%ICE                          = 1           ! Sea-ice point
@@ -130,14 +114,19 @@ contains
           if((NoahmpIO%XLAND(I,J)-1.5) >= 0.) cycle ILOOP     ! Open water case
 
           !---------------------------------------------------------------------
+          !  initialize Data Types
           !  Transfer all the inputs from NoahmpIO to noahmp
           !---------------------------------------------------------------------
-    
-          call ConfigVarInitTransfer (noahmp, NoahmpIO) 
+
+          call ConfigVarInitDefault  (noahmp)
           call ConfigVarInitTransfer (noahmp, NoahmpIO)
+          call ForcingVarInitDefault (noahmp)
           call ForcingVarInitTransfer(noahmp, NoahmpIO)
+          call EnergyVarInitDefault  (noahmp)
           call EnergyVarInitTransfer (noahmp, NoahmpIO)
+          call WaterVarInitDefault   (noahmp)
           call WaterVarInitTransfer  (noahmp, NoahmpIO)
+          call BiochemVarInitDefault (noahmp)
           call BiochemVarInitTransfer(noahmp, NoahmpIO)
 
           !---------------------------------------------------------------------
@@ -183,7 +172,7 @@ contains
               !---------------------------------------------------------------------
               !  Call 1D Noah-MP LSM for glacier points
               !---------------------------------------------------------------------
-              
+
               call NoahmpMainGlacier(noahmp)
 
               !---------------------------------------------------------------------
@@ -231,12 +220,12 @@ contains
        !---------------------------------------------------------------------
        !  Transfer Noah-MP states to output      
        !---------------------------------------------------------------------
-       
+
        call ConfigVarOutTransfer (noahmp, NoahmpIO)
        call EnergyVarOutTransfer (noahmp, NoahmpIO)
        call WaterVarOutTransfer  (noahmp, NoahmpIO)
        call BiochemVarOutTransfer(noahmp, NoahmpIO) 
-       
+
       enddo ILOOP    ! I loop
     enddo  JLOOP     ! J loop
               

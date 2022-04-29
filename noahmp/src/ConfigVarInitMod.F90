@@ -95,8 +95,8 @@ contains
     associate(                                      &
               I     => NoahmpIO%I                  ,&
               J     => NoahmpIO%J                  ,&
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL   &
+              NSNOW => NoahmpIO%NSNOW              ,&
+              NSOIL => NoahmpIO%NSOIL               &
              )
 
     ! config namelist variable
@@ -130,8 +130,8 @@ contains
     endif
 
     ! config domain variable
-    NSNOW                           = NoahmpIO%NSNOW
-    NSOIL                           = NoahmpIO%NSOIL
+    noahmp%config%domain%NSNOW      = NoahmpIO%NSNOW
+    noahmp%config%domain%NSOIL      = NoahmpIO%NSOIL
     noahmp%config%domain%ILOC       = NoahmpIO%I
     noahmp%config%domain%JLOC       = NoahmpIO%J
     noahmp%config%domain%IST        = 1
@@ -160,11 +160,11 @@ contains
     noahmp%config%domain%LAT        = NoahmpIO%XLAT(I,J)
     noahmp%config%domain%NSTAGE     = 8
 
-    allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
-    allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
-    allocate( noahmp%config%domain%SOILTYP(       1:NSOIL) )
-    allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
-    allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
+    if( .not. allocated( noahmp%config%domain%ZSOIL   ) ) allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
+    if( .not. allocated( noahmp%config%domain%ZLAYER  ) ) allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
+    if( .not. allocated( noahmp%config%domain%SOILTYP ) ) allocate( noahmp%config%domain%SOILTYP(       1:NSOIL) )
+    if( .not. allocated( noahmp%config%domain%DZSNSO  ) ) allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
+    if( .not. allocated( noahmp%config%domain%ZSNSO   ) ) allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
     
     noahmp%config%domain%SOILTYP(       1:NSOIL) = huge(1)
     noahmp%config%domain%ZSOIL  (       1:NSOIL) = huge(1.0)
@@ -186,12 +186,6 @@ contains
     noahmp%config%domain%ZSOIL  (       1:NSOIL) = NoahmpIO%ZSOIL  (     1:NSOIL      )
     noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = NoahmpIO%ZSNSOXY(I,-NSNOW+1:NSOIL,J)
 
-    ! Both FVEG and FVGMAX moved from EnergyVarInit-Becasue following block for urban and crop 
-    ! updates both these vars. So better InitTransfer here - Prasanth Valayamkunnath
-    
-    noahmp%energy%state%FVEG    = NoahmpIO%VEGFRA(I,J)/100. ! Updates in ConfigVarInit- Prasanth                      
-    noahmp%energy%state%FVGMAX  = NoahmpIO%GVFMAX(I,J)/100. ! Updates in ConfigVarInit- Prasanth   
-
     if ( (NoahmpIO%IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE) .or. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_1_TABLE) .or. &
          (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_2_TABLE)   .or. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_3_TABLE) .or. &
          (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_4_TABLE)   .or. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_5_TABLE) .or. &
@@ -205,7 +199,7 @@ contains
            noahmp%config%domain%VEGTYP = NoahmpIO%ISURBAN_TABLE
        else
            noahmp%config%domain%VEGTYP = NoahmpIO%NATURAL_TABLE  ! set urban vegetation type based on table natural
-           noahmp%energy%state%FVGMAX  = 0.96 
+           NoahmpIO%GVFMAX(I,J)        = 0.96 * 100.0            ! in %
        endif
          
     endif
@@ -217,8 +211,8 @@ contains
     if (NoahmpIO%IOPT_CROP > 0 .and. NoahmpIO%CROPCAT(I,J) > 0) then
        noahmp%config%domain%CROPTYP  = NoahmpIO%CROPCAT(I,J)             
        noahmp%config%domain%VEGTYP   = NoahmpIO%ISCROP_TABLE
-       noahmp%energy%state%FVGMAX    = 0.95
-       noahmp%energy%state%FVEG      = 0.95
+       NoahmpIO%VEGFRA(I,J)          = 0.95 * 100.0              ! in %
+       NoahmpIO%GVFMAX(I,J)          = 0.95 * 100.0              ! in %
     endif
 
     if(any(noahmp%config%domain%SOILTYP == 14) .AND. NoahmpIO%XICE(I,J) == 0.) then

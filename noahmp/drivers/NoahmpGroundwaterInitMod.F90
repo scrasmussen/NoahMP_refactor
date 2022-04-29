@@ -99,7 +99,7 @@ contains
               kte        => NoahmpIO%kte              & 
              )
 
-
+    
     ! Given the soil layer thicknesses (in DZS), calculate the soil layer
     ! depths from the surface.
     ZSOIL(1)         = -DZS(1)          ! negative
@@ -107,26 +107,30 @@ contains
        ZSOIL(NS)       = ZSOIL(NS-1) - DZS(NS)
     enddo
 
-    itf=min0(ite,ide-1)
-    jtf=min0(jte,jde-1)
+    
+
+    itf=min0(ite,(ide+1)-1)
+    jtf=min0(jte,(jde+1)-1)
+
+    
 
     where(IVGTYP.NE.NoahmpIO%ISWATER_TABLE.AND.IVGTYP.NE.NoahmpIO%ISICE_TABLE)
          LANDMASK=1
     elsewhere
          LANDMASK=-1
     endwhere
-    
+        
     PEXP = 1.0
 
     DELTAT=365.*24*3600. !1 year
-
+    
 !readjust the raw aggregated water table from hires, so that it is better compatible with topography
 
 !use WTD here, to use the lateral communication routine
     WTD=EQWTD
 
     NCOUNT=0
-
+    
     do NITER=1,500
 
 #if (EM_CORE == 1)
@@ -138,12 +142,13 @@ contains
 !Calculate lateral flow
 
       if(NCOUNT.GT.0.OR.NITER.eq.1)then
+
          QLAT = 0.
-         call LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
+         call LATERALFLOW(NoahmpIO, ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
                           ,ids,ide,jds,jde,kds,kde                         & 
                           ,ims,ime,jms,jme,kms,kme                         &
                           ,its,ite,jts,jte,kts,kte                         )
-
+     
          NCOUNT=0
          do J=jts,jtf
            do I=its,itf
@@ -156,7 +161,6 @@ contains
            enddo
          enddo
       endif
-
     enddo !NITER
 
 #if (EM_CORE == 1)
@@ -197,7 +201,7 @@ contains
 
        enddo
     enddo
-
+    
 !make riverbed to be height down from the surface instead of above sea level
 
     RIVERBED = min( RIVERBED-TOPO, 0.)
@@ -206,17 +210,17 @@ contains
 
     DELTAT = WTDDT * 60. !timestep in seconds for this calculation
 
-
+    
 !recalculate lateral flow
 
     QLAT = 0.
-    call LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
+    call LATERALFLOW(NoahmpIO, ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
                      ,ids,ide,jds,jde,kds,kde                         & 
                      ,ims,ime,jms,jme,kms,kme                         &
                      ,its,ite,jts,jte,kts,kte                         )
                         
 !compute flux from grounwater to rivers in the cell
-
+    
     do J=jts,jtf
        do I=its,itf
           if(LANDMASK(I,J).GT.0)then
@@ -233,7 +237,7 @@ contains
           endif
        enddo
     enddo
-
+    
 !now compute eq. soil moisture, change soil moisture to be compatible with the water table and compute deep soil moisture
 
        do J = jts,jtf
@@ -241,23 +245,23 @@ contains
              BEXP   = NoahmpIO%BEXP_TABLE(ISLTYP(I,J))
              SMCMAX = NoahmpIO%SMCMAX_TABLE(ISLTYP(I,J))
              SMCWLT = NoahmpIO%SMCWLT_TABLE(ISLTYP(I,J))
-             
+                
              if(IVGTYP(I,J)==NoahmpIO%ISURBAN_TABLE)then
                 SMCMAX = 0.45         
                 SMCWLT = 0.40         
              endif 
-             
+                
              DWSAT  = NoahmpIO%DWSAT_TABLE(ISLTYP(I,J))
              DKSAT  = NoahmpIO%DKSAT_TABLE(ISLTYP(I,J))
              PSISAT = -NoahmpIO%PSISAT_TABLE(ISLTYP(I,J))
              if ( ( BEXP > 0.0 ) .AND. ( smcmax > 0.0 ) .AND. ( -psisat > 0.0 ) ) then
+
                 !initialize equilibrium soil moisture for water table diagnostic
                 call EquilibriumSoilMoisture(NSOIL,  ZSOIL, SMCMAX, SMCWLT, &
                                              DWSAT,  DKSAT, BEXP  , SMCEQ)  
-
+                
                 SMOISEQ (I,1:NSOIL,J) = SMCEQ (1:NSOIL)
-
-
+                
                 !make sure that below the water table the layers are saturated and
                 !initialize the deep soil moisture
                 if(WTD(I,J) < ZSOIL(NSOIL)-DZS(NSOIL)) then
@@ -314,7 +318,7 @@ contains
                SMCWTDXY(I,J)         = SMCMAX
                WTD(I,J)              = 0.
              endif
-
+  
 !zero out some arrays
 
              DEEPRECHXY(I,J) = 0.
@@ -322,7 +326,7 @@ contains
              QSLATXY(I,J)    = 0.
              QRFSXY(I,J)     = 0.
              QSPRINGSXY(I,J) = 0.
-
+  
           enddo
        enddo
 

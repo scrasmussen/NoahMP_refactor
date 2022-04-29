@@ -140,6 +140,15 @@ OBJS = ConstantDefineMod.o \
 
 all:	$(OBJS)
 
+module_sf_noahmp_groundwater.o: module_sf_noahmp_groundwater.F90
+	@echo ""
+	$(RM) module_sf_noahmp_groundwater.f90
+	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F90 > $(*).f90
+	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I ../../hrldas/MPP -I. \
+	-I../Utility_routines -I../utility $(NETCDFMOD) $(*).f90
+	$(RM) module_sf_noahmp_groundwater.f90
+	@echo ""
+
 .F90.o:
 	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) -I../utility $(NETCDFMOD) $(*).F90
 
