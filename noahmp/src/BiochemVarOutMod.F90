@@ -1,0 +1,49 @@
+module BiochemVarOutMod
+
+!!! Transfer column (1-D) Noah-MP biochemistry (carbon,nitrogen,etc) variables 
+!!! to 2D NoahmpIO for output
+!!! Biochemistry variables should be first defined in BiochemVarType.F90
+
+! ------------------------ Code history -----------------------------------
+! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
+! Refactered code: P. Valayamkunnath, C. He, & refactor team (Oct 27, 2021)
+! -------------------------------------------------------------------------
+
+  use NoahmpIOVarType
+  use NoahmpVarType
+  use Machine, only : kind_noahmp
+
+  implicit none
+
+contains
+
+!=== Transfer model states to output=====
+
+  subroutine BiochemVarOutTransfer(noahmp, NoahmpIO)
+
+    implicit none
+
+    type(noahmp_type),   intent(inout) :: noahmp
+    type(NoahmpIO_type), intent(inout) :: NoahmpIO
+
+    associate(                                       &
+              I        => noahmp%config%domain%ILOC ,&
+              J        => noahmp%config%domain%JLOC  &
+             )
+
+    NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LFMASS
+    NoahmpIO%RTMASSXY (I,J)  =  noahmp%biochem%state%RTMASS
+    NoahmpIO%STMASSXY (I,J)  =  noahmp%biochem%state%STMASS
+    NoahmpIO%WOODXY   (I,J)  =  noahmp%biochem%state%WOOD
+    NoahmpIO%STBLCPXY (I,J)  =  noahmp%biochem%state%STBLCP
+    NoahmpIO%FASTCPXY (I,J)  =  noahmp%biochem%state%FASTCP
+    NoahmpIO%NEEXY    (I,J)  =  noahmp%biochem%flux%NEE
+    NoahmpIO%GPPXY    (I,J)  =  noahmp%biochem%flux%GPP
+    NoahmpIO%NPPXY    (I,J)  =  noahmp%biochem%flux%NPP
+    NoahmpIO%PSNXY    (I,J)  =  noahmp%biochem%flux%PSN
+
+    end associate
+
+  end subroutine BiochemVarOutTransfer
+
+end module BiochemVarOutMod

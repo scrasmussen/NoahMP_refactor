@@ -8,8 +8,7 @@ include ../../hrldas/user_build_options
 OBJS = NoahmpGroundwaterInitMod.o \
        NoahmpSnowInitMod.o \
        NoahmpInitMainMod.o \
-       NoahmpDriverMainMod.o \
-       NoahmpUrbanDriverMainMod.o
+       NoahmpDriverMainMod.o 
 
 all:	$(OBJS)
 
@@ -49,13 +48,9 @@ NoahmpDriverMainMod.o:../utility/Machine.o \
                       ../src/BiochemVarInitMod.o \
                       ../src/NoahmpMainMod.o \
                       ../src/NoahmpMainGlacierMod.o \
+                      ../src/ConfigVarOutMod.o \
+                      ../src/EnergyVarOutMod.o \
+                      ../src/WaterVarOutMod.o \
+                      ../src/BiochemVarOutMod.o \
                       ../../hrldas/Utility_routines/module_ra_gfdleta.o \
-                      ../../wrf/module_sf_urban.o
-
-NoahmpUrbanDriverMainMod.o:../utility/Machine.o \
-                           ../src/NoahmpIOVarType.o \
-                           ../../wrf/module_sf_urban.o \
-                           ../../wrf/module_sf_bep.o \
-                           ../../wrf/module_sf_bep_bem.o \
-                           ../../hrldas/Utility_routines/module_ra_gfdleta.o \
-                           ../../hrldas/Utility_routines/module_model_constants.o 
+                      ../../wrf/module_sf_urban.o 

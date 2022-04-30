@@ -657,9 +657,9 @@ contains
         !----------------------------------------------------------------------------------
         !   Initialize Noah-MP variables
         !----------------------------------------------------------------------------------
-       
+ 
         call NoahmpInitMain(NoahmpIO)
-       
+
         if(NoahmpIO%surface_runoff_option == 5) then
 
         !----------------------------------------------------------------------------------
@@ -1019,7 +1019,7 @@ contains
 
          IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
-            call noahmp_urban (NoahmpIO%sf_urban_physics, NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%IVGTYP,            & ! IN : Model configuration 
+            call noahmp_urban(NoahmpIO, NoahmpIO%sf_urban_physics, NoahmpIO%NUM_SOIL_LAYERS, NoahmpIO%IVGTYP,   & ! IN : Model configuration 
                             NoahmpIO%ITIMESTEP, NoahmpIO%DTBL, NoahmpIO%COSZEN, NoahmpIO%XLAT,                  & ! IN : Time/Space-related
                             NoahmpIO%T_PHY, NoahmpIO%QV_CURR, NoahmpIO%U_PHY, NoahmpIO%V_PHY, NoahmpIO%SWDOWN,  & ! IN : Forcing
                             NoahmpIO%SWDDIR, NoahmpIO%SWDDIF,                                                   &

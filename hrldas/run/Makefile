@@ -28,6 +28,7 @@ OBJS = \
 	../../wrf/module_sf_bep.o \
 	../../wrf/module_sf_bem.o \
 	../../wrf/module_sf_bep_bem.o \
+        ../../wrf/NoahmpUrbanDriverMainMod.o \
 	../Utility_routines/module_wrf_utilities.o \
 	../Utility_routines/module_model_constants.o \
 	../Utility_routines/module_date_utilities.o \
@@ -39,7 +40,6 @@ OBJS = \
         ../../noahmp/drivers/NoahmpInitMainMod.o \
         ../../noahmp/drivers/NoahmpGroundwaterInitMod.o \
         ../../noahmp/drivers/NoahmpSnowInitMod.o \
-        ../../noahmp/drivers/NoahmpUrbanDriverMainMod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
         ../../noahmp/src/ConstantDefineMod.o \
@@ -173,7 +173,11 @@ OBJS = \
         ../../noahmp/src/SurfaceEmissivityGlacierMod.o \
         ../../noahmp/src/SurfaceEnergyFluxGlacierMod.o \
         ../../noahmp/src/SurfaceRadiationGlacierMod.o \
-        ../../noahmp/src/WaterMainGlacierMod.o
+        ../../noahmp/src/WaterMainGlacierMod.o \
+        ../../noahmp/src/ConfigVarOutMod.o \
+        ../../noahmp/src/EnergyVarOutMod.o \
+        ../../noahmp/src/WaterVarOutMod.o \
+        ../../noahmp/src/BiochemVarOutMod.o
 
 CMD = hrldas.exe
 all:	$(CMD)

@@ -4,17 +4,12 @@ module NoahmpUrbanDriverMainMod
 !  SUBROUTINE noahmp_urban seperated from module_sf_noahmpdrv.F
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
-
-  use Machine, only : kind_noahmp
-  use NoahmpIOVarType 
  
   implicit none
-
-  type(NoahmpIO_type)    :: NoahmpIO
   
 contains
 
-  SUBROUTINE noahmp_urban(sf_urban_physics,   NSOIL,         IVGTYP,  ITIMESTEP,            & ! IN : Model configuration 
+  SUBROUTINE noahmp_urban( NoahmpIO,sf_urban_physics,         NSOIL,     IVGTYP,ITIMESTEP,  & ! IN : Model configuration 
                                  DT,     COSZ_URB2D,     XLAT_URB2D,                        & ! IN : Time/Space-related
                                 T3D,           QV3D,          U_PHY,      V_PHY,   SWDOWN,  & ! IN : Forcing
                              SWDDIR,         SWDDIF,                                        &
@@ -74,10 +69,13 @@ contains
   USE module_sf_bep_bem,  only: bep_bem
   USE module_ra_gfdleta,  only: cal_mon_day
   USE module_model_constants, only: KARMAN, CP, XLV
+  use Machine, only : kind_noahmp
+  use NoahmpIOVarType
+
 !----------------------------------------------------------------
     IMPLICIT NONE
 !----------------------------------------------------------------
-
+    type(NoahmpIO_type),                             intent(in)    ::  NoahmpIO
     INTEGER,                                         INTENT(IN   ) ::  sf_urban_physics   ! urban physics option
     INTEGER,                                         INTENT(IN   ) ::  NSOIL     ! number of soil layers
     INTEGER, DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  IVGTYP    ! vegetation type

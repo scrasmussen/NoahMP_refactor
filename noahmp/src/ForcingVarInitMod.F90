@@ -91,7 +91,6 @@ contains
        PRCPOTHR  = max(0.0,PRCPOTHR)
        noahmp%forcing%PRCPNONC  = noahmp%forcing%PRCPNONC + PRCPOTHR
        noahmp%forcing%PRCPSNOW  = noahmp%forcing%PRCPSNOW + NoahmpIO%SR(I,J) * PRCPOTHR 
-       
     !elseif
     !   noahmp%forcing%PRCPCONV    = 0.0
     !   noahmp%forcing%PRCPNONC    = PRCP

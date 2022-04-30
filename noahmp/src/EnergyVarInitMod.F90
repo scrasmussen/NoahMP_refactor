@@ -396,7 +396,6 @@ contains
                                             (NoahmpIO%P8W(I,KTS+1,J)+NoahmpIO%P8W(I,KTS,J))*0.5
     noahmp%energy%state%O2AIR             = NoahmpIO%O2_TABLE *  &
                                             (NoahmpIO%P8W(I,KTS+1,J)+NoahmpIO%P8W(I,KTS,J))*0.5
-
     ! energy parameter variable
     noahmp%energy%param%RC                 = NoahmpIO%RC_TABLE(VEGTYP)
     noahmp%energy%param%HVT                = NoahmpIO%HVT_TABLE(VEGTYP)

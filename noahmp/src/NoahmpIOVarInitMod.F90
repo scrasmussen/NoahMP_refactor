@@ -651,6 +651,9 @@ contains
     !---------------------------------------------------------------
 
     !---------------- MPTABLE.TBL vegetation parameters
+
+    DATASET_IDENTIFIER = NoahmpIO%llanduse
+
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
        open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -660,7 +663,7 @@ contains
     if ( ierr /= 0 ) then
        write(*,'("WARNING: Cannot find file NoahmpTable.TBL")')
     endif
-    DATASET_IDENTIFIER = "MODIFIED_IGBP_MODIS_NOAH" ! set to MODIS type for now for testing
+
     if ( trim(DATASET_IDENTIFIER) == "USGS" ) then
        read(15, noahmp_usgs_veg_categories)
        read(15, noahmp_usgs_parameters)

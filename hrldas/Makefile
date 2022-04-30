@@ -6,9 +6,9 @@ ifdef MPPFLAG
 	(cd MPP; make -f Makefile.NoahMP)
 endif
 	(cd Utility_routines;		make)
-	(cd ../wrf;	          	make)
 	(cd ../noahmp/utility;          make)
 	(cd ../noahmp/src;              make)
+	(cd ../wrf;                     make)
 	(cd ../noahmp/drivers;          make)
 	(cd IO_code;			make)
 	(cd run;			make)
@@ -16,9 +16,9 @@ endif
 
 clean:
 	(cd Utility_routines;		make clean)
-	(cd ../wrf;                     make clean)
 	(cd ../noahmp/utility;          make clean)
 	(cd ../noahmp/src;              make clean)
+	(cd ../wrf;                     make clean)
 	(cd ../noahmp/drivers;          make clean)
 	(cd IO_code;			make clean)
 	(cd run;			make clean)
@@ -33,9 +33,9 @@ ifdef MPPFLAG
 	(cd MPP; make -f Makefile.NoahMP)
 endif
 	(cd Utility_routines;		make)
-	(cd ../wrf;                     make)
 	(cd ../noahmp/utility;          make)
 	(cd ../noahmp/src;              make)
+	(cd ../wrf;                     make)
 	(cd ../noahmp/drivers;          make)
 	(cd IO_code;			make NoahMP MOD_OPT="-DNoahMP")
 	(cd run;			make -f Makefile NoahMP)
