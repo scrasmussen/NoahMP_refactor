@@ -33,7 +33,8 @@ contains
     associate(                                                  &
               I           => noahmp%config%domain%ILOC         ,&
               J           => noahmp%config%domain%JLOC         ,&
-              NSOIL       => noahmp%config%domain%NSOIL         &
+              NSOIL       => noahmp%config%domain%NSOIL        ,&
+              NSNOW       => noahmp%config%domain%NSNOW         &
              )
 
              NoahmpIO%TSK      (I,J)         = noahmp%energy%state%TRAD
@@ -45,6 +46,7 @@ contains
              endif
 
              NoahmpIO%TSLB     (I,1:NSOIL,J) = noahmp%energy%state%STC(1:NSOIL)
+             NoahmpIO%TSNOXY   (I,-NSNOW+1:0,J) = noahmp%energy%state%STC(-NSNOW+1:0)
              NoahmpIO%EMISS    (I,J)         = noahmp%energy%state%EMISSI
              NoahmpIO%QSFC     (I,J)         = noahmp%energy%state%QSFC
              NoahmpIO%TVXY     (I,J)         = noahmp%energy%state%TV

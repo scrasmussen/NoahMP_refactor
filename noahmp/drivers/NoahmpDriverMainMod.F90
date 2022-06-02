@@ -16,6 +16,10 @@ module NoahmpDriverMainMod
   use ForcingVarInitMod
   use WaterVarInitMod
   use BiochemVarInitMod
+  use ConfigVarOutMod
+  use EnergyVarOutMod
+  use WaterVarOutMod
+  use BiochemVarOutMod
   use NoahmpMainMod
   use NoahmpMainGlacierMod
   use module_ra_gfdleta,  only: cal_mon_day
