@@ -82,7 +82,8 @@ contains
 ! -- Inverse of Canopy Resistance (below)
 
              if(noahmp%energy%state%RSSUN  .le. 0.0 .or. noahmp%energy%state%RSSHA  .le. 0.0 &
-                .or. LAISUN .eq. 0.0 .or. LAISHA .eq. 0.0) then
+                .or. LAISUN .eq. 0.0 .or. LAISHA .eq. 0.0 .or. noahmp%energy%state%RSSUN .eq. huge(1.0) &
+                .or. noahmp%energy%state%RSSHA .eq. huge(1.0) ) then
                 NoahmpIO%RS    (I,J)   = 0.0
              else
                 NoahmpIO%RS    (I,J)   = ((1.0/(noahmp%energy%state%RSSUN+RB)*noahmp%energy%state%LAISUN) + &
