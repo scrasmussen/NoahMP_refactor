@@ -217,7 +217,8 @@ CONTAINS
 !  USE NOAHMP_TABLES, ONLY : DKSAT_TABLE
 
 #ifdef MPP_LAND
-        use module_mpp_land, only: mpp_land_com_real, mpp_land_com_integer, global_nx, global_ny, my_id
+    ! MPP_LAND only for HRLDAS Noah-MP/WRF-Hydro - Prasanth Valayamkunnath (06/10/2022)
+     use module_mpp_land, only: mpp_land_com_real, mpp_land_com_integer, global_nx, global_ny, my_id
 #endif
 ! ----------------------------------------------------------------------
   IMPLICIT NONE
@@ -239,7 +240,15 @@ CONTAINS
 !local
   INTEGER                              :: I, J, itsh, iteh, jtsh, jteh, nx, ny
   REAL                                 :: Q, KLAT
-  REAL, DIMENSION(ims-1:ime+1, jms-1:jme+1) :: KCELL, HEAD
+
+#ifdef MPP_LAND 
+  ! halo'ed arrays
+  REAL,    DIMENSION(ims-1:ime+1, jms-1:jme+1) :: KCELL, HEAD
+  integer, dimension(ims-1:ime+1, jms-1:jme+1) :: landmask_h
+  real,    dimension(ims-1:ime+1, jms-1:jme+1) :: area_h, qlat_h
+#else
+  REAL,    DIMENSION(ims:ime, jms:jme) :: KCELL, HEAD
+#endif
 
   REAL, DIMENSION(19)      :: KLATFACTOR
   DATA KLATFACTOR /2.,3.,4.,10.,10.,12.,14.,20.,24.,28.,40.,48.,2.,0.,10.,0.,20.,2.,2./
@@ -247,10 +256,7 @@ CONTAINS
   REAL,    PARAMETER :: PI = 3.14159265 
   REAL,    PARAMETER :: FANGLE = 0.22754493   ! = 0.5*sqrt(0.5*tan(pi/8))
 
-! halo'ed arrays
-  integer, dimension(ims-1:ime+1, jms-1:jme+1) :: landmask_h
-  real,    dimension(ims-1:ime+1, jms-1:jme+1) :: area_h, qlat_h
-
+#ifdef MPP_LAND
 ! create halo'ed local copies of tile vars
   landmask_h(ims:ime, jms:jme) = landmask
   area_h(ims:ime, jms:jme)     = area
@@ -266,6 +272,12 @@ CONTAINS
   iteh=min(ite,global_nx)
   jtsh=max(jts,1)
   jteh=min(jte,global_ny)
+#else
+  itsh=max(its-1,ids)
+  iteh=min(ite+1,ide-1)
+  jtsh=max(jts-1,jds)
+  jteh=min(jte+1,jde-1)
+#endif
 
     DO J=jtsh,jteh
        DO I=itsh,iteh
@@ -284,7 +296,8 @@ CONTAINS
        ENDDO
     ENDDO
 
-! update neighbors with kcell/head/pump_cell calculation
+#ifdef MPP_LAND
+! update neighbors with kcell/head/calculation
     call mpp_land_com_real(KCELL, nx, ny, 99)
     call mpp_land_com_real(HEAD, nx, ny, 99)
 
@@ -294,10 +307,20 @@ CONTAINS
     jteh=min(jte,global_ny-1)
     
     qlat_h  = 0.
+#else
+    itsh=max(its,ids+1)
+    iteh=min(ite,ide-2)
+    jtsh=max(jts,jds+1)
+    jteh=min(jte,jde-2)
+#endif
 
     DO J=jtsh,jteh
        DO I=itsh,iteh
-          IF(LANDMASK(I,J).GT.0)THEN
+#ifdef MPP_LAND
+          IF( landmask_h(I,J).GT.0 )THEN
+#else
+          IF( LANDMASK(I,J).GT.0   )THEN
+#endif
                  Q=0.
                              
                  Q  = Q + (KCELL(I-1,J+1)+KCELL(I,J)) &
@@ -325,15 +348,20 @@ CONTAINS
                         * (HEAD(I+1,J-1)-HEAD(I,J))/SQRT(2.)
 
                  ! Here, Q is in m3/s. To convert to m, divide it by area of the grid cell.
+#ifdef MPP_LAND
                  qlat_h(I, J)  = (FANGLE * Q * DELTAT / area_h(I, J))
-
+#else
+                 QLAT(I,J) = FANGLE* Q * DELTAT / AREA(I,J)
+#endif
           ENDIF
        ENDDO
     ENDDO
 
+#ifdef MPP_LAND
 ! merge (sum) of all neighbor's edge Q's
     call mpp_land_com_real(qlat_h, nx, ny, 1)
     qlat = qlat_h(ims:ime, jms:jme)
+#endif
  
   END  SUBROUTINE LATERALFLOW
 ! ==================================================================================================
