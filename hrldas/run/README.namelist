@@ -216,7 +216,6 @@
                                                         	   geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                  		0 -> No crop model, will run default dynamic vegetation
                                                      		1 -> Liu, et al. 2016
-                                                     		2 -> Gecros (Genotype-by-Environment interaction on CROp growth Simulator) Yin and van Laar, 2005
 
  IRRIGATION_OPTION                 = 0,        		     !  options for irrigation scheme  [default = 0]
                                                            	geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution

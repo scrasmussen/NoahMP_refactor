@@ -22,7 +22,6 @@ OBJS_NoahMP = ../IO_code/module_NoahMP_hrldas_driver.o
 OBJS = \
 	../IO_code/main_hrldas_driver.o \
 	../IO_code/module_hrldas_netcdf_io.o \
-	../../wrf/module_sf_gecros.o \
         ../../wrf/module_bep_bem_helper.o \
 	../../wrf/module_sf_urban.o \
 	../../wrf/module_sf_bep.o \

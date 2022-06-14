@@ -50,7 +50,7 @@ module NoahmpIOVarType
     integer                                                ::  IZ0TLND             ! option of Chen adjustment of Czil (not used)
     integer                                                ::  IOPT_SOIL           ! soil configuration option
     integer                                                ::  IOPT_PEDO           ! soil pedotransfer function option
-    integer                                                ::  IOPT_CROP           ! crop model option (0->none; 1->Liu et al.; 2->Gecros)
+    integer                                                ::  IOPT_CROP           ! crop model option (0->none; 1->Liu et al.)
     integer                                                ::  IOPT_IRR            ! irrigation scheme (0->none; >1 irrigation scheme ON)
     integer                                                ::  IOPT_IRRM           ! irrigation method (0->dynamic; 1-> sprinkler; 2-> micro; 3-> flood)
     integer                                                ::  IOPT_INFDV          ! infiltration options for dynamic VIC (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)

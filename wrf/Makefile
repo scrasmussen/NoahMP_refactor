@@ -7,7 +7,6 @@ include ../hrldas/user_build_options
 
 OBJS = \
         module_bep_bem_helper.o \
-	module_sf_gecros.o \
 	module_sf_urban.o \
 	module_sf_bep.o \
 	module_sf_bem.o \
