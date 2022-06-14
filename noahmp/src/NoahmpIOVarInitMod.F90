@@ -1251,7 +1251,6 @@ contains
     integer                 :: dynamic_veg_option                 = 4
     integer                 :: canopy_stomatal_resistance_option  = 1
     integer                 :: btr_option                         = 1
-    integer                 :: runoff_option                      = 3
     integer                 :: surface_runoff_option              = 3
     integer                 :: subsurface_runoff_option           = 3
     integer                 :: surface_drag_option                = 1
@@ -1498,7 +1497,7 @@ contains
     !---------------------------------------------------------------------
  
     NoahmpIO%IDVEG                             = dynamic_veg_option 
-    NoahmpIO%IOPT_CRS                          = canopy_stomatal_resistance_option       ! this block should be deletd when variable renaming
+    NoahmpIO%IOPT_CRS                          = canopy_stomatal_resistance_option
     NoahmpIO%IOPT_BTR                          = btr_option
     NoahmpIO%IOPT_RUNSRF                       = surface_runoff_option
     NoahmpIO%IOPT_RUNSUB                       = subsurface_runoff_option
@@ -1520,31 +1519,6 @@ contains
     NoahmpIO%IOPT_IRRM                         = irrigation_method
     NoahmpIO%IOPT_INFDV                        = dvic_infiltration_option
     NoahmpIO%IOPT_TDRN                         = tile_drainage_option
-    
-    NoahmpIO%dynamic_veg_option                = dynamic_veg_option 
-    NoahmpIO%canopy_stomatal_resistance_option = canopy_stomatal_resistance_option
-    NoahmpIO%btr_option                        = btr_option
-    NoahmpIO%runoff_option                     = runoff_option
-    NoahmpIO%surface_drag_option               = surface_drag_option
-    NoahmpIO%supercooled_water_option          = supercooled_water_option
-    NoahmpIO%frozen_soil_option                = frozen_soil_option
-    NoahmpIO%radiative_transfer_option         = radiative_transfer_option
-    NoahmpIO%snow_albedo_option                = snow_albedo_option
-    NoahmpIO%snow_thermal_conductivity         = snow_thermal_conductivity
-    NoahmpIO%surface_runoff_option             = surface_runoff_option
-    NoahmpIO%subsurface_runoff_option          = subsurface_runoff_option
-    NoahmpIO%pcp_partition_option              = pcp_partition_option
-    NoahmpIO%tbot_option                       = tbot_option
-    NoahmpIO%temp_time_scheme_option           = temp_time_scheme_option
-    NoahmpIO%glacier_option                    = glacier_option
-    NoahmpIO%surface_resistance_option         = surface_resistance_option
-    NoahmpIO%soil_data_option                  = soil_data_option
-    NoahmpIO%pedotransfer_option               = pedotransfer_option
-    NoahmpIO%crop_option                       = crop_option
-    NoahmpIO%irrigation_option                 = irrigation_option
-    NoahmpIO%irrigation_method                 = irrigation_method
-    NoahmpIO%dvic_infiltration_option          = dvic_infiltration_option
-    NoahmpIO%tile_drainage_option              = tile_drainage_option
     
     NoahmpIO%indir                             = indir
     NoahmpIO%forcing_timestep                  = forcing_timestep
@@ -1590,27 +1564,6 @@ contains
     NoahmpIO%forcing_name_SW                   = forcing_name_SW
     NoahmpIO%forcing_name_PR                   = forcing_name_PR
     NoahmpIO%forcing_name_SN                   = forcing_name_SN
-    NoahmpIO%dynamic_veg_option                = dynamic_veg_option
-    NoahmpIO%canopy_stomatal_resistance_option = canopy_stomatal_resistance_option
-    NoahmpIO%btr_option                        = btr_option
-    NoahmpIO%runoff_option                     = runoff_option
-    NoahmpIO%surface_drag_option               = surface_drag_option
-    NoahmpIO%supercooled_water_option          = supercooled_water_option
-    NoahmpIO%frozen_soil_option                = frozen_soil_option
-    NoahmpIO%radiative_transfer_option         = radiative_transfer_option
-    NoahmpIO%snow_albedo_option                = snow_albedo_option
-    NoahmpIO%pcp_partition_option              = pcp_partition_option
-    NoahmpIO%tbot_option                       = tbot_option
-    NoahmpIO%temp_time_scheme_option           = temp_time_scheme_option
-    NoahmpIO%glacier_option                    = glacier_option
-    NoahmpIO%surface_resistance_option         = surface_resistance_option
-    NoahmpIO%soil_data_option                  = soil_data_option
-    NoahmpIO%pedotransfer_option               = pedotransfer_option
-    NoahmpIO%crop_option                       = crop_option
-    NoahmpIO%irrigation_option                 = irrigation_option
-    NoahmpIO%irrigation_method                 = irrigation_method
-    NoahmpIO%dvic_infiltration_option          = dvic_infiltration_option
-    NoahmpIO%tile_drainage_option              = tile_drainage_option
     NoahmpIO%split_output_count                = split_output_count
     NoahmpIO%skip_first_output                 = skip_first_output
     NoahmpIO%khour                             = khour

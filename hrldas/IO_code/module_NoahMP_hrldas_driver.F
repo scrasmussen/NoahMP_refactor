@@ -24,7 +24,6 @@ module module_NoahMP_hrldas_driver
 #endif
 
 #ifdef WRF_HYDRO
-   !REAL,    allocatable, DIMENSION(:,:)   :: infxsrt,sfcheadrt,soldrain,qtiledrain,ZWATBLE2D ! added to NoahmpIO
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
    REAL,    allocatable, DIMENSION(:,:)   :: etpnd, greenfrac, prcp0
    real :: etpnd1

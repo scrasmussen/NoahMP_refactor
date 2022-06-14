@@ -655,25 +655,6 @@ module NoahmpIOVarType
     character(len=256)                                     ::  forcing_name_PR = "RAINRATE"
     character(len=256)                                     ::  forcing_name_SN = ""
 
-    integer                                                ::  dynamic_veg_option
-    integer                                                ::  canopy_stomatal_resistance_option
-    integer                                                ::  btr_option
-    integer                                                ::  runoff_option
-    integer                                                ::  surface_runoff_option
-    integer                                                ::  subsurface_runoff_option
-    integer                                                ::  surface_drag_option
-    integer                                                ::  supercooled_water_option
-    integer                                                ::  frozen_soil_option
-    integer                                                ::  radiative_transfer_option
-    integer                                                ::  snow_albedo_option
-    integer                                                ::  snow_thermal_conductivity
-    integer                                                ::  glacier_treatment_option
-    integer                                                ::  pcp_partition_option
-    integer                                                ::  tbot_option
-    integer                                                ::  temp_time_scheme_option
-    integer                                                ::  glacier_option
-    integer                                                ::  surface_resistance_option
-
     integer                                                ::  soil_data_option = 1
     integer                                                ::  pedotransfer_option = 1
     integer                                                ::  crop_option = 0
