@@ -229,7 +229,7 @@ contains
 ! For spatially-varying soil parameters, read in necessary extra fields
 !------------------------------------------------------------------------
 
-  if (NoahmpIO%soil_data_option == 2) then
+  if (NoahmpIO%IOPT_SOIL == 2) then
     CALL READ_SOIL_TEXTURE(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
                            NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%SOILCL1, NoahmpIO%SOILCL2, NoahmpIO%SOILCL3,      &
                            NoahmpIO%SOILCL4, NoahmpIO%ISICE, NoahmpIO%ISWATER)
@@ -238,12 +238,12 @@ contains
 
   end if
   
-  if (NoahmpIO%soil_data_option == 3) then
+  if (NoahmpIO%IOPT_SOIL == 3) then
     CALL READ_SOIL_COMPOSITION(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
                                NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%ISICE, NoahmpIO%ISWATER, NoahmpIO%SOILCOMP)
   end if
   
-  if (NoahmpIO%soil_data_option == 4) then
+  if (NoahmpIO%IOPT_SOIL == 4) then
     CALL READ_3D_SOIL(NoahmpIO%SPATIAL_FILENAME, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,        &
                       NoahmpIO%NSOIL, NoahmpIO%BEXP_3D, NoahmpIO%SMCDRY_3D, NoahmpIO%SMCWLT_3D, NoahmpIO%SMCREF_3D,     &
                       NoahmpIO%SMCMAX_3D, NoahmpIO%DKSAT_3D, NoahmpIO%DWSAT_3D, NoahmpIO%PSISAT_3D, NoahmpIO%QUARTZ_3D, &
@@ -259,7 +259,7 @@ contains
 ! For spatially-varying irrigation parameters, read in necessary extra fields
 ! only if IOPT_IRR >= 1
 !----------------------------------------------------------------------
-  if (NoahmpIO%irrigation_option >= 1) then
+  if (NoahmpIO%IOPT_IRR >= 1) then
       CALL READ_AGRICULTURE_DATA(NoahmpIO%AGDATA_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
                                  NoahmpIO%IRFRACT, NoahmpIO%SIFRACT, NoahmpIO%MIFRACT, NoahmpIO%FIFRACT)
   end if
@@ -269,7 +269,7 @@ contains
 ! This option is not tested for parallel use in the offline driver
 !------------------------------------------------------------------------
 
-  if (NoahmpIO%surface_runoff_option == 5) then
+  if (NoahmpIO%IOPT_RUNSUB == 5) then
     CALL READ_MMF_RUNOFF(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                          NoahmpIO%FDEPTHXY, NoahmpIO%EQZWT, NoahmpIO%RECHCLIM, NoahmpIO%RIVERBEDXY)
   end if
@@ -282,7 +282,7 @@ contains
   NoahmpIO%PLANTING   = 126     ! default planting date
   NoahmpIO%HARVEST    = 290     ! default harvest date
   NoahmpIO%SEASON_GDD = 1605    ! default total seasonal growing degree days
-  if (NoahmpIO%crop_option == 1) then ! use crop_option=1 for reading crop extra fields
+  if (NoahmpIO%IOPT_CROP == 1) then ! use crop_option=1 for reading crop extra fields
     CALL READ_CROP_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                          NoahmpIO%CROPTYPE, NoahmpIO%PLANTING, NoahmpIO%HARVEST, NoahmpIO%SEASON_GDD)
   end if
@@ -382,7 +382,7 @@ contains
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
 
      ! below for irrigation scheme
-     IF (NoahmpIO%irrigation_option > 0) THEN
+     IF (NoahmpIO%IOPT_IRR > 0) THEN
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , NoahmpIO%IRNUMSI  )
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMMI" , NoahmpIO%IRNUMMI  )
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMFI" , NoahmpIO%IRNUMFI  )
@@ -659,7 +659,7 @@ contains
  
         call NoahmpInitMain(NoahmpIO)
 
-        if(NoahmpIO%surface_runoff_option == 5) then
+        if(NoahmpIO%IOPT_RUNSUB == 5) then
 
         !----------------------------------------------------------------------------------
         !   Initialize MMF Groundwater variables
@@ -1077,7 +1077,7 @@ contains
                        
          ENDIF 
 
-  IF(NoahmpIO%surface_runoff_option.EQ.5.AND.MOD(ITIME,NoahmpIO%STEPWTD).EQ.0)THEN
+         if (NoahmpIO%IOPT_RUNSUB == 5 .and. mod(ITIME,NoahmpIO%STEPWTD) == 0) then
            CALL wrf_message('calling WTABLE' )
 
 !gmm update wtable from lateral flow and shed water to rivers
@@ -1321,7 +1321,7 @@ contains
               call add_to_output(NoahmpIO%FORCWLSM   , "FORCWLSM", "lowest model wind speed into LSM"                       , "m s{-1}" )
           endif
         ! Irrigation
-            IF (NoahmpIO%irrigation_option > 0) THEN
+            IF (NoahmpIO%IOPT_IRR > 0) THEN
               call add_to_output(NoahmpIO%IRNUMSI    , "IRNUMSI" , "Sprinkler irrigation count"             , "-"                   )
               call add_to_output(NoahmpIO%IRNUMMI    , "IRNUMMI" , "Micro irrigation count"                 , "-"                   )
               call add_to_output(NoahmpIO%IRNUMFI    , "IRNUMFI" , "Flood irrigation count"                 , "-"                   )
@@ -1332,7 +1332,7 @@ contains
               call add_to_output(NoahmpIO%IRRSPLH    , "IRRSPLH" , "Latent heating due to sprinkler"        , "W m{-2}"             )
             ENDIF
         ! MMF groundwater  model
-	    IF(NoahmpIO%surface_runoff_option == 5) THEN
+	    IF(NoahmpIO%IOPT_RUNSUB == 5) THEN
               call add_to_output(NoahmpIO%SMCWTDXY   , "SMCWTD"   , "soil water content between bottom of the soil and water table", "m3 m{-3}")
               call add_to_output(NoahmpIO%RECHXY     , "RECH"     , "recharge to or from the water table when shallow"             , "m"       )
               call add_to_output(NoahmpIO%DEEPRECHXY , "DEEPRECH" , "recharge to or from the water table when deep"                , "m"       )
@@ -1483,7 +1483,7 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" )
   call add_to_restart(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  )
  ! irrigation scheme
-  IF (NoahmpIO%irrigation_option > 0) THEN
+  IF (NoahmpIO%IOPT_IRR > 0) THEN
      call add_to_restart(NoahmpIO%IRNUMSI   , "IRNUMSI")
      call add_to_restart(NoahmpIO%IRNUMMI   , "IRNUMMI")
      call add_to_restart(NoahmpIO%IRNUMFI   , "IRNUMFI")
