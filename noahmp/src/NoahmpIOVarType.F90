@@ -705,7 +705,7 @@ module NoahmpIOVarType
     ! Noahmp Parameters Table 
     !----------------------------------------------------------------
 
-    ! original MPTABLE.TBL vegetation parameters
+    ! vegetation parameters
     character(len=256)                                  :: VEG_DATASET_DESCRIPTION_TABLE
     integer                                             :: NVEG_TABLE
     integer                                             :: ISURBAN_TABLE
@@ -783,7 +783,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: LAIMIN_TABLE      ! minimum leaf area index [m2/m2]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: XSAMIN_TABLE      ! minimum stem area index [m2/m2]
 
-    ! original MPTABLE.TBL radiation parameters
+    ! radiation parameters
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBSAT_TABLE      ! saturated soil albedos: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: ALBDRY_TABLE      ! dry soil albedos: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:)   :: ALBICE_TABLE      ! albedo land ice: 1=vis, 2=nir
@@ -794,7 +794,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: EG_TABLE          ! emissivity soil surface
     real(kind=kind_noahmp)                              :: EICE_TABLE        ! ice surface emissivity
 
-    ! original MPTABLE.TBL global parameters
+    ! global parameters
     real(kind=kind_noahmp)                              :: CO2_TABLE                 ! co2 partial pressure
     real(kind=kind_noahmp)                              :: O2_TABLE                  ! o2 partial pressure
     real(kind=kind_noahmp)                              :: TIMEAN_TABLE              ! gridcell mean topgraphic index (global mean)
@@ -836,7 +836,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp)                              :: Z0SOIL_TABLE              ! Bare-soil roughness length (m) (i.e., under the canopy)
     real(kind=kind_noahmp)                              :: Z0LAKE_TABLE              ! Lake surface roughness length (m)
 
-    ! original MPTABLE.TBL irrigation parameters
+    ! irrigation parameters
     integer                                             :: IRR_HAR_TABLE             ! number of days before harvest date to stop irrigation 
     real(kind=kind_noahmp)                              :: IRR_FRAC_TABLE            ! irrigation Fraction
     real(kind=kind_noahmp)                              :: IRR_LAI_TABLE             ! Minimum lai to trigger irrigation
@@ -847,7 +847,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp)                              :: FIRTFAC_TABLE             ! flood application rate factor
     real(kind=kind_noahmp)                              :: IR_RAIN_TABLE             ! maximum precipitation to stop irrigation trigger
 
-    ! original MPTABLE.TBL tile drainage parameters
+    ! tile drainage parameters
     integer                                             :: DRAIN_LAYER_OPT_TABLE
     integer               , allocatable, dimension(:)   :: TD_DEPTH_TABLE
     real(kind=kind_noahmp), allocatable, dimension(:)   :: TDSMC_FAC_TABLE
@@ -860,7 +860,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: TD_DDRAIN_TABLE
     real(kind=kind_noahmp), allocatable, dimension(:)   :: KLAT_FAC_TABLE
 
-    ! original MPTABLE.TBL optional parameters
+    ! optional parameters
     real(kind=kind_noahmp)                              :: sr2006_theta_1500t_a_TABLE      ! sand coefficient
     real(kind=kind_noahmp)                              :: sr2006_theta_1500t_b_TABLE      ! clay coefficient
     real(kind=kind_noahmp)                              :: sr2006_theta_1500t_c_TABLE      ! orgm coefficient
@@ -902,7 +902,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp)                              :: sr2006_smcmax_a_TABLE           ! sand adjustment
     real(kind=kind_noahmp)                              :: sr2006_smcmax_b_TABLE           ! constant adjustment
 
-    ! original MPTABLE.TBL crop parameters
+    ! crop parameters
     integer                                             :: DEFAULT_CROP_TABLE        ! Default crop index
     integer               , allocatable, dimension(:)   :: PLTDAY_TABLE              ! Planting date
     integer               , allocatable, dimension(:)   :: HSDAY_TABLE               ! Harvest date
@@ -957,7 +957,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: RTCT_TABLE                ! root to grain
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BIO2LAI_TABLE             ! leaf are per living leaf biomass [m^2/kg]
 
-    ! original SOILPARM.TBL parameters
+    ! soil parameters
     integer                                             :: SLCATS_TABLE      ! number of soil categories
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BEXP_TABLE        ! soil B parameter
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCDRY_TABLE      ! dry soil moisture threshold
@@ -977,7 +977,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: GDVIC_TABLE       ! mean capilary drive (m)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BBVIC_TABLE       ! heterogeniety parameter for DVIC infiltration [-]
 
-    ! original GENPARM.TBL parameters
+    ! general parameters
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SLOPE_TABLE       ! slope factor for soil drainage
     real(kind=kind_noahmp)                              :: CSOIL_TABLE       ! Soil heat capacity [J m-3 K-1]
     real(kind=kind_noahmp)                              :: REFDK_TABLE       ! Parameter in the surface runoff parameterization

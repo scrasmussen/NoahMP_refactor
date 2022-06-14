@@ -186,7 +186,7 @@ contains
     dwsat  = dksat * psisat * bexp / smcmax ! units should be m*m/s
     smcdry = smcwlt
   
-! Introducing somewhat arbitrary limits (based on SOILPARM) to prevent bad things
+! Introducing somewhat arbitrary limits (based on NoahmpTable soil) to prevent bad things
   
     smcmax = max(0.32 ,min(smcmax,  0.50 ))
     smcref = max(0.17 ,min(smcref,smcmax ))

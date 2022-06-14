@@ -38,7 +38,7 @@ contains
     !=== define local variables to store NoahmpTable values
     !-------------------------------------------------------
     
-    ! MPTABLE.TBL vegetation parameters
+    ! vegetation parameters
     character(len=256)                     :: DATASET_IDENTIFIER
     character(len=256)                     :: VEG_DATASET_DESCRIPTION
     logical                                :: file_named
@@ -79,7 +79,7 @@ contains
                                               LAI_OCT, LAI_NOV, LAI_DEC, RHOL_VIS, RHOL_NIR, RHOS_VIS, RHOS_NIR, TAUL_VIS,   &
                                               TAUL_NIR, TAUS_VIS, TAUS_NIR, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
 
-    ! SOIPARM.TBL soil parameters
+    ! soil parameters
     character(len=256)                             :: message
     character(len=10)                              :: SLTYPE
     integer                                        :: SLCATS
@@ -91,13 +91,13 @@ contains
     namelist / noahmp_soil_stas_ruc_parameters /      BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
                                                       BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
 
-    ! GENPARM.TBL general parameters
+    ! general parameters
     real(kind=kind_noahmp)                       :: CSOIL_DATA, REFDK_DATA, REFKDT_DATA, FRZK_DATA, ZBOT_DATA, CZIL_DATA
     real(kind=kind_noahmp), dimension(NUM_SLOPE) :: SLOPE_DATA
     namelist / noahmp_general_parameters /          SLOPE_DATA, CSOIL_DATA, REFDK_DATA, REFKDT_DATA, FRZK_DATA, ZBOT_DATA,   &
                                                     CZIL_DATA
 
-    ! MPTABLE.TBL radiation parameters
+    ! radiation parameters
     real(kind=kind_noahmp)                   :: BETADS, BETAIS, EICE
     real(kind=kind_noahmp), dimension(MBAND) :: ALBICE, ALBLAK, OMEGAS 
     real(kind=kind_noahmp), dimension(2)     :: EG
@@ -105,7 +105,7 @@ contains
     namelist / noahmp_rad_parameters /          ALBSAT_VIS, ALBSAT_NIR, ALBDRY_VIS, ALBDRY_NIR, ALBICE, ALBLAK, OMEGAS,      &
                                                 BETADS, BETAIS, EG, EICE
 
-    ! MPTABLE.TBL global parameters
+    ! global parameters
     real(kind=kind_noahmp)                   :: CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
                                                 GRAIN_GROWTH, EXTRA_GROWTH, DIRT_SOOT, BATS_COSZ, BATS_VIS_NEW,              &
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
@@ -121,13 +121,13 @@ contains
                                                 WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
                                                 PSIWLT, Z0SOIL, Z0LAKE
 
-    ! MPTABLE.TBL irrigation parameters
+    ! irrigation parameters
     integer                                  :: IRR_HAR
     real(kind=kind_noahmp)                   :: IRR_FRAC, IRR_LAI, IRR_MAD, FILOSS, SPRIR_RATE, MICIR_RATE, FIRTFAC, IR_RAIN
     namelist / noahmp_irrigation_parameters /   IRR_FRAC, IRR_HAR, IRR_LAI, IRR_MAD, FILOSS, SPRIR_RATE, MICIR_RATE, FIRTFAC,&
                                                 IR_RAIN
 
-    ! MPTABLE.TBL crop parameters
+    ! crop parameters
     integer                                  :: DEFAULT_CROP
     integer               , dimension(NCROP) :: PLTDAY, HSDAY, C3C4
     real(kind=kind_noahmp), dimension(NCROP) :: PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2, GDDS3, GDDS4, GDDS5, C3PSNI,&
@@ -168,7 +168,7 @@ contains
                                                 RTCT_S1, RTCT_S2, RTCT_S3, RTCT_S4, RTCT_S5, RTCT_S6, RTCT_S7, RTCT_S8,      &
                                                 BIO2LAI
 
-    ! MPTABLE.TBL tile drainage parameters
+    ! tile drainage parameters
     integer                                        :: NSOILTYPE, DRAIN_LAYER_OPT
     integer               , dimension(MAX_SOILTYP) :: TD_DEPTH
     real(kind=kind_noahmp), dimension(MAX_SOILTYP) :: TDSMC_FAC, TD_DC, TD_DCOEF, TD_D, TD_ADEPTH, TD_RADI, TD_SPAC,         &
@@ -176,7 +176,7 @@ contains
     namelist / noahmp_tiledrain_parameters /          NSOILTYPE, DRAIN_LAYER_OPT, TDSMC_FAC, TD_DEPTH, TD_DC, TD_DCOEF, TD_D,&
                                                       TD_ADEPTH, TD_RADI, TD_SPAC, TD_DDRAIN, KLAT_FAC
 
-    ! MPTABLE.TBL optional parameters
+    ! optional parameters
     real(kind=kind_noahmp)                         :: sr2006_theta_1500t_a, sr2006_theta_1500t_b, sr2006_theta_1500t_c,      &
                                                       sr2006_theta_1500t_d, sr2006_theta_1500t_e, sr2006_theta_1500t_f,      &
                                                       sr2006_theta_1500t_g, sr2006_theta_1500_a , sr2006_theta_1500_b,       &
@@ -208,7 +208,7 @@ contains
     !=== allocate multi-dim input table variables
     !--------------------------------------------------
 
-    ! MPTABLE.TBL vegetation parameters
+    ! vegetation parameters
     allocate( NoahmpIO%CH2OP_TABLE(MVT) )
     allocate( NoahmpIO%DLEAF_TABLE(MVT) )
     allocate( NoahmpIO%Z0MVT_TABLE(MVT) )
@@ -266,7 +266,7 @@ contains
     allocate( NoahmpIO%LAIMIN_TABLE(MVT) )
     allocate( NoahmpIO%XSAMIN_TABLE(MVT) )
 
-    ! SOILPARM.TBL parameters
+    ! soil parameters
     allocate( NoahmpIO%BEXP_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%SMCDRY_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%F1_TABLE(MAX_SOILTYP) )
@@ -285,10 +285,10 @@ contains
     allocate( NoahmpIO%GDVIC_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%BBVIC_TABLE(MAX_SOILTYP) )
 
-    ! GENPARM.TBL parameters
+    ! general parameters
     allocate( NoahmpIO%SLOPE_TABLE(NUM_SLOPE) )
 
-    ! MPTABLE.TBL radiation parameters
+    ! radiation parameters
     allocate( NoahmpIO%ALBSAT_TABLE(MSC,MBAND) )
     allocate( NoahmpIO%ALBDRY_TABLE(MSC,MBAND) )
     allocate( NoahmpIO%ALBICE_TABLE(MBAND) )
@@ -296,7 +296,7 @@ contains
     allocate( NoahmpIO%OMEGAS_TABLE(MBAND) )
     allocate( NoahmpIO%EG_TABLE(2) )
 
-    ! MPTABLE.TBL tile drainage parameters
+    ! tile drainage parameters
     allocate( NoahmpIO%TDSMC_FAC_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%TD_DC_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%TD_DEPTH_TABLE(MAX_SOILTYP) )
@@ -308,7 +308,7 @@ contains
     allocate( NoahmpIO%TD_DDRAIN_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%KLAT_FAC_TABLE(MAX_SOILTYP) )
 
-    ! MPTABLE.TBL crop parameters
+    ! crop parameters
     allocate( NoahmpIO%PLTDAY_TABLE(NCROP) )
     allocate( NoahmpIO%HSDAY_TABLE(NCROP) )
     allocate( NoahmpIO%C3C4_TABLE(NCROP) )
@@ -367,7 +367,7 @@ contains
     ! we come to a screeching halt as soon as we try to use anything
     !---------------------------------------------------------------
 
-    ! MPTABLE.TBL vegetation parameters
+    ! vegetation parameters
     NoahmpIO%ISURBAN_TABLE      = -99999
     NoahmpIO%ISWATER_TABLE      = -99999
     NoahmpIO%ISBARREN_TABLE     = -99999
@@ -443,7 +443,7 @@ contains
     NoahmpIO%LAIMIN_TABLE       = -1.0e36
     NoahmpIO%XSAMIN_TABLE       = -1.0e36
 
-    ! SOILPARM.TBL soil parameters
+    ! soil parameters
     NoahmpIO%SLCATS_TABLE       = -99999
     NoahmpIO%BEXP_TABLE         = -1.0e36
     NoahmpIO%SMCDRY_TABLE       = -1.0e36
@@ -463,7 +463,7 @@ contains
     NoahmpIO%GDVIC_TABLE        = -1.0e36
     NoahmpIO%BBVIC_TABLE        = -1.0e36
 
-    ! GENPARM.TBL general parameters
+    ! general parameters
     NoahmpIO%SLOPE_TABLE        = -1.0e36
     NoahmpIO%CSOIL_TABLE        = -1.0e36
     NoahmpIO%REFDK_TABLE        = -1.0e36
@@ -472,7 +472,7 @@ contains
     NoahmpIO%ZBOT_TABLE         = -1.0e36
     NoahmpIO%CZIL_TABLE         = -1.0e36
 
-    ! MPTABLE.TBL radiation parameters
+    ! radiation parameters
     NoahmpIO%ALBSAT_TABLE       = -1.0e36
     NoahmpIO%ALBDRY_TABLE       = -1.0e36
     NoahmpIO%ALBICE_TABLE       = -1.0e36
@@ -483,7 +483,7 @@ contains
     NoahmpIO%EG_TABLE           = -1.0e36
     NoahmpIO%EICE_TABLE         = -1.0e36
 
-    ! MPTABLE.TBL global parameters
+    ! global parameters
     NoahmpIO%CO2_TABLE              = -1.0e36
     NoahmpIO%O2_TABLE               = -1.0e36
     NoahmpIO%TIMEAN_TABLE           = -1.0e36
@@ -525,7 +525,7 @@ contains
     NoahmpIO%Z0SOIL_TABLE           = -1.0e36
     NoahmpIO%Z0LAKE_TABLE           = -1.0e36
 
-    ! MPTABLE.TBL irrigation parameters
+    ! irrigation parameters
     NoahmpIO%IRR_HAR_TABLE          = -99999
     NoahmpIO%IRR_FRAC_TABLE         = -1.0e36
     NoahmpIO%IRR_LAI_TABLE          = -1.0e36
@@ -536,7 +536,7 @@ contains
     NoahmpIO%FIRTFAC_TABLE          = -1.0e36
     NoahmpIO%IR_RAIN_TABLE          = -1.0e36
 
-    ! MPTABLE.TBL crop parameters
+    ! crop parameters
     NoahmpIO%DEFAULT_CROP_TABLE     = -99999
     NoahmpIO%PLTDAY_TABLE           = -99999
     NoahmpIO%HSDAY_TABLE            = -99999
@@ -591,7 +591,7 @@ contains
     NoahmpIO%RTCT_TABLE             = -1.0e36
     NoahmpIO%BIO2LAI_TABLE          = -1.0e36
 
-    ! MPTABLE.TBL tile drainage parameters
+    ! tile drainage parameters
     NoahmpIO%DRAIN_LAYER_OPT_TABLE  = -99999
     NoahmpIO%TD_DEPTH_TABLE         = -99999
     NoahmpIO%TDSMC_FAC_TABLE        = -1.0e36
@@ -604,7 +604,7 @@ contains
     NoahmpIO%TD_DDRAIN_TABLE        = -1.0e36
     NoahmpIO%KLAT_FAC_TABLE         = -1.0e36
 
-    ! MPTABLE.TBL optional parameters
+    ! optional parameters
     NoahmpIO%sr2006_theta_1500t_a_TABLE = -1.0e36
     NoahmpIO%sr2006_theta_1500t_b_TABLE = -1.0e36
     NoahmpIO%sr2006_theta_1500t_c_TABLE = -1.0e36
@@ -650,7 +650,7 @@ contains
     ! transfer values from table to input variables
     !---------------------------------------------------------------
 
-    !---------------- MPTABLE.TBL vegetation parameters
+    !---------------- NoahmpTable.TBL vegetation parameters
 
     DATASET_IDENTIFIER = NoahmpIO%llanduse
 
@@ -675,6 +675,7 @@ contains
        write(*,'("WARNING: DATASET_IDENTIFIER = ''", A, "''")') trim(DATASET_IDENTIFIER)
     endif
     close(15)
+
     ! assign values
     NoahmpIO%ISURBAN_TABLE         = ISURBAN
     NoahmpIO%ISWATER_TABLE         = ISWATER
@@ -778,7 +779,7 @@ contains
     NoahmpIO%TAUS_TABLE(1:NVEG,1)  = TAUS_VIS(1:NVEG) !stem transmittance: 1=vis, 2=nir
     NoahmpIO%TAUS_TABLE(1:NVEG,2)  = TAUS_NIR(1:NVEG) !stem transmittance: 1=vis, 2=nir
 
-    !---------------- SOILPARM.TBL soil parameters
+    !---------------- NoahmpTable.TBL soil parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
        open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -798,6 +799,7 @@ contains
        write(*,'("WARNING: DATASET_IDENTIFIER = ''", A, "''")') trim(SLTYPE)
     endif
     close(15)
+
     ! assign values
     NoahmpIO%SLCATS_TABLE             = SLCATS
     NoahmpIO%BEXP_TABLE(1:SLCATS)     = BB(1:SLCATS)
@@ -818,7 +820,7 @@ contains
     NoahmpIO%GDVIC_TABLE(1:SLCATS)    = GDVIC(1:SLCATS)
     NoahmpIO%BBVIC_TABLE(1:SLCATS)    = BBVIC(1:SLCATS)
 
-    !---------------- GENPARM.TBL general parameters
+    !---------------- NoahmpTable.TBL general parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
        open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -830,6 +832,7 @@ contains
     endif
     read(15, noahmp_general_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%SLOPE_TABLE(1:NUM_SLOPE) = SLOPE_DATA(1:NUM_SLOPE)
     NoahmpIO%CSOIL_TABLE              = CSOIL_DATA
@@ -839,7 +842,7 @@ contains
     NoahmpIO%ZBOT_TABLE               = ZBOT_DATA
     NoahmpIO%CZIL_TABLE               = CZIL_DATA
 
-    !---------------- MPTABLE.TBL radiation parameters
+    !---------------- NoahmpTable.TBL radiation parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -851,6 +854,7 @@ contains
     endif
     read(15,noahmp_rad_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%ALBSAT_TABLE(:,1) = ALBSAT_VIS ! saturated soil albedos: 1=vis, 2=nir
     NoahmpIO%ALBSAT_TABLE(:,2) = ALBSAT_NIR ! saturated soil albedos: 1=vis, 2=nir
@@ -864,7 +868,7 @@ contains
     NoahmpIO%EG_TABLE          = EG
     NoahmpIO%EICE_TABLE        = EICE
 
-    !---------------- MPTABLE.TBL global parameters
+    !---------------- NoahmpTable.TBL global parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -876,6 +880,7 @@ contains
     endif
     read(15,noahmp_global_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%CO2_TABLE              = CO2
     NoahmpIO%O2_TABLE               = O2
@@ -918,7 +923,7 @@ contains
     NoahmpIO%Z0SOIL_TABLE           = Z0SOIL
     NoahmpIO%Z0LAKE_TABLE           = Z0LAKE
 
-    !---------------- MPTABLE.TBL irrigation parameters
+    !---------------- NoahmpTable.TBL irrigation parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -930,6 +935,7 @@ contains
     endif
     read(15,noahmp_irrigation_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%IRR_FRAC_TABLE         = IRR_FRAC
     NoahmpIO%IRR_HAR_TABLE          = IRR_HAR
@@ -941,7 +947,7 @@ contains
     NoahmpIO%FIRTFAC_TABLE          = FIRTFAC
     NoahmpIO%IR_RAIN_TABLE          = IR_RAIN 
 
-    !---------------- MPTABLE.TBL crop parameters
+    !---------------- NoahmpTable.TBL crop parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -953,6 +959,7 @@ contains
     endif
     read(15,noahmp_crop_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%DEFAULT_CROP_TABLE     = DEFAULT_CROP
     NoahmpIO%PLTDAY_TABLE           = PLTDAY
@@ -1092,7 +1099,7 @@ contains
     NoahmpIO%RTCT_TABLE(:,8)        = RTCT_S8
     NoahmpIO%BIO2LAI_TABLE          = BIO2LAI
 
-    !---------------- MPTABLE.TBL tile drainage parameters
+    !---------------- NoahmpTable.TBL tile drainage parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -1104,6 +1111,7 @@ contains
     endif
     read(15,noahmp_tiledrain_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%TDSMC_FAC_TABLE(1:NSOILTYPE)    = TDSMC_FAC(1:NSOILTYPE)
     NoahmpIO%TD_DEPTH_TABLE(1:NSOILTYPE)    = TD_DEPTH(1:NSOILTYPE)
@@ -1117,7 +1125,7 @@ contains
     NoahmpIO%TD_DDRAIN_TABLE(1:NSOILTYPE)   = TD_DDRAIN(1:NSOILTYPE)
     NoahmpIO%KLAT_FAC_TABLE(1:NSOILTYPE)    = KLAT_FAC(1:NSOILTYPE)
 
-    !---------------- MPTABLE.TBL optional parameters
+    !---------------- NoahmpTable.TBL optional parameters
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
       open(15, file="NoahmpTable.TBL", status='old', form='formatted', action='read', iostat=ierr)
@@ -1129,6 +1137,7 @@ contains
     endif
     read(15,noahmp_optional_parameters)
     close(15)
+
     ! assign values
     NoahmpIO%sr2006_theta_1500t_a_TABLE = sr2006_theta_1500t_a
     NoahmpIO%sr2006_theta_1500t_b_TABLE = sr2006_theta_1500t_b
