@@ -1581,7 +1581,7 @@ contains
     NoahmpIO%yend                              = yend
     NoahmpIO%MAX_SOIL_LEVELS                   = MAX_SOIL_LEVELS
     NoahmpIO%soil_thick_input                  = soil_thick_input 
-    
+ 
 !---------------------------------------------------------------------
 !  NAMELIST check end
 !---------------------------------------------------------------------
@@ -2084,7 +2084,6 @@ contains
     NoahmpIO%SOILCL4         = huge(1.0)
     NoahmpIO%SOILCOMP        = huge(1.0)
     NoahmpIO%VEGFRA          = huge(1.0)
-    NoahmpIO%GVFMAX          = huge(1.0)
     NoahmpIO%TMN             = huge(1.0)
     NoahmpIO%XLAND           = huge(1.0)
     NoahmpIO%XICE            = huge(1.0)

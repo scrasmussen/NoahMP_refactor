@@ -1,14 +1,14 @@
 module module_NoahMP_hrldas_driver
 
   USE NoahmpIOVarType
-  USE NoahmpIOVarInitMod, only:ReadNoahmpTable, ReadNamelist, NoahmpIOVarInitDefault
+  USE NoahmpIOVarInitMod, only : ReadNoahmpTable, ReadNamelist, NoahmpIOVarInitDefault
   USE module_hrldas_netcdf_io
   USE NoahmpInitMainMod
   USE NoahmpGroundwaterInitMod
   USE NoahmpDriverMainMod
-  USE module_sf_noahmp_groundwater, only: WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
-  USE NoahmpUrbanDriverMainMod, only: noahmp_urban
-  USE module_sf_urban,     only: urban_param_init, urban_var_init
+  USE module_sf_noahmp_groundwater, only : WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
+  USE NoahmpUrbanDriverMainMod, only : noahmp_urban
+  USE module_sf_urban,     only : urban_param_init, urban_var_init
   USE module_date_utilities
 
 #ifdef MPP_LAND
@@ -34,7 +34,7 @@ module module_NoahMP_hrldas_driver
    integer  :: finemesh, finemesh_factor
 #endif
 
-  character(len=9), parameter :: version = "v20220501"
+  character(len=9), parameter :: version = "v20220701"
   integer :: LDASIN_VERSION
 
 #ifdef MPP_LAND
@@ -753,19 +753,9 @@ contains
 #ifdef WRF_HYDRO
     allocate( etpnd     (NoahmpIO%ix,NoahmpIO%jx) )
     allocate( prcp0     (NoahmpIO%ix,NoahmpIO%jx) )
-   ! allocate( infxsrt   (NoahmpIO%ix,NoahmpIO%jx) )
-   ! allocate( sfcheadrt (NoahmpIO%ix,NoahmpIO%jx) )
-   ! allocate( soldrain  (NoahmpIO%ix,NoahmpIO%jx) )
-   ! allocate( qtiledrain(NoahmpIO%ix,NoahmpIO%jx) )
-   ! allocate( ZWATBLE2D (NoahmpIO%ix,NoahmpIO%jx) )
 
     etpnd     = 0.0
     prcp0     = 0
-   ! sfcheadrt = 0.0
-   ! infxsrt   = 0.0
-   ! soldrain  = 0.0
-   ! qtiledrain= 0.0
-   ! ZWATBLE2D = 0.0
 
    allocate(zsoil (NSOIL))
    zsoil = 0

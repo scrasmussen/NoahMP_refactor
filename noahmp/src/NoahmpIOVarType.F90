@@ -56,7 +56,6 @@ module NoahmpIOVarType
     integer                                                ::  IOPT_INFDV          ! infiltration options for dynamic VIC (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)
     integer                                                ::  IOPT_TDRN           ! drainage option (0->off; 1->simple scheme; 2->Hooghoudt's scheme)
     real(kind=kind_noahmp)                                 ::  XICE_THRESHOLD      ! fraction of grid determining seaice
-    real(kind=kind_noahmp)                                 ::  soiltstep           ! soil time step (s) control namelist option (default=0: same as main NoahMP timstep)
     real(kind=kind_noahmp)                                 ::  JULIAN              ! Julian day
     real(kind=kind_noahmp)                                 ::  DTBL                ! timestep [s]
     real(kind=kind_noahmp)                                 ::  DX                  ! horizontal grid spacing [m]
@@ -662,7 +661,6 @@ module NoahmpIOVarType
     integer                                                ::  irrigation_method = 0
     integer                                                ::  dvic_infiltration_option = 1
     integer                                                ::  tile_drainage_option = 0
-    real                                                   ::  soil_timestep_option = 0.0
     integer                                                ::  noahmp_output = 0
 
     integer                                                ::  split_output_count = 1
