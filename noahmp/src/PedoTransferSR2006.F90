@@ -1,7 +1,6 @@
 module PedoTransferSR2006
 
-!!! Main water module including all water relevant processes
-!!! canopy water -> snowpack water -> soil water -> ground water
+!!! Compute soil water infiltration based on different soil composition
 
   use Machine, only : kind_noahmp
   use NoahmpIOVarType

@@ -10,7 +10,6 @@ module NoahmpDriverMainMod
   use ConstantDefineMod
   use NoahmpVarType
   use NoahmpIOVarType
-  use NoahmpIOVarInitMod
   use ConfigVarInitMod
   use EnergyVarInitMod
   use ForcingVarInitMod
@@ -180,7 +179,7 @@ contains
               call NoahmpMainGlacier(noahmp)
 
               !---------------------------------------------------------------------
-              !  Transfer Noah-MP glacial states for output  
+              !  Transfer Noah-MP glacial states for output  (this can be moved to transferout module using ICE as if-statement) 
               !---------------------------------------------------------------------
               
               noahmp%water%state%FSNO   = 1.0  
@@ -205,7 +204,7 @@ contains
               call NoahmpMain(noahmp)
               
               !---------------------------------------------------------------------
-              !  Transfer QFX and LH for output      
+              !  Transfer QFX and LH for output (this can be moved to transferout module using ICE as if-statement)     
               !---------------------------------------------------------------------
               
               NoahmpIO%QFX (I,J)        = noahmp%water%flux%ECAN  + &
@@ -219,16 +218,17 @@ contains
                                           noahmp%energy%flux%FIRR                                     
          
           endif ! glacial split ends 
-       endif    ! land-sea test ends
  
-       !---------------------------------------------------------------------
-       !  Transfer Noah-MP states to output      
-       !---------------------------------------------------------------------
+        !---------------------------------------------------------------------
+        !  Transfer Noah-MP states to output      
+        !---------------------------------------------------------------------
 
-       call ConfigVarOutTransfer (noahmp, NoahmpIO)
-       call EnergyVarOutTransfer (noahmp, NoahmpIO)
-       call WaterVarOutTransfer  (noahmp, NoahmpIO)
-       call BiochemVarOutTransfer(noahmp, NoahmpIO) 
+        call ConfigVarOutTransfer (noahmp, NoahmpIO)
+        call EnergyVarOutTransfer (noahmp, NoahmpIO)
+        call WaterVarOutTransfer  (noahmp, NoahmpIO)
+        call BiochemVarOutTransfer(noahmp, NoahmpIO) 
+
+        endif    ! land-sea test ends
 
       enddo ILOOP    ! I loop
     enddo  JLOOP     ! J loop

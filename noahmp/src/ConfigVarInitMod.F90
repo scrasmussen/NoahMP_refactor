@@ -149,7 +149,7 @@ contains
     noahmp%config%domain%COSZ       = NoahmpIO%COSZEN   (I,  J)
     noahmp%config%domain%ISNOW      = NoahmpIO%ISNOWXY  (I,  J)
   
-    noahmp%config%domain%URBAN_FLAG = .false. !NoahmpIO%URBAN_FLAG
+    noahmp%config%domain%URBAN_FLAG = .false.
     noahmp%config%domain%ISWATER    = NoahmpIO%ISWATER_TABLE
     noahmp%config%domain%ISBARREN   = NoahmpIO%ISBARREN_TABLE
     noahmp%config%domain%ISICE      = NoahmpIO%ISICE_TABLE

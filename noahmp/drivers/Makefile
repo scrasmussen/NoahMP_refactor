@@ -40,7 +40,6 @@ NoahmpDriverMainMod.o:../utility/Machine.o \
                       ../src/NoahmpVarType.o \
                       ../src/NoahmpIOVarType.o \
                       ../src/ConstantDefineMod.o \
-                      ../src/NoahmpIOVarInitMod.o \
                       ../src/ConfigVarInitMod.o \
                       ../src/EnergyVarInitMod.o \
                       ../src/ForcingVarInitMod.o \

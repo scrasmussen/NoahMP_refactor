@@ -403,35 +403,10 @@ contains
        !initialize arrays for groundwater dynamics iopt_run=5
  
        if(IOPT_RUNSRF.eq.5) then
-         ! if( PRESENT(smoiseq)   .AND. &
-         !   PRESENT(smcwtdxy)    .AND. &
-         !   PRESENT(rechxy)      .AND. &
-         !   PRESENT(deeprechxy)  .AND. &
-         !   PRESENT(areaxy)      .AND. &
-         !   PRESENT(dx)          .AND. &
-         !   PRESENT(dy)          .AND. &
-         !   PRESENT(msftx)       .AND. &
-         !   PRESENT(msfty)       .AND. &
-         !   PRESENT(wtddt)       .AND. &
-         !   PRESENT(stepwtd)     .AND. &
-         !   PRESENT(dt)          .AND. &
-         !   PRESENT(qrfsxy)      .AND. &
-         !   PRESENT(qspringsxy)  .AND. &
-         !   PRESENT(qslatxy)     .AND. &
-         !   PRESENT(fdepthxy)    .AND. &
-         !   PRESENT(ht)          .AND. &
-         !   PRESENT(riverbedxy)  .AND. &
-         !   PRESENT(eqzwt)       .AND. &
-         !   PRESENT(rivercondxy) .AND. &
-         !   PRESENT(pexpxy)      .AND. &
-         !   PRESENT(rechclim)    ) then
 
              STEPWTD = nint(WTDDT*60./DT)
              STEPWTD = max(STEPWTD,1)
 
-          !else
-          !   call wrf_error_fatal ('Not enough fields to use groundwater option in Noah-MP')
-          !endif
        endif
     endif
  
