@@ -5,7 +5,7 @@ module SurfaceEnergyFluxGlacierMod
 !!! Surface energy balance (bare soil):
 !!! Ground level: -SAB + IRB[TG] + SHB[TG] + EVB[TG] + GHB[TG] = 0
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use VaporPressureSaturationMod,    only : VaporPressureSaturation
@@ -58,11 +58,11 @@ contains
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,    options for glacier treatment 
-              LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
-              UU              => noahmp%forcing%UU                   ,& ! in,    wind speed in eastward direction (m/s)
-              VV              => noahmp%forcing%VV                   ,& ! in,    wind speed in northward direction (m/s)
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
+              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight ,& ! in,    air pressure [Pa] at reference height
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               SMC             => noahmp%water%state%SMC              ,& ! in,    total glacier/soil water content [m3/m3]
               SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier/soil water content [m3/m3]
@@ -71,7 +71,7 @@ contains
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
-              QAIR            => noahmp%energy%state%QAIR            ,& ! in,    specific humidity at reference height (kg/kg)
+              SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
               EMG             => noahmp%energy%state%EMG             ,& ! in,    ground emissivity
@@ -152,8 +152,8 @@ contains
        else
           CEV = 0.0   ! don't allow any sublimation of glacier in opt_gla=2
        endif
-       IRB = CIR * TGB**4 - EMG * LWDN
-       SHB = CSH * (TGB        - SFCTMP      )
+       IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
+       SHB = CSH * (TGB        - TemperatureAirRefHeight      )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
        GHB = CGH * (TGB        - STC(ISNOW+1))
        B   = SAG - IRB - SHB - EVB - GHB + PAHB
@@ -166,7 +166,7 @@ contains
        TGB = TGB + DTG  ! update ground temperature
 
        ! for computing M-O length
-       H = CSH * (TGB - SFCTMP)
+       H = CSH * (TGB - TemperatureAirRefHeight)
 
        ! update specific humidity
        T = TDC(TGB)
@@ -176,8 +176,8 @@ contains
        else
           ESTG = ESATI
        endif
-       QSFC = 0.622 * (ESTG*RHSUR) / (SFCPRS - 0.378 * (ESTG*RHSUR))
-       QFX  = (QSFC - QAIR) * CEV * GAMMAG / CPAIR
+       QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirRefHeight - 0.378 * (ESTG*RHSUR))
+       QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / CPAIR
 
     enddo loop3 ! end stability iteration
 
@@ -189,18 +189,18 @@ contains
           T = TDC(TGB) ! MB: recalculate ESTG
           call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
           ESTG = ESATI
-          QSFC = 0.622 * (ESTG*RHSUR) / (SFCPRS - 0.378 * (ESTG*RHSUR))
-          QFX  = (QSFC - QAIR) * CEV * GAMMAG / CPAIR
-          IRB  = CIR * TGB**4 - EMG * LWDN
-          SHB  = CSH * (TGB        - SFCTMP)
+          QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirRefHeight - 0.378 * (ESTG*RHSUR))
+          QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / CPAIR
+          IRB  = CIR * TGB**4 - EMG * RadLWDownRefHeight
+          SHB  = CSH * (TGB        - TemperatureAirRefHeight)
           EVB  = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
           GHB  = SAG + PAHB - (IRB + SHB + EVB)
        endif
     endif
 
     ! wind stresses
-    TAUXB = -RHOAIR * CM * UR * UU
-    TAUYB = -RHOAIR * CM * UR * VV
+    TAUXB = -RHOAIR * CM * UR * WindEastwardRefHeight
+    TAUYB = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! 2m air temperature
     EHB2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )

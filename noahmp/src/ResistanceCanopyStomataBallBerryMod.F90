@@ -2,7 +2,7 @@ module ResistanceCanopyStomataBallBerryMod
 
 !!! Compute canopy stomatal resistance and foliage photosynthesis based on Ball-Berry scheme
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -57,8 +57,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
+              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight   ,& ! in,    air pressure [Pa] at reference height
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
               IGS             => noahmp%biochem%state%IGS            ,& ! in,    growing season index (0=off, 1=on)
               FOLN            => noahmp%biochem%state%FOLN           ,& ! in,    foliage nitrogen concentration (%)
@@ -96,7 +96,7 @@ contains
 
        ! initialize RS=RSMAX and PSN=0 because will only do calculations
        ! for PARSUN  > 0, in which case RS <= RSMAX and PSN >= 0
-       CF = SFCPRS / (8.314 * SFCTMP) * 1.0e06  ! unit conversion factor
+       CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSUN  = 1.0 / BP * CF  
        PSNSUN = 0.0           
 
@@ -121,11 +121,11 @@ contains
           do ITER = 1, NITER
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
-             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / SFCPRS * (1.0 - C3PSN)
+             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
              PSNSUN = min( WJ, WC, WE ) * IGS
-             CS     = max( CO2 - 1.37*RLB*SFCPRS*PSNSUN, MPE )
-             A      = MP * PSNSUN * SFCPRS * CEA / (CS * ESTV) + BP
-             B      = ( MP * PSNSUN * SFCPRS / CS + BP ) * RLB - 1.0
+             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSUN, MPE )
+             A      = MP * PSNSUN * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = ( MP * PSNSUN * PressureAirRefHeight / CS + BP ) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -135,7 +135,7 @@ contains
              R1     = Q / A
              R2     = C / Q
              RSSUN  = max(R1, R2)
-             CI     = max( CS - PSNSUN*SFCPRS*1.65*RSSUN, 0.0 )
+             CI     = max( CS - PSNSUN*PressureAirRefHeight*1.65*RSSUN, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m
@@ -150,7 +150,7 @@ contains
 
        ! initialize RS=RSMAX and PSN=0 because will only do calculations
        ! for PARSHA  > 0, in which case RS <= RSMAX and PSN >= 0
-       CF = SFCPRS / (8.314 * SFCTMP) * 1.0e06  ! unit conversion factor
+       CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSHA  = 1.0 / BP * CF
        PSNSHA = 0.0
 
@@ -175,11 +175,11 @@ contains
           do ITER = 1, NITER
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
-             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / SFCPRS * (1.0 - C3PSN)
+             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
              PSNSHA = min( WJ, WC, WE ) * IGS
-             CS     = max( CO2 - 1.37*RLB*SFCPRS*PSNSHA, MPE )
-             A      = MP * PSNSHA * SFCPRS * CEA / (CS * ESTV) + BP
-             B      = ( MP * PSNSHA * SFCPRS / CS + BP ) * RLB - 1.0
+             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSHA, MPE )
+             A      = MP * PSNSHA * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = ( MP * PSNSHA * PressureAirRefHeight / CS + BP ) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -189,7 +189,7 @@ contains
              R1     = Q / A
              R2     = C / Q
              RSSHA  = max(R1, R2)
-             CI     = max( CS - PSNSHA*SFCPRS*1.65*RSSHA, 0.0 )
+             CI     = max( CS - PSNSHA*PressureAirRefHeight*1.65*RSSHA, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m

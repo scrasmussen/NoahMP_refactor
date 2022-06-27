@@ -5,7 +5,7 @@ module SurfaceEnergyFluxBareGroundMod
 !!! Surface energy balance (bare soil):
 !!! Ground level: -SAB + IRB[TG] + SHB[TG] + EVB[TG] + GHB[TG] = 0
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use VaporPressureSaturationMod,    only : VaporPressureSaturation
@@ -58,12 +58,11 @@ contains
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
               OPT_SFC         => noahmp%config%nmlist%OPT_SFC        ,& ! in,    options for surface layer drag coeff (CH & CM)
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
-              LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
-              UU              => noahmp%forcing%UU                   ,& ! in,    wind speed in eastward direction (m/s)
-              VV              => noahmp%forcing%VV                   ,& ! in,    wind speed in northward direction (m/s)
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
-              PSFC            => noahmp%forcing%PSFC                 ,& ! in,    pressure at lowest model layer
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
+              PressureAirSurface      => noahmp%forcing%PressureAirSurface ,& ! in,    air pressure [Pa] at surface-atmosphere interface
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
@@ -71,7 +70,7 @@ contains
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
-              QAIR            => noahmp%energy%state%QAIR            ,& ! in,    specific humidity at reference height (kg/kg)
+              SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
               EMG             => noahmp%energy%state%EMG             ,& ! in,    ground emissivity
@@ -151,8 +150,8 @@ contains
        ! ground fluxes and temperature change
        CSH = RHOAIR * CPAIR / RAHB
        CEV = RHOAIR * CPAIR / GAMMAG / (RSURF + RAWB)
-       IRB = CIR * TGB**4 - EMG * LWDN
-       SHB = CSH * (TGB        - SFCTMP      )
+       IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
+       SHB = CSH * (TGB        - TemperatureAirRefHeight )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
        GHB = CGH * (TGB        - STC(ISNOW+1))
        B   = SAG - IRB - SHB - EVB - GHB + PAHB
@@ -165,7 +164,7 @@ contains
        TGB = TGB + DTG  ! update ground temperature
 
        ! for computing M-O length
-       H = CSH * (TGB - SFCTMP)
+       H = CSH * (TGB - TemperatureAirRefHeight)
 
        ! update specific humidity
        T = TDC(TGB)
@@ -175,8 +174,8 @@ contains
        else
           ESTG = ESATI
        endif
-       QSFC = 0.622 * (ESTG*RHSUR) / (PSFC - 0.378 * (ESTG*RHSUR))
-       QFX  = (QSFC - QAIR) * CEV * GAMMAG / CPAIR
+       QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirSurface - 0.378 * (ESTG*RHSUR))
+       QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / CPAIR
 
     enddo loop3 ! end stability iteration
 
@@ -185,16 +184,16 @@ contains
        if ( (SNOWH > 0.05) .and. (TGB > TFRZ) ) then
           if ( OPT_STC == 1 ) TGB = TFRZ
           if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * TFRZ  ! MB: allow TG>0C during melt v3.7
-          IRB = CIR * TGB**4 - EMG * LWDN
-          SHB = CSH * (TGB        - SFCTMP)
+          IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
+          SHB = CSH * (TGB        - TemperatureAirRefHeight)
           EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
           GHB = SAG + PAHB - (IRB + SHB + EVB)
        endif
     endif
 
     ! wind stresses
-    TAUXB = -RHOAIR * CM * UR * UU
-    TAUYB = -RHOAIR * CM * UR * VV
+    TAUXB = -RHOAIR * CM * UR * WindEastwardRefHeight
+    TAUYB = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! 2m air temperature
     if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then

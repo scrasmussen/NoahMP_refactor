@@ -8,7 +8,7 @@ module ConfigVarType
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
 
   implicit none
   save
@@ -30,8 +30,8 @@ module ConfigVarType
                                                  ! 9 -> off (use input LAI; use maximum vegetation fraction)
     integer                   :: OPT_SNF       ! options for partitioning  precipitation into rainfall & snowfall
                                                  ! 1 -> Jordan (1991)
-                                                 ! 2 -> BATS: when SFCTMP<TFRZ+2.2 
-                                                 ! 3 -> SFCTMP < TFRZ
+                                                 ! 2 -> BATS: when TemperatureAirRefHeight < TFRZ+2.2 
+                                                 ! 3 -> TemperatureAirRefHeight < TFRZ
                                                  ! 4 -> Use WRF microphysics output
                                                  ! 5 -> Use wetbulb temperature (Wang et al., 2019)
     integer                   :: OPT_BTR       ! options for soil moisture factor for stomatal resistance
@@ -67,7 +67,7 @@ module ConfigVarType
                                                  ! 4 -> Verseghy (1991) scheme
                                                  ! 5 -> Douvill(Yen, 1981) scheme
     integer                   :: OPT_TBOT      ! options for lower boundary condition of soil temperature
-                                                 ! 1 -> zero heat flux from bottom (ZBOT and TBOT not used)
+                                                 ! 1 -> zero heat flux from bottom (ZBOT & TemperatureSoilBottom not used)
                                                  ! 2 -> TBOT at ZBOT (8m) read from a file (original Noah)
     integer                   :: OPT_FRZ       ! options for soil supercooled liquid water
                                                  ! 1 -> no iteration (Niu and Yang, 2006 JHM)

@@ -5,8 +5,8 @@ module IrrigationSprinklerMod
 !!! Irrigation water will be applied over the canopy, affecting  present soil moisture, 
 !!! infiltration rate of the soil, and evaporative loss, which should be executed before canopy process.
  
-  use Machine,     only : kind_noahmp
-  use CheckNanMod, only : CheckRealNaN
+  use Machine
+  use CheckNanMod
   use NoahmpVarType
   use ConstantDefineMod
   use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
@@ -38,9 +38,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              T2              => noahmp%forcing%SFCTMP               ,& ! in,     surface air temperature [k] from Atmos forcing
-              WINDU           => noahmp%forcing%UU                   ,& ! in,     u direction wind
-              WINDV           => noahmp%forcing%VV                   ,& ! in,     v direction wind
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,     air temperature [K] at reference height
+              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,     wind speed [m/s] in northward direction at reference height
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
               SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
               SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
@@ -69,11 +69,11 @@ contains
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
     ! losses from sprinkler irrigation systems under various operating 
     ! conditions. Journal of Applied Sciences, 9(3), 597-600.
-    WINDSPEED = sqrt( (WINDU**2.0) + (WINDV**2.0) )                       ! [m/s]
-    ESAT1     = 610.8 * exp( (17.27*(T2-273.15)) / (237.3+(T2-273.15)) )  ! [Pa]
+    WINDSPEED = sqrt( (WindEastwardRefHeight**2.0) + (WindNorthwardRefHeight**2.0) )   ! [m/s]
+    ESAT1     = 610.8 * exp( (17.27*(TemperatureAirRefHeight-273.15)) / (237.3+(TemperatureAirRefHeight-273.15)) )  ! [Pa]
 
-    if ( T2 > 273.15 ) then ! Equation (3)
-       IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.092) ) * ( (T2-273.15)**(-0.102) ) ! [%]
+    if ( TemperatureAirRefHeight > 273.15 ) then ! Equation (3)
+       IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.092) ) * ( (TemperatureAirRefHeight-273.15)**(-0.102) ) ! [%]
     else ! Equation (4)
        IRRLOSS = 4.337 * ( exp(0.077*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.098) ) ! [%]
     endif

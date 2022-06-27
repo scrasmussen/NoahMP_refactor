@@ -3,7 +3,7 @@ module CanopyWaterInterceptMod
 !!! Canopy water processes for snow and rain interception
 !!! Subsequent hydrological process for intercepted water is done in CanopyHydrology
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,8 +33,8 @@ contains
     associate(                                                        &
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
               DT              => noahmp%config%domain%DT             ,& ! in,    noahmp time step (s)
-              UU              => noahmp%forcing%UU                   ,& ! in,    u direction wind
-              VV              => noahmp%forcing%VV                   ,& ! in,    v direction wind
+              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
@@ -109,7 +109,7 @@ contains
        QINTS = min( QINTS, (MAXSNO-CANICE)/DT * (1.0-exp(-SNOW*DT/MAXSNO)) )
        QINTS = max( QINTS, 0.0 )
        FT    = max( 0.0, (TV - 270.15) / 1.87e5 )
-       FV    = sqrt(UU*UU + VV*VV) / 1.56e5
+       FV    = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
        ICEDRIP = max( 0.0, CANICE ) * (FV + FT)    !MB: removed /DT
        QDRIPS  = (FVEG * SNOW - QINTS) + ICEDRIP

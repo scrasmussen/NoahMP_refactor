@@ -6,7 +6,7 @@ module SurfaceEnergyFluxVegetatedMod
 !!! Canopy level: -SAV + IRC[TV] + SHC[TV] + EVC[TV] + TR[TV] = 0
 !!! Ground level: -SAG + IRG[TG] + SHG[TG] + EVG[TG] + GH[TG] = 0
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use VaporPressureSaturationMod,          only : VaporPressureSaturation
@@ -77,12 +77,12 @@ contains
               OPT_SFC         => noahmp%config%nmlist%OPT_SFC        ,& ! in,    options for surface layer drag coeff (CH & CM)
               OPT_CRS         => noahmp%config%nmlist%OPT_CRS        ,& ! in,    options for canopy stomatal resistance
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
-              UU              => noahmp%forcing%UU                   ,& ! in,    wind speed in eastward direction (m/s)
-              VV              => noahmp%forcing%VV                   ,& ! in,    wind speed in northward direction (m/s)
-              LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
-              PSFC            => noahmp%forcing%PSFC                 ,& ! in,    pressure at lowest model layer
+              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
+              RadLWDownRefHeight      => noahmp%forcing%RadLWDownRefHeight      ,& ! in,    downward longwave radiation [W/m2] at reference height
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight ,& ! in,    air temperature [K] at reference height
+              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight    ,& ! in,    air pressure [Pa] at reference height
+              PressureAirSurface      => noahmp%forcing%PressureAirSurface      ,& ! in,    air pressure [Pa] at surface-atmos interface
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
               FWET            => noahmp%water%state%FWET             ,& ! in,    wetted or snowed fraction of the canopy
@@ -98,7 +98,7 @@ contains
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
-              QAIR            => noahmp%energy%state%QAIR            ,& ! in,    specific humidity at reference height (kg/kg)
+              SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
               LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,    sunlit leaf area index, one-sided (m2/m2)
@@ -188,7 +188,7 @@ contains
        ESTG = ESATI
     endif
     !jref - consistent surface specific humidity for sfcdif3 and sfcdif4
-    QSFC = 0.622 * EAIR / (PSFC - 0.378*EAIR)
+    QSFC = 0.622 * EAIR / (PressureAirSurface - 0.378*EAIR)
 
     ! canopy height
     HCAN = HVT
@@ -216,7 +216,7 @@ contains
     endif
 
     ! prepare for longwave rad.
-    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * LWDN - EMV * EMG * SB * TGV**4
+    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * RadLWDownRefHeight - EMV * EMG * SB * TGV**4
     CIR = ( 2.0 - EMV * (1.0-EMG) ) * EMV * SB
 
     ! begin stability iteration for canopy temperature and flux
@@ -270,7 +270,7 @@ contains
        CVH  = 2.0 * VAIE / RB
        CGH  = 1.0 / RAHG
        COND = CAH + CVH + CGH
-       ATA  = (SFCTMP * CAH + TGV * CGH) / COND
+       ATA  = (TemperatureAirRefHeight * CAH + TGV * CGH) / COND
        BTA  = CVH / COND
        CSH  = (1.0 - BTA) * RHOAIR * CPAIR * CVH
 
@@ -308,11 +308,11 @@ contains
        !TAH = ATA + BTA * TV  ! canopy air T; update here for consistency
 
        ! for computing M-O length in the next iteration
-       H    = RHOAIR * CPAIR * (TAH - SFCTMP) / RAHC
+       H    = RHOAIR * CPAIR * (TAH - TemperatureAirRefHeight) / RAHC
        HG   = RHOAIR * CPAIR * (TGV  - TAH)   / RAHG
 
        ! consistent specific humidity from canopy air vapor pressure
-       QSFC = (0.622 * EAH) / (SFCPRS - 0.378 * EAH)
+       QSFC = (0.622 * EAH) / (PressureAirRefHeight - 0.378 * EAH)
        if ( LITER == 1 ) then
           exit loop1
        endif
@@ -322,7 +322,7 @@ contains
     enddo loop1  ! end stability iteration
 
     ! under-canopy fluxes and ground temperature
-    AIR = -EMG * (1.0 - EMV) * LWDN - EMG * EMV * SB * TV**4
+    AIR = -EMG * (1.0 - EMV) * RadLWDownRefHeight - EMG * EMV * SB * TV**4
     CIR = EMG * SB
     CSH = RHOAIR * CPAIR / RAHG
     CEV = RHOAIR * CPAIR / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
@@ -351,14 +351,14 @@ contains
        GH  = GH  + CGH * DTG
        TGV = TGV + DTG
     enddo loop2
-    !TAH = (CAH*SFCTMP + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
+    !TAH = (CAH*TemperatureAirRefHeight + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
 
     ! if snow on ground and TGV > TFRZ: reset TGV = TFRZ. reevaluate ground fluxes.
     if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
        if ( (SNOWH > 0.05) .and. (TGV > TFRZ) ) then
           if ( OPT_STC == 1 ) TGV = TFRZ
           if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * TFRZ   ! MB: allow TGV>0C during melt v3.7
-          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * LWDN - EMG * EMV * SB * TV**4
+          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * SB * TV**4
           SHG = CSH * (TGV        - TAH)
           EVG = CEV * (ESTG*RHSUR - EAH)
           GH  = SAG + PAHG - (IRG + SHG + EVG)
@@ -366,14 +366,14 @@ contains
     endif
 
     ! wind stresses
-    TAUXV = -RHOAIR * CM * UR * UU
-    TAUYV = -RHOAIR * CM * UR * VV
+    TAUXV = -RHOAIR * CM * UR * WindEastwardRefHeight
+    TAUYV = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! consistent vegetation air temperature and vapor pressure since TGV is not consistent with the TAH/EAH calculation.
-    ! TAH = SFCTMP + (SHG+SHC) / (RHOAIR*CPAIR*CAH) 
-    ! TAH = SFCTMP + (SHG*FVEG+SHC) / (RHOAIR*CPAIR*CAH) ! ground flux need fveg
+    ! TAH = TemperatureAirRefHeight + (SHG+SHC) / (RHOAIR*CPAIR*CAH) 
+    ! TAH = TemperatureAirRefHeight + (SHG*FVEG+SHC) / (RHOAIR*CPAIR*CAH) ! ground flux need fveg
     ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*CPAIR/GAMMAG)
-    ! QFX = (QSFC-QAIR) * RHOAIR * CAW !*CPAIR/GAMMAG
+    ! QFX = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*CPAIR/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
     if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
@@ -383,11 +383,11 @@ contains
        CQ2V = CAH2
        if ( CAH2 < 1.0e-5 ) then
           T2MV = TAH
-          !Q2V  = (EAH*0.622/(SFCPRS - 0.378*EAH))
+          !Q2V  = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))
           Q2V  = QSFC
        else
           T2MV = TAH - (SHG + SHC/FVEG) / (RHOAIR * CPAIR) * 1.0 / CAH2
-          !Q2V = (EAH*0.622/(SFCPRS - 0.378*EAH))- QFX/(RHOAIR*FV)* 1./VKC * LOG((2.+Z0H)/Z0H)
+          !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- QFX/(RHOAIR*FV)* 1./VKC * LOG((2.+Z0H)/Z0H)
           Q2V  = QSFC - ( (EVC+TR)/FVEG + EVG ) / (LATHEAV * RHOAIR) * 1.0 / CQ2V
        endif
     endif

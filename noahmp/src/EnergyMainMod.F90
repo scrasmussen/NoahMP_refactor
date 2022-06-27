@@ -74,10 +74,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
-              LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
-              UU              => noahmp%forcing%UU                   ,& ! in,    east-west direction wind (m/s)
-              VV              => noahmp%forcing%VV                   ,& ! in,    north-south direction wind (m/s)
+              PressureAirRefHeight   => noahmp%forcing%PressureAirRefHeight  ,& ! in,    air pressure [Pa] at reference height
+              RadLWDownRefHeight     => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,   wind speed [m/s] in northward direction at reference height
+              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
@@ -85,7 +86,6 @@ contains
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
               FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
               PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
               PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
@@ -184,7 +184,7 @@ contains
     PAH     = 0.0
 
     ! wind speed at reference height: ur >= 1
-    UR = max( sqrt(UU**2.0 + VV**2.0), 1.0 )
+    UR = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
 
     ! vegetated or non-vegetated
     VAI = ELAI + ESAI
@@ -253,7 +253,7 @@ contains
        CH    = FVEG * CHV   + (1.0 - FVEG) * CHB
        Q2E   = FVEG * Q2V   + (1.0 - FVEG) * Q2B 
        Z0WRF = Z0M
-       Q1    = FVEG * (EAH*0.622/(SFCPRS-0.378*EAH)) + (1.0 - FVEG) * QSFC
+       Q1    = FVEG * (EAH*0.622/(PressureAirRefHeight-0.378*EAH)) + (1.0 - FVEG) * QSFC
     else
        TAUX  = TAUXB
        TAUY  = TAUYB
@@ -279,21 +279,21 @@ contains
     endif
 
     ! emitted longwave radiation and physical check
-    FIRE = LWDN + FIRA
+    FIRE = RadLWDownRefHeight + FIRA
     if ( FIRE <= 0.0 ) then
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
        write(6,*) 'input of SHDFAC with LAI'
        write(6,*) 'SHDFAC=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG
-       write(6,*) 'LWDN=',LWDN,'FIRA=',FIRA,'SNOWH=',SNOWH
+       write(6,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SNOWH=',SNOWH
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
     ! radiative temperature: subtract from the emitted IR the
-    ! reflected portion of the incoming LWDN, so just
+    ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the canopy/ground system.
     ! Old TRAD calculation not taking into account Emissivity:
     ! TRAD = (FIRE/SB)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*LWDN) / (EMISSI * SB) ) ** 0.25
+    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * SB) ) ** 0.25
 
     ! other photosynthesis related quantities for biochem process
     APAR = PARSUN * LAISUN + PARSHA * LAISHA
@@ -324,8 +324,8 @@ contains
     if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
 
     ! update total surface albedo
-    if ( SWDOWN > 0.0 ) then
-       ALBEDO = FSR / SWDOWN
+    if ( RadSWDownRefHeight > 0.0 ) then
+       ALBEDO = FSR / RadSWDownRefHeight
     else
        ALBEDO = -999.9
     endif

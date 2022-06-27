@@ -7,7 +7,7 @@ module ResistanceCanopyStomataJarvisMod
 !!! Source: Jarvis (1976), Noilhan and Planton (1989), Jacquemin and Noilhan (1990). 
 !!! See also Chen et al (1996, JGR, Vol 101(D3), 7251-7268): Eqns 12-14 and Table 2 of Sec. 3.1.2
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use HumiditySaturationMod, only : HumiditySaturation
@@ -40,7 +40,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight,& ! in,  air pressure [Pa] at reference height
               BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
               RGL             => noahmp%energy%param%RGL             ,& ! in,    Parameter used in radiation stress function
               RSMIN           => noahmp%energy%param%RSMIN           ,& ! in,    Minimum stomatal resistance [s m-1]
@@ -68,9 +68,9 @@ contains
        RSSUN  = 0.0
 
        ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  EAH  / (SFCPRS - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = 0.622 *  EAH  / (PressureAirRefHeight - 0.378 * EAH) ! specific humidity [kg/kg]
        Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TV, SFCPRS, Q2SAT, DQSDT2)
+       call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
        FF  = 2.0 * PARSUN / RGL
@@ -97,9 +97,9 @@ contains
        RSSHA  = 0.0
        
        ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  EAH  / (SFCPRS - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = 0.622 *  EAH  / (PressureAirRefHeight - 0.378 * EAH) ! specific humidity [kg/kg]
        Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TV, SFCPRS, Q2SAT, DQSDT2)
+       call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
        FF  = 2.0 * PARSHA / RGL

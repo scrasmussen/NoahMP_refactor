@@ -48,7 +48,7 @@ contains
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,    depth of snow/soil layer-bottom (m)
               OPT_TBOT        => noahmp%config%nmlist%OPT_TBOT       ,& ! in,    options for lower boundary condition of soil temperature
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
-              TBOT            => noahmp%forcing%TBOT                 ,& ! in,    bottom soil temp. at ZBOT (K)
+              TemperatureSoilBottom => noahmp%forcing%TemperatureSoilBottom,& ! in,    bottom boundary soil temperature [K]
               ZBOT            => noahmp%energy%state%ZBOTSNO         ,& ! in,    depth of lower boundary condition (m) from snow surface
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
               DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
@@ -96,7 +96,7 @@ contains
              BOTFLX = 0.0
           endif
           if ( OPT_TBOT == 2 ) then
-             DTSDZ(K) = (STC(K) - TBOT) / (0.5 * (ZSNSO(K-1)+ZSNSO(K)) - ZBOT)
+             DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (ZSNSO(K-1)+ZSNSO(K)) - ZBOT)
              BOTFLX   = -DF(K) * DTSDZ(K)
           endif
           EFLUX(K) = ( -BOTFLX - DF(K-1)*DTSDZ(K-1) ) - PHI(K)

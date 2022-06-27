@@ -170,7 +170,7 @@ contains
 
           if (noahmp%config%domain%VEGTYP == noahmp%config%domain%ISICE ) then
               noahmp%config%domain%ICE = -1                                       ! Land-ice point      
-              noahmp%forcing%TBOT = MIN(noahmp%forcing%TBOT,263.15)               ! set deep temp to at most -10C
+              noahmp%forcing%TemperatureSoilBottom = min(noahmp%forcing%TemperatureSoilBottom,263.15) ! set deep temp to at most -10C
 
               !---------------------------------------------------------------------
               !  Call 1D Noah-MP LSM for glacier points

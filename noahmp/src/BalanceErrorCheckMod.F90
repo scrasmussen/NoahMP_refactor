@@ -165,7 +165,7 @@ contains
               ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
               JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
+              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
               FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
               FSRV            => noahmp%energy%flux%FSRV             ,& ! in,    reflected solar radiation by vegetation (w/m2)
@@ -189,17 +189,17 @@ contains
 ! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
-    ERRSW = SWDOWN - (FSA + FSR)
+    ERRSW = RadSWDownRefHeight - (FSA + FSR)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
        write(*,*) 'I, J =',  ILOC, JLOC
        write(*,*) 'ERRSW =',  ERRSW
        write(*,*) "VEGETATION!"
-       write(*,*) "SWDOWN*FVEG =",      SWDOWN * FVEG
+       write(*,*) "RadSWDownRefHeight*FVEG =",RadSWDownRefHeight * FVEG
        write(*,*) "FVEG*SAV + SAG =",   FVEG * SAV + SAG
        write(*,*) "FVEG*FSRV + FSRG =", FVEG * FSRV + FSRG
        write(*,*) "GROUND!"
-       write(*,*) "(1.-FVEG)*SWDOWN =", (1.0-FVEG) * SWDOWN
+       write(*,*) "(1.-FVEG)*RadSWDownRefHeight =", (1.0-FVEG)*RadSWDownRefHeight
        write(*,*) "(1.-FVEG)*SAG =",    (1.0-FVEG) * SAG
        write(*,*) "(1.-FVEG)*FSRG=",    (1.0-FVEG) * FSRG
        write(*,*) "FSRV   =", FSRV

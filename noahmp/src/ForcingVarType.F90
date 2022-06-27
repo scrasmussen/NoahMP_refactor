@@ -1,14 +1,14 @@
 module ForcingVarType
 
 !!! Define column (1-D) Noah-MP forcing variables
-!!! Forcing variable initialization is done in ForcingVarInit.F90
+!!! Forcing variable initialization is done in ForcingVarInitMod.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
 
   implicit none
   save
@@ -17,21 +17,21 @@ module ForcingVarType
   type, public :: forcing_type
 
     ! define specific forcing variables
-    real(kind=kind_noahmp) :: SFCTMP          ! surface air temperature [k]
-    real(kind=kind_noahmp) :: UU              ! wind speed in eastward dir [m/s]
-    real(kind=kind_noahmp) :: VV              ! wind speed in northward dir [m/s]
-    real(kind=kind_noahmp) :: Q2              ! 2-m specific humidity (kg/kg)
-    real(kind=kind_noahmp) :: SFCPRS          ! surface pressure (pa)
-    real(kind=kind_noahmp) :: LWDN            ! downward longwave radiation [w/m2]
-    real(kind=kind_noahmp) :: PSFC            ! pressure at lowest model layer (pa)
-    real(kind=kind_noahmp) :: SOLDN           ! downward shortwave radiation [w/m2]
-    real(kind=kind_noahmp) :: PRCPCONV        ! convective precipitation entering  [mm/s]
-    real(kind=kind_noahmp) :: PRCPNONC        ! non-convective precipitation entering [mm/s]
-    real(kind=kind_noahmp) :: PRCPSHCV        ! shallow convective precip entering  [mm/s]
-    real(kind=kind_noahmp) :: PRCPSNOW        ! snow entering land model [mm/s]
-    real(kind=kind_noahmp) :: PRCPGRPL        ! graupel entering land model [mm/s] 
-    real(kind=kind_noahmp) :: PRCPHAIL        ! hail entering land model [mm/s]  
-    real(kind=kind_noahmp) :: TBOT            ! bottom condition for soil temp. [K]
+    real(kind=kind_noahmp) :: SpecHumidityRefHeight    ! Specific humidity [kg water vapor / kg moist air] forcing at reference height
+    real(kind=kind_noahmp) :: TemperatureAirRefHeight  ! Air temperature [K] forcing at reference height
+    real(kind=kind_noahmp) :: WindEastwardRefHeight    ! wind speed [m/s] in eastward dir at reference height
+    real(kind=kind_noahmp) :: WindNorthwardRefHeight   ! wind speed [m/s] in northward dir at reference height
+    real(kind=kind_noahmp) :: RadSWDownRefHeight       ! downward shortwave radiation [W/m2] at reference height
+    real(kind=kind_noahmp) :: RadLWDownRefHeight       ! downward longwave radiation [W/m2] at reference height
+    real(kind=kind_noahmp) :: PressureAirRefHeight     ! air pressure [Pa] at reference height
+    real(kind=kind_noahmp) :: PressureAirSurface       ! air pressure [Pa] at surface-atmosphere interface (lowest atmos model boundary)
+    real(kind=kind_noahmp) :: PrecipConvRefHeight      ! convective precipitation rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipNonConvRefHeight   ! non-convective precipitation rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipShConvRefHeight    ! shallow convective precipitation rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipSnowRefHeight      ! snowfall rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipGraupelRefHeight   ! graupel rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipHailRefHeight      ! hail rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: TemperatureSoilBottom    ! bottom boundary condition for soil temperature [K]
 
   end type forcing_type
 

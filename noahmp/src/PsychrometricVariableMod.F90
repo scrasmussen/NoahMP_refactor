@@ -24,7 +24,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (K)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
               LATHEAV         => noahmp%energy%state%LATHEAV         ,& ! out,   latent heat of vaporization/subli (j/kg), canopy
@@ -44,7 +44,7 @@ contains
        LATHEAV       = HSUB
        FROZEN_CANOPY = .true.
     endif
-    GAMMAV = CPAIR * SFCPRS / (0.622 * LATHEAV)
+    GAMMAV = CPAIR * PressureAirRefHeight / (0.622 * LATHEAV)
 
     ! for ground
     if ( TG > TFRZ ) then
@@ -54,7 +54,7 @@ contains
        LATHEAG       = HSUB
        FROZEN_GROUND = .true.
     endif
-    GAMMAG = CPAIR * SFCPRS / (0.622 * LATHEAG)
+    GAMMAG = CPAIR * PressureAirRefHeight / (0.622 * LATHEAG)
 
     end associate
 

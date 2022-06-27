@@ -2,7 +2,7 @@ module PrecipitationHeatAdvectGlacierMod
 
 !!! Estimate heat flux advected from precipitation to glacier ground
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -27,7 +27,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
               RAIN            => noahmp%water%flux%RAIN              ,& ! in,    total liquid rainfall (mm/s) before interception
               SNOW            => noahmp%water%flux%SNOW              ,& ! in,    total liquid snowfall (mm/s) before interception
@@ -44,10 +44,10 @@ contains
     QSNOW   = SNOW
 
     ! Heat advection for liquid rainfall
-    PAH_AG = QRAIN * (CWAT/1000.0) * (SFCTMP - TG)
+    PAH_AG = QRAIN * (CWAT/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AG = PAH_AG + QSNOW * (CICE/1000.0) * (SFCTMP - TG)
+    PAH_AG = PAH_AG + QSNOW * (CICE/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHB = PAH_AG

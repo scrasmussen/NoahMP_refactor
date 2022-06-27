@@ -611,26 +611,26 @@ module NoahmpIOVarType
     integer                                                ::  start_day
     integer                                                ::  start_hour
     integer                                                ::  start_min
-    character(len=256)                                     ::  outdir = "."
-    character(len=256)                                     ::  restart_filename_requested = " "
+    character(len=256)                                     ::  outdir
+    character(len=256)                                     ::  restart_filename_requested
     integer                                                ::  restart_frequency_hours
     integer                                                ::  output_timestep
     integer                                                ::  spinup_loops
 
-    integer                                                ::  sf_urban_physics = 0
-    integer                                                ::  use_wudapt_lcz   = 0 ! add for LCZ urban
-    integer                                                ::  num_urban_ndm    = 1
-    integer                                                ::  num_urban_ng     = 1
-    integer                                                ::  num_urban_nwr    = 1
-    integer                                                ::  num_urban_ngb    = 1
-    integer                                                ::  num_urban_nf     = 1
-    integer                                                ::  num_urban_nz     = 1
-    integer                                                ::  num_urban_nbui   = 1
-    integer                                                ::  num_urban_hi     = 15 
-    real                                                   ::  urban_atmosphere_thickness = 2.0
+    integer                                                ::  sf_urban_physics
+    integer                                                ::  use_wudapt_lcz
+    integer                                                ::  num_urban_ndm
+    integer                                                ::  num_urban_ng
+    integer                                                ::  num_urban_nwr
+    integer                                                ::  num_urban_ngb
+    integer                                                ::  num_urban_nf
+    integer                                                ::  num_urban_nz
+    integer                                                ::  num_urban_nbui
+    integer                                                ::  num_urban_hi
+    real                                                   ::  urban_atmosphere_thickness
 ! new urban var for green roof and solar panel
-    integer                                                ::  num_urban_ngr    = 10 ! = ngr_u in bep_bem.F
-    integer                                                ::  urban_map_zgrd   = 1 
+    integer                                                ::  num_urban_ngr
+    integer                                                ::  urban_map_zgrd
 
 ! derived urban dimensions
   
@@ -644,41 +644,41 @@ module NoahmpIOVarType
     integer                                                ::  urban_map_gbd
     integer                                                ::  urban_map_fbd
 
-    character(len=256)                                     ::  forcing_name_T = "T2D"
-    character(len=256)                                     ::  forcing_name_Q = "Q2D"
-    character(len=256)                                     ::  forcing_name_U = "U2D"
-    character(len=256)                                     ::  forcing_name_V = "V2D"
-    character(len=256)                                     ::  forcing_name_P = "PSFC"
-    character(len=256)                                     ::  forcing_name_LW = "LWDOWN"
-    character(len=256)                                     ::  forcing_name_SW = "SWDOWN"
-    character(len=256)                                     ::  forcing_name_PR = "RAINRATE"
-    character(len=256)                                     ::  forcing_name_SN = ""
+    character(len=256)                                     ::  forcing_name_T
+    character(len=256)                                     ::  forcing_name_Q
+    character(len=256)                                     ::  forcing_name_U
+    character(len=256)                                     ::  forcing_name_V
+    character(len=256)                                     ::  forcing_name_P
+    character(len=256)                                     ::  forcing_name_LW
+    character(len=256)                                     ::  forcing_name_SW
+    character(len=256)                                     ::  forcing_name_PR
+    character(len=256)                                     ::  forcing_name_SN
 
-    integer                                                ::  soil_data_option = 1
-    integer                                                ::  pedotransfer_option = 1
-    integer                                                ::  crop_option = 0
-    integer                                                ::  irrigation_option = 0
-    integer                                                ::  irrigation_method = 0
-    integer                                                ::  dvic_infiltration_option = 1
-    integer                                                ::  tile_drainage_option = 0
-    integer                                                ::  noahmp_output = 0
+    integer                                                ::  soil_data_option
+    integer                                                ::  pedotransfer_option
+    integer                                                ::  crop_option
+    integer                                                ::  irrigation_option
+    integer                                                ::  irrigation_method
+    integer                                                ::  dvic_infiltration_option
+    integer                                                ::  tile_drainage_option
+    integer                                                ::  noahmp_output
 
-    integer                                                ::  split_output_count = 1
-    logical                                                ::  skip_first_output = .false.
+    integer                                                ::  split_output_count
+    logical                                                ::  skip_first_output
     integer                                                ::  khour
     integer                                                ::  kday
     real                                                   ::  zlvl 
-    character(len=256)                                     ::  hrldas_setup_file = " "
-    character(len=256)                                     ::  spatial_filename = " "
-    character(len=256)                                     ::  external_veg_filename_template = " "
-    character(len=256)                                     ::  external_lai_filename_template = " "
-    character(len=256)                                     ::  agdata_flnm = " "
-    character(len=256)                                     ::  tdinput_flnm = " "
-    integer                                                ::  xstart = 1
-    integer                                                ::  ystart = 1
-    integer                                                ::  xend = 0
-    integer                                                ::  yend = 0
-    integer                                                ::  MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
+    character(len=256)                                     ::  hrldas_setup_file
+    character(len=256)                                     ::  spatial_filename
+    character(len=256)                                     ::  external_veg_filename_template
+    character(len=256)                                     ::  external_lai_filename_template
+    character(len=256)                                     ::  agdata_flnm
+    character(len=256)                                     ::  tdinput_flnm
+    integer                                                ::  xstart
+    integer                                                ::  ystart
+    integer                                                ::  xend
+    integer                                                ::  yend
+    integer                                                ::  MAX_SOIL_LEVELS
     real(kind=kind_noahmp),  allocatable, dimension(:)     ::  soil_thick_input
     !----------------------------------------------------------------
     ! Noahmp Parameters Table 

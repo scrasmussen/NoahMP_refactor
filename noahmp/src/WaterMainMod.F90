@@ -48,7 +48,7 @@ contains
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,     density air (kg/m3)
               CH              => noahmp%energy%state%CH              ,& ! in,     exchange coefficient (m/s) for heat, surface, grid mean
-              QAIR            => noahmp%energy%state%QAIR            ,& ! in,     specific humidity at reference height (kg/kg)
+              SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,     specific humidity (kg/kg) at reference height
               FGEV            => noahmp%energy%flux%FGEV             ,& ! in,     soil evap heat (w/m2) [+ to atm]
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
@@ -171,7 +171,7 @@ contains
     ! update surface water vapor flux ! urban - jref
     QFX = ETRAN + ECAN + EDIR
     if ( (URBAN_FLAG .eqv. .true.) ) then
-       QSFC = QFX / (RHOAIR * CH) + QAIR
+       QSFC = QFX / (RHOAIR * CH) + SpecHumidityRefHeight
        Q2B  = QSFC
     endif
 

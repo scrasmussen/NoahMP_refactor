@@ -24,14 +24,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
+              PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
               GAMMAG          => noahmp%energy%state%GAMMAG           & ! out,   psychrometric constant (pa/K), ground
              )
 ! ----------------------------------------------------------------------
 
     LATHEAG = HSUB
-    GAMMAG  = CPAIR * SFCPRS / (0.622 * LATHEAG)
+    GAMMAG  = CPAIR * PressureAirRefHeight / (0.622 * LATHEAG)
 
     end associate
 

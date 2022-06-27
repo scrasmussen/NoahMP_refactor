@@ -5,12 +5,12 @@ module ForcingVarInitMod
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
-  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -23,22 +23,21 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    noahmp%forcing%SFCTMP      = huge(1.0)
-    noahmp%forcing%UU          = huge(1.0)
-    noahmp%forcing%VV          = huge(1.0)
-    noahmp%forcing%Q2          = huge(1.0)
-    noahmp%forcing%SFCPRS      = huge(1.0)
-    noahmp%forcing%LWDN        = huge(1.0)
-    noahmp%forcing%PSFC        = huge(1.0)
-    noahmp%forcing%SOLDN       = huge(1.0)
-    noahmp%forcing%PRCPCONV    = huge(1.0)
-    noahmp%forcing%PRCPNONC    = huge(1.0)
-    noahmp%forcing%PRCPSHCV    = huge(1.0)
-    noahmp%forcing%PRCPSNOW    = huge(1.0)
-    noahmp%forcing%PRCPGRPL    = huge(1.0)
-    noahmp%forcing%PRCPHAIL    = huge(1.0)
-    noahmp%forcing%PSFC        = huge(1.0)
-    noahmp%forcing%TBOT        = huge(1.0)
+    noahmp%forcing%SpecHumidityRefHeight   = undefined_real 
+    noahmp%forcing%TemperatureAirRefHeight = undefined_real
+    noahmp%forcing%WindEastwardRefHeight   = undefined_real
+    noahmp%forcing%WindNorthwardRefHeight  = undefined_real
+    noahmp%forcing%RadLWDownRefHeight      = undefined_real
+    noahmp%forcing%RadSWDownRefHeight      = undefined_real
+    noahmp%forcing%PrecipConvRefHeight     = undefined_real
+    noahmp%forcing%PrecipNonConvRefHeight  = undefined_real
+    noahmp%forcing%PrecipShConvRefHeight   = undefined_real
+    noahmp%forcing%PrecipSnowRefHeight     = undefined_real
+    noahmp%forcing%PrecipGraupelRefHeight  = undefined_real
+    noahmp%forcing%PrecipHailRefHeight     = undefined_real
+    noahmp%forcing%PressureAirSurface      = undefined_real
+    noahmp%forcing%PressureAirRefHeight    = undefined_real
+    noahmp%forcing%TemperatureSoilBottom   = undefined_real
 
   end subroutine ForcingVarInitDefault
 
@@ -50,55 +49,40 @@ contains
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
     type(noahmp_type),   intent(inout) :: noahmp
     
-    !local
-    real(kind=kind_noahmp)              :: PRCPOTHR                                      ! other precip, e.g. fog [mm/s]                ! MB/AN : v3.7   
-    real(kind=kind_noahmp)              :: PRCP                                          ! total precipitation entering  [mm/s]         ! MB/AN : v3.7 
+    ! local variables
+    real(kind=kind_noahmp)              :: PrecipOtherRefHeight  ! other precipitation, e.g. fog [mm/s] at reference height
+    real(kind=kind_noahmp)              :: PrecipTotalRefHeight  ! total precipitation [mm/s] at reference height
 
-    associate(                                                  &
-              I           => noahmp%config%domain%ILOC         ,&
-              J           => noahmp%config%domain%JLOC         ,&
-              KTS         => NoahmpIO%kts                       &
+! ---------------------------------------------------------------
+    associate(                                       &
+              I      => noahmp%config%domain%ILOC   ,&
+              J      => noahmp%config%domain%JLOC    &
              )
-             
-    noahmp%forcing%SFCTMP      = NoahmpIO%T_PHY(I,1,J)
-    noahmp%forcing%UU          = NoahmpIO%U_PHY(I,1,J)
-    noahmp%forcing%VV          = NoahmpIO%V_PHY(I,1,J)
-    noahmp%forcing%Q2          = NoahmpIO%QV_CURR(I,1,J)/(1.0 + NoahmpIO%QV_CURR(I,1,J)) ! convert from mixing ratio to specific humidity [kg/kg]
-    noahmp%forcing%SFCPRS      = (NoahmpIO%P8W(I,KTS+1,J)+NoahmpIO%P8W(I,KTS,J))*0.5     ! surface pressure defined at intermediate level [Pa] 
-                                                                                         ! consistent with temperature, mixing ratio
-    noahmp%forcing%LWDN        = NoahmpIO%GLW      (I,J)
-    noahmp%forcing%PSFC        = NoahmpIO%P8W      (I,1,J)
-    noahmp%forcing%SOLDN       = NoahmpIO%SWDOWN   (I,J)
-    noahmp%forcing%TBOT        = NoahmpIO%TMN      (I,J)
-    
-    ! precipitation preprocess: ! MB/AN : v3.7 
-    PRCP                       = NoahmpIO%RAINBL   (I,J) / NoahmpIO%DTBL
+! ---------------------------------------------------------------
 
-    !if (present(NoahmpIO%MP_RAINC) .and. present(NoahmpIO%MP_RAINNC) .and. &
-    !    present(NoahmpIO%MP_SHCV)  .and. present(NoahmpIO%MP_SNOW)   .and. &
-    !    present(NoahmpIO%MP_GRAUP) .and. present(NoahmpIO%MP_HAIL))  then  
-        
-       noahmp%forcing%PRCPCONV    = NoahmpIO%MP_RAINC (I,J) / NoahmpIO%DTBL
-       noahmp%forcing%PRCPNONC    = NoahmpIO%MP_RAINNC(I,J) / NoahmpIO%DTBL
-       noahmp%forcing%PRCPSHCV    = NoahmpIO%MP_SHCV  (I,J) / NoahmpIO%DTBL
-       noahmp%forcing%PRCPSNOW    = NoahmpIO%MP_SNOW  (I,J) / NoahmpIO%DTBL
-       noahmp%forcing%PRCPGRPL    = NoahmpIO%MP_GRAUP (I,J) / NoahmpIO%DTBL
-       noahmp%forcing%PRCPHAIL    = NoahmpIO%MP_HAIL  (I,J) / NoahmpIO%DTBL
+    noahmp%forcing%TemperatureAirRefHeight = NoahmpIO%T_PHY(I,1,J)
+    noahmp%forcing%WindEastwardRefHeight   = NoahmpIO%U_PHY(I,1,J)
+    noahmp%forcing%WindNorthwardRefHeight  = NoahmpIO%V_PHY(I,1,J)
+    noahmp%forcing%SpecHumidityRefHeight   = NoahmpIO%QV_CURR(I,1,J) / (1.0+NoahmpIO%QV_CURR(I,1,J))  ! convert from mixing ratio to specific humidity
+    noahmp%forcing%PressureAirRefHeight    = (NoahmpIO%P8W(I,1,J) + NoahmpIO%P8W(I,2,J)) * 0.5        ! air pressure [Pa] at middle point of lowest atmos model layer
+    noahmp%forcing%PressureAirSurface      = NoahmpIO%P8W(I,1,J)
+    noahmp%forcing%RadLWDownRefHeight      = NoahmpIO%GLW(I,J)
+    noahmp%forcing%RadSWDownRefHeight      = NoahmpIO%SWDOWN(I,J)
+    noahmp%forcing%TemperatureSoilBottom   = NoahmpIO%TMN(I,J)
+    noahmp%forcing%PrecipConvRefHeight     = NoahmpIO%MP_RAINC(I,J)  / NoahmpIO%DTBL
+    noahmp%forcing%PrecipNonConvRefHeight  = NoahmpIO%MP_RAINNC(I,J) / NoahmpIO%DTBL
+    noahmp%forcing%PrecipShConvRefHeight   = NoahmpIO%MP_SHCV(I,J)   / NoahmpIO%DTBL
+    noahmp%forcing%PrecipSnowRefHeight     = NoahmpIO%MP_SNOW(I,J)   / NoahmpIO%DTBL
+    noahmp%forcing%PrecipGraupelRefHeight  = NoahmpIO%MP_GRAUP(I,J)  / NoahmpIO%DTBL
+    noahmp%forcing%PrecipHailRefHeight     = NoahmpIO%MP_HAIL(I,J)   / NoahmpIO%DTBL
+    ! treat other precipitation (e.g. fog) contained in total precipitation
+    PrecipTotalRefHeight                   = NoahmpIO%RAINBL(I,J) / NoahmpIO%DTBL  ! convert precipitation unit from mm/timestep to mm/s
+    PrecipOtherRefHeight                   = PrecipTotalRefHeight - noahmp%forcing%PrecipConvRefHeight - &
+                                             noahmp%forcing%PrecipNonConvRefHeight - noahmp%forcing%PrecipShConvRefHeight
+    PrecipOtherRefHeight                   = max(0.0, PrecipOtherRefHeight)
+    noahmp%forcing%PrecipNonConvRefHeight  = noahmp%forcing%PrecipNonConvRefHeight + PrecipOtherRefHeight
+    noahmp%forcing%PrecipSnowRefHeight     = noahmp%forcing%PrecipSnowRefHeight + PrecipOtherRefHeight * NoahmpIO%SR(I,J)
 
-       PRCPOTHR  = PRCP - noahmp%forcing%PRCPCONV - &
-                   noahmp%forcing%PRCPNONC - noahmp%forcing%PRCPSHCV                     ! take care of other (fog) contained in rainbl
-                   
-       PRCPOTHR  = max(0.0,PRCPOTHR)
-       noahmp%forcing%PRCPNONC  = noahmp%forcing%PRCPNONC + PRCPOTHR
-       noahmp%forcing%PRCPSNOW  = noahmp%forcing%PRCPSNOW + NoahmpIO%SR(I,J) * PRCPOTHR 
-    !elseif
-    !   noahmp%forcing%PRCPCONV    = 0.0
-    !   noahmp%forcing%PRCPNONC    = PRCP
-    !   noahmp%forcing%PRCPSHCV    = 0.0
-    !   noahmp%forcing%PRCPSNOW    = NoahmpIO%SR(I,J) * PRCP
-    !   noahmp%forcing%PRCPGRPL    = 0.0
-    !   noahmp%forcing%PRCPHAIL    = 0.0    
-    !endif
     end associate
  
   end subroutine ForcingVarInitTransfer

@@ -8,6 +8,7 @@ module ConfigVarInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
 
@@ -23,29 +24,29 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
     ! config namelist variable
-    noahmp%config%nmlist%OPT_DVEG     = huge(1)
-    noahmp%config%nmlist%OPT_SNF      = huge(1)
-    noahmp%config%nmlist%OPT_BTR      = huge(1)
-    noahmp%config%nmlist%OPT_RSF      = huge(1)
-    noahmp%config%nmlist%OPT_SFC      = huge(1)
-    noahmp%config%nmlist%OPT_CRS      = huge(1)
-    noahmp%config%nmlist%OPT_ALB      = huge(1)
-    noahmp%config%nmlist%OPT_RAD      = huge(1)
-    noahmp%config%nmlist%OPT_STC      = huge(1)
-    noahmp%config%nmlist%OPT_TKSNO    = huge(1)
-    noahmp%config%nmlist%OPT_TBOT     = huge(1)
-    noahmp%config%nmlist%OPT_FRZ      = huge(1)
-    noahmp%config%nmlist%OPT_RUNSRF   = huge(1)
-    noahmp%config%nmlist%OPT_RUNSUB   = huge(1)
-    noahmp%config%nmlist%OPT_INF      = huge(1)
-    noahmp%config%nmlist%OPT_INFDV    = huge(1)
-    noahmp%config%nmlist%OPT_TDRN     = huge(1)
-    noahmp%config%nmlist%OPT_IRR      = huge(1)
-    noahmp%config%nmlist%OPT_IRRM     = huge(1)
-    noahmp%config%nmlist%OPT_CROP     = huge(1)
-    noahmp%config%nmlist%OPT_SOIL     = huge(1)
-    noahmp%config%nmlist%OPT_PEDO     = huge(1)
-    noahmp%config%nmlist%OPT_GLA      = huge(1)
+    noahmp%config%nmlist%OPT_DVEG     = undefined_int
+    noahmp%config%nmlist%OPT_SNF      = undefined_int
+    noahmp%config%nmlist%OPT_BTR      = undefined_int
+    noahmp%config%nmlist%OPT_RSF      = undefined_int
+    noahmp%config%nmlist%OPT_SFC      = undefined_int
+    noahmp%config%nmlist%OPT_CRS      = undefined_int
+    noahmp%config%nmlist%OPT_ALB      = undefined_int
+    noahmp%config%nmlist%OPT_RAD      = undefined_int
+    noahmp%config%nmlist%OPT_STC      = undefined_int
+    noahmp%config%nmlist%OPT_TKSNO    = undefined_int
+    noahmp%config%nmlist%OPT_TBOT     = undefined_int
+    noahmp%config%nmlist%OPT_FRZ      = undefined_int
+    noahmp%config%nmlist%OPT_RUNSRF   = undefined_int
+    noahmp%config%nmlist%OPT_RUNSUB   = undefined_int
+    noahmp%config%nmlist%OPT_INF      = undefined_int
+    noahmp%config%nmlist%OPT_INFDV    = undefined_int
+    noahmp%config%nmlist%OPT_TDRN     = undefined_int
+    noahmp%config%nmlist%OPT_IRR      = undefined_int
+    noahmp%config%nmlist%OPT_IRRM     = undefined_int
+    noahmp%config%nmlist%OPT_CROP     = undefined_int
+    noahmp%config%nmlist%OPT_SOIL     = undefined_int
+    noahmp%config%nmlist%OPT_PEDO     = undefined_int
+    noahmp%config%nmlist%OPT_GLA      = undefined_int
 
     ! config domain variable
     noahmp%config%domain%LLANDUSE     = "MODIFIED_IGBP_MODIS_NOAH"
@@ -53,32 +54,32 @@ contains
     noahmp%config%domain%CROPLU       = .false.
     noahmp%config%domain%CROP_ACTIVE  = .false.
     noahmp%config%domain%DVEG_ACTIVE  = .false.
-    noahmp%config%domain%NSNOW        = huge(1)
-    noahmp%config%domain%NSOIL        = huge(1)
-    noahmp%config%domain%ILOC         = huge(1)
-    noahmp%config%domain%JLOC         = huge(1)
-    noahmp%config%domain%VEGTYP       = huge(1)
-    noahmp%config%domain%CROPTYP      = huge(1)
-    noahmp%config%domain%ISNOW        = huge(1)
-    noahmp%config%domain%IST          = huge(1)
-    noahmp%config%domain%NBAND        = huge(1)
-    noahmp%config%domain%SOILCOLOR    = huge(1)
-    noahmp%config%domain%ICE          = huge(1)
-    noahmp%config%domain%NSTAGE       = huge(1)
-    noahmp%config%domain%ISWATER      = huge(1)
-    noahmp%config%domain%ISBARREN     = huge(1)
-    noahmp%config%domain%ISICE        = huge(1)
-    noahmp%config%domain%ISCROP       = huge(1)
-    noahmp%config%domain%EBLFOREST    = huge(1)
-    noahmp%config%domain%YEARLEN      = huge(1)
-    noahmp%config%domain%SLOPETYP     = huge(1)
-    noahmp%config%domain%DT           = huge(1.0)
-    noahmp%config%domain%DX           = huge(1.0)
-    noahmp%config%domain%JULIAN       = huge(1.0)
-    noahmp%config%domain%COSZ         = huge(1.0)
-    noahmp%config%domain%ZREF         = huge(1.0)
-    noahmp%config%domain%DZ8W         = huge(1.0)
-    noahmp%config%domain%LAT          = huge(1.0)
+    noahmp%config%domain%NSNOW        = undefined_int
+    noahmp%config%domain%NSOIL        = undefined_int
+    noahmp%config%domain%ILOC         = undefined_int
+    noahmp%config%domain%JLOC         = undefined_int
+    noahmp%config%domain%VEGTYP       = undefined_int
+    noahmp%config%domain%CROPTYP      = undefined_int
+    noahmp%config%domain%ISNOW        = undefined_int
+    noahmp%config%domain%IST          = undefined_int
+    noahmp%config%domain%NBAND        = undefined_int
+    noahmp%config%domain%SOILCOLOR    = undefined_int
+    noahmp%config%domain%ICE          = undefined_int
+    noahmp%config%domain%NSTAGE       = undefined_int
+    noahmp%config%domain%ISWATER      = undefined_int
+    noahmp%config%domain%ISBARREN     = undefined_int
+    noahmp%config%domain%ISICE        = undefined_int
+    noahmp%config%domain%ISCROP       = undefined_int
+    noahmp%config%domain%EBLFOREST    = undefined_int
+    noahmp%config%domain%YEARLEN      = undefined_int
+    noahmp%config%domain%SLOPETYP     = undefined_int
+    noahmp%config%domain%DT           = undefined_real
+    noahmp%config%domain%DX           = undefined_real
+    noahmp%config%domain%JULIAN       = undefined_real
+    noahmp%config%domain%COSZ         = undefined_real
+    noahmp%config%domain%ZREF         = undefined_real
+    noahmp%config%domain%DZ8W         = undefined_real
+    noahmp%config%domain%LAT          = undefined_real
 
   end subroutine ConfigVarInitDefault
 
@@ -166,11 +167,11 @@ contains
     if( .not. allocated( noahmp%config%domain%DZSNSO  ) ) allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
     if( .not. allocated( noahmp%config%domain%ZSNSO   ) ) allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
     
-    noahmp%config%domain%SOILTYP(       1:NSOIL) = huge(1)
-    noahmp%config%domain%ZSOIL  (       1:NSOIL) = huge(1.0)
-    noahmp%config%domain%ZLAYER (       1:NSOIL) = huge(1.0)
-    noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) = huge(1.0)
-    noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = huge(1.0)
+    noahmp%config%domain%SOILTYP(       1:NSOIL) = undefined_int
+    noahmp%config%domain%ZSOIL  (       1:NSOIL) = undefined_real
+    noahmp%config%domain%ZLAYER (       1:NSOIL) = undefined_real
+    noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) = undefined_real
+    noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = undefined_real
 
     if(NoahmpIO%iopt_soil == 1) then
        noahmp%config%domain%SOILTYP(1:NSOIL) = NoahmpIO%ISLTYP(I,J)      ! soil type same in all layers

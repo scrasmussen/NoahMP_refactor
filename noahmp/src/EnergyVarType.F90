@@ -34,7 +34,6 @@ module EnergyVarType
     real(kind=kind_noahmp) :: FSR             ! total reflected solar radiation (w/m2)
     real(kind=kind_noahmp) :: FSRV            ! reflected solar radiation by vegetation (w/m2)
     real(kind=kind_noahmp) :: FSRG            ! reflected solar radiation by ground (w/m2)
-    real(kind=kind_noahmp) :: SWDOWN          ! downward solar filtered by sun angle [w/m2]
     real(kind=kind_noahmp) :: IRC             ! canopy net longwave radiation (w/m2) [+= to atm]
     real(kind=kind_noahmp) :: SHC             ! canopy sensible heat flux (w/m2)     [+= to atm]
     real(kind=kind_noahmp) :: EVC             ! canopy evaporation heat flux (w/m2)  [+= to atm]
@@ -164,7 +163,6 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RAHB            ! aerodynamic resistance for sensible heat (s/m), bare ground
     real(kind=kind_noahmp) :: RAWB            ! aerodynamic resistance for water vapor (s/m), bare ground
     real(kind=kind_noahmp) :: RB              ! bulk leaf boundary layer resistance (s/m)
-    real(kind=kind_noahmp) :: QAIR            ! specific humidity at reference height ZLVL (kg/kg)
     real(kind=kind_noahmp) :: THAIR           ! potential temp at reference height (K)
     real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height ZLVL
     real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)

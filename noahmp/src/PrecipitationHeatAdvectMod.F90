@@ -2,7 +2,7 @@ module PrecipitationHeatAdvectMod
 
 !!! Estimate heat flux advected from precipitation to vegetation and ground
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -30,7 +30,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,   air temperature [K] at reference height
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
@@ -55,14 +55,14 @@ contains
     PAHB    = 0.0
 
     ! Heat advection for liquid rainfall
-    PAH_AC = FVEG * RAIN * (CWAT/1000.0) * (SFCTMP - TV)
+    PAH_AC = FVEG * RAIN * (CWAT/1000.0) * (TemperatureAirRefHeight - TV)
     PAH_CG = QDRIPR * (CWAT/1000.0) * (TV - TG)
-    PAH_AG = QTHROR * (CWAT/1000.0) * (SFCTMP - TG)
+    PAH_AG = QTHROR * (CWAT/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AC = PAH_AC + FVEG * SNOW * (CICE/1000.0) * (SFCTMP - TV)
+    PAH_AC = PAH_AC + FVEG * SNOW * (CICE/1000.0) * (TemperatureAirRefHeight - TV)
     PAH_CG = PAH_CG + QDRIPS * (CICE/1000.0) * (TV - TG)
-    PAH_AG = PAH_AG + QTHROS * (CICE/1000.0) * (SFCTMP - TG)
+    PAH_AG = PAH_AG + QTHROS * (CICE/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHV = PAH_AC - PAH_CG

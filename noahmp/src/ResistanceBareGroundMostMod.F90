@@ -1,9 +1,9 @@
 module ResistanceBareGroundMostMod
 
-!!! Compute bare ground resistance and drag coefficient CM for momentum and CH for heat
+!!! Compute bare ground resistance and drag coefficient for momentum and heat
 !!! based on Monin-Obukhov (M-O) Similarity Theory (MOST)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -45,10 +45,10 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,    surface air temperature [k] from Atmos forcing
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               ZLVL            => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
-              QAIR            => noahmp%energy%state%QAIR            ,& ! in,    specific humidity at reference height (kg/kg)
+              SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight ,& ! in,    specific humidity (kg/kg) at reference height
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
               ZPD             => noahmp%energy%state%ZPDG            ,& ! in,    ground zero plane displacement (m)
               Z0H             => noahmp%energy%state%Z0HB            ,& ! in,    roughness length, sensible heat (m), bare ground
@@ -92,7 +92,7 @@ contains
        MOL  = 0.0
        MOZ2 = 0.0
     else
-       TVIR = (1.0 + 0.61 * QAIR) * SFCTMP
+       TVIR = (1.0 + 0.61 * SpecHumidityRefHeight) * TemperatureAirRefHeight
        TMP1 = VKC * (GRAV / TVIR) * H / (RHOAIR * CPAIR)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOL  = -1.0 * FV**3 / TMP1

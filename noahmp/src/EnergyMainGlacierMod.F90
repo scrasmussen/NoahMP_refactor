@@ -3,7 +3,7 @@ module EnergyMainGlacierMod
 !!! Main energy module for glacier points including all energy relevant processes
 !!! snow thermal property -> radiation -> ground heat flux -> snow temperature solver -> snow/ice phase change
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowCoverGlacierMod,                   only : SnowCoverGlacier
@@ -38,12 +38,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SFCPRS          => noahmp%forcing%SFCPRS               ,& ! in,    surface air pressure at reference height (pa)
-              LWDN            => noahmp%forcing%LWDN                 ,& ! in,    downward longwave radiation [w/m2]
-              UU              => noahmp%forcing%UU                   ,& ! in,    east-west direction wind (m/s)
-              VV              => noahmp%forcing%VV                   ,& ! in,    north-south direction wind (m/s)
+              RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
+              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
-              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
               TG              => noahmp%energy%state%TG              ,& ! inout, ground temperature (K)
@@ -86,7 +85,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! wind speed at reference height: ur >= 1
-    UR = max( sqrt(UU**2.0 + VV**2.0), 1.0 )
+    UR = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
 
     ! glaicer snow cover fraction
     call SnowCoverGlacier(noahmp)
@@ -137,20 +136,20 @@ contains
     Z0WRF = Z0MG
 
     ! emitted longwave radiation and physical check
-    FIRE = LWDN + FIRA
+    FIRE = RadLWDownRefHeight + FIRA
     if ( FIRE <= 0.0 ) then
        write(*,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
-       write(*,*) 'LWDN=',LWDN,'FIRA=',FIRA,'SNOWH=',SNOWH
+       write(*,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SNOWH=',SNOWH
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
     ! radiative temperature: subtract from the emitted IR the
-    ! reflected portion of the incoming LWDN, so just
+    ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the ground system.
     ! Old TRAD calculation not taking into account Emissivity:
     ! TRAD = (FIRE/SB)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*LWDN) / (EMISSI * SB) ) ** 0.25
+    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * SB) ) ** 0.25
 
     ! compute snow and glacier ice temperature
     call GlacierTemperatureMain(noahmp)
@@ -168,8 +167,8 @@ contains
     call GlacierPhaseChange(noahmp)
 
     ! update total surface albedo
-    if ( SWDOWN > 0.0 ) then
-       ALBEDO = FSR / SWDOWN
+    if ( RadSWDownRefHeight > 0.0 ) then
+       ALBEDO = FSR / RadSWDownRefHeight
     else
        ALBEDO = -999.9
     endif

@@ -130,7 +130,7 @@ contains
     associate(                                                        &
               ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
               JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
-              SWDOWN          => noahmp%energy%flux%SWDOWN           ,& ! in,    downward solar filtered by sun angle [w/m2]
+              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
               FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
               FIRA            => noahmp%energy%flux%FIRA             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
@@ -145,12 +145,12 @@ contains
 ! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
-    ERRSW = SWDOWN - (FSA + FSR)
+    ERRSW = RadSWDownRefHeight - (FSA + FSR)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
        write(*,*) 'I, J =',  ILOC, JLOC
        write(*,*) 'ERRSW =',  ERRSW
-       write(*,*) "SWDOWN =", SWDOWN
+       write(*,*) "RadSWDownRefHeight =", RadSWDownRefHeight
        write(*,*) "FSR    =", FSR
        write(*,*) "SAG    =", SAG
        write(*,*) "FSA    =", FSA

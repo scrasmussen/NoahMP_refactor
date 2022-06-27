@@ -3,7 +3,7 @@ module SnowfallGlacierMod
 !!! Snowfall process over glacier
 !!! Update snow water equivalent and snow depth
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -31,7 +31,7 @@ contains
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
               SNOWHIN         => noahmp%water%flux%SNOWHIN           ,& ! in,     snow depth increasing rate (m/s)
-              SFCTMP          => noahmp%forcing%SFCTMP               ,& ! in,     surface air temperature [k] from Atmos forcing
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,     air temperature [K] at reference height
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
@@ -57,7 +57,7 @@ contains
        NEWNODE   =  1
        DZSNSO(0) = SNOWH
        SNOWH     = 0.0
-       STC(0)    = min(273.16, SFCTMP)   ! temporary setup
+       STC(0)    = min(273.16, TemperatureAirRefHeight)   ! temporary setup
        SNICE(0)  = SNEQV
        SNLIQ(0)  = 0.0
     endif

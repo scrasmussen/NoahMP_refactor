@@ -8,10 +8,10 @@ module WaterVarInitMod
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
   use PedoTransferSR2006
-  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -30,56 +30,56 @@ contains
              )
 
     ! water state variable
-    noahmp%water%state%IRCNTSI        = huge(1  )
-    noahmp%water%state%IRCNTMI        = huge(1  )
-    noahmp%water%state%IRCNTFI        = huge(1  )
-    noahmp%water%state%BDFALL         = huge(1.0)
-    noahmp%water%state%CANLIQ         = huge(1.0)
-    noahmp%water%state%CANICE         = huge(1.0)
-    noahmp%water%state%CMC            = huge(1.0)
-    noahmp%water%state%FWET           = huge(1.0)
-    noahmp%water%state%MAXSNO         = huge(1.0)
-    noahmp%water%state%MAXLIQ         = huge(1.0)
-    noahmp%water%state%SNOWH          = huge(1.0)
-    noahmp%water%state%SNEQV          = huge(1.0)
-    noahmp%water%state%SNEQVO         = huge(1.0)
-    noahmp%water%state%PONDING        = huge(1.0)
-    noahmp%water%state%PONDING1       = huge(1.0)
-    noahmp%water%state%PONDING2       = huge(1.0)
-    noahmp%water%state%FIFAC          = huge(1.0)
-    noahmp%water%state%IRAMTFI        = huge(1.0)
-    noahmp%water%state%MIFAC          = huge(1.0)
-    noahmp%water%state%IRAMTMI        = huge(1.0)
-    noahmp%water%state%SIFAC          = huge(1.0)
-    noahmp%water%state%IRAMTSI        = huge(1.0)
-    noahmp%water%state%ZWT            = huge(1.0)
-    noahmp%water%state%SICEMAX        = huge(1.0)
-    noahmp%water%state%SH2OMIN        = huge(1.0)
-    noahmp%water%state%FSAT           = huge(1.0)
-    noahmp%water%state%FCRMAX         = huge(1.0)
-    noahmp%water%state%SMCWTD         = huge(1.0)
-    noahmp%water%state%DEEPRECH       = huge(1.0)
-    noahmp%water%state%RECH           = huge(1.0)
-    noahmp%water%state%WPLUS          = huge(1.0)
-    noahmp%water%state%WATBLED        = huge(1.0)
-    noahmp%water%state%TDFRACMP       = huge(1.0)
-    noahmp%water%state%WA             = huge(1.0)
-    noahmp%water%state%WT             = huge(1.0)
-    noahmp%water%state%WSLAKE         = huge(1.0)
-    noahmp%water%state%sfcheadrt      = huge(1.0)
-    noahmp%water%state%IRRFRA         = huge(1.0)
-    noahmp%water%state%SIFRA          = huge(1.0)
-    noahmp%water%state%MIFRA          = huge(1.0)
-    noahmp%water%state%FIFRA          = huge(1.0)
-    noahmp%water%state%FP             = huge(1.0)
-    noahmp%water%state%FSNO           = huge(1.0)
-    noahmp%water%state%BTRAN          = huge(1.0)
-    noahmp%water%state%FPICE          = huge(1.0)
-    noahmp%water%state%WROOT          = huge(1.0)
-    noahmp%water%state%WSTRES         = huge(1.0)
-    noahmp%water%state%BEG_WB         = huge(1.0)
-    noahmp%water%state%ERRWAT         = huge(1.0)
-    noahmp%water%state%END_WB         = huge(1.0)
+    noahmp%water%state%IRCNTSI        = undefined_int
+    noahmp%water%state%IRCNTMI        = undefined_int
+    noahmp%water%state%IRCNTFI        = undefined_int
+    noahmp%water%state%BDFALL         = undefined_real
+    noahmp%water%state%CANLIQ         = undefined_real
+    noahmp%water%state%CANICE         = undefined_real
+    noahmp%water%state%CMC            = undefined_real
+    noahmp%water%state%FWET           = undefined_real
+    noahmp%water%state%MAXSNO         = undefined_real
+    noahmp%water%state%MAXLIQ         = undefined_real
+    noahmp%water%state%SNOWH          = undefined_real
+    noahmp%water%state%SNEQV          = undefined_real
+    noahmp%water%state%SNEQVO         = undefined_real
+    noahmp%water%state%PONDING        = undefined_real
+    noahmp%water%state%PONDING1       = undefined_real
+    noahmp%water%state%PONDING2       = undefined_real
+    noahmp%water%state%FIFAC          = undefined_real
+    noahmp%water%state%IRAMTFI        = undefined_real
+    noahmp%water%state%MIFAC          = undefined_real
+    noahmp%water%state%IRAMTMI        = undefined_real
+    noahmp%water%state%SIFAC          = undefined_real
+    noahmp%water%state%IRAMTSI        = undefined_real
+    noahmp%water%state%ZWT            = undefined_real
+    noahmp%water%state%SICEMAX        = undefined_real
+    noahmp%water%state%SH2OMIN        = undefined_real
+    noahmp%water%state%FSAT           = undefined_real
+    noahmp%water%state%FCRMAX         = undefined_real
+    noahmp%water%state%SMCWTD         = undefined_real
+    noahmp%water%state%DEEPRECH       = undefined_real
+    noahmp%water%state%RECH           = undefined_real
+    noahmp%water%state%WPLUS          = undefined_real
+    noahmp%water%state%WATBLED        = undefined_real
+    noahmp%water%state%TDFRACMP       = undefined_real
+    noahmp%water%state%WA             = undefined_real
+    noahmp%water%state%WT             = undefined_real
+    noahmp%water%state%WSLAKE         = undefined_real
+    noahmp%water%state%sfcheadrt      = undefined_real
+    noahmp%water%state%IRRFRA         = undefined_real
+    noahmp%water%state%SIFRA          = undefined_real
+    noahmp%water%state%MIFRA          = undefined_real
+    noahmp%water%state%FIFRA          = undefined_real
+    noahmp%water%state%FP             = undefined_real
+    noahmp%water%state%FSNO           = undefined_real
+    noahmp%water%state%BTRAN          = undefined_real
+    noahmp%water%state%FPICE          = undefined_real
+    noahmp%water%state%WROOT          = undefined_real
+    noahmp%water%state%WSTRES         = undefined_real
+    noahmp%water%state%BEG_WB         = undefined_real
+    noahmp%water%state%ERRWAT         = undefined_real
+    noahmp%water%state%END_WB         = undefined_real
 
     if( .not. allocated( noahmp%water%state%IMELT        ) ) allocate( noahmp%water%state%IMELT        (-NSNOW+1:NSOIL) )
     if( .not. allocated( noahmp%water%state%SUPERCOOL    ) ) allocate( noahmp%water%state%SUPERCOOL    (-NSNOW+1:NSOIL) )
@@ -103,75 +103,75 @@ contains
     if( .not. allocated( noahmp%water%state%BTRANI       ) ) allocate( noahmp%water%state%BTRANI       (       1:NSOIL) )
     if( .not. allocated( noahmp%water%state%PSI          ) ) allocate( noahmp%water%state%PSI          (       1:NSOIL) )
 
-    noahmp%water%state%IMELT(:)       = huge(1)
-    noahmp%water%state%SUPERCOOL(:)   = huge(1.0)
-    noahmp%water%state%SNICE(:)       = huge(1.0)
-    noahmp%water%state%SNLIQ(:)       = huge(1.0)
-    noahmp%water%state%SNICEV(:)      = huge(1.0)
-    noahmp%water%state%SNLIQV(:)      = huge(1.0)
-    noahmp%water%state%FICEOLD_SNOW(:)= huge(1.0)
-    noahmp%water%state%FICE_SNOW(:)   = huge(1.0)
-    noahmp%water%state%FICE_SOIL(:)   = huge(1.0)
-    noahmp%water%state%EPORE_SNOW(:)  = huge(1.0)
-    noahmp%water%state%EPORE_SNOW2(:) = huge(1.0)
-    noahmp%water%state%SH2O(:)        = huge(1.0)
-    noahmp%water%state%SICE(:)        = huge(1.0)
-    noahmp%water%state%SMC(:)         = huge(1.0)
-    noahmp%water%state%FCR(:)         = huge(1.0)
-    noahmp%water%state%WCND(:)        = huge(1.0)
-    noahmp%water%state%WDF(:)         = huge(1.0)
-    noahmp%water%state%EPORE_SOIL(:)  = huge(1.0)
-    noahmp%water%state%SMCEQ(:)       = huge(1.0)
-    noahmp%water%state%BTRANI(:)      = huge(1.0)
-    noahmp%water%state%PSI(:)         = huge(1.0)
+    noahmp%water%state%IMELT(:)       = undefined_int
+    noahmp%water%state%SUPERCOOL(:)   = undefined_real
+    noahmp%water%state%SNICE(:)       = undefined_real
+    noahmp%water%state%SNLIQ(:)       = undefined_real
+    noahmp%water%state%SNICEV(:)      = undefined_real
+    noahmp%water%state%SNLIQV(:)      = undefined_real
+    noahmp%water%state%FICEOLD_SNOW(:)= undefined_real
+    noahmp%water%state%FICE_SNOW(:)   = undefined_real
+    noahmp%water%state%FICE_SOIL(:)   = undefined_real
+    noahmp%water%state%EPORE_SNOW(:)  = undefined_real
+    noahmp%water%state%EPORE_SNOW2(:) = undefined_real
+    noahmp%water%state%SH2O(:)        = undefined_real
+    noahmp%water%state%SICE(:)        = undefined_real
+    noahmp%water%state%SMC(:)         = undefined_real
+    noahmp%water%state%FCR(:)         = undefined_real
+    noahmp%water%state%WCND(:)        = undefined_real
+    noahmp%water%state%WDF(:)         = undefined_real
+    noahmp%water%state%EPORE_SOIL(:)  = undefined_real
+    noahmp%water%state%SMCEQ(:)       = undefined_real
+    noahmp%water%state%BTRANI(:)      = undefined_real
+    noahmp%water%state%PSI(:)         = undefined_real
 
     ! water flux variable
-    noahmp%water%flux%PRCP            = huge(1.0)
-    noahmp%water%flux%RAIN            = huge(1.0)
-    noahmp%water%flux%SNOW            = huge(1.0)
-    noahmp%water%flux%QPRECC          = huge(1.0)
-    noahmp%water%flux%QPRECL          = huge(1.0)
-    noahmp%water%flux%ECAN            = huge(1.0)
-    noahmp%water%flux%ETRAN           = huge(1.0)
-    noahmp%water%flux%QEVAC           = huge(1.0)
-    noahmp%water%flux%QDEWC           = huge(1.0)
-    noahmp%water%flux%QFROC           = huge(1.0)
-    noahmp%water%flux%QSUBC           = huge(1.0)
-    noahmp%water%flux%QMELTC          = huge(1.0)
-    noahmp%water%flux%QFRZC           = huge(1.0)
-    noahmp%water%flux%QSNOW           = huge(1.0)
-    noahmp%water%flux%SNOWHIN         = huge(1.0)
-    noahmp%water%flux%QSNFRO          = huge(1.0)
-    noahmp%water%flux%QSNSUB          = huge(1.0)
-    noahmp%water%flux%QRAIN           = huge(1.0)
-    noahmp%water%flux%QSNBOT          = huge(1.0)
-    noahmp%water%flux%SNOFLOW         = huge(1.0)
+    noahmp%water%flux%PRCP            = undefined_real
+    noahmp%water%flux%RAIN            = undefined_real
+    noahmp%water%flux%SNOW            = undefined_real
+    noahmp%water%flux%QPRECC          = undefined_real
+    noahmp%water%flux%QPRECL          = undefined_real
+    noahmp%water%flux%ECAN            = undefined_real
+    noahmp%water%flux%ETRAN           = undefined_real
+    noahmp%water%flux%QEVAC           = undefined_real
+    noahmp%water%flux%QDEWC           = undefined_real
+    noahmp%water%flux%QFROC           = undefined_real
+    noahmp%water%flux%QSUBC           = undefined_real
+    noahmp%water%flux%QMELTC          = undefined_real
+    noahmp%water%flux%QFRZC           = undefined_real
+    noahmp%water%flux%QSNOW           = undefined_real
+    noahmp%water%flux%SNOWHIN         = undefined_real
+    noahmp%water%flux%QSNFRO          = undefined_real
+    noahmp%water%flux%QSNSUB          = undefined_real
+    noahmp%water%flux%QRAIN           = undefined_real
+    noahmp%water%flux%QSNBOT          = undefined_real
+    noahmp%water%flux%SNOFLOW         = undefined_real
     noahmp%water%flux%IRFIRATE        = 0.0
     noahmp%water%flux%IRMIRATE        = 0.0
     noahmp%water%flux%IRSIRATE        = 0.0
     noahmp%water%flux%IREVPLOS        = 0.0
-    noahmp%water%flux%QINSUR          = huge(1.0)
-    noahmp%water%flux%RUNSRF          = huge(1.0)
-    noahmp%water%flux%RUNSUB          = huge(1.0)
-    noahmp%water%flux%PDDUM           = huge(1.0)
-    noahmp%water%flux%QSEVA           = huge(1.0)
-    noahmp%water%flux%QDRAIN          = huge(1.0)
-    noahmp%water%flux%QTLDRN          = huge(1.0)
-    noahmp%water%flux%QIN             = huge(1.0)
-    noahmp%water%flux%QDIS            = huge(1.0)
-    noahmp%water%flux%QVAP            = huge(1.0)
-    noahmp%water%flux%QDEW            = huge(1.0)
-    noahmp%water%flux%QSDEW           = huge(1.0)
+    noahmp%water%flux%QINSUR          = undefined_real
+    noahmp%water%flux%RUNSRF          = undefined_real
+    noahmp%water%flux%RUNSUB          = undefined_real
+    noahmp%water%flux%PDDUM           = undefined_real
+    noahmp%water%flux%QSEVA           = undefined_real
+    noahmp%water%flux%QDRAIN          = undefined_real
+    noahmp%water%flux%QTLDRN          = undefined_real
+    noahmp%water%flux%QIN             = undefined_real
+    noahmp%water%flux%QDIS            = undefined_real
+    noahmp%water%flux%QVAP            = undefined_real
+    noahmp%water%flux%QDEW            = undefined_real
+    noahmp%water%flux%QSDEW           = undefined_real
     noahmp%water%flux%EIRR            = 0.0
-    noahmp%water%flux%QINTR           = huge(1.0)
-    noahmp%water%flux%QDRIPR          = huge(1.0)
-    noahmp%water%flux%QTHROR          = huge(1.0)
-    noahmp%water%flux%QINTS           = huge(1.0)
-    noahmp%water%flux%QDRIPS          = huge(1.0)
-    noahmp%water%flux%QTHROS          = huge(1.0)
-    noahmp%water%flux%EDIR            = huge(1.0)
-    noahmp%water%flux%QMELT           = huge(1.0)
-    noahmp%water%flux%QFX             = huge(1.0)
+    noahmp%water%flux%QINTR           = undefined_real
+    noahmp%water%flux%QDRIPR          = undefined_real
+    noahmp%water%flux%QTHROR          = undefined_real
+    noahmp%water%flux%QINTS           = undefined_real
+    noahmp%water%flux%QDRIPS          = undefined_real
+    noahmp%water%flux%QTHROS          = undefined_real
+    noahmp%water%flux%EDIR            = undefined_real
+    noahmp%water%flux%QMELT           = undefined_real
+    noahmp%water%flux%QFX             = undefined_real
 
     if( .not. allocated( noahmp%water%flux%DDZ1   ) ) allocate( noahmp%water%flux%DDZ1   (-NSNOW+1:0) )
     if( .not. allocated( noahmp%water%flux%DDZ2   ) ) allocate( noahmp%water%flux%DDZ2   (-NSNOW+1:0) )
@@ -179,70 +179,70 @@ contains
     if( .not. allocated( noahmp%water%flux%PDZDTC ) ) allocate( noahmp%water%flux%PDZDTC (-NSNOW+1:0) )
     if( .not. allocated( noahmp%water%flux%ETRANI ) ) allocate( noahmp%water%flux%ETRANI ( 1:NSOIL  ) )
 
-    noahmp%water%flux%DDZ1(:)           = huge(1.0)
-    noahmp%water%flux%DDZ2(:)           = huge(1.0)
-    noahmp%water%flux%DDZ3(:)           = huge(1.0)
-    noahmp%water%flux%PDZDTC(:)         = huge(1.0)
-    noahmp%water%flux%ETRANI(:)         = huge(1.0)
+    noahmp%water%flux%DDZ1(:)           = undefined_real
+    noahmp%water%flux%DDZ2(:)           = undefined_real
+    noahmp%water%flux%DDZ3(:)           = undefined_real
+    noahmp%water%flux%PDZDTC(:)         = undefined_real
+    noahmp%water%flux%ETRANI(:)         = undefined_real
 
     ! water parameter variable
-    noahmp%water%param%DRAIN_LAYER_OPT  = huge(1  )
-    noahmp%water%param%TD_DEPTH         = huge(1  )
-    noahmp%water%param%NROOT            = huge(1  )
-    noahmp%water%param%IRR_HAR          = huge(1  )
-    noahmp%water%param%CH2OP            = huge(1.0)
-    noahmp%water%param%C2_SnowCompact   = huge(1.0)
-    noahmp%water%param%C3_SnowCompact   = huge(1.0)
-    noahmp%water%param%C4_SnowCompact   = huge(1.0)
-    noahmp%water%param%C5_SnowCompact   = huge(1.0)
-    noahmp%water%param%DM_SnowCompact   = huge(1.0)
-    noahmp%water%param%ETA0_SnowCompact = huge(1.0)
-    noahmp%water%param%SNLIQMAXFRAC     = huge(1.0)
-    noahmp%water%param%SSI              = huge(1.0)
-    noahmp%water%param%SNOW_RET_FAC     = huge(1.0)
-    noahmp%water%param%FIRTFAC          = huge(1.0)
-    noahmp%water%param%MICIR_RATE       = huge(1.0)
-    noahmp%water%param%KDT              = huge(1.0)
-    noahmp%water%param%FRZX             = huge(1.0)
-    noahmp%water%param%BVIC             = huge(1.0)
-    noahmp%water%param%AXAJ             = huge(1.0)
-    noahmp%water%param%BXAJ             = huge(1.0)
-    noahmp%water%param%XXAJ             = huge(1.0)
-    noahmp%water%param%BBVIC            = huge(1.0)
-    noahmp%water%param%GDVIC            = huge(1.0)
-    noahmp%water%param%BDVIC            = huge(1.0)
-    noahmp%water%param%SLOPE            = huge(1.0)
-    noahmp%water%param%TD_DC            = huge(1.0)
-    noahmp%water%param%TDSMC_FAC        = huge(1.0)
-    noahmp%water%param%TD_DCOEF         = huge(1.0)
-    noahmp%water%param%TD_ADEPTH        = huge(1.0)
-    noahmp%water%param%KLAT_FAC         = huge(1.0)
-    noahmp%water%param%TD_DDRAIN        = huge(1.0)
-    noahmp%water%param%TD_SPAC          = huge(1.0)
-    noahmp%water%param%TD_RADI          = huge(1.0)
-    noahmp%water%param%TD_D             = huge(1.0)
-    noahmp%water%param%FFF              = huge(1.0)
-    noahmp%water%param%RSBMX            = huge(1.0)
-    noahmp%water%param%TIMEAN           = huge(1.0)
-    noahmp%water%param%FSATMX           = huge(1.0)
-    noahmp%water%param%ROUS             = huge(1.0)
-    noahmp%water%param%CMIC             = huge(1.0)
-    noahmp%water%param%WSLMAX           = huge(1.0)
-    noahmp%water%param%SWEMAXGLA        = huge(1.0)
-    noahmp%water%param%REFDK            = huge(1.0)
-    noahmp%water%param%REFKDT           = huge(1.0)
-    noahmp%water%param%FRZK             = huge(1.0)
-    noahmp%water%param%IRR_LAI          = huge(1.0)
-    noahmp%water%param%IRR_MAD          = huge(1.0)
-    noahmp%water%param%FILOSS           = huge(1.0)
-    noahmp%water%param%SPRIR_RATE       = huge(1.0)
-    noahmp%water%param%IRR_FRAC         = huge(1.0)
-    noahmp%water%param%IR_RAIN          = huge(1.0)
-    noahmp%water%param%SNOWDEN_MIN      = huge(1.0)
-    noahmp%water%param%SWEMX            = huge(1.0)
-    noahmp%water%param%PSIWLT           = huge(1.0)
-    noahmp%water%param%MFSNO            = huge(1.0)
-    noahmp%water%param%SCFFAC           = huge(1.0)
+    noahmp%water%param%DRAIN_LAYER_OPT  = undefined_int
+    noahmp%water%param%TD_DEPTH         = undefined_int
+    noahmp%water%param%NROOT            = undefined_int
+    noahmp%water%param%IRR_HAR          = undefined_int
+    noahmp%water%param%CH2OP            = undefined_real
+    noahmp%water%param%C2_SnowCompact   = undefined_real
+    noahmp%water%param%C3_SnowCompact   = undefined_real
+    noahmp%water%param%C4_SnowCompact   = undefined_real
+    noahmp%water%param%C5_SnowCompact   = undefined_real
+    noahmp%water%param%DM_SnowCompact   = undefined_real
+    noahmp%water%param%ETA0_SnowCompact = undefined_real
+    noahmp%water%param%SNLIQMAXFRAC     = undefined_real
+    noahmp%water%param%SSI              = undefined_real
+    noahmp%water%param%SNOW_RET_FAC     = undefined_real
+    noahmp%water%param%FIRTFAC          = undefined_real
+    noahmp%water%param%MICIR_RATE       = undefined_real
+    noahmp%water%param%KDT              = undefined_real
+    noahmp%water%param%FRZX             = undefined_real
+    noahmp%water%param%BVIC             = undefined_real
+    noahmp%water%param%AXAJ             = undefined_real
+    noahmp%water%param%BXAJ             = undefined_real
+    noahmp%water%param%XXAJ             = undefined_real
+    noahmp%water%param%BBVIC            = undefined_real
+    noahmp%water%param%GDVIC            = undefined_real
+    noahmp%water%param%BDVIC            = undefined_real
+    noahmp%water%param%SLOPE            = undefined_real
+    noahmp%water%param%TD_DC            = undefined_real
+    noahmp%water%param%TDSMC_FAC        = undefined_real
+    noahmp%water%param%TD_DCOEF         = undefined_real
+    noahmp%water%param%TD_ADEPTH        = undefined_real
+    noahmp%water%param%KLAT_FAC         = undefined_real
+    noahmp%water%param%TD_DDRAIN        = undefined_real
+    noahmp%water%param%TD_SPAC          = undefined_real
+    noahmp%water%param%TD_RADI          = undefined_real
+    noahmp%water%param%TD_D             = undefined_real
+    noahmp%water%param%FFF              = undefined_real
+    noahmp%water%param%RSBMX            = undefined_real
+    noahmp%water%param%TIMEAN           = undefined_real
+    noahmp%water%param%FSATMX           = undefined_real
+    noahmp%water%param%ROUS             = undefined_real
+    noahmp%water%param%CMIC             = undefined_real
+    noahmp%water%param%WSLMAX           = undefined_real
+    noahmp%water%param%SWEMAXGLA        = undefined_real
+    noahmp%water%param%REFDK            = undefined_real
+    noahmp%water%param%REFKDT           = undefined_real
+    noahmp%water%param%FRZK             = undefined_real
+    noahmp%water%param%IRR_LAI          = undefined_real
+    noahmp%water%param%IRR_MAD          = undefined_real
+    noahmp%water%param%FILOSS           = undefined_real
+    noahmp%water%param%SPRIR_RATE       = undefined_real
+    noahmp%water%param%IRR_FRAC         = undefined_real
+    noahmp%water%param%IR_RAIN          = undefined_real
+    noahmp%water%param%SNOWDEN_MIN      = undefined_real
+    noahmp%water%param%SWEMX            = undefined_real
+    noahmp%water%param%PSIWLT           = undefined_real
+    noahmp%water%param%MFSNO            = undefined_real
+    noahmp%water%param%SCFFAC           = undefined_real
 
     if( .not. allocated( noahmp%water%param%SMCMAX ) ) allocate( noahmp%water%param%SMCMAX (1:NSOIL) )
     if( .not. allocated( noahmp%water%param%SMCWLT ) ) allocate( noahmp%water%param%SMCWLT (1:NSOIL) )
@@ -254,15 +254,15 @@ contains
     if( .not. allocated( noahmp%water%param%PSISAT ) ) allocate( noahmp%water%param%PSISAT (1:NSOIL) )
     if( .not. allocated( noahmp%water%param%QUARTZ ) ) allocate( noahmp%water%param%QUARTZ (1:NSOIL) )
 
-    noahmp%water%param%SMCMAX(:)        = huge(1.0)
-    noahmp%water%param%SMCWLT(:)        = huge(1.0)
-    noahmp%water%param%SMCREF(:)        = huge(1.0)
-    noahmp%water%param%SMCDRY(:)        = huge(1.0)
-    noahmp%water%param%DWSAT (:)        = huge(1.0)
-    noahmp%water%param%DKSAT (:)        = huge(1.0)
-    noahmp%water%param%BEXP  (:)        = huge(1.0)
-    noahmp%water%param%PSISAT(:)        = huge(1.0)
-    noahmp%water%param%QUARTZ(:)        = huge(1.0)
+    noahmp%water%param%SMCMAX(:)        = undefined_real
+    noahmp%water%param%SMCWLT(:)        = undefined_real
+    noahmp%water%param%SMCREF(:)        = undefined_real
+    noahmp%water%param%SMCDRY(:)        = undefined_real
+    noahmp%water%param%DWSAT (:)        = undefined_real
+    noahmp%water%param%DKSAT (:)        = undefined_real
+    noahmp%water%param%BEXP  (:)        = undefined_real
+    noahmp%water%param%PSISAT(:)        = undefined_real
+    noahmp%water%param%QUARTZ(:)        = undefined_real
     ! water diagnostic variable
 
 
