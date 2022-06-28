@@ -117,19 +117,19 @@ contains
 
     ! Porosity and partial volume
     do J = ISNOW+1, 0
-       VOL_ICE(J) = min( 1.0, SNICE(J)/(DZSNSO(J)*DENICE) )
+       VOL_ICE(J) = min( 1.0, SNICE(J)/(DZSNSO(J)*ConstDensityIce) )
        EPORE(J)   = 1.0 - VOL_ICE(J)
     enddo
 
     ! compute inter-layer snow water flow
     do J = ISNOW+1, 0
        SNLIQ(J)   = SNLIQ(J) + QIN
-       VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*DENH2O)
+       VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*ConstDensityWater)
        QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * DZSNSO(J) )
        if ( J == 0 ) then
           QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * DT * QOUT )
        endif
-       QOUT     = QOUT * DENH2O
+       QOUT     = QOUT * ConstDensityWater
        SNLIQ(J) = SNLIQ(J) - QOUT
        if ( ( SNLIQ(J) / (SNICE(J)+SNLIQ(J)) ) > SNLIQMAXFRAC ) then
           QOUT     = QOUT + ( SNLIQ(J) - SNLIQMAXFRAC/(1.0-SNLIQMAXFRAC) * SNICE(J) )
@@ -140,7 +140,7 @@ contains
 
     ! update snow depth
     do J = ISNOW+1, 0
-       DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/DENH2O + SNICE(J)/DENICE )
+       DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/ConstDensityWater + SNICE(J)/ConstDensityIce )
     enddo
 
     ! Liquid water from snow bottom to soil (mm/s)

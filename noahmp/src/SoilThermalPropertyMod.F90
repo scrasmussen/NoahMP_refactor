@@ -63,8 +63,8 @@ contains
        ! ==== soil heat capacity
 
        SICE_TMP(ISOIL) = SMC(ISOIL) - SH2O(ISOIL)
-       CVSOIL(ISOIL)   = SH2O(ISOIL) * CWAT + (1.0 - SMCMAX(ISOIL)) * CSOIL &
-                         + (SMCMAX(ISOIL) - SMC(ISOIL)) * CPAIR + SICE_TMP(ISOIL) * CICE
+       CVSOIL(ISOIL)   = SH2O(ISOIL) * ConstHeatCapacWater + (1.0 - SMCMAX(ISOIL)) * CSOIL &
+                         + (SMCMAX(ISOIL) - SMC(ISOIL)) * ConstHeatCapacAir + SICE_TMP(ISOIL) * ConstHeatCapacIce
 
        ! ==== soil thermal conductivity
 
@@ -76,7 +76,7 @@ contains
        if ( SMC(ISOIL) > 0.0 ) XUNFROZ = SH2O(ISOIL) / SMC(ISOIL)
        XU = XUNFROZ * SMCMAX(ISOIL)
        ! SATURATED THERMAL CONDUCTIVITY
-       THKSAT = THKS ** (1.0-SMCMAX(ISOIL)) * TKICE ** (SMCMAX(ISOIL)-XU) * THKW ** (XU)
+       THKSAT = THKS ** (1.0-SMCMAX(ISOIL)) * ConstThermConductIce ** (SMCMAX(ISOIL)-XU) * THKW ** (XU)
        ! DRY THERMAL CONDUCTIVITY IN W.M-1.K-1
        GAMMD  = (1.0 - SMCMAX(ISOIL)) * 2700.0
        THKDRY = (0.135 * GAMMD + 64.7) / (2700.0 - 0.947 * GAMMD)

@@ -3,7 +3,7 @@ module SnowLayerDivideMod
 !!! Snowpack layer division process
 !!! Update snow ice, snow water, snow thickness, snow temperature
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowLayerWaterComboMod, only: SnowLayerWaterCombo
@@ -111,7 +111,7 @@ contains
              SWICE(3) = SWICE(2)
              SWLIQ(3) = SWLIQ(2)
              TSNO(3)  = TSNO(2) - DTDZ * DZ(2) / 2.0
-             if ( TSNO(3) >= TFRZ ) then
+             if ( TSNO(3) >= ConstFreezePoint ) then
                 TSNO(3)  = TSNO(2)
              else
                 TSNO(2) = TSNO(2) + DTDZ * DZ(2) / 2.0

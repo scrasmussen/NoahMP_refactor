@@ -98,7 +98,7 @@ contains
     RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
 
     ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-    FIRR = IREVPLOS * 1000.0 * HVAP / DT   ! heat used for evaporation (W/m2)
+    FIRR = IREVPLOS * 1000.0 * ConstLatHeatVapor / DT   ! heat used for evaporation (W/m2)
     EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
 
     end associate

@@ -53,7 +53,7 @@ contains
        if ( IST == 1 )  then  ! soil
           ALBSOD(IB) = min( ALBSAT(IB)+INC, ALBDRY(IB) )
           ALBSOI(IB) = ALBSOD(IB)
-       elseif ( TG > TFRZ ) then  ! unfrozen lake, wetland
+       elseif ( TG > ConstFreezePoint ) then  ! unfrozen lake, wetland
           ALBSOD(IB) = 0.06 / ( max(0.01, COSZ)**1.7 + 0.15 )
           ALBSOI(IB) = 0.06
        else    !frozen lake, wetland

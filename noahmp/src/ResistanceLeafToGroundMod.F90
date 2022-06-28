@@ -2,7 +2,7 @@ module ResistanceLeafToGroundMod
 
 !!! Compute under-canopy aerodynamic resistance (RAG) and leaf boundary layer resistance (RB)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -66,7 +66,7 @@ contains
 
     ! stability correction to below canopy resistance
     if ( ITER > 1 ) then
-       TMP1 = VKC * (GRAV / TAH) * HG / (RHOAIR * CPAIR)
+       TMP1 = ConstVonKarman * (ConstGravityAcc / TAH) * HG / (RHOAIR * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOLG = -1.0 * FV**3 / TMP1
        MOZG = min( (ZPD-Z0MG)/MOLG, 1.0 )
@@ -89,7 +89,7 @@ contains
     TMPRAH2 = HCAN * exp(CWPC) / CWPC * (TMP1-TMP2)
 
     ! aerodynamic resistances raw and rah between heights zpd+z0h and z0hg.
-    KH   = max ( VKC * FV * (HCAN-ZPD), MPE )
+    KH   = max ( ConstVonKarman * FV * (HCAN-ZPD), MPE )
     RAMG = 0.0
     RAHG = TMPRAH2 / KH
     RAWG = RAHG

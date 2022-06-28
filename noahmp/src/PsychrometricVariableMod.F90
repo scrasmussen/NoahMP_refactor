@@ -2,7 +2,7 @@ module PsychrometricVariableMod
 
 !!! Compute psychrometric variables for canopy and ground
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -37,24 +37,24 @@ contains
 ! ----------------------------------------------------------------------
 
     ! for canopy
-    if ( TV > TFRZ ) then   ! Barlage: add distinction between ground and vegetation in v3.6
-       LATHEAV       = HVAP
+    if ( TV > ConstFreezePoint ) then   ! Barlage: add distinction between ground and vegetation in v3.6
+       LATHEAV       = ConstLatHeatVapor
        FROZEN_CANOPY = .false.
     else
-       LATHEAV       = HSUB
+       LATHEAV       = ConstLatHeatSublim
        FROZEN_CANOPY = .true.
     endif
-    GAMMAV = CPAIR * PressureAirRefHeight / (0.622 * LATHEAV)
+    GAMMAV = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAV)
 
     ! for ground
-    if ( TG > TFRZ ) then
-       LATHEAG       = HVAP
+    if ( TG > ConstFreezePoint ) then
+       LATHEAG       = ConstLatHeatVapor
        FROZEN_GROUND = .false.
     else
-       LATHEAG       = HSUB
+       LATHEAG       = ConstLatHeatSublim
        FROZEN_GROUND = .true.
     endif
-    GAMMAG = CPAIR * PressureAirRefHeight / (0.622 * LATHEAG)
+    GAMMAG = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAG)
 
     end associate
 

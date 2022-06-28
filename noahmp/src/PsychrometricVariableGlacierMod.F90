@@ -2,7 +2,7 @@ module PsychrometricVariableGlacierMod
 
 !!! Compute psychrometric variables for glacier ground
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -30,8 +30,8 @@ contains
              )
 ! ----------------------------------------------------------------------
 
-    LATHEAG = HSUB
-    GAMMAG  = CPAIR * PressureAirRefHeight / (0.622 * LATHEAG)
+    LATHEAG = ConstLatHeatSublim
+    GAMMAG  = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAG)
 
     end associate
 

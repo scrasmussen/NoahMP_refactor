@@ -67,7 +67,7 @@ contains
     real(kind=kind_noahmp)                :: LAISHAE      ! shaded leaf area index, one-sided (m2/m2),effective
     real(kind=kind_noahmp)                :: T, TDC       ! Kelvin to degree Celsius with limit -50 to +50
 ! local statement function
-    TDC(T) = min( 50.0, max(-50.0, (T - TFRZ)) )
+    TDC(T) = min( 50.0, max(-50.0, (T - ConstFreezePoint)) )
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -216,8 +216,9 @@ contains
     endif
 
     ! prepare for longwave rad.
-    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * RadLWDownRefHeight - EMV * EMG * SB * TGV**4
-    CIR = ( 2.0 - EMV * (1.0-EMG) ) * EMV * SB
+    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * RadLWDownRefHeight - &
+          EMV * EMG * ConstStefanBoltzmann * TGV**4
+    CIR = ( 2.0 - EMV * (1.0-EMG) ) * EMV * ConstStefanBoltzmann
 
     ! begin stability iteration for canopy temperature and flux
     loop1: do ITER = 1, NITERC
@@ -272,7 +273,7 @@ contains
        COND = CAH + CVH + CGH
        ATA  = (TemperatureAirRefHeight * CAH + TGV * CGH) / COND
        BTA  = CVH / COND
-       CSH  = (1.0 - BTA) * RHOAIR * CPAIR * CVH
+       CSH  = (1.0 - BTA) * RHOAIR * ConstHeatCapacAir * CVH
 
        ! latent heat conductance and coeff above veg.
        CAW  = 1.0 / RAWC
@@ -282,17 +283,17 @@ contains
        COND = CAW + CEW + CTW + CGW
        AEA  = ( EAIR*CAW + ESTG*CGW ) / COND
        BEA  = (CEW + CTW) / COND
-       CEV  = (1.0 - BEA) * CEW * RHOAIR * CPAIR / GAMMAV   ! Barlage: change to vegetation v3.6
-       CTR  = (1.0 - BEA) * CTW * RHOAIR * CPAIR / GAMMAV
+       CEV  = (1.0 - BEA) * CEW * RHOAIR * ConstHeatCapacAir / GAMMAV   ! Barlage: change to vegetation v3.6
+       CTR  = (1.0 - BEA) * CTW * RHOAIR * ConstHeatCapacAir / GAMMAV
 
        ! evaluate surface fluxes with current temperature and solve for dts
        TAH  = ATA + BTA * TV               ! canopy air T.
        EAH  = AEA + BEA * ESTV             ! canopy air e
        IRC  = FVEG * (AIR + CIR * TV**4)
-       SHC  = FVEG * RHOAIR * CPAIR * CVH * (TV - TAH)
-       EVC  = FVEG * RHOAIR * CPAIR * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
-       TR   = FVEG * RHOAIR * CPAIR * CTW * (ESTV - EAH) / GAMMAV
-       if ( TV > TFRZ ) then
+       SHC  = FVEG * RHOAIR * ConstHeatCapacAir * CVH * (TV - TAH)
+       EVC  = FVEG * RHOAIR * ConstHeatCapacAir * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
+       TR   = FVEG * RHOAIR * ConstHeatCapacAir * CTW * (ESTV - EAH) / GAMMAV
+       if ( TV > ConstFreezePoint ) then
           EVC = min( CANLIQ*LATHEAV/DT, EVC )    ! Barlage: add if block for canice in v3.6
        else
           EVC = min( CANICE*LATHEAV/DT, EVC )
@@ -308,8 +309,8 @@ contains
        !TAH = ATA + BTA * TV  ! canopy air T; update here for consistency
 
        ! for computing M-O length in the next iteration
-       H    = RHOAIR * CPAIR * (TAH - TemperatureAirRefHeight) / RAHC
-       HG   = RHOAIR * CPAIR * (TGV  - TAH)   / RAHG
+       H    = RHOAIR * ConstHeatCapacAir * (TAH - TemperatureAirRefHeight) / RAHC
+       HG   = RHOAIR * ConstHeatCapacAir * (TGV  - TAH)   / RAHG
 
        ! consistent specific humidity from canopy air vapor pressure
        QSFC = (0.622 * EAH) / (PressureAirRefHeight - 0.378 * EAH)
@@ -322,10 +323,10 @@ contains
     enddo loop1  ! end stability iteration
 
     ! under-canopy fluxes and ground temperature
-    AIR = -EMG * (1.0 - EMV) * RadLWDownRefHeight - EMG * EMV * SB * TV**4
-    CIR = EMG * SB
-    CSH = RHOAIR * CPAIR / RAHG
-    CEV = RHOAIR * CPAIR / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
+    AIR = -EMG * (1.0 - EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
+    CIR = EMG * ConstStefanBoltzmann
+    CSH = RHOAIR * ConstHeatCapacAir / RAHG
+    CEV = RHOAIR * ConstHeatCapacAir / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
     CGH = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
     ! begin stability iteration
     loop2: do ITER = 1, NITERG
@@ -353,12 +354,12 @@ contains
     enddo loop2
     !TAH = (CAH*TemperatureAirRefHeight + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
 
-    ! if snow on ground and TGV > TFRZ: reset TGV = TFRZ. reevaluate ground fluxes.
+    ! if snow on ground and TGV > freezing point: reset TGV = freezing point. reevaluate ground fluxes.
     if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
-       if ( (SNOWH > 0.05) .and. (TGV > TFRZ) ) then
-          if ( OPT_STC == 1 ) TGV = TFRZ
-          if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * TFRZ   ! MB: allow TGV>0C during melt v3.7
-          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * SB * TV**4
+       if ( (SNOWH > 0.05) .and. (TGV > ConstFreezePoint) ) then
+          if ( OPT_STC == 1 ) TGV = ConstFreezePoint
+          if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
+          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
           SHG = CSH * (TGV        - TAH)
           EVG = CEV * (ESTG*RHSUR - EAH)
           GH  = SAG + PAHG - (IRG + SHG + EVG)
@@ -370,24 +371,24 @@ contains
     TAUYV = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! consistent vegetation air temperature and vapor pressure since TGV is not consistent with the TAH/EAH calculation.
-    ! TAH = TemperatureAirRefHeight + (SHG+SHC) / (RHOAIR*CPAIR*CAH) 
-    ! TAH = TemperatureAirRefHeight + (SHG*FVEG+SHC) / (RHOAIR*CPAIR*CAH) ! ground flux need fveg
-    ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*CPAIR/GAMMAG)
-    ! QFX = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*CPAIR/GAMMAG
+    ! TAH = TemperatureAirRefHeight + (SHG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) 
+    ! TAH = TemperatureAirRefHeight + (SHG*FVEG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) ! ground flux need fveg
+    ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*ConstHeatCapacAir/GAMMAG)
+    ! QFX = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*ConstHeatCapacAir/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
     if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
-       ! CAH2 = FV * 1.0 / VKC * log((2.0+Z0H)/Z0H)
-       ! CAH2 = FV * VKC / log((2.0+Z0H)/Z0H)
-       CAH2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )
+       ! CAH2 = FV * 1.0 / ConstVonKarman * log((2.0+Z0H)/Z0H)
+       ! CAH2 = FV * ConstVonKarman / log((2.0+Z0H)/Z0H)
+       CAH2 = FV * ConstVonKarman / ( log((2.0+Z0H)/Z0H) - FH2 )
        CQ2V = CAH2
        if ( CAH2 < 1.0e-5 ) then
           T2MV = TAH
           !Q2V  = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))
           Q2V  = QSFC
        else
-          T2MV = TAH - (SHG + SHC/FVEG) / (RHOAIR * CPAIR) * 1.0 / CAH2
-          !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- QFX/(RHOAIR*FV)* 1./VKC * LOG((2.+Z0H)/Z0H)
+          T2MV = TAH - (SHG + SHC/FVEG) / (RHOAIR * ConstHeatCapacAir) * 1.0 / CAH2
+          !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- QFX/(RHOAIR*FV)* 1./ConstVonKarman * LOG((2.+Z0H)/Z0H)
           Q2V  = QSFC - ( (EVC+TR)/FVEG + EVG ) / (LATHEAV * RHOAIR) * 1.0 / CQ2V
        endif
     endif

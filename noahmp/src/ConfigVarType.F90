@@ -30,8 +30,8 @@ module ConfigVarType
                                                  ! 9 -> off (use input LAI; use maximum vegetation fraction)
     integer                   :: OPT_SNF       ! options for partitioning  precipitation into rainfall & snowfall
                                                  ! 1 -> Jordan (1991)
-                                                 ! 2 -> BATS: when TemperatureAirRefHeight < TFRZ+2.2 
-                                                 ! 3 -> TemperatureAirRefHeight < TFRZ
+                                                 ! 2 -> BATS: when TemperatureAirRefHeight < freezing point+2.2 
+                                                 ! 3 -> TemperatureAirRefHeight < freezing point
                                                  ! 4 -> Use WRF microphysics output
                                                  ! 5 -> Use wetbulb temperature (Wang et al., 2019)
     integer                   :: OPT_BTR       ! options for soil moisture factor for stomatal resistance

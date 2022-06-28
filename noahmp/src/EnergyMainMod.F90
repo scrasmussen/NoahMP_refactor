@@ -292,8 +292,8 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the canopy/ground system.
     ! Old TRAD calculation not taking into account Emissivity:
-    ! TRAD = (FIRE/SB)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * SB) ) ** 0.25
+    ! TRAD = (FIRE/ConstStefanBoltzmann)**0.25
+    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * ConstStefanBoltzmann) )**0.25
 
     ! other photosynthesis related quantities for biochem process
     APAR = PARSUN * LAISUN + PARSHA * LAISHA
@@ -304,9 +304,9 @@ contains
 
     ! adjusting suface temperature based on snow condition
     if ( OPT_STC == 2 ) then
-       if ( (SNOWH > 0.05) .and. (TG > TFRZ) ) then
-          TGV = TFRZ
-          TGB = TFRZ
+       if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
+          TGV = ConstFreezePoint
+          TGB = ConstFreezePoint
           if ( (VEG .eqv. .true.) .and. (FVEG > 0) ) then
              TG = FVEG * TGV + (1.0 - FVEG) * TGB
              TS = FVEG * TV  + (1.0 - FVEG) * TGB

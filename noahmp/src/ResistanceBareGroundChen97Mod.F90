@@ -4,7 +4,7 @@ module ResistanceBareGroundChen97Mod
 !!! based on Chen et al. (1997, BLM)
 !!! This scheme can handle both over open water and over solid surface
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -42,7 +42,7 @@ contains
     real(kind=kind_noahmp), parameter     :: VKRM   = 0.40
     real(kind=kind_noahmp), parameter     :: EXCM   = 0.001
     real(kind=kind_noahmp), parameter     :: BETA   = 1.0 / 270.0
-    real(kind=kind_noahmp), parameter     :: BTG    = BETA * GRAV
+    real(kind=kind_noahmp), parameter     :: BTG    = BETA * ConstGravityAcc
     real(kind=kind_noahmp), parameter     :: ELFC   = VKRM * BTG
     real(kind=kind_noahmp), parameter     :: WOLD   = 0.15
     real(kind=kind_noahmp), parameter     :: WNEW   = 1.0 - WOLD

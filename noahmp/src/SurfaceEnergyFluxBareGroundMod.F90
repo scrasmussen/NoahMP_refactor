@@ -48,7 +48,7 @@ contains
     real(kind=kind_noahmp)                :: H            ! temporary sensible heat flux (w/m2)
     real(kind=kind_noahmp)                :: T, TDC       ! Kelvin to degree Celsius with limit -50 to +50
 ! local statement function
-    TDC(T) = min( 50.0, max(-50.0, (T - TFRZ)) )
+    TDC(T) = min( 50.0, max(-50.0, (T - ConstFreezePoint)) )
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -115,7 +115,7 @@ contains
     H      = 0.0
     QFX    = 0.0
     FV     = 0.1
-    CIR    = EMG * SB
+    CIR    = EMG * ConstStefanBoltzmann
     CGH    = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
 
     ! begin stability iteration for ground temperature and flux
@@ -148,8 +148,8 @@ contains
        endif
 
        ! ground fluxes and temperature change
-       CSH = RHOAIR * CPAIR / RAHB
-       CEV = RHOAIR * CPAIR / GAMMAG / (RSURF + RAWB)
+       CSH = RHOAIR * ConstHeatCapacAir / RAHB
+       CEV = RHOAIR * ConstHeatCapacAir / GAMMAG / (RSURF + RAWB)
        IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
        SHB = CSH * (TGB        - TemperatureAirRefHeight )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
@@ -175,15 +175,15 @@ contains
           ESTG = ESATI
        endif
        QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirSurface - 0.378 * (ESTG*RHSUR))
-       QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / CPAIR
+       QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
 
     enddo loop3 ! end stability iteration
 
-    ! if snow on ground and TGB > TFRZ: reset TGB = TFRZ. reevaluate ground fluxes.
+    ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
     if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
-       if ( (SNOWH > 0.05) .and. (TGB > TFRZ) ) then
-          if ( OPT_STC == 1 ) TGB = TFRZ
-          if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * TFRZ  ! MB: allow TG>0C during melt v3.7
+       if ( (SNOWH > 0.05) .and. (TGB > ConstFreezePoint) ) then
+          if ( OPT_STC == 1 ) TGB = ConstFreezePoint
+          if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
           IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
           SHB = CSH * (TGB        - TemperatureAirRefHeight)
           EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
@@ -197,14 +197,14 @@ contains
 
     ! 2m air temperature
     if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
-       !EHB2 = FV * VKC / LOG((2.0+Z0H)/Z0H)
-       EHB2 = FV * VKC / ( log((2.0+Z0H)/Z0H) - FH2 )
+       !EHB2 = FV * ConstVonKarman / LOG((2.0+Z0H)/Z0H)
+       EHB2 = FV * ConstVonKarman / ( log((2.0+Z0H)/Z0H) - FH2 )
        CQ2B = EHB2
        if ( EHB2 < 1.0e-5 ) then
           T2MB = TGB
           Q2B  = QSFC
        else
-          T2MB = TGB - SHB / (RHOAIR*CPAIR) * 1.0 / EHB2
+          T2MB = TGB - SHB / (RHOAIR*ConstHeatCapacAir) * 1.0 / EHB2
           Q2B  = QSFC - EVB / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
        endif
        if ( URBAN_FLAG .eqv. .true. ) Q2B = QSFC

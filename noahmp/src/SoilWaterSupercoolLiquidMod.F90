@@ -1,15 +1,15 @@
 module SoilWaterSupercoolLiquidMod
 
-!!! Calculate amount of supercooled liquid soil water content if soil temperature <273.15K (TFRZ)
+!!! Calculate amount of supercooled liquid soil water content if soil temperature < freezing point
 !!! This uses Newton-type iteration to solve the nonlinear implicit equation 
 !!! Reference: Eqn.17 in Koren et al. 1999 JGR VOL 104(D16), 19569-19585
 !!! New version (June 2001): much faster and more accurate Newton iteration achieved by first
 !!! taking log of Eqn above -- less than 4 (typically 1 or 2) iterations achieves convergence.
 !!! Explicit 1-step solution option for special case of parameter CK=0, which reduces the
 !!! original implicit equation to a simpler explicit form, known as "Flerchinger Eqn". Improved
-!!! handling of solution in the limit of freezing point temperature (TFRZ).
+!!! handling of solution in the limit of freezing point temperature.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -63,9 +63,9 @@ contains
     if ( BEXP(ISOIL) >  BLIM ) BX = BLIM
     NLOG = 0
 
-    ! if soil temperature not largely below freezing (TFRZ), SH2O = SMC
+    ! if soil temperature not largely below freezing point, SH2O = SMC
     KCOUNT = 0
-    if ( TKELV > (TFRZ-1.0e-3) ) then
+    if ( TKELV > (ConstFreezePoint-1.0e-3) ) then
        FREE = SMC
     else  ! frozen soil case
 
@@ -79,8 +79,9 @@ contains
 1001      Continue
           if ( .not. ((NLOG < 10) .and. (KCOUNT == 0)) ) goto 1002
           NLOG  = NLOG +1
-          DF    = alog ( (PSISAT(ISOIL)*GRAV/HFUS) * ((1.0 + CK*SWL)**2.0) * (SMCMAX(ISOIL)/(SMC - SWL))**BX ) - &
-                  alog ( -(TKELV - TFRZ) / TKELV )
+          DF    = alog ( (PSISAT(ISOIL)*ConstGravityAcc/ConstLatHeatFusion) * &
+                         ((1.0 + CK*SWL)**2.0) * (SMCMAX(ISOIL)/(SMC - SWL))**BX ) - &
+                         alog ( -(TKELV - ConstFreezePoint) / TKELV )
           DENOM = 2.0 * CK / (1.0 + CK * SWL) + BX / (SMC - SWL)
           SWLK  = SWL - DF / DENOM
           ! bounds useful for mathematical solution
@@ -108,7 +109,8 @@ contains
           print*, 'Flerchinger used in NEW version. Iterations=', NLOG
           !write(message, '("Flerchinger used in NEW version. Iterations=", I6)') NLOG
           !call wrf_message(trim(message))
-          FK = ( ( (HFUS / (GRAV * (-PSISAT(ISOIL)))) * ((TKELV-TFRZ) / TKELV) )**(-1.0/BX) ) * SMCMAX(ISOIL)
+          FK = ( ( (ConstLatHeatFusion / (ConstGravityAcc * (-PSISAT(ISOIL)))) * &
+                   ((TKELV-ConstFreezePoint) / TKELV) )**(-1.0/BX) ) * SMCMAX(ISOIL)
           if ( FK < 0.02 ) FK = 0.02
           FREE = min( FK, SMC )
        endif

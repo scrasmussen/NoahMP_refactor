@@ -54,7 +54,7 @@ contains
        TAUSS = 0.0
     else
        DELA0 = DT / TAU0
-       ARG   = GRAIN_GROWTH * (1.0/TFRZ - 1.0/TG)
+       ARG   = GRAIN_GROWTH * (1.0/ConstFreezePoint - 1.0/TG)
        AGE1  = exp(ARG)
        AGE2  = exp( amin1( 0.0, EXTRA_GROWTH*ARG ) )
        AGE3  = DIRT_SOOT

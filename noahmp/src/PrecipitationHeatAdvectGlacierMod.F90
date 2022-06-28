@@ -44,10 +44,10 @@ contains
     QSNOW   = SNOW
 
     ! Heat advection for liquid rainfall
-    PAH_AG = QRAIN * (CWAT/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = QRAIN * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AG = PAH_AG + QSNOW * (CICE/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = PAH_AG + QSNOW * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHB = PAH_AG

@@ -55,14 +55,14 @@ contains
     PAHB    = 0.0
 
     ! Heat advection for liquid rainfall
-    PAH_AC = FVEG * RAIN * (CWAT/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = QDRIPR * (CWAT/1000.0) * (TV - TG)
-    PAH_AG = QTHROR * (CWAT/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = FVEG * RAIN * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TV)
+    PAH_CG = QDRIPR * (ConstHeatCapacWater/1000.0) * (TV - TG)
+    PAH_AG = QTHROR * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AC = PAH_AC + FVEG * SNOW * (CICE/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = PAH_CG + QDRIPS * (CICE/1000.0) * (TV - TG)
-    PAH_AG = PAH_AG + QTHROS * (CICE/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = PAH_AC + FVEG * SNOW * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TV)
+    PAH_CG = PAH_CG + QDRIPS * (ConstHeatCapacIce/1000.0) * (TV - TG)
+    PAH_AG = PAH_AG + QTHROS * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHV = PAH_AC - PAH_CG

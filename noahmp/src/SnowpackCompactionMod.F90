@@ -27,7 +27,7 @@ contains
     integer                :: J       ! snow layer index
     real(kind=kind_noahmp) :: BURDEN  ! pressure of overlying snow [kg/m2]
     real(kind=kind_noahmp) :: DEXPF   ! EXPF=exp(-c4*(273.15-STC))
-    real(kind=kind_noahmp) :: TD      ! STC - TFRZ [K]
+    real(kind=kind_noahmp) :: TD      ! STC - ConstFreezePoint [K]
     real(kind=kind_noahmp) :: VOID    ! void (1 - SNICE - SNLIQ)
     real(kind=kind_noahmp) :: WX      ! water mass (ice + liquid) [kg/m2]
     real(kind=kind_noahmp) :: BI      ! partial density of ice [kg/m3]
@@ -68,12 +68,12 @@ contains
     do J = ISNOW+1, 0
        WX      = SNICE(J) + SNLIQ(J)
        FICE(J) = SNICE(J) / WX
-       VOID    = 1.0 - ( SNICE(J)/DENICE + SNLIQ(J)/DENH2O ) / DZSNSO(J)
+       VOID    = 1.0 - ( SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater ) / DZSNSO(J)
 
        ! Allow compaction only for non-saturated node and higher ice lens node.
        if ( (VOID > 0.001) .and. (SNICE(J) > 0.1) ) then
           BI    = SNICE(J) / DZSNSO(J)
-          TD    = max( 0.0, TFRZ-STC(J) )
+          TD    = max( 0.0, ConstFreezePoint-STC(J) )
 
           ! Settling/compaction as a result of destructive metamorphism
           DEXPF   = exp( -C4 * TD )
@@ -98,7 +98,7 @@ contains
 
           ! The change in DZ due to compaction
           DZSNSO(J) = DZSNSO(J) * ( 1.0 + PDZDTC(J) )
-          DZSNSO(J) = max( DZSNSO(J), SNICE(J)/DENICE + SNLIQ(J)/DENH2O )
+          DZSNSO(J) = max( DZSNSO(J), SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater )
 
        endif
 

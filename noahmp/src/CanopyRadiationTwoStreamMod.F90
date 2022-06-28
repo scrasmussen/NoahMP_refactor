@@ -104,13 +104,13 @@ contains
        KOPEN = 1.0
     else
        if ( OPT_RAD == 1 ) then
-          DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (PAI * RC**2)
+          DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * RC**2)
           HD      = HVT - HVB
           BB      = 0.5 * HD
           THETAP  = atan( BB / RC * tan(acos(max(0.01, COSZ))) )
-         !BGAP    = exp( DEN * PAI * RC**2 / cos(THETAP) )
-          BGAP    = exp( -DENFVEG * PAI * RC**2 / cos(THETAP) )
-          FA      = VAI / ( 1.33 * PAI * RC**3.0 * (BB/RC) * DENFVEG )
+         !BGAP    = exp( DEN * ConstPI * RC**2 / cos(THETAP) )
+          BGAP    = exp( -DENFVEG * ConstPI * RC**2 / cos(THETAP) )
+          FA      = VAI / ( 1.33 * ConstPI * RC**3.0 * (BB/RC) * DENFVEG )
           NEWVAI  = HD * FA
           WGAP    = (1.0 - BGAP) * exp(-0.5 * NEWVAI / COSZ)
           GAP     = min( 1.0-FVEG, BGAP+WGAP )
@@ -149,7 +149,7 @@ contains
     BETAIL = 0.5 * ( RHO(IB) + TAU(IB) + (RHO(IB)-TAU(IB)) * ((1.0+CHIL)/2.0)**2 ) / OMEGAL
 
     ! adjust omega, betad, and betai for intercepted snow
-    if ( TV > TFRZ ) then  !no snow
+    if ( TV > ConstFreezePoint ) then  !no snow
        TMP0 = OMEGAL
        TMP1 = BETADL
        TMP2 = BETAIL

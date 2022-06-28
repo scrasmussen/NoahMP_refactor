@@ -148,16 +148,16 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the ground system.
     ! Old TRAD calculation not taking into account Emissivity:
-    ! TRAD = (FIRE/SB)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * SB) ) ** 0.25
+    ! TRAD = (FIRE/ConstStefanBoltzmann)**0.25
+    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * ConstStefanBoltzmann) ) ** 0.25
 
     ! compute snow and glacier ice temperature
     call GlacierTemperatureMain(noahmp)
 
     ! adjusting suface temperature based on snow condition
     if ( OPT_STC == 2 ) then
-       if ( (SNOWH > 0.05) .and. (TG > TFRZ) ) then
-          TGB = TFRZ
+       if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
+          TGB = ConstFreezePoint
           TG = TGB
           TS = TGB
        endif

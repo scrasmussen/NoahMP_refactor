@@ -76,7 +76,7 @@ contains
        if ( (SH2O(1) < 0.01) .and. (SNOWH == 0.0) ) RSURF = 1.0e6
 
        PSI   = -PSISAT(1) * (max(0.01,SH2O(1)) / SMCMAX(1)) ** (-BEXP(1))
-       RHSUR = FSNO + (1.0 - FSNO) * exp(PSI * GRAV / (RW * TG))
+       RHSUR = FSNO + (1.0 - FSNO) * exp(PSI * ConstGravityAcc / (ConstGasWaterVapor * TG))
     endif
 
     ! urban

@@ -47,7 +47,7 @@ contains
 
     ! ground roughness length
     if ( IST == 2 ) then ! Lake 
-       if ( TG <= TFRZ ) then
+       if ( TG <= ConstFreezePoint ) then
           Z0MG = Z0LAKE * (1.0 - FSNO) + FSNO * Z0SNO
        else
           Z0MG = Z0LAKE

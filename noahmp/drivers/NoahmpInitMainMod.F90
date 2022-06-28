@@ -5,7 +5,7 @@ module NoahmpInitMainMod
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpIOVarType
   use NoahmpSnowInitMod
  
@@ -38,7 +38,7 @@ contains
     real(kind=kind_noahmp)                      :: FK, masslai, masssai
     real(kind=kind_noahmp), parameter           :: BLIM  = 5.5
     real(kind=kind_noahmp), parameter           :: HLICE = 3.335E5
-    real(kind=kind_noahmp), parameter           :: GRAV = 9.81
+    real(kind=kind_noahmp), parameter           :: GRAV0 = 9.81
     real(kind=kind_noahmp), parameter           :: T0 = 273.15
     character(len=240)                          :: err_message
     character(len=4)                            :: MMINSL
@@ -240,7 +240,7 @@ contains
                   do NS=1, NSOIL
 
                      if ( TSLB(I,NS,J) < 273.149 ) then    ! Use explicit as initial soil ice
-                        FK = (( (HLICE/(GRAV*(-PSISAT))) *                              &
+                        FK = (( (HLICE/(GRAV0*(-PSISAT))) *                              &
                              ((TSLB(I,NS,J)-T0)/TSLB(I,NS,J)) )**(-1/BEXP) )*SMCMAX
                         FK = MAX(FK, 0.02)
                         SH2O(I,NS,J) = MIN( FK, SMOIS(I,NS,J) )

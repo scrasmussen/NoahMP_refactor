@@ -2,8 +2,8 @@ module SoilSnowTemperatureMainMod
 
 !!! Main module to compute snow (if exists) and soil layer temperature. 
 !!! Note that snow temperatures during melting season may exceed melting 
-!!! point (TFRZ) but later in SoilSnowPhaseChange subroutine the snow
-!!! temperatures are reset to TFRZ for melting snow.
+!!! point but later in SoilSnowPhaseChange subroutine the snow
+!!! temperatures are reset to melting point for melting snow.
 
   use Machine, only : kind_noahmp
   use NoahmpVarType

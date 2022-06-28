@@ -76,12 +76,12 @@ contains
     ! compute lake thermal properties (no consideration of turbulent mixing for this version)
     if ( IST == 2 ) then
        do IZ = 1, NSOIL
-          if ( STC(IZ) > TFRZ) then
-             HCPCT(IZ) = CWAT
-             DF(IZ)    = TKWAT  !+ KEDDY * CWAT 
+          if ( STC(IZ) > ConstFreezePoint) then
+             HCPCT(IZ) = ConstHeatCapacWater
+             DF(IZ)    = ConstThermConductWater  !+ KEDDY * ConstHeatCapacWater 
           else
-             HCPCT(IZ) = CICE
-             DF(IZ)    = TKICE
+             HCPCT(IZ) = ConstHeatCapacIce
+             DF(IZ)    = ConstThermConductIce
           endif
        enddo
     endif

@@ -2,10 +2,10 @@ module GlacierTemperatureMainMod
 
 !!! Main module to compute snow (if exists) and glacier ice temperature. 
 !!! Note that snow temperatures during melting season may exceed melting 
-!!! point (TFRZ) but later in GlacierPhaseChange subroutine the snow
-!!! temperatures are reset to TFRZ for melting snow.
+!!! point but later in GlacierPhaseChange subroutine the snow
+!!! temperatures are reset to melting point for melting snow.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use GlacierTemperatureSolverMod, only : GlacierTemperatureSolver

@@ -73,17 +73,17 @@ contains
 
     ! canopy evaporation, transpiration, and dew
     if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy
-       ETRAN = max( FCTR/HVAP, 0.0 )
-       QEVAC = max( FCEV/HVAP, 0.0 )
-       QDEWC = abs( min( FCEV/HVAP, 0.0 ) )
+       ETRAN = max( FCTR/ConstLatHeatVapor, 0.0 )
+       QEVAC = max( FCEV/ConstLatHeatVapor, 0.0 )
+       QDEWC = abs( min( FCEV/ConstLatHeatVapor, 0.0 ) )
        QSUBC = 0.0
        QFROC = 0.0
     else
-       ETRAN = max( FCTR/HSUB, 0.0 )
+       ETRAN = max( FCTR/ConstLatHeatSublim, 0.0 )
        QEVAC = 0.0
        QDEWC = 0.0
-       QSUBC = max( FCEV/HSUB, 0.0 )
-       QFROC = abs( min( FCEV/HSUB, 0.0 ) )
+       QSUBC = max( FCEV/ConstLatHeatSublim, 0.0 )
+       QFROC = abs( min( FCEV/ConstLatHeatSublim, 0.0 ) )
     endif
 
     ! canopy water balance. for convenience allow dew to bring CANLIQ above
@@ -111,19 +111,19 @@ contains
 
 !=== phase change
     ! canopy ice melting
-    if ( (CANICE > 1.0e-6) .and. (TV > TFRZ) ) then
-       QMELTC = min( CANICE/DT, (TV-TFRZ)*CICE*CANICE/DENICE/(DT*HFUS) )
+    if ( (CANICE > 1.0e-6) .and. (TV > ConstFreezePoint) ) then
+       QMELTC = min( CANICE/DT, (TV-ConstFreezePoint)*ConstHeatCapacIce*CANICE/ConstDensityIce/(DT*ConstLatHeatFusion) )
        CANICE = max( 0.0, CANICE - QMELTC*DT )
        CANLIQ = max( 0.0, CANLIQ + QMELTC*DT )
-       TV     = FWET*TFRZ + (1.0 - FWET)*TV
+       TV     = FWET*ConstFreezePoint + (1.0 - FWET)*TV
     endif
 
     ! canopy water refreeezing
-    if ( (CANLIQ > 1.0e-6) .and. (TV < TFRZ) ) then
-       QFRZC  = min( CANLIQ/DT, (TFRZ-TV)*CWAT*CANLIQ/DENH2O/(DT*HFUS) )
+    if ( (CANLIQ > 1.0e-6) .and. (TV < ConstFreezePoint) ) then
+       QFRZC  = min( CANLIQ/DT, (ConstFreezePoint-TV)*ConstHeatCapacWater*CANLIQ/ConstDensityWater/(DT*ConstLatHeatFusion) )
        CANLIQ = max( 0.0, CANLIQ - QFRZC*DT )
        CANICE = max( 0.0, CANICE + QFRZC*DT )
-       TV     = FWET*TFRZ + (1.0 - FWET)*TV
+       TV     = FWET*ConstFreezePoint + (1.0 - FWET)*TV
     ENDIF
 
 !=== update total canopy water

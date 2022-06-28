@@ -2,7 +2,7 @@ module SoilSnowWaterPhaseChangeMod
 
 !!! Compute the phase change (melting/freezing) of snow water and soil water
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilWaterSupercoolLiquidMod, only : SoilWaterSupercoolLiquid
@@ -105,8 +105,8 @@ contains
     if ( IST == 1 ) then ! land points
        do J = 1, NSOIL
           if ( OPT_FRZ == 1 ) then
-             if ( STC(J) < TFRZ ) then
-                SMP          = HFUS * (TFRZ - STC(J)) / (GRAV * STC(J)) !(m)
+             if ( STC(J) < ConstFreezePoint ) then
+                SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
                 SUPERCOOL(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
                 SUPERCOOL(J) = SUPERCOOL(J) * DZSNSO(J) * 1000.0        !(mm)
              endif
@@ -120,15 +120,15 @@ contains
 
     !--- determine melting or freezing state
     do J = ISNOW+1, NSOIL
-       if ( (MICE(J) > 0.0) .and. (STC(J) >= TFRZ) ) then
+       if ( (MICE(J) > 0.0) .and. (STC(J) >= ConstFreezePoint) ) then
           IMELT(J) = 1  ! melting
        endif
-       if ( (MLIQ(J) > SUPERCOOL(J)) .and. (STC(J) < TFRZ) ) then
+       if ( (MLIQ(J) > SUPERCOOL(J)) .and. (STC(J) < ConstFreezePoint) ) then
           IMELT(J) = 2  ! freezing
        endif
        ! If snow exists, but its thickness is not enough to create a layer
        if ( (ISNOW == 0) .and. (SNEQV > 0.0) .and. (J == 1) ) then
-          if ( STC(J) >= TFRZ ) then
+          if ( STC(J) >= ConstFreezePoint ) then
              IMELT(J) = 1
           endif
        endif
@@ -137,8 +137,8 @@ contains
     !--- Calculate the energy surplus and loss for melting and freezing
     do J = ISNOW+1, NSOIL
        if ( IMELT(J) > 0 ) then
-          HM(J)  = (STC(J) - TFRZ) / FACT(J)
-          STC(J) = TFRZ
+          HM(J)  = (STC(J) - ConstFreezePoint) / FACT(J)
+          STC(J) = ConstFreezePoint
        endif
        if ( (IMELT(J) == 1) .and. (HM(J) < 0.0) ) then
           HM(J)    = 0.0
@@ -148,7 +148,7 @@ contains
           HM(J)    = 0.0
           IMELT(J) = 0
        endif
-       XM(J) = HM(J) * DT / HFUS
+       XM(J) = HM(J) * DT / ConstLatHeatFusion
     enddo
 
     !--- The rate of melting and freezing for snow without a layer, needs more work.
@@ -158,16 +158,16 @@ contains
        PROPOR = SNEQV / TEMP1
        SNOWH  = max( 0.0, PROPOR*SNOWH )
        SNOWH  = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
-       HEATR  = HM(1) - HFUS * (TEMP1 - SNEQV) / DT
+       HEATR  = HM(1) - ConstLatHeatFusion * (TEMP1 - SNEQV) / DT
        if ( HEATR > 0.0 ) then
-          XM(1) = HEATR * DT / HFUS
+          XM(1) = HEATR * DT / ConstLatHeatFusion
           HM(1) = HEATR
        else
           XM(1) = 0.0
           HM(1) = 0.0
        endif
        QMELT   = max( 0.0, (TEMP1-SNEQV) ) / DT
-       XMF     = HFUS * QMELT
+       XMF     = ConstLatHeatFusion * QMELT
        PONDING = TEMP1 - SNEQV
     endif
 
@@ -177,7 +177,7 @@ contains
           HEATR = 0.0
           if ( XM(J) > 0.0 ) then
              MICE(J) = max( 0.0, WICE0(J)-XM(J) )
-             HEATR   = HM(J) - HFUS * (WICE0(J) - MICE(J)) / DT
+             HEATR   = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / DT
           elseif ( XM(J) < 0.0 ) then
              if ( J <= 0 ) then  ! snow layer
                 MICE(J) = min( WMASS0(J), WICE0(J)-XM(J) )
@@ -189,7 +189,7 @@ contains
                    MICE(J) = max( MICE(J), 0.0 )
                 endif
              endif
-             HEATR = HM(J) - HFUS * (WICE0(J) - MICE(J)) / DT
+             HEATR = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / DT
           endif
           MLIQ(J) = max( 0.0, WMASS0(J)-MICE(J) ) ! update liquid water mass
 
@@ -197,15 +197,15 @@ contains
           if ( abs(HEATR) > 0.0 ) then
              STC(J) = STC(J) + FACT(J) * HEATR
              if ( J <= 0 ) then  ! snow
-                if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = TFRZ
+                if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = ConstFreezePoint
                 if ( MICE(J) == 0.0 ) then         ! BARLAGE
-                   STC(J)  = TFRZ                  ! BARLAGE
+                   STC(J)  = ConstFreezePoint      ! BARLAGE
                    HM(J+1) = HM(J+1) + HEATR       ! BARLAGE
-                   XM(J+1) = HM(J+1) * DT / HFUS   ! BARLAGE
+                   XM(J+1) = HM(J+1) * DT / ConstLatHeatFusion   ! BARLAGE
                 endif
              endif
           endif
-          XMF = XMF + HFUS * (WICE0(J) - MICE(J)) / DT
+          XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / DT
           ! snow melting rate
           if ( J < 1 ) then
              QMELT = QMELT + max( 0.0, (WICE0(J)-MICE(J)) ) / DT

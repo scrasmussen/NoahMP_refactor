@@ -48,15 +48,15 @@ contains
 
     !  effective porosity of snow
     do IZ = ISNOW+1, 0
-       SNICEV(IZ) = min( 1.0, SNICE(IZ)/(DZSNSO(IZ)*DENICE) )
+       SNICEV(IZ) = min( 1.0, SNICE(IZ)/(DZSNSO(IZ)*ConstDensityIce) )
        EPORE(IZ)  = 1.0 - SNICEV(IZ)
-       SNLIQV(IZ) = min( EPORE(IZ), SNLIQ(IZ)/(DZSNSO(IZ)*DENH2O) )
+       SNLIQV(IZ) = min( EPORE(IZ), SNLIQ(IZ)/(DZSNSO(IZ)*ConstDensityWater) )
     enddo
 
     ! thermal capacity of snow
     do IZ = ISNOW+1, 0
        BDSNOI(IZ) = (SNICE(IZ) + SNLIQ(IZ)) / DZSNSO(IZ)
-       CVSNO(IZ)  = CICE * SNICEV(IZ) + CWAT * SNLIQV(IZ)
+       CVSNO(IZ)  = ConstHeatCapacIce * SNICEV(IZ) + ConstHeatCapacWater * SNLIQV(IZ)
       ! CVSNO(IZ) = 0.525e06  ! constant
     enddo
 

@@ -2,7 +2,7 @@ module SnowLayerWaterComboMod
 
 !!! Update snow water and temperature for combined snowpack layer
 
-  use Machine, only : kind_noahmp
+  use Machine
   use ConstantDefineMod
 
   implicit none
@@ -43,16 +43,16 @@ contains
     DZC   = DZ + DZ2
     WICEC = WICE + WICE2
     WLIQC = WLIQ + WLIQ2
-    H     = (CICE*WICE  + CWAT*WLIQ)  * (T  - TFRZ) + HFUS * WLIQ
-    H2    = (CICE*WICE2 + CWAT*WLIQ2) * (T2 - TFRZ) + HFUS * WLIQ2
+    H     = (ConstHeatCapacIce*WICE  + ConstHeatCapacWater*WLIQ)  * (T  - ConstFreezePoint) + ConstLatHeatFusion * WLIQ
+    H2    = (ConstHeatCapacIce*WICE2 + ConstHeatCapacWater*WLIQ2) * (T2 - ConstFreezePoint) + ConstLatHeatFusion * WLIQ2
 
     HC = H + H2
     if ( HC < 0.0 ) then
-       TC = TFRZ + HC / (CICE*WICEC + CWAT*WLIQC)
-    else if ( HC <= HFUS*WLIQC ) then
-       TC = TFRZ
+       TC = ConstFreezePoint + HC / (ConstHeatCapacIce*WICEC + ConstHeatCapacWater*WLIQC)
+    else if ( HC <= ConstLatHeatFusion*WLIQC ) then
+       TC = ConstFreezePoint
     else
-       TC = TFRZ + (HC - HFUS*WLIQC) / (CICE*WICEC + CWAT*WLIQC)
+       TC = ConstFreezePoint + (HC - ConstLatHeatFusion*WLIQC) / (ConstHeatCapacIce*WICEC + ConstHeatCapacWater*WLIQC)
     endif
 
     DZ   = DZC

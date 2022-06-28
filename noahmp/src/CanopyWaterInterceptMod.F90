@@ -140,7 +140,7 @@ contains
     QRAIN   = QDRIPR + QTHROR
     QSNOW   = QDRIPS + QTHROS
     SNOWHIN = QSNOW / BDFALL
-    if ( (IST == 2) .and. (TG > TFRZ) ) then
+    if ( (IST == 2) .and. (TG > ConstFreezePoint) ) then
        QSNOW   = 0.0
        SNOWHIN = 0.0
     endif

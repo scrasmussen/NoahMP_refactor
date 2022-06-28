@@ -93,7 +93,7 @@ contains
        MOZ2 = 0.0
     else
        TVIR = (1.0 + 0.61 * SpecHumidityRefHeight) * TemperatureAirRefHeight
-       TMP1 = VKC * (GRAV / TVIR) * H / (RHOAIR * CPAIR)
+       TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (RHOAIR * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOL  = -1.0 * FV**3 / TMP1
        MOZ  = min( (ZLVL - ZPD) / MOL, 1.0 )
@@ -158,13 +158,13 @@ contains
     if ( abs(CHFH) <= MPE ) CHFH = MPE
     if ( abs(CM2FM2) <= MPE ) CM2FM2 = MPE
     if ( abs(CH2FH2) <= MPE ) CH2FH2 = MPE
-    CM  = VKC * VKC / (CMFM * CMFM)
-    CH  = VKC * VKC / (CMFM * CHFH)
-    CH2 = VKC * VKC / (CM2FM2 * CH2FH2)
+    CM  = ConstVonKarman * ConstVonKarman / (CMFM * CMFM)
+    CH  = ConstVonKarman * ConstVonKarman / (CMFM * CHFH)
+    CH2 = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
 
     ! friction velocity
     FV  = UR * sqrt(CM)
-    CH2 = VKC * FV / CH2FH2
+    CH2 = ConstVonKarman * FV / CH2FH2
 
     ! aerodynamic resistance
     RAMB = max( 1.0, 1.0 / (CM*UR) )

@@ -25,11 +25,8 @@ contains
 ! local varibles
     real(kind=kind_noahmp)             :: PAIR                   ! atm bottom level pressure (pa)
     real(kind=kind_noahmp)             :: PRCP_FROZEN            ! total frozen precipitation [mm/s] ! MB/AN : v3.7
-    real(kind=kind_noahmp), parameter  :: RHO_GRPL = 500.0       ! graupel bulk density [kg/m3] ! MB/AN : v3.7
-    real(kind=kind_noahmp), parameter  :: RHO_HAIL = 917.0       ! hail bulk density [kg/m3]    ! MB/AN : v3.7
-    real(kind=kind_noahmp), parameter  :: dir_frac = 0.7         ! direct solar radiation fraction
-    real(kind=kind_noahmp), parameter  :: vis_frac = 0.5         ! visible band solar radiation fraction
-    ! wet-bulb scheme Wang et al., 2019 GRL, C.He, 12/18/2020
+    real(kind=kind_noahmp)             :: dir_frac               ! direct solar radiation fraction
+    real(kind=kind_noahmp)             :: vis_frac               ! visible band solar radiation fraction
     real(kind=kind_noahmp)             :: ESATAIR                ! saturated vapor pressure of air
     real(kind=kind_noahmp)             :: LATHEA                 ! latent heat of vapor/sublimation
     real(kind=kind_noahmp)             :: GAMMA_b                ! (cp*p)/(eps*L)
@@ -69,12 +66,14 @@ contains
 ! ------------------------------------------------------------------------
 
     ! surface air quantities
-    PAIR   = PressureAirRefHeight  ! atm bottom level pressure (pa), jref: seems like PAIR should be P1000mb?
-    THAIR  = TemperatureAirRefHeight * (PressureAirRefHeight/PAIR)**(RAIR/CPAIR) 
+    PAIR   = PressureAirRefHeight  ! to be consistent with resistanceChen97 calculation (based on ground reference level)
+    THAIR  = TemperatureAirRefHeight * (PressureAirRefHeight/PAIR)**(ConstGasDryAir/ConstHeatCapacAir) 
     EAIR   = SpecHumidityRefHeight * PressureAirRefHeight / (0.622+0.378*SpecHumidityRefHeight)
-    RHOAIR = (PressureAirRefHeight - 0.378*EAIR) / (RAIR * TemperatureAirRefHeight)
+    RHOAIR = (PressureAirRefHeight - 0.378*EAIR) / (ConstGasDryAir * TemperatureAirRefHeight)
 
     ! downward solar radiation
+    dir_frac = 0.7
+    vis_frac = 0.5
     if ( COSZ <= 0.0 ) RadSWDownRefHeight = 0.0     ! filter by solar zenith angle
     SOLAD(1) = RadSWDownRefHeight * dir_frac       * vis_frac        ! direct  vis
     SOLAD(2) = RadSWDownRefHeight * dir_frac       * (1.0-vis_frac)  ! direct  nir
@@ -101,12 +100,12 @@ contains
 
     ! Jordan (1991)
     if ( OPT_SNF == 1 ) then
-       if ( TemperatureAirRefHeight > (TFRZ+2.5) ) then
+       if ( TemperatureAirRefHeight > (ConstFreezePoint+2.5) ) then
           FPICE = 0.0
        else
-          if ( TemperatureAirRefHeight <= (TFRZ+0.5) ) then
+          if ( TemperatureAirRefHeight <= (ConstFreezePoint+0.5) ) then
              FPICE = 1.0
-          elseif ( TemperatureAirRefHeight <= (TFRZ+2.0) ) then
+          elseif ( TemperatureAirRefHeight <= (ConstFreezePoint+2.0) ) then
              FPICE = 1.0 - (-54.632 + 0.2*TemperatureAirRefHeight)
           else
              FPICE = 0.6
@@ -116,7 +115,7 @@ contains
 
     ! BATS scheme
     if ( OPT_SNF == 2 ) then
-       if ( TemperatureAirRefHeight >= (TFRZ+2.2) ) then
+       if ( TemperatureAirRefHeight >= (ConstFreezePoint+2.2) ) then
           FPICE = 0.0
        else
           FPICE = 1.0
@@ -125,7 +124,7 @@ contains
 
     ! Simple temperature scheme
     if ( OPT_SNF == 3 ) then
-       if ( TemperatureAirRefHeight >= TFRZ ) then
+       if ( TemperatureAirRefHeight >= ConstFreezePoint ) then
           FPICE = 0.0
        else
           FPICE = 1.0
@@ -134,14 +133,14 @@ contains
 
     ! Use WRF microphysics output
     ! Hedstrom NR and JW Pomeroy (1998), Hydrol. Processes, 12, 1611-1625
-    BDFALL = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-TFRZ)/2.59) )   !fresh snow density !MB/AN: change to MIN  
+    BDFALL = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
     if ( OPT_SNF == 4 ) then
        PRCP_FROZEN = PrecipSnowRefHeight + PrecipGraupelRefHeight + PrecipHailRefHeight
        if ( (PrecipNonConvRefHeight > 0.0) .and. (PRCP_FROZEN > 0.0) ) then
           FPICE  = min( 1.0, PRCP_FROZEN/PrecipNonConvRefHeight )
           FPICE  = max( 0.0, FPICE )
-          BDFALL = BDFALL * (PrecipSnowRefHeight/PRCP_FROZEN) + RHO_GRPL * (PrecipGraupelRefHeight/PRCP_FROZEN) + &
-                   RHO_HAIL * (PrecipHailRefHeight/PRCP_FROZEN)
+          BDFALL = BDFALL * (PrecipSnowRefHeight/PRCP_FROZEN) + ConstDensityGraupel * (PrecipGraupelRefHeight/PRCP_FROZEN) + &
+                   ConstDensityHail * (PrecipHailRefHeight/PRCP_FROZEN)
        else
           FPICE = 0.0
        endif
@@ -149,13 +148,13 @@ contains
 
     ! wet-bulb scheme (Wang et al., 2019 GRL), C.He, 12/18/2020
     if ( OPT_SNF == 5 ) then
-       TDC = min( 50.0, max(-50.0,(TemperatureAirRefHeight - TFRZ)) )         ! Kelvin to degree Celsius with limit -50 to +50
-       if ( TemperatureAirRefHeight > TFRZ ) then
-          LATHEA = HVAP
+       TDC = min( 50.0, max(-50.0,(TemperatureAirRefHeight - ConstFreezePoint)) )         ! Kelvin to degree Celsius with limit -50 to +50
+       if ( TemperatureAirRefHeight > ConstFreezePoint ) then
+          LATHEA = ConstLatHeatVapor
        else
-          LATHEA = HSUB
+          LATHEA = ConstLatHeatSublim
        endif
-       GAMMA_b = CPAIR * PressureAirRefHeight / (0.622 * LATHEA)
+       GAMMA_b = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEA)
        TWET    = TDC - 5.0                                     ! first guess wetbulb temperature
        do ITER = 1, NITER
           ESATAIR = 610.8 * exp( (17.27*TWET) / (237.3+TWET) )

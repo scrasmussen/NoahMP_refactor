@@ -102,7 +102,7 @@ contains
 
        if ( PARSUN > 0.0 ) then
           FNF  = min( FOLN / max(MPE, FOLNMX), 1.0 )
-          TC   = TV - TFRZ
+          TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSUN
           J    = PPF * QE25
           KC   = KC25 * F1(AKC, TC)
@@ -156,7 +156,7 @@ contains
 
        if ( PARSHA > 0.0 ) then
           FNF  = min( FOLN / max(MPE, FOLNMX), 1.0 )
-          TC   = TV - TFRZ
+          TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSHA
           J    = PPF * QE25
           KC   = KC25 * F1(AKC, TC)
