@@ -30,7 +30,7 @@ module NoahmpIOVarType
     integer                                                ::  ISURBAN             ! land cover category for urban
     integer                                                ::  ISWATER             ! land cover category for water
     integer                                                ::  ISLAKE              ! land cover category for lake
-    integer                                                ::  IDVEG               ! dynamic vegetation (1 -> off ; 2 -> on) with opt_crs = 1   
+    integer                                                ::  IOPT_DVEG           ! dynamic vegetation   
     integer                                                ::  IOPT_CRS            ! canopy stomatal resistance (1-> Ball-Berry; 2->Jarvis)   
     integer                                                ::  IOPT_BTR            ! soil moisture factor for stomatal resistance (1-> Noah; 2-> CLM; 3-> SSiB)
     integer                                                ::  IOPT_RUNSRF         ! surface runoff and groundwater (1->SIMGM; 2->SIMTOP; 3->Schaake96; 4->BATS)

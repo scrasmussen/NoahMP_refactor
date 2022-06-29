@@ -4,7 +4,7 @@ module RunoffSurfaceDynamicVicMod
 !!! Reference: Liang, X., & Xie, Z. (2001). A new surface runoff parameterization with subgrid-scale
 !!! soil heterogeneity for land surface models. Advances in Water Resources, 24(9-10), 1173-1193.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilWaterInfilPhilipMod,        only : SoilWaterInfilPhilip
@@ -57,7 +57,7 @@ contains
      associate(                                                        &
                NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
                ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-               OPT_INFDV       => noahmp%config%nmlist%OPT_INFDV      ,& ! in,     options for infiltration in dynamic VIC runoff scheme
+               OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration,& ! in,     options for infiltration in dynamic VIC runoff scheme
                SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
                SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
                SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
@@ -101,11 +101,11 @@ contains
      INFLMAX = 0
 
      ! compute surface infiltration
-     if ( OPT_INFDV == 1 ) then
+     if ( OptDynVicInfiltration == 1 ) then
         call SoilWaterInfilPhilip(noahmp, DT, INFLMAX, FACC, FSUR)
-     else if ( OPT_INFDV == 2 ) then
+     else if ( OptDynVicInfiltration == 2 ) then
         call SoilWaterInfilGreenAmpt(noahmp, INFLMAX, FACC, FSUR)
-     else if ( OPT_INFDV == 3 ) then
+     else if ( OptDynVicInfiltration == 3 ) then
         call SoilWaterInfilSmithParlange(noahmp, INFLMAX, FACC, FSUR)
      endif
 

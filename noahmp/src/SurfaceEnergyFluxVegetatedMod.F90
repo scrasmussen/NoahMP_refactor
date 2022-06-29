@@ -74,9 +74,9 @@ contains
               DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              OPT_SFC         => noahmp%config%nmlist%OPT_SFC        ,& ! in,    options for surface layer drag coeff (CH & CM)
-              OPT_CRS         => noahmp%config%nmlist%OPT_CRS        ,& ! in,    options for canopy stomatal resistance
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
+              OptSurfaceDrag => noahmp%config%nmlist%OptSurfaceDrag,& ! in,    options for surface layer drag/exchange coefficient
+              OptStomataResistance => noahmp%config%nmlist%OptStomataResistance ,& ! in,    options for canopy stomatal resistance
+              OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
               RadLWDownRefHeight      => noahmp%forcing%RadLWDownRefHeight      ,& ! in,    downward longwave radiation [W/m2] at reference height
@@ -233,8 +233,8 @@ contains
        endif
 
        ! aerodyn resistances between heights zlvl and d+z0v
-       if ( OPT_SFC == 1 ) call ResistanceAboveCanopyMOST(noahmp, ITER, H, MOZSGN)
-       if ( OPT_SFC == 2 ) call ResistanceAboveCanopyChen97(noahmp, ITER)
+       if ( OptSurfaceDrag == 1 ) call ResistanceAboveCanopyMOST(noahmp, ITER, H, MOZSGN)
+       if ( OptSurfaceDrag == 2 ) call ResistanceAboveCanopyChen97(noahmp, ITER)
 
        ! aerodyn resistance between z0g and d+z0v, and leaf boundary layer resistance
        call ResistanceLeafToGround(noahmp, ITER, VAIE, HG)
@@ -252,13 +252,13 @@ contains
 
        ! stomatal resistance
        if ( ITER == 1 ) then
-          if ( OPT_CRS == 1 ) then  ! Ball-Berry
+          if ( OptStomataResistance == 1 ) then  ! Ball-Berry
              IndexShade = 0 ! sunlit case
              call ResistanceCanopyStomataBallBerry(noahmp, IndexShade)
              IndexShade = 1 ! shaded case
              call ResistanceCanopyStomataBallBerry(noahmp, IndexShade)
           endif
-          if ( OPT_CRS == 2 ) then  ! Jarvis
+          if ( OptStomataResistance == 2 ) then  ! Jarvis
              IndexShade = 0 ! sunlit case
              call ResistanceCanopyStomataJarvis(noahmp, IndexShade)
              IndexShade = 1 ! shaded case
@@ -355,10 +355,10 @@ contains
     !TAH = (CAH*TemperatureAirRefHeight + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
 
     ! if snow on ground and TGV > freezing point: reset TGV = freezing point. reevaluate ground fluxes.
-    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
+    if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
        if ( (SNOWH > 0.05) .and. (TGV > ConstFreezePoint) ) then
-          if ( OPT_STC == 1 ) TGV = ConstFreezePoint
-          if ( OPT_STC == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
+          if ( OptSnowSoilTempTime == 1 ) TGV = ConstFreezePoint
+          if ( OptSnowSoilTempTime == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
           IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
           SHG = CSH * (TGV        - TAH)
           EVG = CEV * (ESTG*RHSUR - EAH)
@@ -377,7 +377,7 @@ contains
     ! QFX = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*ConstHeatCapacAir/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
-    if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
+    if ( (OptSurfaceDrag == 1) .or. (OptSurfaceDrag == 2) ) then
        ! CAH2 = FV * 1.0 / ConstVonKarman * log((2.0+Z0H)/Z0H)
        ! CAH2 = FV * ConstVonKarman / log((2.0+Z0H)/Z0H)
        CAH2 = FV * ConstVonKarman / ( log((2.0+Z0H)/Z0H) - FH2 )

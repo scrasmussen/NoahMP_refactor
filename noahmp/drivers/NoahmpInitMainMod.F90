@@ -109,9 +109,9 @@ contains
               chstarxy          => NoahmpIO%CHSTARXY,          &
               NSOIL             => NoahmpIO%NSOIL,             &
               IOPT_RUNSRF       => NoahmpIO%IOPT_RUNSRF,       & 
-              iopt_crop         => NoahmpIO%crop_option,       &
-              iopt_irr          => NoahmpIO%irrigation_option, &
-              iopt_irrm         => NoahmpIO%irrigation_method, &
+              OptCropModel      => NoahmpIO%crop_option,       &
+              OptIrrigation       => NoahmpIO%irrigation_option, &
+              OptIrrigationMethod => NoahmpIO%irrigation_method, &
               sf_urban_physics  => NoahmpIO%sf_urban_physics,  &
               smoiseq           => NoahmpIO%smoiseq,           &
               smcwtdxy          => NoahmpIO%smcwtdxy,          &
@@ -333,7 +333,7 @@ contains
 
 ! Initialize crop for Liu crop model
 
-                if(iopt_crop == 1 ) then
+                if(OptCropModel == 1 ) then
                    cropcat    (i,j) = NoahmpIO%default_crop_table
                 if(croptype(i,5,j) >= 0.5) then
                    rtmassxy(i,j) = 0.0
@@ -363,21 +363,21 @@ contains
          end if
 
 ! Noah-MP irrigation scheme !pvk
-             if(iopt_irr >= 1 .and. iopt_irr <= 3) then
-                if(iopt_irrm == 0 .or. iopt_irrm ==1) then       ! sprinkler
+             if ( (OptIrrigation >= 1) .and. (OptIrrigation <= 3) ) then
+                if ( (OptIrrigationMethod == 0) .or. (OptIrrigationMethod ==1) ) then       ! sprinkler
                    irnumsi(i,j) = 0
                    irwatsi(i,j) = 0.
                    ireloss(i,j) = 0.
                    irrsplh(i,j) = 0.     
-                else if (iopt_irrm == 0 .or. iopt_irrm ==2) then ! micro or drip
+                elseif ( (OptIrrigationMethod == 0) .or. (OptIrrigationMethod == 2) ) then ! micro or drip
                    irnummi(i,j) = 0
                    irwatmi(i,j) = 0.
                    irmivol(i,j) = 0.
-                else if (iopt_irrm == 0 .or. iopt_irrm ==3) then ! flood 
+                elseif ( (OptIrrigationMethod == 0) .or. (OptIrrigationMethod == 3) ) then ! flood 
                    irnumfi(i,j) = 0
                    irwatfi(i,j) = 0.
                    irfivol(i,j) = 0.
-                end if
+                endif
              end if
             endif
           enddo

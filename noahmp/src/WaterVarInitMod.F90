@@ -423,15 +423,13 @@ contains
                                                  /(NoahmpIO%SNICEXY(I,ISNOW+1:0,J) &
                                                  + NoahmpIO%SNLIQXY(I,ISNOW+1:0,J))
 
-    if(NoahmpIO%iopt_soil == 3 .and. .not. noahmp%config%domain%urban_flag) then
+    if( (noahmp%config%nmlist%OptSoilProperty == 3) .and. (.not. noahmp%config%domain%urban_flag) ) then
        sand = 0.01 * NoahmpIO%soilcomp(I,1:4,J)
        clay = 0.01 * NoahmpIO%soilcomp(I,5:8,J)
        orgm = 0.0
-
-       if(NoahmpIO%iopt_pedo == 1) call pedotransfer_sr2006(NoahmpIO,noahmp,              &
-                                                            noahmp%config%domain%SOILTYP, &
-                                                            sand,clay,orgm)
-    end if
+       if (noahmp%config%nmlist%OptPedotransfer == 1) &
+         call pedotransfer_sr2006(NoahmpIO,noahmp,noahmp%config%domain%SOILTYP,sand,clay,orgm)
+    endif
 
     end associate
 

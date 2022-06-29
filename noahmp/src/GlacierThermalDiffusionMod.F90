@@ -6,7 +6,7 @@ module GlacierThermalDiffusionMod
 !!! are coupled in solving the equations. Also compute/prepare the matrix
 !!! coefficients for the tri-diagonal matrix of the implicit time scheme.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -46,8 +46,8 @@ contains
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,    depth of snow/soil layer-bottom (m)
-              OPT_TBOT        => noahmp%config%nmlist%OPT_TBOT       ,& ! in,    options for lower boundary condition of soil temperature
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
+              OptSoilTemperatureBottom => noahmp%config%nmlist%OptSoilTemperatureBottom,& ! in,    options for lower boundary condition of soil temperature
+              OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme
               TemperatureSoilBottom => noahmp%forcing%TemperatureSoilBottom,& ! in,    bottom boundary soil temperature [K]
               ZBOT            => noahmp%energy%state%ZBOTSNO         ,& ! in,    depth of lower boundary condition (m) from snow surface
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
@@ -92,10 +92,10 @@ contains
        elseif ( K == NSOIL ) then
           DENOM(K) = (ZSNSO(K-1) - ZSNSO(K)) * HCPCT(K)
           TEMP1    =  ZSNSO(K-1) - ZSNSO(K)
-          if ( OPT_TBOT == 1 ) then
+          if ( OptSoilTemperatureBottom == 1 ) then
              BOTFLX = 0.0
           endif
-          if ( OPT_TBOT == 2 ) then
+          if ( OptSoilTemperatureBottom == 2 ) then
              DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (ZSNSO(K-1)+ZSNSO(K)) - ZBOT)
              BOTFLX   = -DF(K) * DTSDZ(K)
           endif
@@ -108,10 +108,10 @@ contains
        if ( K == (ISNOW+1) ) then
           AI(K) =   0.0
           CI(K) = - DF(K)   * DDZ(K) / DENOM(K)
-          if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
+          if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
              BI(K) = - CI(K)
           endif
-          if ( OPT_STC == 2 ) then
+          if ( OptSnowSoilTempTime == 2 ) then
              BI(K) = - CI(K) + DF(K) / ( 0.5*ZSNSO(K)*ZSNSO(K)*HCPCT(K) )
           endif
        elseif ( K < NSOIL ) then

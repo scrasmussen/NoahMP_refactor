@@ -41,7 +41,7 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              OPT_RUNSUB      => noahmp%config%nmlist%OPT_RUNSUB     ,& ! in,     options for drainage and subsurface runoff
+              OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               ZWT             => noahmp%water%state%ZWT              ,& ! in,     water table depth [m]
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
@@ -87,8 +87,8 @@ contains
     !  excessive water above saturation in a layer is moved to
     !  its unsaturated layer like in a bucket
 
-    ! gmm with opt_run=5 there is soil moisture below nsoil, to the water table
-    if ( OPT_RUNSUB == 5 ) then
+    ! for MMF scheme, there is soil moisture below nsoil, to the water table
+    if ( OptRunoffSubsurface == 5 ) then
        ! update smcwtd
        if ( ZWT < ZSOIL(NSOIL)-DZSNSO(NSOIL) ) then
           ! accumulate qdrain to update deep water table and soil moisture later

@@ -56,8 +56,8 @@ contains
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
-              OPT_SFC         => noahmp%config%nmlist%OPT_SFC        ,& ! in,    options for surface layer drag coeff (CH & CM)
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
+              OptSurfaceDrag  => noahmp%config%nmlist%OptSurfaceDrag ,& ! in,    options for surface layer drag/exchange coefficient
+              OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
@@ -129,8 +129,8 @@ contains
        endif
 
        ! aerodyn resistances between heights zlvl and d+z0v
-       if ( OPT_SFC == 1 ) call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
-       if ( OPT_SFC == 2 ) call ResistanceBareGroundChen97(noahmp, ITER)
+       if ( OptSurfaceDrag == 1 ) call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
+       if ( OptSurfaceDrag == 2 ) call ResistanceBareGroundChen97(noahmp, ITER)
 
        ! conductance variables for diagnostics         
        EMB = 1.0 / RAMB
@@ -180,10 +180,10 @@ contains
     enddo loop3 ! end stability iteration
 
     ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
-    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
+    if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
        if ( (SNOWH > 0.05) .and. (TGB > ConstFreezePoint) ) then
-          if ( OPT_STC == 1 ) TGB = ConstFreezePoint
-          if ( OPT_STC == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
+          if ( OptSnowSoilTempTime == 1 ) TGB = ConstFreezePoint
+          if ( OptSnowSoilTempTime == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
           IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
           SHB = CSH * (TGB        - TemperatureAirRefHeight)
           EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
@@ -196,7 +196,7 @@ contains
     TAUYB = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! 2m air temperature
-    if ( (OPT_SFC == 1) .or. (OPT_SFC == 2) ) then
+    if ( (OptSurfaceDrag == 1) .or. (OptSurfaceDrag == 2) ) then
        !EHB2 = FV * ConstVonKarman / LOG((2.0+Z0H)/Z0H)
        EHB2 = FV * ConstVonKarman / ( log((2.0+Z0H)/Z0H) - FH2 )
        CQ2B = EHB2

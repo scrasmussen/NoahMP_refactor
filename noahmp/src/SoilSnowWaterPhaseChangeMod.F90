@@ -41,7 +41,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OPT_FRZ         => noahmp%config%nmlist%OPT_FRZ        ,& ! in,    options for supercooled liquid water
+              OptSoilSupercoolWater => noahmp%config%nmlist%OptSoilSupercoolWater,& ! in,    options for soil supercooled liquid water
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
@@ -104,14 +104,14 @@ contains
     !--- compute soil supercool water content
     if ( IST == 1 ) then ! land points
        do J = 1, NSOIL
-          if ( OPT_FRZ == 1 ) then
+          if ( OptSoilSupercoolWater == 1 ) then
              if ( STC(J) < ConstFreezePoint ) then
                 SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
                 SUPERCOOL(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
                 SUPERCOOL(J) = SUPERCOOL(J) * DZSNSO(J) * 1000.0        !(mm)
              endif
           endif
-          if ( OPT_FRZ == 2 ) then
+          if ( OptSoilSupercoolWater == 2 ) then
                call SoilWaterSupercoolLiquid(noahmp, J, SUPERCOOL(J), STC(J), SMC(J), SH2O(J))
                SUPERCOOL(J) = SUPERCOOL(J) * DZSNSO(J) * 1000.0        !(mm)
           endif

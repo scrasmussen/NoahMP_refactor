@@ -36,7 +36,7 @@ module EnergyMainMod
 !            -------------------------------------- approach overlaps too much shadows.
 ! --------------------------------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowCoverGroundNiu07Mod,        only : SnowCoverGroundNiu07
@@ -79,7 +79,7 @@ contains
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,   wind speed [m/s] in northward direction at reference height
               RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
+              OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
@@ -303,7 +303,7 @@ contains
     call SoilSnowTemperatureMain(noahmp)
 
     ! adjusting suface temperature based on snow condition
-    if ( OPT_STC == 2 ) then
+    if ( OptSnowSoilTempTime == 2 ) then
        if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
           TGV = ConstFreezePoint
           TGB = ConstFreezePoint

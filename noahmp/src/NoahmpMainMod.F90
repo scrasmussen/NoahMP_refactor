@@ -3,7 +3,7 @@ module NoahmpMainMod
 !!! Main NoahMP module including all column model processes
 !!! atmos forcing -> canopy intercept -> precip heat advect -> main energy -> main water -> main biogeochemistry -> balance check
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use AtmosForcingMod,            only : ProcessAtmosForcing
@@ -39,7 +39,7 @@ contains
     associate(                                                        &
               DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE    ,& ! in,     flag to activate dynamic vegetation model
               CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE    ,& ! in,     flag to activate dynamic crop model
-              OPT_CROP        => noahmp%config%nmlist%OPT_CROP       ,& ! in,     crop option
+              OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,     option for crop model
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] for sprinkler
               CROPLU          => noahmp%config%domain%CROPLU          & ! out,    flag to identify croplands
              )
@@ -106,7 +106,7 @@ contains
     !--------------------------------------------------------------------- 
 
     if ( DVEG_ACTIVE .eqv. .true. ) call BiochemNatureVegMain(noahmp)                     ! for natural vegetation
-    if ( (OPT_CROP == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
+    if ( (OptCropModel == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
 
     !---------------------------------------------------------------------
     ! Error check for energy and water balance

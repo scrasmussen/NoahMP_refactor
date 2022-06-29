@@ -3,7 +3,7 @@ module SoilWaterMainMod
 !!! Main soil water module including all soil water processes & update soil moisture
 !!! surface runoff, infiltration, soil water diffusion, subsurface runoff, tile drainage
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use RunoffSurfaceTopModelGrdMod,       only : RunoffSurfaceTopModelGrd
@@ -64,9 +64,9 @@ contains
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
-              OPT_RUNSRF      => noahmp%config%nmlist%OPT_RUNSRF     ,& ! in,     options for surface runoff
-              OPT_RUNSUB      => noahmp%config%nmlist%OPT_RUNSUB     ,& ! in,     options for subsurface runoff
-              OPT_TDRN        => noahmp%config%nmlist%OPT_TDRN       ,& ! in,     options for tile drainage
+              OptRunoffSurface => noahmp%config%nmlist%OptRunoffSurface ,& ! in,     options for surface runoff
+              OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface,& ! in,     options for subsurface runoff
+              OptTileDrainage => noahmp%config%nmlist%OptTileDrainage,& ! in,     options for tile drainage
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
               TDFRACMP        => noahmp%water%state%TDFRACMP         ,& ! in,     tile drainage map(fraction)
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
@@ -131,20 +131,20 @@ contains
     enddo
 
     ! subsurface runoff for runoff scheme option 2
-    if ( OPT_RUNSUB == 2 ) call RunoffSubSurfaceEquiWaterTable(noahmp)
+    if ( OptRunoffSubsurface == 2 ) call RunoffSubSurfaceEquiWaterTable(noahmp)
 
     !!! surface runoff and infiltration rate using different schemes
     ! jref impermable surface at urban
     if ( URBAN_FLAG .eqv. .true. ) FCR(1) = 0.95
 
-    if ( OPT_RUNSRF == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
-    if ( OPT_RUNSRF == 2 ) call RunoffSurfaceTopModelEqui(noahmp)
-    if ( OPT_RUNSRF == 3 ) call RunoffSurfaceFreeDrain(noahmp,DT)
-    if ( OPT_RUNSRF == 4 ) call RunoffSurfaceBATS(noahmp)
-    if ( OPT_RUNSRF == 5 ) call RunoffSurfaceTopModelMMF(noahmp)
-    if ( OPT_RUNSRF == 6 ) call RunoffSurfaceVIC(noahmp,DT)
-    if ( OPT_RUNSRF == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DT)
-    if ( OPT_RUNSRF == 8 ) call RunoffSurfaceDynamicVic(noahmp,DT,FACC)
+    if ( OptRunoffSurface == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
+    if ( OptRunoffSurface == 2 ) call RunoffSurfaceTopModelEqui(noahmp)
+    if ( OptRunoffSurface == 3 ) call RunoffSurfaceFreeDrain(noahmp,DT)
+    if ( OptRunoffSurface == 4 ) call RunoffSurfaceBATS(noahmp)
+    if ( OptRunoffSurface == 5 ) call RunoffSurfaceTopModelMMF(noahmp)
+    if ( OptRunoffSurface == 6 ) call RunoffSurfaceVIC(noahmp,DT)
+    if ( OptRunoffSurface == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DT)
+    if ( OptRunoffSurface == 8 ) call RunoffSurfaceDynamicVic(noahmp,DT,FACC)
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
@@ -160,10 +160,10 @@ contains
 
     do ITER = 1, NITER
        if ( QINSUR > 0.0 ) then
-          if ( OPT_RUNSRF == 3 ) call RunoffSurfaceFreeDrain(noahmp,DTFINE)
-          if ( OPT_RUNSRF == 6 ) call RunoffSurfaceVIC(noahmp,DTFINE)
-          if ( OPT_RUNSRF == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DTFINE)
-          if ( OPT_RUNSRF == 8 ) call RunoffSurfaceDynamicVic(noahmp,DTFINE,FACC)
+          if ( OptRunoffSurface == 3 ) call RunoffSurfaceFreeDrain(noahmp,DTFINE)
+          if ( OptRunoffSurface == 6 ) call RunoffSurfaceVIC(noahmp,DTFINE)
+          if ( OptRunoffSurface == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DTFINE)
+          if ( OptRunoffSurface == 8 ) call RunoffSurfaceDynamicVic(noahmp,DTFINE,FACC)
        endif
        call SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
        call SoilMoistureSolver(noahmp, DTFINE, AI, BI, CI, RHSTT)
@@ -178,15 +178,15 @@ contains
     QDRAIN = QDRAIN * 1000.0
 
     ! compute tile drainage ! pvk
-    if ( (OPT_TDRN == 1) .and. (TDFRACMP > 0.3) .and. (OPT_RUNSRF == 3) ) then
+    if ( (OptTileDrainage == 1) .and. (TDFRACMP > 0.3) .and. (OptRunoffSurface == 3) ) then
        call TileDrainageSimple(noahmp)  ! simple tile drainage
     endif
-    if ( (OPT_TDRN == 2) .and. (TDFRACMP > 0.1) .and. (OPT_RUNSRF == 3) ) then
+    if ( (OptTileDrainage == 2) .and. (TDFRACMP > 0.1) .and. (OptRunoffSurface == 3) ) then
        call TileDrainageHooghoudt(noahmp)  ! Hooghoudt tile drain
     END IF
 
     ! removal of soil water due to subsurface runoff (option 2)
-    if ( OPT_RUNSUB == 2 ) then
+    if ( OptRunoffSubsurface == 2 ) then
        WTSUB = 0.0
        do K = 1, NSOIL
           WTSUB = WTSUB + WCND(K) * DZSNSO(K)
@@ -199,7 +199,7 @@ contains
 
     ! Limit MLIQ to be greater than or equal to watmin.
     ! Get water needed to bring MLIQ equal WATMIN from lower layer.
-    if ( OPT_RUNSUB /= 1 ) then
+    if ( OptRunoffSubsurface /= 1 ) then
        do IZ = 1, NSOIL
           MLIQ(IZ) = SH2O(IZ) * DZSNSO(IZ) * 1000.0
        enddo
@@ -223,19 +223,19 @@ contains
        MLIQ(IZ) = MLIQ(IZ) + XS
        RUNSUB   = RUNSUB - XS/DT
 
-       if ( OPT_RUNSUB == 5 ) DEEPRECH = DEEPRECH - XS * 1.0e-3
+       if ( OptRunoffSubsurface == 5 ) DEEPRECH = DEEPRECH - XS * 1.0e-3
 
        do IZ = 1, NSOIL
           SH2O(IZ) = MLIQ(IZ) / (DZSNSO(IZ)*1000.0)
        enddo
-    endif ! OPT_RUNSUB /= 1
+    endif ! OptRunoffSubsurface /= 1
 
     ! compute groundwater and subsurface runoff
-    if ( OPT_RUNSUB == 1 ) call RunoffSubSurfaceGroundWater(noahmp)
+    if ( OptRunoffSubsurface == 1 ) call RunoffSubSurfaceGroundWater(noahmp)
 
     ! compute subsurface runoff based on drainage rate
-    if ( (OPT_RUNSUB == 3) .or. (OPT_RUNSUB == 4) .or. (OPT_RUNSUB == 6) .or. &
-         (OPT_RUNSUB == 7) .or. (OPT_RUNSUB == 8) ) then
+    if ( (OptRunoffSubsurface == 3) .or. (OptRunoffSubsurface == 4) .or. (OptRunoffSubsurface == 6) .or. &
+         (OptRunoffSubsurface == 7) .or. (OptRunoffSubsurface == 8) ) then
          call RunoffSubSurfaceDrainage(noahmp)
     endif
 
@@ -245,7 +245,7 @@ contains
     enddo
 
     ! compute subsurface runoff and shallow water table for MMF scheme
-    if ( OPT_RUNSUB == 5 ) call RunoffSubSurfaceShallowWaterMMF(noahmp)
+    if ( OptRunoffSubsurface == 5 ) call RunoffSubSurfaceShallowWaterMMF(noahmp)
 
     end associate
 

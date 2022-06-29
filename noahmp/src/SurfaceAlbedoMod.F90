@@ -3,7 +3,7 @@ module SurfaceAlbedoMod
 !!! Compute total surface albedo and vegetation radiative fluxes 
 !!! per unit incoming direct and diffuse radiation and sunlit fraction of canopy
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowAgingBatsMod,            only : SnowAgingBats
@@ -40,7 +40,7 @@ contains
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
               COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
-              OPT_ALB         => noahmp%config%nmlist%OPT_ALB        ,& ! in,    options for ground snow surface albedo
+              OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               RHOL            => noahmp%energy%param%RHOL            ,& ! in,    leaf reflectance: 1=vis, 2=nir
               RHOS            => noahmp%energy%param%RHOS            ,& ! in,    stem reflectance: 1=vis, 2=nir
               TAUL            => noahmp%energy%param%TAUL            ,& ! in,    leaf transmittance: 1=vis, 2=nir
@@ -119,8 +119,8 @@ contains
        call SnowAgingBats(noahmp)
 
        ! snow albedos: only if COSZ > 0 and FSNO > 0
-       if ( OPT_ALB == 1 )  call SnowAlbedoBats(noahmp)
-       if ( OPT_ALB == 2 )  call SnowAlbedoClass(noahmp)
+       if ( OptSnowAlbedo == 1 )  call SnowAlbedoBats(noahmp)
+       if ( OptSnowAlbedo == 2 )  call SnowAlbedoClass(noahmp)
 
        ! ground surface albedo
        call GroundAlbedo(noahmp)

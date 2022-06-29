@@ -5,7 +5,7 @@ module CanopyRadiationTwoStreamMod
 !!! for unit incoming direct or diffuse flux given an underlying ground with known albedo.
 !!! Reference for the modified two-stream scheme Niu and Yang (2004), JGR
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -59,7 +59,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OPT_RAD         => noahmp%config%nmlist%OPT_RAD        ,& ! in,    options for canopy radiation transfer
+              OptCanopyRadiationTransfer => noahmp%config%nmlist%OptCanopyRadiationTransfer,& ! in,    options for canopy radiation transfer
               COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
               FWET            => noahmp%water%state%FWET             ,& ! in,    wetted or snowed fraction of the canopy
               RC              => noahmp%energy%param%RC              ,& ! in,    tree crown radius (m)
@@ -103,7 +103,7 @@ contains
        GAP   = 1.0
        KOPEN = 1.0
     else
-       if ( OPT_RAD == 1 ) then
+       if ( OptCanopyRadiationTransfer == 1 ) then
           DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * RC**2)
           HD      = HVT - HVB
           BB      = 0.5 * HD
@@ -116,11 +116,11 @@ contains
           GAP     = min( 1.0-FVEG, BGAP+WGAP )
           KOPEN   = 0.05
        endif
-       if ( OPT_RAD == 2 ) then
+       if ( OptCanopyRadiationTransfer == 2 ) then
           GAP     = 0.0
           KOPEN   = 0.0
        endif
-       if ( OPT_RAD == 3 ) then
+       if ( OptCanopyRadiationTransfer == 3 ) then
           GAP     = 1.0 - FVEG
           KOPEN   = 1.0 - FVEG
        endif

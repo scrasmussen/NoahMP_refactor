@@ -59,7 +59,7 @@ contains
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
               ZWT             => noahmp%water%state%ZWT              ,& ! inout,  water table depth [m]
               WA              => noahmp%water%state%WA               ,& ! inout,  water storage in aquifer [mm]
-              WT              => noahmp%water%state%WT               ,& ! inout,  water storage in aquifer + saturated soil [mm]             
+              WT              => noahmp%water%state%WT               ,& ! inout,  water storage in aquifer + saturated soil [mm]
               FFF             => noahmp%water%param%FFF              ,& ! inout,  runoff decay factor (m-1)
               RSBMX           => noahmp%water%param%RSBMX            ,& ! inout,  baseflow coefficient [mm/s]
               QIN             => noahmp%water%flux%QIN               ,& ! out,    groundwater recharge [mm/s]

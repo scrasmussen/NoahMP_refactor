@@ -63,8 +63,8 @@ contains
     noahmp%forcing%TemperatureAirRefHeight = NoahmpIO%T_PHY(I,1,J)
     noahmp%forcing%WindEastwardRefHeight   = NoahmpIO%U_PHY(I,1,J)
     noahmp%forcing%WindNorthwardRefHeight  = NoahmpIO%V_PHY(I,1,J)
-    noahmp%forcing%SpecHumidityRefHeight   = NoahmpIO%QV_CURR(I,1,J) / (1.0+NoahmpIO%QV_CURR(I,1,J))  ! convert from mixing ratio to specific humidity
-    noahmp%forcing%PressureAirRefHeight    = (NoahmpIO%P8W(I,1,J) + NoahmpIO%P8W(I,2,J)) * 0.5        ! air pressure [Pa] at middle point of lowest atmos model layer
+    noahmp%forcing%SpecHumidityRefHeight   = NoahmpIO%QV_CURR(I,1,J)/(1.0+NoahmpIO%QV_CURR(I,1,J))  ! convert from mixing ratio to specific humidity
+    noahmp%forcing%PressureAirRefHeight    = (NoahmpIO%P8W(I,1,J) + NoahmpIO%P8W(I,2,J)) * 0.5      ! air pressure [Pa] at middle point of lowest atmos model layer
     noahmp%forcing%PressureAirSurface      = NoahmpIO%P8W(I,1,J)
     noahmp%forcing%RadLWDownRefHeight      = NoahmpIO%GLW(I,J)
     noahmp%forcing%RadSWDownRefHeight      = NoahmpIO%SWDOWN(I,J)

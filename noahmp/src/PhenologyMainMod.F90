@@ -3,7 +3,7 @@ module PhenologyMainMod
 !!! Main Phenology module to estimate vegetation phenology (LAI, SAI, FVEG)
 !!! considering vegeation canopy being buries by snow and evolution in time
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -35,8 +35,8 @@ contains
 
 !---------------------------------------------------------------------
     associate(                                                     &
-              DVEG            => noahmp%config%nmlist%OPT_DVEG    ,& ! in,    dynamic vegetation option
-              OPT_CROP        => noahmp%config%nmlist%OPT_CROP    ,& ! in,    crop option
+              OptDynamicVeg   => noahmp%config%nmlist%OptDynamicVeg  ,& ! in,    dynamic vegetation option
+              OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,    crop model option
               VEGTYP          => noahmp%config%domain%VEGTYP      ,& ! in,    vegetation type 
               CROPTYPE        => noahmp%config%domain%CROPTYP     ,& ! in,    crop type 
               ISICE           => noahmp%config%domain%ISICE       ,& ! in,    land ice flag
@@ -72,7 +72,7 @@ contains
     if ( CROPTYPE == 0 ) then
 
        ! no dynamic vegetation, use table LAI
-       if ( (DVEG == 1) .or. (DVEG == 3) .or. (DVEG == 4) ) then
+       if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 4) ) then
           if ( LAT >= 0.0 ) then
             ! Northern Hemisphere
             DAY = JULIAN
@@ -93,7 +93,7 @@ contains
        endif
 
        ! no dynamic vegetation, use input LAI time series
-       if ( (DVEG == 7) .or. (DVEG == 8) .or. (DVEG == 9) ) then
+       if ( (OptDynamicVeg == 7) .or. (OptDynamicVeg == 8) .or. (OptDynamicVeg == 9) ) then
           SAI = max( 0.05, 0.1*LAI )   ! when reading LAI, set SAI to 10% LAI, but not below 0.05 MB: v3.8
           if ( LAI < 0.05 ) SAI = 0.0  ! if LAI below minimum, make sure SAI = 0
        endif
@@ -134,22 +134,22 @@ contains
     ! compute vegetation fraction
     ! input green vegetation fraction should be consistent with LAI
     ! use FVEG = SHDFAC from input
-    if ( (DVEG == 1) .or. (DVEG == 6) .or. (DVEG == 7) ) then
+    if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 6) .or. (OptDynamicVeg == 7) ) then
        FVEG = SHDFAC
     ! computed FVEG from LAI & SAI
-    elseif ( (DVEG == 2) .or. (DVEG == 3) .or. (DVEG == 8) ) then
+    elseif ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 8) ) then
        FVEG = 1.0 - exp(-0.52 * (LAI + SAI))
     ! use yearly maximum vegetation fraction
-    elseif ( (DVEG == 4) .or. (DVEG == 5) .or. (DVEG == 9) ) then
+    elseif ( (OptDynamicVeg == 4) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 9) ) then
        FVEG = SHDMAX
     ! outside existing vegetation options
     else
-       write(*,*) "Un-recognized dynamic vegetation option (DVEG)... "
-       !call wrf_error_fatal("Namelist parameter DVEG unknown") 
+       write(*,*) "Un-recognized dynamic vegetation option (OptDynamicVeg)... "
+       !call wrf_error_fatal("Namelist parameter OptDynamicVeg unknown") 
        stop "error"
     endif
     ! use maximum vegetation fraction for crop run
-    if ( (OPT_CROP > 0) .and. (CROPTYPE > 0) ) then
+    if ( (OptCropModel > 0) .and. (CROPTYPE > 0) ) then
        FVEG = SHDMAX
     endif
 
@@ -161,8 +161,8 @@ contains
     ! determine if activate dynamic vegetation or crop run
     CROP_ACTIVE = .false.
     DVEG_ACTIVE = .false.
-    if ( (DVEG == 2) .or. (DVEG == 5) .or. (DVEG == 6) ) DVEG_ACTIVE = .true.
-    if ( (OPT_CROP > 0) .and. (CROPTYPE > 0) ) then
+    if ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 6) ) DVEG_ACTIVE = .true.
+    if ( (OptCropModel > 0) .and. (CROPTYPE > 0) ) then
        CROP_ACTIVE = .true.
        DVEG_ACTIVE = .false.
     endif

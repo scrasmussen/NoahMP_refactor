@@ -3,11 +3,11 @@ module IrrigationTriggerMod
 !!! Trigger irrigation if soil moisture less than the management allowable deficit (MAD)
 !!! and estimate irrigation water depth (m) using current rootzone soil moisture and field 
 !!! capacity. There are two options here to trigger the irrigation scheme based on MAD
-!!! OPT_IRR = 1 -> if irrigated fraction > threshold fraction
-!!! OPT_IRR = 2 -> if irrigated fraction > threshold fraction and within crop season
-!!! OPT_IRR = 3 -> if irrigated fraction > threshold fraction and LAI > threshold LAI
+!!! OptIrrigation = 1 -> if irrigated fraction > threshold fraction
+!!! OptIrrigation = 2 -> if irrigated fraction > threshold fraction and within crop season
+!!! OptIrrigation = 3 -> if irrigated fraction > threshold fraction and LAI > threshold LAI
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -40,8 +40,8 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface (m)
               JULIAN          => noahmp%config%domain%JULIAN         ,& ! in,     julian day of the year
-              OPT_IRR         => noahmp%config%nmlist%OPT_IRR        ,& ! in,     irrigation option
-              OPT_IRRM        => noahmp%config%nmlist%OPT_IRRM       ,& ! in,     irrigation method option
+              OptIrrigation   => noahmp%config%nmlist%OptIrrigation  ,& ! in,     irrigation option
+              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod,& ! in,     irrigation method option
               PLTDAY          => noahmp%biochem%param%PLTDAY         ,& ! in,     Planting day (day of year)
               HSDAY           => noahmp%biochem%param%HSDAY          ,& ! in,     Harvest date (day of year)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
@@ -70,11 +70,11 @@ contains
     IRR_ACTIVE = .true.
 
     ! check if irrigation is can be activated or not
-    if ( OPT_IRR == 2 ) then ! activate irrigation if within crop season
+    if ( OptIrrigation == 2 ) then ! activate irrigation if within crop season
        if ( (JULIAN < PLTDAY) .or. (JULIAN > (HSDAY-IRR_HAR)) ) IRR_ACTIVE = .false.
-    elseif ( OPT_IRR == 3) then ! activate if LAI > threshold LAI
+    elseif ( OptIrrigation == 3) then ! activate if LAI > threshold LAI
        if ( LAI < IRR_LAI) IRR_ACTIVE = .false.
-    elseif ( (OPT_IRR > 3) .or. (OPT_IRR < 1) ) then
+    elseif ( (OptIrrigation > 3) .or. (OptIrrigation < 1) ) then
        IRR_ACTIVE = .false.
     endif
 
@@ -96,21 +96,21 @@ contains
          IRRWATAMT = ( SMCLIM - SMCAVL ) * IRRFRA * FVEG
 
          ! sprinkler irrigation amount (m) based on 2D SIFAC
-         if ( (IRAMTSI == 0.0) .and. (SIFAC > 0.0) .and. (OPT_IRRM == 0) ) then
+         if ( (IRAMTSI == 0.0) .and. (SIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
             IRAMTSI = SIFAC * IRRWATAMT
             IRCNTSI = IRCNTSI + 1
          ! sprinkler irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTSI == 0.0) .and. (OPT_IRRM == 1) ) then
+         elseif ( (IRAMTSI == 0.0) .and. (OptIrrigationMethod == 1) ) then
             IRAMTSI = IRRWATAMT
             IRCNTSI = IRCNTSI + 1
          endif
 
          ! micro irrigation amount (m) based on 2D MIFAC
-         if ( (IRAMTMI == 0.0) .and. (MIFAC > 0.0) .and. (OPT_IRRM == 0) ) then
+         if ( (IRAMTMI == 0.0) .and. (MIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
             IRAMTMI = MIFAC * IRRWATAMT
             IRCNTMI = IRCNTMI + 1
          ! micro irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTMI == 0.0) .and. (OPT_IRRM == 2) ) then
+         elseif ( (IRAMTMI == 0.0) .and. (OptIrrigationMethod == 2) ) then
             IRAMTMI = IRRWATAMT
             IRCNTMI = IRCNTMI + 1
          endif
@@ -119,11 +119,11 @@ contains
          ! third layer to FC. As water moves from one end of the field to
          ! another, surface layers will be saturated. 
          ! flood irrigation amount (m) based on 2D FIFAC
-         if ( (IRAMTFI == 0.0) .and. (FIFAC > 0.0) .and. (OPT_IRRM == 0) ) then
+         if ( (IRAMTFI == 0.0) .and. (FIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
             IRAMTFI = FIFAC * IRRWATAMT * (FILOSS + 1)
             IRCNTFI = IRCNTFI + 1
          !flood irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTFI == 0.0) .and. (OPT_IRRM == 3) ) then
+         elseif ( (IRAMTFI == 0.0) .and. (OptIrrigationMethod == 3) ) then
             IRAMTFI = IRRWATAMT * (FILOSS + 1)
             IRCNTFI = IRCNTFI + 1
          endif

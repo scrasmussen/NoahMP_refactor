@@ -2,7 +2,7 @@ module SurfaceAlbedoGlacierMod
 
 !!! Compute glacier surface albedo
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowAgingBatsMod,       only : SnowAgingBats
@@ -33,7 +33,7 @@ contains
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
               COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
-              OPT_ALB         => noahmp%config%nmlist%OPT_ALB        ,& ! in,    options for ground snow surface albedo
+              OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,   ground albedo (direct beam: vis, nir)
               ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! out,   ground albedo (diffuse: vis, nir)
               ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,   snow albedo for direct(1=vis, 2=nir)
@@ -60,8 +60,8 @@ contains
        call SnowAgingBats(noahmp)
 
        ! snow albedos: only if COSZ > 0 and FSNO > 0
-       if ( OPT_ALB == 1 )  call SnowAlbedoBats(noahmp)
-       if ( OPT_ALB == 2 )  call SnowAlbedoClass(noahmp)
+       if ( OptSnowAlbedo == 1 )  call SnowAlbedoBats(noahmp)
+       if ( OptSnowAlbedo == 2 )  call SnowAlbedoClass(noahmp)
 
        ! ground albedo
        call GroundAlbedoGlacier(noahmp)

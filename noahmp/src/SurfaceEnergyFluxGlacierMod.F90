@@ -56,8 +56,8 @@ contains
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of glacier/soil layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme (only layer 1)
-              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,    options for glacier treatment 
+              OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment,& ! in,    options for glacier treatment 
               RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
@@ -147,10 +147,10 @@ contains
 
        ! ground fluxes and temperature change
        CSH = RHOAIR * ConstHeatCapacAir / RAHB
-       if ( (SNOWH > 0.0) .or. (OPT_GLA == 1) ) then
+       if ( (SNOWH > 0.0) .or. (OptGlacierTreatment == 1) ) then
           CEV = RHOAIR * ConstHeatCapacAir / GAMMAG / (RSURF + RAWB)
        else
-          CEV = 0.0   ! don't allow any sublimation of glacier in opt_gla=2
+          CEV = 0.0   ! don't allow any sublimation of glacier in OptGlacierTreatment=2
        endif
        IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
        SHB = CSH * (TGB        - TemperatureAirRefHeight      )
@@ -183,8 +183,9 @@ contains
 
     ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
     SICEtemp = SMC - SH2O
-    if ( (OPT_STC == 1) .or. (OPT_STC == 3) ) then
-       if ( (maxval(SICEtemp) > 0.0 .or. SNOWH > 0.05) .and. (TGB > ConstFreezePoint) .and. (OPT_GLA == 1) ) then
+    if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
+       if ( (maxval(SICEtemp) > 0.0 .or. SNOWH > 0.05) .and. &
+            (TGB > ConstFreezePoint) .and. (OptGlacierTreatment == 1) ) then
           TGB = ConstFreezePoint
           T = TDC(TGB) ! MB: recalculate ESTG
           call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)

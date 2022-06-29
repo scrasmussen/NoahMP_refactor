@@ -4,7 +4,7 @@ module ResistanceGroundEvaporationMod
 !!! It represents the resistance imposed by the molecular diffusion in soil 
 !!! surface (as opposed to aerodynamic resistance computed elsewhere in the model)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -36,7 +36,7 @@ contains
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,    depth of layer-bottom from soil surface
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
-              OPT_RSF         => noahmp%config%nmlist%OPT_RSF        ,& ! in,    options for surface resistent to evaporation/sublimation
+              OptGroundResistanceEvap => noahmp%config%nmlist%OptGroundResistanceEvap,& ! in,    options for ground resistance to evaporation/sublimation
               RSURF_EXP       => noahmp%energy%param%RSURF_EXP       ,& ! in,    exponent in the shape parameter for soil resistance
               RSURF_SNOW      => noahmp%energy%param%RSURF_SNOW      ,& ! in,    surface resistance for snow(s/m)
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
@@ -59,18 +59,18 @@ contains
        RHSUR = 1.0
     else    ! soil point
 
-       if ( (OPT_RSF == 1) .or. (OPT_RSF == 4) ) then   ! Sakaguchi and Zeng, 2009
+       if ( (OptGroundResistanceEvap == 1) .or. (OptGroundResistanceEvap == 4) ) then   ! Sakaguchi and Zeng, 2009
           ! taking the "residual water content" to be the wilting point, 
           ! and correcting the exponent on the D term (typo in SZ09 ?)
           L_RSURF = (-ZSOIL(1)) * (exp( (1.0 - min(1.0,SH2O(1)/SMCMAX(1))) ** RSURF_EXP ) - 1.0) / (2.71828 - 1.0)
           D_RSURF = 2.2e-5 * SMCMAX(1) * SMCMAX(1) * (1.0 - SMCWLT(1)/SMCMAX(1)) ** (2.0 + 3.0/BEXP(1))
           RSURF = L_RSURF / D_RSURF
-       elseif ( OPT_RSF == 2 ) then  ! Sellers (1992) original
+       elseif ( OptGroundResistanceEvap == 2 ) then  ! Sellers (1992) original
           RSURF = FSNO * 1.0 + (1.0 - FSNO) * exp(8.25 - 4.225*BEVAP)
-       elseif ( OPT_RSF == 3 ) then  ! Sellers (1992) adjusted to decrease RSURF for wet soil
+       elseif ( OptGroundResistanceEvap == 3 ) then  ! Sellers (1992) adjusted to decrease RSURF for wet soil
           RSURF = FSNO * 1.0 + (1.0 - FSNO) * exp(8.25 - 6.0*BEVAP) 
        endif
-       if ( OPT_RSF == 4 ) then ! FSNO weighted; snow RSURF set in MPTABLE v3.8
+       if ( OptGroundResistanceEvap == 4 ) then ! FSNO weighted; snow RSURF set in MPTABLE v3.8
           RSURF = 1.0 / ( FSNO * (1.0/RSURF_SNOW) + (1.0 - FSNO) * (1.0/max(RSURF,0.001)) )
        endif
        if ( (SH2O(1) < 0.01) .and. (SNOWH == 0.0) ) RSURF = 1.0e6

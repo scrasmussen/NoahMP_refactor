@@ -1495,7 +1495,7 @@ contains
     !  Transfer Namelist locals to input data structure
     !---------------------------------------------------------------------
  
-    NoahmpIO%IDVEG                             = dynamic_veg_option 
+    NoahmpIO%IOPT_DVEG                         = dynamic_veg_option 
     NoahmpIO%IOPT_CRS                          = canopy_stomatal_resistance_option
     NoahmpIO%IOPT_BTR                          = btr_option
     NoahmpIO%IOPT_RUNSRF                       = surface_runoff_option

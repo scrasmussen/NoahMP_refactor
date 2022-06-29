@@ -2,10 +2,10 @@ module IrrigationPrepareMod
 
 !!! Prepare dynamic irrigation variables and trigger irrigation based on conditions
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
-  use IrrigationTriggerMod,       only : IrrigationTrigger
+  use IrrigationTriggerMod, only : IrrigationTrigger
 
   implicit none
 
@@ -29,7 +29,7 @@ contains
     associate(                                                        &
               LLANDUSE        => noahmp%config%domain%LLANDUSE       ,& ! in,     landuse data name (USGS or MODIS_IGBP)
               VEGTYP          => noahmp%config%domain%VEGTYP         ,& ! in,     vegetation type
-              OPT_IRRM        => noahmp%config%nmlist%OPT_IRRM       ,& ! in,     irrigation method option
+              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod,& ! in,     irrigation method option
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
               IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     total input irrigation fraction
@@ -62,22 +62,22 @@ contains
     MIFAC = MIFRA
     FIFAC = FIFRA
 
-    ! if OPT_IRRM = 0 and if methods are unknown for certain area, then use sprinkler irrigation method
-    if ( (OPT_IRRM == 0) .and. (SIFAC == 0.0) .and. (MIFAC == 0.0) &
+    ! if OptIrrigationMethod = 0 and if methods are unknown for certain area, then use sprinkler irrigation method
+    if ( (OptIrrigationMethod == 0) .and. (SIFAC == 0.0) .and. (MIFAC == 0.0) &
          .and. (FIFAC == 0.0) .and. (IRRFRA >= IRR_FRAC) ) then
        SIFAC = 1.0
     endif
 
     ! choose method based on user namelist choice
-    if ( OPT_IRRM == 1 ) then
+    if ( OptIrrigationMethod == 1 ) then
        SIFAC = 1.0
        MIFAC = 0.0
        FIFAC = 0.0
-    elseif ( OPT_IRRM == 2 ) then
+    elseif ( OptIrrigationMethod == 2 ) then
        SIFAC = 0.0
        MIFAC = 1.0
        FIFAC = 0.0
-    elseif ( OPT_IRRM == 3 ) then
+    elseif ( OptIrrigationMethod == 3 ) then
        SIFAC = 0.0
        MIFAC = 0.0
        FIFAC = 1.0

@@ -3,10 +3,10 @@ module WaterMainGlacierMod
 !!! Main glacier water module including all water relevant processes
 !!! snowpack water -> ice water -> runoff
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
-  use SnowWaterMainGlacierMod,    only : SnowWaterMainGlacier
+  use SnowWaterMainGlacierMod, only : SnowWaterMainGlacier
 
   implicit none
 
@@ -32,7 +32,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,     option for glacier treatment
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,     option for glacier treatment
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               ILOC            => noahmp%config%domain%ILOC           ,& ! in,     grid index
@@ -113,29 +113,29 @@ contains
     RUNSRF = QINSUR * 1000.0   ! mm/s
 
     ! glacier ice water
-    if ( OPT_GLA == 1 ) then
+    if ( OptGlacierTreatment == 1 ) then
        REPLACE = 0.0
        do ILEV = 1, NSOIL
           REPLACE = REPLACE + DZSNSO(ILEV)*(SICE(ILEV) - SICE_SAVE(ILEV) + SH2O(ILEV) - SH2O_SAVE(ILEV))
        enddo
        REPLACE = REPLACE * 1000.0 / DT     ! convert to [mm/s]
        SICE    = min(1.0, SICE_SAVE)
-    elseif ( OPT_GLA == 2 ) then
+    elseif ( OptGlacierTreatment == 2 ) then
        SICE = 1.0
     endif
     SH2O = 1.0 - SICE
 
     ! use RUNSUB as a water balancer, SNOFLOW is snow that disappears, REPLACE is
     ! water from below that replaces glacier loss
-    if ( OPT_GLA == 1 ) then
+    if ( OptGlacierTreatment == 1 ) then
        RUNSUB = SNOFLOW + REPLACE
-    elseif ( OPT_GLA == 2 ) then
+    elseif ( OptGlacierTreatment == 2 ) then
        RUNSUB = SNOFLOW
        QVAP   = QSNSUB
        QDEW   = QSNFRO
     endif
 
-    if ( OPT_GLA == 2 ) then
+    if ( OptGlacierTreatment == 2 ) then
        EDIR = QVAP - QDEW
        FGEV = EDIR * LATHEAG
     endif

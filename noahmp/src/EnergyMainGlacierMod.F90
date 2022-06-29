@@ -42,7 +42,7 @@ contains
               RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
-              OPT_STC         => noahmp%config%nmlist%OPT_STC        ,& ! in,    options for snow/soil temperature time scheme
+              OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
               TG              => noahmp%energy%state%TG              ,& ! inout, ground temperature (K)
@@ -155,7 +155,7 @@ contains
     call GlacierTemperatureMain(noahmp)
 
     ! adjusting suface temperature based on snow condition
-    if ( OPT_STC == 2 ) then
+    if ( OptSnowSoilTempTime == 2 ) then
        if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
           TGB = ConstFreezePoint
           TG = TGB

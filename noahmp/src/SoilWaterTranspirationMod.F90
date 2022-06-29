@@ -34,7 +34,7 @@ contains
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,    depth of layer-bottom from soil surface
-              OPT_BTR         => noahmp%config%nmlist%OPT_BTR        ,& ! in,    options for soil moisture factor for stomatal resistance
+              OptSoilWaterTranspiration => noahmp%config%nmlist%OptSoilWaterTranspiration,& ! in,    options for soil moisture factor for stomatal resistance & ET
               NROOT           => noahmp%water%param%NROOT            ,& ! in,    number of soil layers with root present
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,    wilting point soil moisture [m3/m3]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
@@ -56,14 +56,14 @@ contains
     ! only for soil point
     if ( IST ==1 ) then
        do IZ = 1, NROOT
-          if ( OPT_BTR == 1 ) then  ! Noah
+          if ( OptSoilWaterTranspiration == 1 ) then  ! Noah
              GX = (SH2O(IZ) - SMCWLT(IZ)) / (SMCREF(IZ) - SMCWLT(IZ))
           endif
-          if ( OPT_BTR == 2 ) then  ! CLM
+          if ( OptSoilWaterTranspiration == 2 ) then  ! CLM
              PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
              GX      = (1.0 - PSI(IZ)/PSIWLT) / (1.0 + PSISAT(IZ)/PSIWLT)
           endif
-          if ( OPT_BTR == 3 ) then  ! SSiB
+          if ( OptSoilWaterTranspiration == 3 ) then  ! SSiB
              PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
              GX      = 1.0 - exp( -5.8 * (log(PSIWLT/PSI(IZ))) )
           endif

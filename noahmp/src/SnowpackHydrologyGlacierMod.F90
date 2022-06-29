@@ -36,7 +36,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,     option for glacier treatment
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,     option for glacier treatment
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
               DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
               FSH             => noahmp%energy%flux%FSH              ,& ! in,     total sensible heat (w/m2) [+ to atm]
@@ -74,9 +74,9 @@ contains
 
     ! for the case when SNEQV becomes '0' after 'COMBINE'
     if ( SNEQV == 0.0 ) then
-       if ( OPT_GLA == 1 ) then
+       if ( OptGlacierTreatment == 1 ) then
           SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * DT / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
-       elseif ( OPT_GLA == 2 ) then
+       elseif ( OptGlacierTreatment == 2 ) then
           FSH    = FSH - (QSNFRO - QSNSUB) * ConstLatHeatSublim
           QSNFRO = 0.0
           QSNSUB = 0.0
@@ -87,13 +87,13 @@ contains
     ! snow surface sublimation may be larger than existing snow mass. To conserve water,
     ! excessive sublimation is used to reduce soil water. Smaller time steps would tend to aviod this problem.
     if ( (ISNOW == 0) .and. (SNEQV > 0.0) ) then
-       if ( OPT_GLA == 1 ) then
+       if ( OptGlacierTreatment == 1 ) then
           TEMP   = SNEQV
           SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
           PROPOR = SNEQV / TEMP
           SNOWH  = max( 0.0, PROPOR*SNOWH )
           SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
-       elseif ( OPT_GLA == 2 ) then
+       elseif ( OptGlacierTreatment == 2 ) then
           FSH = FSH - (QSNFRO - QSNSUB) * ConstLatHeatSublim
           QSNFRO = 0.0
           QSNSUB = 0.0

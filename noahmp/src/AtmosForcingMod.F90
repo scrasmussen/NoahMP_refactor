@@ -38,7 +38,7 @@ contains
 ! ------------------------------------------------------------------------
     associate(                                                           &
               COSZ                  => noahmp%config%domain%COSZ        ,& ! in,   cosine solar zenith angle [0-1]
-              OPT_SNF               => noahmp%config%nmlist%OPT_SNF     ,& ! in,   rain-snow partition physics option
+              OptRainSnowPartition    => noahmp%config%nmlist%OptRainSnowPartition,& ! in,   rain-snow partition physics option
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight,& ! in,   air pressure [Pa] at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,   air temperature [K] at reference height
               SpecHumidityRefHeight   => noahmp%forcing%SpecHumidityRefHeight, & ! in,  specific humidity (kg/kg) forcing at reference height
@@ -82,7 +82,7 @@ contains
 
     ! precipitation
     PRCP = PrecipConvRefHeight + PrecipNonConvRefHeight + PrecipShConvRefHeight
-    if ( OPT_SNF == 4 ) then
+    if ( OptRainSnowPartition == 4 ) then
        QPRECC = PrecipConvRefHeight + PrecipShConvRefHeight
        QPRECL = PrecipNonConvRefHeight
     else
@@ -99,7 +99,7 @@ contains
     ! partition precipitation into rain and snow. Moved from CANWAT MB/AN: v3.7
 
     ! Jordan (1991)
-    if ( OPT_SNF == 1 ) then
+    if ( OptRainSnowPartition == 1 ) then
        if ( TemperatureAirRefHeight > (ConstFreezePoint+2.5) ) then
           FPICE = 0.0
        else
@@ -114,7 +114,7 @@ contains
     endif
 
     ! BATS scheme
-    if ( OPT_SNF == 2 ) then
+    if ( OptRainSnowPartition == 2 ) then
        if ( TemperatureAirRefHeight >= (ConstFreezePoint+2.2) ) then
           FPICE = 0.0
        else
@@ -123,7 +123,7 @@ contains
     endif
 
     ! Simple temperature scheme
-    if ( OPT_SNF == 3 ) then
+    if ( OptRainSnowPartition == 3 ) then
        if ( TemperatureAirRefHeight >= ConstFreezePoint ) then
           FPICE = 0.0
        else
@@ -134,7 +134,7 @@ contains
     ! Use WRF microphysics output
     ! Hedstrom NR and JW Pomeroy (1998), Hydrol. Processes, 12, 1611-1625
     BDFALL = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
-    if ( OPT_SNF == 4 ) then
+    if ( OptRainSnowPartition == 4 ) then
        PRCP_FROZEN = PrecipSnowRefHeight + PrecipGraupelRefHeight + PrecipHailRefHeight
        if ( (PrecipNonConvRefHeight > 0.0) .and. (PRCP_FROZEN > 0.0) ) then
           FPICE  = min( 1.0, PRCP_FROZEN/PrecipNonConvRefHeight )
@@ -147,7 +147,7 @@ contains
     endif
 
     ! wet-bulb scheme (Wang et al., 2019 GRL), C.He, 12/18/2020
-    if ( OPT_SNF == 5 ) then
+    if ( OptRainSnowPartition == 5 ) then
        TDC = min( 50.0, max(-50.0,(TemperatureAirRefHeight - ConstFreezePoint)) )         ! Kelvin to degree Celsius with limit -50 to +50
        if ( TemperatureAirRefHeight > ConstFreezePoint ) then
           LATHEA = ConstLatHeatVapor

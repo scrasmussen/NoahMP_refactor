@@ -39,7 +39,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OPT_GLA         => noahmp%config%nmlist%OPT_GLA        ,& ! in,    options for glacier treatment
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment,& ! in,    options for glacier treatment
               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
               NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
               ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
@@ -119,7 +119,7 @@ contains
     enddo
 
     ! The rate of melting and freezing for snow without a layer, needs more work.
-    if ( OPT_GLA == 2 ) then
+    if ( OptGlacierTreatment == 2 ) then
        if ( (ISNOW == 0) .and. (SNEQV > 0.0) .and. (STC(1) > ConstFreezePoint) ) then
           HM(1)    = (STC(1) - ConstFreezePoint) / FACT(1)                  ! available heat
           STC(1)   = ConstFreezePoint                                       ! set T to freezing
@@ -141,7 +141,7 @@ contains
           XMF      = ConstLatHeatFusion * QMELT                               ! melted snow energy
           PONDING  = TEMP1 - SNEQV                              ! melt water
        endif
-    endif ! OPT_GLA==2
+    endif ! OptGlacierTreatment==2
 
     ! The rate of melting and freezing for multi-layer snow
     do J = ISNOW+1, 0
@@ -170,7 +170,7 @@ contains
 
     !---- glacier ice layer treatment
 
-    if ( OPT_GLA == 1 ) then
+    if ( OptGlacierTreatment == 1 ) then
 
        ! ice layer water mass
        do J = 1, NSOIL
@@ -373,7 +373,7 @@ contains
           enddo
        endif
 
-    endif ! OPT_GLA==1
+    endif ! OptGlacierTreatment==1
 
     !--- update snow and soil ice and liquid content
     do J = ISNOW+1, 0     ! snow
@@ -381,10 +381,10 @@ contains
        SNICE(J) = MICE(J)
     enddo
     do J = 1, NSOIL       ! glacier ice
-       if ( OPT_GLA == 1 ) then
+       if ( OptGlacierTreatment == 1 ) then
           SH2O(J) = MLIQ(J) / (1000.0 * DZSNSO(J))
           SH2O(J) = max( 0.0, min(1.0,SH2O(J)) )
-       elseif ( OPT_GLA == 2 ) then
+       elseif ( OptGlacierTreatment == 2 ) then
           SH2O(J) = 0.0             ! ice, assume all frozen forever
        endif
        SMC(J) = 1.0
