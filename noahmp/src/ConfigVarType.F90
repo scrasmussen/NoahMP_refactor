@@ -133,13 +133,13 @@ module ConfigVarType
     logical                   :: CROPLU        ! flag to identify croplands
     logical                   :: CROP_ACTIVE   ! flag to activate crop model
     logical                   :: DVEG_ACTIVE   ! flag to activate dynamic vegetation model
-    integer                   :: ILOC          ! model grid index
-    integer                   :: JLOC          ! model grid index
-    integer                   :: VEGTYP        ! vegetation type
-    integer                   :: CROPTYP       ! crop type
-    integer                   :: NSOIL         ! number of soil layers
-    integer                   :: NSNOW         ! maximum number of snow layers
-    integer                   :: ISNOW         ! actual number of snow layers
+    integer                   :: GridIndexI              ! model grid index in x-direction
+    integer                   :: GridIndexJ              ! model grid index in y-direction
+    integer                   :: VegType                 ! vegetation type
+    integer                   :: CropType                ! crop type
+    integer                   :: NumSoilLayer            ! number of soil layers
+    integer                   :: NumSnowLayerMax         ! maximum number of snow layers
+    integer                   :: NumSnowLayerNeg         ! actual number of snow layers (negative)
     integer                   :: IST           ! surface type 1-soil; 2-lake
     integer                   :: NBAND         ! number of solar radiation wave bands
     integer                   :: SOILCOLOR     ! soil texture type for albedo
@@ -152,17 +152,17 @@ module ConfigVarType
     integer                   :: NSTAGE        ! number of growth stages
     integer                   :: YEARLEN       ! Number of days in the particular year
     integer                   :: SLOPETYP      ! underground runoff slope term
-    real(kind=kind_noahmp)    :: DT            ! noahmp timestep (s)
-    real(kind=kind_noahmp)    :: DX            ! noahmp model grid spacing (m)
+    real(kind=kind_noahmp)    :: MainTimeStep            ! noahmp main timestep [sec]
+    real(kind=kind_noahmp)    :: GridSize                ! noahmp model grid spacing [m]
     real(kind=kind_noahmp)    :: JULIAN        ! julian day of the year
-    real(kind=kind_noahmp)    :: COSZ          ! cosine solar zenith angle
-    real(kind=kind_noahmp)    :: ZREF          ! reference height  (m)
-    real(kind=kind_noahmp)    :: DZ8W          ! thickness of surface atmospheric layers [m]
+    real(kind=kind_noahmp)    :: CosSolarZenithAngle     ! cosine solar zenith angle
+    real(kind=kind_noahmp)    :: ZREF          ! reference height  [m]
+    real(kind=kind_noahmp)    :: ThicknessAtmosBotLayer  ! thickness of atmospheric bottom layers [m]
     real(kind=kind_noahmp)    :: ZLVL          ! thickness of surface atmospheric layers [m]
-    real(kind=kind_noahmp)    :: LAT           ! latitude (radians)
+    real(kind=kind_noahmp)    :: Latitude                ! latitude [degree]
 
     integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSOIL   ! depth of layer-bottom from soil surface
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSoilLayer   ! depth [m] of layer-bottom from soil surface
     real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSO   ! depth of snow/soil layer-bottom (m)
     real(kind=kind_noahmp), allocatable, dimension(:) :: ZLAYER  ! soil layer thickness (m)

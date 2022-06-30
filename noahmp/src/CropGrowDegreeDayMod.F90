@@ -2,7 +2,7 @@ module CropGrowDegreeDayMod
 
 !!! Compute crop growing degree days
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -30,7 +30,7 @@ contains
 
 !------------------------------------------------------------------------
     associate(                                                       &
-              DT               => noahmp%config%domain%DT           ,& ! in,    main model timestep (s)
+              MainTimeStep     => noahmp%config%domain%MainTimeStep ,& ! in,    main noahmp timestep (s)
               JULIAN           => noahmp%config%domain%JULIAN       ,& ! in,    Julian day of year (fractional) (0<=JULIAN<YEARLEN)
               T2M              => noahmp%energy%state%T2M           ,& ! in,    2-m air temperature (K)
               PLTDAY           => noahmp%biochem%param%PLTDAY       ,& ! in,    Planting day (day of year)
@@ -70,7 +70,7 @@ contains
     else
        TDIFF = TC - GDDTBASE
     endif
-    GDD      = (GDD + TDIFF * DT / 86400.0) * IPA * IHA
+    GDD      = (GDD + TDIFF * MainTimeStep / 86400.0) * IPA * IHA
     GDDDAY   = GDD
       
     ! Decide corn growth stage, based on Hybrid-Maize 

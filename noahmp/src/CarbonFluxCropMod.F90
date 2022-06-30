@@ -4,7 +4,7 @@ module CarbonFluxCropMod
 !!! based on RE Dickinson et al.(1998), modifed by Guo-Yue Niu, 2004
 !!! Modified by Xing Liu, 2014
         
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,7 +33,7 @@ contains
 
 !------------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               RTOVRC          => noahmp%biochem%param%RTOVRC         ,& ! in,    root turnover coefficient [1/s]
               RSDRYC          => noahmp%biochem%param%RSDRYC         ,& ! in,    degree of drying that reduces soil respiration [-]
               RSWOODC         => noahmp%biochem%param%RSWOODC        ,& ! in,    wood respiration coeficient [1/s]
@@ -150,7 +150,7 @@ contains
     FNF     = min( FOLN / max(1.0e-06, FOLN_MX), 1.0 )
     TF      = Q10MR**((TV - 298.16) / 10.0)
     RESP    = LFMR25 * TF * FNF * XLAI * (1.0 - WSTRES)         ! umol/m2/s
-    RSLEAF  = min( (LFMASS - LFMSMN) / DT, RESP*30.0e-6 )       ! g/m2/s
+    RSLEAF  = min( (LFMASS - LFMSMN) / MainTimeStep, RESP*30.0e-6 )       ! g/m2/s
     RSROOT  = RTMR25 * (RTMASS * 1.0e-3) * TF * 30.0e-6         ! g/m2/s
     RSSTEM  = STMR25 * (STMASS * 1.0e-3) * TF * 30.0e-6         ! g/m2/s
     RSGRAIN = GRAINMR25 * (GRAIN * 1.0e-3) * TF * 30.0e-6       ! g/m2/s
@@ -176,8 +176,8 @@ contains
     ADDNPPST = STPT(PGS)*CBHYDRAFX - GRSTEM - RSSTEM
     
     ! avoid reducing leaf mass below its minimum value but conserve mass
-    LFDEL  = (LFMASS - LFMSMN) / DT
-    STDEL  = (STMASS - STMSMN) / DT
+    LFDEL  = (LFMASS - LFMSMN) / MainTimeStep
+    STDEL  = (STMASS - STMSMN) / MainTimeStep
     LFTOVR = min( LFTOVR, LFDEL+ADDNPPLF )
     STTOVR = min( STTOVR, STDEL+ADDNPPST )
     DIELF  = min( DIELF, LFDEL+ADDNPPLF-LFTOVR )
@@ -191,27 +191,27 @@ contains
     NPPG   = GRAINPT(PGS) * CBHYDRAFX - RSGRAIN - GRGRAIN
 
     ! masses of plant components
-    LFMASS = LFMASS + (NPPL - LFTOVR - DIELF) * DT
-    STMASS = STMASS + (NPPS - STTOVR) * DT                    ! g/m2
-    RTMASS = RTMASS + (NPPR - RTTOVR) * DT
-    GRAIN  = GRAIN + NPPG * DT 
+    LFMASS = LFMASS + (NPPL - LFTOVR - DIELF) * MainTimeStep
+    STMASS = STMASS + (NPPS - STTOVR) * MainTimeStep       ! g/m2
+    RTMASS = RTMASS + (NPPR - RTTOVR) * MainTimeStep
+    GRAIN  = GRAIN + NPPG * MainTimeStep 
     GPP    = CBHYDRAFX * 0.4                                  ! g/m2/s C  0.4=12/30, CH20 to C
 
     ! carbon convert to grain
     LFCONVERT = 0.0              ! Zhe Zhang 2020-07-13
     STCONVERT = 0.0
     RTCONVERT = 0.0
-    LFCONVERT = LFMASS * (LFCT(PGS) * DT / 3600.0)
-    STCONVERT = STMASS * (STCT(PGS) * DT / 3600.0)
-    RTCONVERT = RTMASS * (RTCT(PGS) * DT / 3600.0)
+    LFCONVERT = LFMASS * (LFCT(PGS) * MainTimeStep / 3600.0)
+    STCONVERT = STMASS * (STCT(PGS) * MainTimeStep / 3600.0)
+    RTCONVERT = RTMASS * (RTCT(PGS) * MainTimeStep / 3600.0)
     LFMASS    = LFMASS - LFCONVERT
     STMASS    = STMASS - STCONVERT
     RTMASS    = RTMASS - RTCONVERT
     GRAIN     = GRAIN + STCONVERT + RTCONVERT + LFCONVERT
     !if ( PGS==6 ) then
-    !   STCONVERT = STMASS * (0.00005 * DT / 3600.0)
+    !   STCONVERT = STMASS * (0.00005 * MainTimeStep / 3600.0)
     !   STMASS    = STMASS - STCONVERT
-    !   RTCONVERT = RTMASS * (0.0005 * DT / 3600.0)
+    !   RTCONVERT = RTMASS * (0.0005 * MainTimeStep / 3600.0)
     !   RTMASS    = RTMASS - RTCONVERT
     !   GRAIN     = GRAIN + STCONVERT + RTCONVERT
     !endif
@@ -228,14 +228,14 @@ contains
     !if ( (PGS == 1) .or. (PGS == 2) .or. (PGS == 8) ) then
     !   FASTCP=1000
     !else
-    FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+DIELF) * DT 
+    FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+DIELF) * MainTimeStep 
     !endif
     FST    = 2.0**((STC(1) - 283.16) / 10.0)
     FSW    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
     RSSOIL = FSW * FST * MRP * max(0.0, FASTCP*1.0e-3) * 12.0e-6
     STABLC = 0.1 * RSSOIL
-    FASTCP = FASTCP - (RSSOIL + STABLC) * DT
-    STBLCP = STBLCP + STABLC * DT
+    FASTCP = FASTCP - (RSSOIL + STABLC) * MainTimeStep
+    STBLCP = STBLCP + STABLC * MainTimeStep
  
     !  total carbon flux
     CFLUX  = - CARBFX + RSLEAF + RSROOT + RSSTEM &

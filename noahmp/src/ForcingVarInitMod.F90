@@ -54,9 +54,9 @@ contains
     real(kind=kind_noahmp)              :: PrecipTotalRefHeight  ! total precipitation [mm/s] at reference height
 
 ! ---------------------------------------------------------------
-    associate(                                       &
-              I      => noahmp%config%domain%ILOC   ,&
-              J      => noahmp%config%domain%JLOC    &
+    associate(                                           &
+              I      => noahmp%config%domain%GridIndexI ,&
+              J      => noahmp%config%domain%GridIndexJ  &
              )
 ! ---------------------------------------------------------------
 

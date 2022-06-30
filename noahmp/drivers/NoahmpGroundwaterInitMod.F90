@@ -5,7 +5,7 @@ module NoahmpGroundwaterInitMod
 !  P. Valayamkunnath C. He & refactor team (April 08 2022)
 !--------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpIOVarType
   
   implicit none

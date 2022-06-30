@@ -34,7 +34,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,    depth of layer-bottom from soil surface
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,    depth [m] of layer-bottom from soil surface
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
               OptGroundResistanceEvap => noahmp%config%nmlist%OptGroundResistanceEvap,& ! in,    options for ground resistance to evaporation/sublimation
               RSURF_EXP       => noahmp%energy%param%RSURF_EXP       ,& ! in,    exponent in the shape parameter for soil resistance
@@ -62,7 +62,7 @@ contains
        if ( (OptGroundResistanceEvap == 1) .or. (OptGroundResistanceEvap == 4) ) then   ! Sakaguchi and Zeng, 2009
           ! taking the "residual water content" to be the wilting point, 
           ! and correcting the exponent on the D term (typo in SZ09 ?)
-          L_RSURF = (-ZSOIL(1)) * (exp( (1.0 - min(1.0,SH2O(1)/SMCMAX(1))) ** RSURF_EXP ) - 1.0) / (2.71828 - 1.0)
+          L_RSURF = (-DepthSoilLayer(1)) * (exp( (1.0 - min(1.0,SH2O(1)/SMCMAX(1))) ** RSURF_EXP ) - 1.0) / (2.71828 - 1.0)
           D_RSURF = 2.2e-5 * SMCMAX(1) * SMCMAX(1) * (1.0 - SMCWLT(1)/SMCMAX(1)) ** (2.0 + 3.0/BEXP(1))
           RSURF = L_RSURF / D_RSURF
        elseif ( OptGroundResistanceEvap == 2 ) then  ! Sellers (1992) original

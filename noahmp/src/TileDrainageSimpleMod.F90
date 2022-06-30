@@ -2,7 +2,7 @@ module TileDrainageSimpleMod
 
 !!! Calculate tile drainage discharge (mm) based on simple model
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,9 +33,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep [s]
               ZLAYER          => noahmp%config%domain%ZLAYER         ,& ! in,     soil layer thickness (m)
               TD_DC           => noahmp%water%param%TD_DC            ,& ! in,     drainage coefficient (mm d^-1)
               DRAIN_LAYER_OPT => noahmp%water%param%DRAIN_LAYER_OPT  ,& ! in,     starting soil layer for drainage
@@ -50,9 +50,9 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( TDFRAC(1:NSOIL) )
-    allocate( AVFC  (1:NSOIL) )
-    allocate( OVRFC (1:NSOIL) )
+    allocate( TDFRAC(1:NumSoilLayer) )
+    allocate( AVFC  (1:NumSoilLayer) )
+    allocate( OVRFC (1:NumSoilLayer) )
     TDFRAC = 0.0
     AVFC   = 0.0
     TDRVOL = 0.0
@@ -61,13 +61,13 @@ contains
     ZLAYER = 0.0
     TDSUM  = 0.0
     TDFRAC = 0.0
-    TDDC   = TD_DC * DT / (24.0 * 3600.0)
+    TDDC   = TD_DC * MainTimeStep / (24.0 * 3600.0)
 
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        if ( K == 1 ) then
-          ZLAYER(K) = -1.0 * ZSOIL(K)
+          ZLAYER(K) = -1.0 * DepthSoilLayer(K)
        else
-          ZLAYER(K) = ZSOIL(K-1) - ZSOIL(K)
+          ZLAYER(K) = DepthSoilLayer(K-1) - DepthSoilLayer(K)
        endif
     enddo
     if ( DRAIN_LAYER_OPT == 0 ) then ! drainage from one specified layer in NoahmpTable.TBL
@@ -193,7 +193,7 @@ contains
        endif
     endif
 
-    QTLDRN = TDRVOL / DT
+    QTLDRN = TDRVOL / MainTimeStep
 
     end associate
 

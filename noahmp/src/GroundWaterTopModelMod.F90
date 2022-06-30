@@ -2,7 +2,7 @@ module GroundWaterTopModelMod
 
 !!! Compute groundwater flow and subsurface runoff based on TOPMODEL (Niu et al., 2007)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -44,9 +44,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of soil layer-bottom [m]
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step [s]
+              DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,     depth of soil layer-bottom [m]
               FCRMAX          => noahmp%water%state%FCRMAX           ,& ! in,     maximum fraction of imperviousness (FCR)
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
               WCND            => noahmp%water%state%WCND             ,& ! in,     soil hydraulic conductivity (m/s)
@@ -68,29 +68,29 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( ZNODE (1:NSOIL) )
-    allocate( DZMM  (1:NSOIL) )
-    allocate( MLIQ  (1:NSOIL) )
-    allocate( EPORE (1:NSOIL) )
-    allocate( HK    (1:NSOIL) )
-    allocate( SMC   (1:NSOIL) )
+    allocate( ZNODE (1:NumSoilLayer) )
+    allocate( DZMM  (1:NumSoilLayer) )
+    allocate( MLIQ  (1:NumSoilLayer) )
+    allocate( EPORE (1:NumSoilLayer) )
+    allocate( HK    (1:NumSoilLayer) )
+    allocate( SMC   (1:NumSoilLayer) )
     QDIS = 0.0
     QIN  = 0.0
 
     ! Derive layer-bottom depth in [mm]; KWM:Derive layer thickness in mm
-    DZMM(1) = -ZSOIL(1) * 1.0e3
-    do IZ = 2, NSOIL
-       DZMM(IZ)  = 1.0e3 * ( ZSOIL(IZ-1) - ZSOIL(IZ) )
+    DZMM(1) = -DepthSoilLayer(1) * 1.0e3
+    do IZ = 2, NumSoilLayer
+       DZMM(IZ)  = 1.0e3 * ( DepthSoilLayer(IZ-1) - DepthSoilLayer(IZ) )
     enddo
 
     ! Derive node (middle) depth in [m]; KWM: Positive number, depth below ground surface in m
-    ZNODE(1) = -ZSOIL(1) / 2.0
-    do IZ = 2, NSOIL
-       ZNODE(IZ) = -ZSOIL(IZ-1) + 0.5 * ( ZSOIL(IZ-1) - ZSOIL(IZ) )
+    ZNODE(1) = -DepthSoilLayer(1) / 2.0
+    do IZ = 2, NumSoilLayer
+       ZNODE(IZ) = -DepthSoilLayer(IZ-1) + 0.5 * ( DepthSoilLayer(IZ-1) - DepthSoilLayer(IZ) )
     enddo
 
     ! Convert volumetric soil moisture "sh2o" to mass
-    do IZ = 1, NSOIL
+    do IZ = 1, NumSoilLayer
        SMC(IZ)   = SH2O(IZ) + SICE(IZ)
        MLIQ(IZ)  = SH2O(IZ) * DZMM(IZ)
        EPORE(IZ) = max( 0.01, SMCMAX(IZ)-SICE(IZ) )
@@ -98,9 +98,9 @@ contains
     enddo
 
     ! The layer index of the first unsaturated layer (the layer right above the water table)
-    IWT = NSOIL
-    do IZ = 2, NSOIL
-       if ( ZWT <= -ZSOIL(IZ) ) then
+    IWT = NumSoilLayer
+    do IZ = 2, NumSoilLayer
+       if ( ZWT <= -DepthSoilLayer(IZ) ) then
           IWT = IZ - 1
           exit
        endif
@@ -122,33 +122,33 @@ contains
     WH_ZWT  = -ZWT * 1.0e3                 !(mm)
     WH      = SMPFZ - ZNODE(IWT) * 1.0e3   !(mm)
     QIN     = -KA * (WH_ZWT - WH) / ( (ZWT-ZNODE(IWT)) * 1.0e3 )
-    QIN     = max( -10.0/DT, min(10.0/DT, QIN) )
+    QIN     = max( -10.0/MainTimeStep, min(10.0/MainTimeStep, QIN) )
 
     ! Water storage in the aquifer + saturated soil
-    WT  = WT + (QIN - QDIS) * DT     !(mm)
-    if ( IWT == NSOIL ) then
-       WA          = WA + (QIN - QDIS) * DT     !(mm)
+    WT  = WT + (QIN - QDIS) * MainTimeStep     !(mm)
+    if ( IWT == NumSoilLayer ) then
+       WA          = WA + (QIN - QDIS) * MainTimeStep     !(mm)
        WT          = WA
-       ZWT         = (-ZSOIL(NSOIL) + 25.0) - WA / 1000.0 / ROUS      !(m)
-       MLIQ(NSOIL) = MLIQ(NSOIL) - QIN * DT        ! [mm]
-       MLIQ(NSOIL) = MLIQ(NSOIL) + max( 0.0, (WA - 5000.0) )
+       ZWT         = (-DepthSoilLayer(NumSoilLayer) + 25.0) - WA / 1000.0 / ROUS      !(m)
+       MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) - QIN * MainTimeStep        ! [mm]
+       MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) + max( 0.0, (WA - 5000.0) )
        WA          = min( WA, 5000.0 )
     else
-       if ( IWT == NSOIL-1 ) then
-          ZWT = -ZSOIL(NSOIL) - (WT - ROUS*1000.0*25.0) / (EPORE(NSOIL))/1000.0
+       if ( IWT == NumSoilLayer-1 ) then
+          ZWT = -DepthSoilLayer(NumSoilLayer) - (WT - ROUS*1000.0*25.0) / (EPORE(NumSoilLayer))/1000.0
        else
           WS = 0.0   ! water used to fill soil air pores
-          do IZ = IWT+2, NSOIL
+          do IZ = IWT+2, NumSoilLayer
              WS = WS + EPORE(IZ) * DZMM(IZ)
           enddo
-          ZWT = -ZSOIL(IWT+1) - (WT - ROUS*1000.0*25.0 - WS) / (EPORE(IWT+1))/1000.0
+          ZWT = -DepthSoilLayer(IWT+1) - (WT - ROUS*1000.0*25.0 - WS) / (EPORE(IWT+1))/1000.0
        endif
        WTSUB = 0.0
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           WTSUB = WTSUB + HK(IZ) * DZMM(IZ)
        enddo
-       do IZ = 1, NSOIL           ! Removing subsurface runoff
-          MLIQ(IZ) = MLIQ(IZ) - QDIS * DT * HK(IZ) * DZMM(IZ) / WTSUB
+       do IZ = 1, NumSoilLayer           ! Removing subsurface runoff
+          MLIQ(IZ) = MLIQ(IZ) - QDIS * MainTimeStep * HK(IZ) * DZMM(IZ) / WTSUB
        enddo
     endif
 
@@ -157,7 +157,7 @@ contains
     ! Limit MLIQ to be greater than or equal to watmin.
     ! Get water needed to bring MLIQ equal WATMIN from lower layer.
     WATMIN = 0.01
-    do IZ = 1, NSOIL-1
+    do IZ = 1, NumSoilLayer-1
        if ( MLIQ(IZ) < 0.0 ) then
           XS = WATMIN - MLIQ(IZ)
        else
@@ -166,7 +166,7 @@ contains
        MLIQ(IZ  ) = MLIQ(IZ  ) + XS
        MLIQ(IZ+1) = MLIQ(IZ+1) - XS
     enddo
-    IZ = NSOIL
+    IZ = NumSoilLayer
     if ( MLIQ(IZ) < WATMIN ) then
        XS = WATMIN - MLIQ(IZ)
     else
@@ -177,7 +177,7 @@ contains
     WT       = WT - XS
 
     ! update soil moisture
-    do IZ = 1, NSOIL
+    do IZ = 1, NumSoilLayer
         SH2O(IZ) = MLIQ(IZ) / DZMM(IZ)
     enddo
 

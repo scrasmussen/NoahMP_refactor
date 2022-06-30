@@ -28,11 +28,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
               SNOWHIN         => noahmp%water%flux%SNOWHIN           ,& ! in,     snow depth increasing rate (m/s)
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,     air temperature [K] at reference height
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg         => noahmp%config%domain%NumSnowLayerNeg  ,& ! inout,  actual number of snow layers (negative)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
@@ -45,15 +45,15 @@ contains
     NEWNODE  = 0
 
 ! shallow snow / no layer
-    if ( (ISNOW == 0) .and. (QSNOW > 0.0) ) then
-       SNOWH = SNOWH + SNOWHIN * DT
-       SNEQV = SNEQV + QSNOW * DT
+    if ( (NumSnowLayerNeg == 0) .and. (QSNOW > 0.0) ) then
+       SNOWH = SNOWH + SNOWHIN * MainTimeStep
+       SNEQV = SNEQV + QSNOW * MainTimeStep
     endif
 
 ! creating a new layer
-!    if ( (ISNOW == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.025) ) then !MB: change limit
-   if ( (ISNOW == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.05) ) then
-       ISNOW     = -1
+!    if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.025) ) then !MB: change limit
+   if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.05) ) then
+       NumSnowLayerNeg     = -1
        NEWNODE   =  1
        DZSNSO(0) = SNOWH
        SNOWH     = 0.0
@@ -63,9 +63,9 @@ contains
     endif
 
 ! snow with layers
-    if ( (ISNOW < 0) .and. (NEWNODE == 0) .and. (QSNOW > 0.0) ) then
-       SNICE(ISNOW+1)  = SNICE(ISNOW+1)   + QSNOW   * DT
-       DZSNSO(ISNOW+1) = DZSNSO(ISNOW+1)  + SNOWHIN * DT
+    if ( (NumSnowLayerNeg < 0) .and. (NEWNODE == 0) .and. (QSNOW > 0.0) ) then
+       SNICE(NumSnowLayerNeg+1)  = SNICE(NumSnowLayerNeg+1)   + QSNOW   * MainTimeStep
+       DZSNSO(NumSnowLayerNeg+1) = DZSNSO(NumSnowLayerNeg+1)  + SNOWHIN * MainTimeStep
     endif
 
     end associate

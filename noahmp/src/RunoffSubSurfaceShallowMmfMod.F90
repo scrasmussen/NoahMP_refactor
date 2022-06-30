@@ -2,7 +2,7 @@ module RunoffSubSurfaceShallowMmfMod
 
 !!! Calculate subsurface runoff based on TOPMODEL with groundwater (Niu et al 2007)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use ShallowWaterTableMmfMod, only : ShallowWaterTableMMF
@@ -25,7 +25,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
               QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,     soil bottom drainage (m/s)
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
@@ -39,7 +39,7 @@ contains
     call ShallowWaterTableMMF(noahmp)
 
     ! update moisture
-    SH2O(NSOIL) = SMC(NSOIL) - SICE(NSOIL)
+    SH2O(NumSoilLayer) = SMC(NumSoilLayer) - SICE(NumSoilLayer)
 
     ! compute subsurface runoff
     ! it really comes from subroutine watertable, which is not called with the same frequency as the soil routines here

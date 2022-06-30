@@ -3,7 +3,7 @@ module SnowAgingBatsMod
 !!! Estimate snow age based on BATS snow albedo scheme for use in BATS snow albedo calculation
 !!! Reference: Yang et al. (1997) J.of Climate
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -36,7 +36,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
               SWEMX           => noahmp%water%param%SWEMX            ,& ! in,     new snow mass to fully cover old snow (mm)
               TAU0            => noahmp%energy%param%TAU0            ,& ! in,     snow aging parameter
               GRAIN_GROWTH    => noahmp%energy%param%GRAIN_GROWTH    ,& ! in,     vapor diffusion snow growth factor
@@ -53,7 +53,7 @@ contains
     if ( SNEQV <= 0.0 ) then
        TAUSS = 0.0
     else
-       DELA0 = DT / TAU0
+       DELA0 = MainTimeStep / TAU0
        ARG   = GRAIN_GROWTH * (1.0/ConstFreezePoint - 1.0/TG)
        AGE1  = exp(ARG)
        AGE2  = exp( amin1( 0.0, EXTRA_GROWTH*ARG ) )

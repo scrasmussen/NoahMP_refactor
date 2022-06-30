@@ -2,7 +2,7 @@ module SnowAlbedoClassMod
 
 !!! Compute snow albedo based on the CLASS scheme (Verseghy, 1991)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -29,7 +29,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
               SWEMX           => noahmp%water%param%SWEMX            ,& ! in,     new snow mass to fully cover old snow (mm)
               CLASS_ALB_REF   => noahmp%energy%param%CLASS_ALB_REF   ,& ! in,     reference snow albedo in CLASS scheme
@@ -45,13 +45,13 @@ contains
     ALBSND(1: NBAND) = 0.0
     ALBSNI(1: NBAND) = 0.0
 
-    ! when cosz > 0
-    ALB = CLASS_ALB_REF + (ALBOLD - CLASS_ALB_REF) * exp( -0.01 * DT / CLASS_SNO_AGE )
+    ! when CosSolarZenithAngle > 0
+    ALB = CLASS_ALB_REF + (ALBOLD - CLASS_ALB_REF) * exp( -0.01 * MainTimeStep / CLASS_SNO_AGE )
 
     ! 1 mm fresh snow(SWE) -- 10mm snow depth, assumed the fresh snow density 100kg/m3
     ! here assume 1cm snow depth will fully cover the old snow
     if ( QSNOW > 0.0 ) then
-       ALB = ALB + min(QSNOW, SWEMX/DT) * (CLASS_ALB_NEW - ALB) / (SWEMX/DT)
+       ALB = ALB + min(QSNOW, SWEMX/MainTimeStep) * (CLASS_ALB_NEW - ALB) / (SWEMX/MainTimeStep)
     endif
 
     ALBSNI(1)= ALB         ! vis diffuse

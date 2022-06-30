@@ -5,7 +5,7 @@ module IrrigationFloodMod
 !!! Irrigation water is applied on the surface based on present soil moisture and
 !!! infiltration rate of the soil. Flooding or overland flow is based on infiltration excess
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
@@ -31,7 +31,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               FIFAC           => noahmp%water%state%FIFAC            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
               FIRTFAC         => noahmp%water%param%FIRTFAC          ,& ! in,     flood application rate factor
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
@@ -44,12 +44,12 @@ contains
     FSUR = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationInfilPhilip(noahmp, DT, FSUR)  
+    call IrrigationInfilPhilip(noahmp, MainTimeStep, FSUR)  
 
     ! irrigation rate of flood irrigation. It should be
     ! greater than infiltration rate to get infiltration
     ! excess runoff at the time of application
-    IRFIRATE = FSUR * DT * FIRTFAC   ! Limit the application rate to fac*infiltration rate 
+    IRFIRATE = FSUR * MainTimeStep * FIRTFAC   ! Limit the application rate to fac*infiltration rate 
     IRFIRATE = IRFIRATE * FIFAC
 
     if ( IRFIRATE >= IRAMTFI ) then
@@ -60,7 +60,7 @@ contains
     endif
 
     ! update water flux going to surface soil
-    QINSUR = QINSUR + (IRFIRATE / DT)  ! [m/s]
+    QINSUR = QINSUR + (IRFIRATE / MainTimeStep)  ! [m/s]
 
     end associate
 

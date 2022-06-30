@@ -32,11 +32,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,     option for glacier treatment
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,     grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,     grid index
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,    option for glacier treatment
+              NumSoilLayer        => noahmp%config%domain%NumSoilLayer        ,& ! in,    number of soil layers
+              MainTimeStep        => noahmp%config%domain%MainTimeStep        ,& ! in,    noahmp main time step [s]
+              GridIndexI          => noahmp%config%domain%GridIndexI          ,& ! in,    grid index in x-direction
+              GridIndexJ          => noahmp%config%domain%GridIndexJ          ,& ! in,    grid index in y-direction
               QVAP            => noahmp%water%flux%QVAP              ,& ! in,     soil surface evaporation rate[mm/s]
               QDEW            => noahmp%water%flux%QDEW              ,& ! in,     soil surface dew rate[mm/s]
               QRAIN           => noahmp%water%flux%QRAIN             ,& ! in,     snow surface rain rate[mm/s]
@@ -44,7 +44,7 @@ contains
               BDFALL          => noahmp%water%state%BDFALL           ,& ! in,     bulk density of snowfall (kg/m3)
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               FGEV            => noahmp%energy%flux%FGEV             ,& ! inout,  glacier evap heat (w/m2) [+ to atm]
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/glacier layers (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
@@ -68,8 +68,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialize
-    allocate( SICE_SAVE(1:NSOIL) )
-    allocate( SH2O_SAVE(1:NSOIL) )
+    allocate( SICE_SAVE(1:NumSoilLayer) )
+    allocate( SH2O_SAVE(1:NumSoilLayer) )
     SNOFLOW   = 0.0
     RUNSUB    = 0.0
     RUNSRF    = 0.0
@@ -99,14 +99,14 @@ contains
     call SnowWaterMainGlacier(noahmp)
 
     ! total surface input water to glacier ice
-    QINSUR = (PONDING + PONDING1 + PONDING2) / DT * 0.001  ! convert units (mm/s -> m/s)
-    if ( ISNOW == 0 ) then
+    QINSUR = (PONDING + PONDING1 + PONDING2) / MainTimeStep * 0.001  ! convert units (mm/s -> m/s)
+    if ( NumSnowLayerNeg == 0 ) then
        QINSUR = QINSUR + (QSNBOT + QRAIN) * 0.001
     else
        QINSUR = QINSUR + QSNBOT * 0.001
     endif
 #ifdef WRF_HYDRO
-    QINSUR = QINSUR + sfcheadrt / DT * 0.001
+    QINSUR = QINSUR + sfcheadrt / MainTimeStep * 0.001
 #endif
 
     ! surface runoff
@@ -115,10 +115,10 @@ contains
     ! glacier ice water
     if ( OptGlacierTreatment == 1 ) then
        REPLACE = 0.0
-       do ILEV = 1, NSOIL
+       do ILEV = 1, NumSoilLayer
           REPLACE = REPLACE + DZSNSO(ILEV)*(SICE(ILEV) - SICE_SAVE(ILEV) + SH2O(ILEV) - SH2O_SAVE(ILEV))
        enddo
-       REPLACE = REPLACE * 1000.0 / DT     ! convert to [mm/s]
+       REPLACE = REPLACE * 1000.0 / MainTimeStep     ! convert to [mm/s]
        SICE    = min(1.0, SICE_SAVE)
     elseif ( OptGlacierTreatment == 2 ) then
        SICE = 1.0
@@ -141,7 +141,7 @@ contains
     endif
 
     if ( maxval(SICE) < 0.0001 ) then
-       write(*,*) "GLACIER HAS MELTED AT:",ILOC,JLOC," ARE YOU SURE THIS SHOULD BE A GLACIER POINT?"
+       write(*,*) "GLACIER HAS MELTED AT:",GridIndexI,GridIndexJ," ARE YOU SURE THIS SHOULD BE A GLACIER POINT?"
        !CALL wrf_debug(10,TRIM(message))
     endif
 

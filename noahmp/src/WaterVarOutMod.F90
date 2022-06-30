@@ -1,16 +1,16 @@
 module WaterVarOutMod
 
-!!! Transfer column (1-D) Noah-MP energy variables to 2D NoahmpIO for output
-!!! Energy variables should be first defined in EnergyType.f90
+!!! Transfer column (1-D) Noah-MP water variables to 2D NoahmpIO for output
+!!! Water variables should be first defined in WaterVarType.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: P. Valayamkunnath, C. He, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
-  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -28,11 +28,11 @@ contains
     ! local loop index
     integer                          :: ISOIL
 
-    associate(                                                  &
-              I           => noahmp%config%domain%ILOC         ,&
-              J           => noahmp%config%domain%JLOC         ,&
-              NSNOW       => noahmp%config%domain%NSNOW        ,&
-              NSOIL       => noahmp%config%domain%NSOIL         &
+    associate(                                                         &
+              I               => noahmp%config%domain%GridIndexI      ,&
+              J               => noahmp%config%domain%GridIndexJ      ,&
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer     &
              )
 
     NoahmpIO%SMSTAV   (I,J)            = 0.0  ! [maintained as Noah consistency] water
@@ -41,8 +41,8 @@ contains
     NoahmpIO%UDRUNOFF (I,J)            = NoahmpIO%UDRUNOFF (I,J) + (noahmp%water%flux%RUNSUB * NoahmpIO%DTBL)
     NoahmpIO%QTDRAIN  (I,J)            = NoahmpIO%QTDRAIN  (I,J) + (noahmp%water%flux%QTLDRN * NoahmpIO%DTBL)
     NoahmpIO%SNOWC    (I,J)            = noahmp%water%state%FSNO
-    NoahmpIO%SMOIS    (I,1:NSOIL,J)    = noahmp%water%state%SMC (1:NSOIL)
-    NoahmpIO%SH2O     (I,1:NSOIL,J)    = noahmp%water%state%SH2O(1:NSOIL)
+    NoahmpIO%SMOIS    (I,1:NumSoilLayer,J)    = noahmp%water%state%SMC (1:NumSoilLayer)
+    NoahmpIO%SH2O     (I,1:NumSoilLayer,J)    = noahmp%water%state%SH2O(1:NumSoilLayer)
     NoahmpIO%SNOW     (I,J)            = noahmp%water%state%SNEQV
     NoahmpIO%SNOWH    (I,J)            = noahmp%water%state%SNOWH
     NoahmpIO%CANWAT   (I,J)            = noahmp%water%state%CANLIQ + noahmp%water%state%CANICE
@@ -61,8 +61,8 @@ contains
     NoahmpIO%ZWTXY    (I,J)            = noahmp%water%state%ZWT
     NoahmpIO%WAXY     (I,J)            = noahmp%water%state%WA
     NoahmpIO%WTXY     (I,J)            = noahmp%water%state%WT
-    NoahmpIO%SNICEXY  (I,-NSNOW+1:0,J) = noahmp%water%state%SNICE (-NSNOW+1:0)
-    NoahmpIO%SNLIQXY  (I,-NSNOW+1:0,J) = noahmp%water%state%SNLIQ (-NSNOW+1:0)
+    NoahmpIO%SNICEXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SNICE (-NumSnowLayerMax+1:0)
+    NoahmpIO%SNLIQXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SNLIQ (-NumSnowLayerMax+1:0)
     NoahmpIO%RUNSFXY  (I,J)            = noahmp%water%flux%RUNSRF
     NoahmpIO%RUNSBXY  (I,J)            = noahmp%water%flux%RUNSUB
     NoahmpIO%ECANXY   (I,J)            = noahmp%water%flux%ECAN

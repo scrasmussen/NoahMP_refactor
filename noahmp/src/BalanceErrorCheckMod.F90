@@ -2,7 +2,7 @@ module BalanceErrorCheckMod
 
 !!! Check water and energy balance and report error
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -28,7 +28,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
@@ -43,7 +43,7 @@ contains
     ! compute total water storage before NoahMP processes
     if ( IST == 1 ) then  ! soil
        BEG_WB = CANLIQ + CANICE + SNEQV + WA
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           BEG_WB = BEG_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
        enddo
     endif
@@ -71,12 +71,12 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
+              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
+              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
@@ -104,16 +104,16 @@ contains
 
     ! before water balance check add irrigation water to precipitation
     if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) then
-       PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / DT  ! irrigation
+       PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / MainTimeStep  ! irrigation
     endif
 
     ! Error in water balance should be < 0.1 mm
     if ( IST == 1 ) then        !soil
        END_WB = CANLIQ + CANICE + SNEQV + WA
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           END_WB = END_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
        enddo
-       ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * DT
+       ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * MainTimeStep
 #ifndef WRF_HYDRO
        if ( abs(ERRWAT) > 0.1 ) then
           if ( ERRWAT > 0) then
@@ -126,10 +126,10 @@ contains
           write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
           !call wrf_message(trim(message))
           write(*, &
-               '("  I    J   END_WB   BEG_WB     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   ZWT   QTLDRN")')
+               '("  GridIndexI    GridIndexJ   END_WB   BEG_WB     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   ZWT   QTLDRN")')
           !call wrf_message(trim(message))
-          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)')ILOC,JLOC,END_WB,BEG_WB,PRCP*DT,ECAN*DT,&
-                EDIR*DT,ETRAN*DT,RUNSRF*DT,RUNSUB*DT,ZWT,QTLDRN*DT
+          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,END_WB,BEG_WB,PRCP*MainTimeStep,ECAN*MainTimeStep,&
+                EDIR*MainTimeStep,ETRAN*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep,ZWT,QTLDRN*MainTimeStep
           !call wrf_message(trim(message))
           !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
           stop "Error"
@@ -162,8 +162,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
+              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
+              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
               RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
@@ -192,7 +192,7 @@ contains
     ERRSW = RadSWDownRefHeight - (FSA + FSR)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
-       write(*,*) 'I, J =',  ILOC, JLOC
+       write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
        write(*,*) 'ERRSW =',  ERRSW
        write(*,*) "VEGETATION!"
        write(*,*) "RadSWDownRefHeight*FVEG =",RadSWDownRefHeight * FVEG
@@ -217,7 +217,7 @@ contains
     ERRENG = SAV + SAG + PAH - (FIRA + FSH + FCEV + FGEV + FCTR + SSOIL + FIRR)
     ! print out diagnostics when error is large
     if ( abs(ERRENG) > 0.01 ) then
-       write(*,*) 'ERRENG =',ERRENG,' at i,j: ',ILOC,JLOC
+       write(*,*) 'ERRENG =',ERRENG,' at GridIndexI,GridIndexJ: ',GridIndexI,GridIndexJ
        !call wrf_message(trim(message))
        write(*,'(a17,F10.4)') "Net solar:        ",FSA
        !call wrf_message(trim(message))

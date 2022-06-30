@@ -6,7 +6,7 @@ module NoahmpDriverMainMod
 ! Refactered code: P. Valayamkunnath, C. He & refactor team (April 08, 2022)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
   use ConstantDefineMod
   use NoahmpVarType
   use NoahmpIOVarType
@@ -161,14 +161,14 @@ contains
           !  Call 1D Noah-MP LSM  
           !------------------------------------------------------------------------
           
-          if(noahmp%config%domain%VEGTYP == 25) noahmp%energy%state%FVEG = 0.0  ! Set playa, lava, sand to bare
-          if(noahmp%config%domain%VEGTYP == 25) noahmp%energy%state%LAI  = 0.0 
-          if(noahmp%config%domain%VEGTYP == 26) noahmp%energy%state%FVEG = 0.0  ! hard coded for USGS
-          if(noahmp%config%domain%VEGTYP == 26) noahmp%energy%state%LAI  = 0.0
-          if(noahmp%config%domain%VEGTYP == 27) noahmp%energy%state%FVEG = 0.0
-          if(noahmp%config%domain%VEGTYP == 27) noahmp%energy%state%LAI  = 0.0
+          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%FVEG = 0.0  ! Set playa, lava, sand to bare
+          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%LAI  = 0.0 
+          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%FVEG = 0.0  ! hard coded for USGS
+          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%LAI  = 0.0
+          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%FVEG = 0.0
+          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%LAI  = 0.0
 
-          if (noahmp%config%domain%VEGTYP == noahmp%config%domain%ISICE ) then
+          if (noahmp%config%domain%VegType == noahmp%config%domain%ISICE ) then
               noahmp%config%domain%ICE = -1                                       ! Land-ice point      
               noahmp%forcing%TemperatureSoilBottom = min(noahmp%forcing%TemperatureSoilBottom,263.15) ! set deep temp to at most -10C
 

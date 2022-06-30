@@ -39,7 +39,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
+              CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               RHOL            => noahmp%energy%param%RHOL            ,& ! in,    leaf reflectance: 1=vis, 2=nir
               RHOS            => noahmp%energy%param%RHOS            ,& ! in,    stem reflectance: 1=vis, 2=nir
@@ -104,8 +104,8 @@ contains
     enddo
     VAI = ELAI + ESAI
 
-    ! solar radiation process is only done if COSZ > 0
-    if ( COSZ > 0 ) then
+    ! solar radiation process is only done if there is light
+    if ( CosSolarZenithAngle > 0 ) then
 
        ! weight reflectance/transmittance by LAI and SAI
        WL  = ELAI / max(VAI, MPE)
@@ -118,7 +118,7 @@ contains
        ! snow aging
        call SnowAgingBats(noahmp)
 
-       ! snow albedos: only if COSZ > 0 and FSNO > 0
+       ! snow albedos
        if ( OptSnowAlbedo == 1 )  call SnowAlbedoBats(noahmp)
        if ( OptSnowAlbedo == 2 )  call SnowAlbedoClass(noahmp)
 
@@ -135,7 +135,7 @@ contains
        enddo
 
        ! sunlit fraction of canopy. set FSUN = 0 if FSUN < 0.01.
-       EXT  = GDIR / COSZ * sqrt( 1.0 - RHO(1) - TAU(1) )
+       EXT  = GDIR / CosSolarZenithAngle * sqrt( 1.0 - RHO(1) - TAU(1) )
        FSUN = ( 1.0 - exp(-EXT * VAI) ) / max( EXT*VAI, MPE )
        EXT  = FSUN
        if ( EXT < 0.01 ) then
@@ -145,7 +145,7 @@ contains
        endif
        FSUN = WL
 
-    endif  ! COSZ > 0
+    endif  ! CosSolarZenithAngle > 0
 
     ! shaded canopy fraction
     FSHA   = 1.0 - FSUN

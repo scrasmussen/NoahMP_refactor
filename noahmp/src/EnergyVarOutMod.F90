@@ -30,11 +30,11 @@ contains
     real(kind=kind_noahmp)           :: LAISHA       ! shaded leaf area index (m2/m2)
     real(kind=kind_noahmp)           :: RB           ! leaf boundary layer resistance (s/m)
 
-    associate(                                                  &
-              I           => noahmp%config%domain%ILOC         ,&
-              J           => noahmp%config%domain%JLOC         ,&
-              NSOIL       => noahmp%config%domain%NSOIL        ,&
-              NSNOW       => noahmp%config%domain%NSNOW         &
+    associate(                                                         &
+              I               => noahmp%config%domain%GridIndexI      ,&
+              J               => noahmp%config%domain%GridIndexJ      ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax  &
              )
 
              NoahmpIO%TSK      (I,J)         = noahmp%energy%state%TRAD
@@ -45,8 +45,8 @@ contains
                 NoahmpIO%ALBEDO(I,J)         = noahmp%energy%state%ALBEDO
              endif
 
-             NoahmpIO%TSLB     (I,1:NSOIL,J) = noahmp%energy%state%STC(1:NSOIL)
-             NoahmpIO%TSNOXY   (I,-NSNOW+1:0,J) = noahmp%energy%state%STC(-NSNOW+1:0)
+             NoahmpIO%TSLB     (I,1:NumSoilLayer,J) = noahmp%energy%state%STC(1:NumSoilLayer)
+             NoahmpIO%TSNOXY   (I,-NumSnowLayerMax+1:0,J) = noahmp%energy%state%STC(-NumSnowLayerMax+1:0)
              NoahmpIO%EMISS    (I,J)         = noahmp%energy%state%EMISSI
              NoahmpIO%QSFC     (I,J)         = noahmp%energy%state%QSFC
              NoahmpIO%TVXY     (I,J)         = noahmp%energy%state%TV
@@ -114,7 +114,7 @@ contains
              NoahmpIO%CHV2XY   (I,J)   = noahmp%energy%state%CHV2
              NoahmpIO%CHB2XY   (I,J)   = noahmp%energy%state%EHB2
              NoahmpIO%IRRSPLH  (I,J)   = NoahmpIO%IRRSPLH(I,J) + &
-                                         (noahmp%energy%flux%FIRR*noahmp%config%domain%DT) ! Joules/m^2
+                                         (noahmp%energy%flux%FIRR*noahmp%config%domain%MainTimeStep) ! Joules/m^2
 
     end associate
 

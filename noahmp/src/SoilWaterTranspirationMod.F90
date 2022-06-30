@@ -3,7 +3,7 @@ module SoilWaterTranspirationMod
 !!! compute soil water transpiration factor that will be used for 
 !!! stomata resistance and evapotranspiration calculations
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,7 +33,7 @@ contains
     associate(                                                        &
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,    depth of layer-bottom from soil surface
+              DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,    depth [m] of layer-bottom from soil surface
               OptSoilWaterTranspiration => noahmp%config%nmlist%OptSoilWaterTranspiration,& ! in,    options for soil moisture factor for stomatal resistance & ET
               NROOT           => noahmp%water%param%NROOT            ,& ! in,    number of soil layers with root present
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,    wilting point soil moisture [m3/m3]
@@ -69,7 +69,7 @@ contains
           endif
           GX = min( 1.0, max(0.0,GX) )
 
-          BTRANI(IZ) = max( MPE, DZSNSO(IZ) / (-ZSOIL(NROOT)) * GX )
+          BTRANI(IZ) = max( MPE, DZSNSO(IZ) / (-DepthSoilLayer(NROOT)) * GX )
           BTRAN      = BTRAN + BTRANI(IZ)
        enddo
 

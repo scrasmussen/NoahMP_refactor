@@ -3,7 +3,7 @@ module RunoffSurfaceVicMod
 !!! Compute saturated area, surface infiltration, and surface runoff based on VIC runoff scheme
 !!! This scheme is adopted from VIC model
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -32,8 +32,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,     depth [m] of layer-bottom from soil surface
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
@@ -55,9 +55,9 @@ contains
     RUNSRF        = 0.0
     PDDUM         = 0.0
 
-    do IZ = 1, NSOIL-2
-       TOP_MOIST     = TOP_MOIST + SMC(IZ) * (-1.0) * ZSOIL(IZ)  ! m
-       TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * ZSOIL(IZ) ! m  
+    do IZ = 1, NumSoilLayer-2
+       TOP_MOIST     = TOP_MOIST + SMC(IZ) * (-1.0) * DepthSoilLayer(IZ)  ! m
+       TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * DepthSoilLayer(IZ) ! m  
     enddo
 
     ! fractional saturated area from soil moisture

@@ -41,10 +41,10 @@ contains
     real(kind=kind_noahmp), allocatable, dimension(:) :: EFLUX   ! temporary variable
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
+    associate(                                                         &
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,& ! in,    number of soil layers
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,  maximum number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! in,    actual number of snow layers (negative)
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,    depth of snow/soil layer-bottom (m)
               OptSoilTemperatureBottom => noahmp%config%nmlist%OptSoilTemperatureBottom,& ! in,    options for lower boundary condition of soil temperature
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme
@@ -60,11 +60,11 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( DDZ   (-NSNOW+1:NSOIL) )
-    allocate( DZ    (-NSNOW+1:NSOIL) )
-    allocate( DENOM (-NSNOW+1:NSOIL) )
-    allocate( DTSDZ (-NSNOW+1:NSOIL) )
-    allocate( EFLUX (-NSNOW+1:NSOIL) )
+    allocate( DDZ   (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( DZ    (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( DENOM (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( DTSDZ (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( EFLUX (-NumSnowLayerMax+1:NumSoilLayer) )
     RHSTS(:) = 0.0
     AI(:)    = 0.0
     BI(:)    = 0.0
@@ -76,20 +76,20 @@ contains
     EFLUX(:) = 0.0
 
     ! compute gradient and flux of glacier/snow thermal diffusion
-    do K = ISNOW+1, NSOIL
-       if ( K == (ISNOW+1) ) then
+    do K = NumSnowLayerNeg+1, NumSoilLayer
+       if ( K == (NumSnowLayerNeg+1) ) then
           DENOM(K) = - ZSNSO(K) * HCPCT(K)
           TEMP1    = - ZSNSO(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
           EFLUX(K) = DF(K) * DTSDZ(K) - SSOIL - PHI(K)
-       elseif ( K < NSOIL ) then
+       elseif ( K < NumSoilLayer ) then
           DENOM(K) = (ZSNSO(K-1) - ZSNSO(K)) * HCPCT(K)
           TEMP1    = ZSNSO(K-1) - ZSNSO(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
           EFLUX(K) = ( DF(K)*DTSDZ(K) - DF(K-1)*DTSDZ(K-1) ) - PHI(K)
-       elseif ( K == NSOIL ) then
+       elseif ( K == NumSoilLayer ) then
           DENOM(K) = (ZSNSO(K-1) - ZSNSO(K)) * HCPCT(K)
           TEMP1    =  ZSNSO(K-1) - ZSNSO(K)
           if ( OptSoilTemperatureBottom == 1 ) then
@@ -104,8 +104,8 @@ contains
     enddo
 
     ! prepare the matrix coefficients for the tri-diagonal matrix
-    do K = ISNOW+1, NSOIL
-       if ( K == (ISNOW+1) ) then
+    do K = NumSnowLayerNeg+1, NumSoilLayer
+       if ( K == (NumSnowLayerNeg+1) ) then
           AI(K) =   0.0
           CI(K) = - DF(K)   * DDZ(K) / DENOM(K)
           if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
@@ -114,11 +114,11 @@ contains
           if ( OptSnowSoilTempTime == 2 ) then
              BI(K) = - CI(K) + DF(K) / ( 0.5*ZSNSO(K)*ZSNSO(K)*HCPCT(K) )
           endif
-       elseif ( K < NSOIL ) then
+       elseif ( K < NumSoilLayer ) then
           AI(K) = - DF(K-1) * DDZ(K-1) / DENOM(K)
           CI(K) = - DF(K  ) * DDZ(K  ) / DENOM(K)
           BI(K) = - (AI(K) + CI (K))
-       elseif ( K == NSOIL ) then
+       elseif ( K == NumSoilLayer ) then
           AI(K) = - DF(K-1) * DDZ(K-1) / DENOM(K)
           CI(K) = 0.0
           BI(K) = - (AI(K) + CI(K))

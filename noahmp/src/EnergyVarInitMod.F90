@@ -23,9 +23,9 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    associate(                                      &
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL  ,&
+    associate(                                                         &
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
               NBAND => noahmp%config%domain%NBAND   &
              )
     
@@ -163,16 +163,16 @@ contains
     noahmp%energy%state%ERRENG          = undefined_real
     noahmp%energy%state%ERRSW           = undefined_real
     
-    if( .not. allocated( noahmp%energy%state%STC      ) ) allocate( noahmp%energy%state%STC      (-NSNOW+1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%DF       ) ) allocate( noahmp%energy%state%DF       (-NSNOW+1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%HCPCT    ) ) allocate( noahmp%energy%state%HCPCT    (-NSNOW+1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%FACT     ) ) allocate( noahmp%energy%state%FACT     (-NSNOW+1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%CVSNO    ) ) allocate( noahmp%energy%state%CVSNO    (-NSNOW+1:0    ) )
-    if( .not. allocated( noahmp%energy%state%TKSNO    ) ) allocate( noahmp%energy%state%TKSNO    (-NSNOW+1:0    ) )
-    if( .not. allocated( noahmp%energy%state%CVSOIL   ) ) allocate( noahmp%energy%state%CVSOIL   (       1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%TKSOIL   ) ) allocate( noahmp%energy%state%TKSOIL   (       1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%CVGLAICE ) ) allocate( noahmp%energy%state%CVGLAICE (       1:NSOIL) )
-    if( .not. allocated( noahmp%energy%state%TKGLAICE ) ) allocate( noahmp%energy%state%TKGLAICE (       1:NSOIL) )
+    if( .not. allocated( noahmp%energy%state%STC      ) ) allocate( noahmp%energy%state%STC      (-NumSnowLayerMax+1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%DF       ) ) allocate( noahmp%energy%state%DF       (-NumSnowLayerMax+1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%HCPCT    ) ) allocate( noahmp%energy%state%HCPCT    (-NumSnowLayerMax+1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%FACT     ) ) allocate( noahmp%energy%state%FACT     (-NumSnowLayerMax+1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%CVSNO    ) ) allocate( noahmp%energy%state%CVSNO    (-NumSnowLayerMax+1:0    ) )
+    if( .not. allocated( noahmp%energy%state%TKSNO    ) ) allocate( noahmp%energy%state%TKSNO    (-NumSnowLayerMax+1:0    ) )
+    if( .not. allocated( noahmp%energy%state%CVSOIL   ) ) allocate( noahmp%energy%state%CVSOIL   (       1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%TKSOIL   ) ) allocate( noahmp%energy%state%TKSOIL   (       1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%CVGLAICE ) ) allocate( noahmp%energy%state%CVGLAICE (       1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%state%TKGLAICE ) ) allocate( noahmp%energy%state%TKGLAICE (       1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%state%ALBSND   ) ) allocate( noahmp%energy%state%ALBSND   (       1:NBAND) )
     if( .not. allocated( noahmp%energy%state%ALBSNI   ) ) allocate( noahmp%energy%state%ALBSNI   (       1:NBAND) )
     if( .not. allocated( noahmp%energy%state%ALBSOD   ) ) allocate( noahmp%energy%state%ALBSOD   (       1:NBAND) )
@@ -253,7 +253,7 @@ contains
     if( .not. allocated( noahmp%energy%flux%FREGI ) ) allocate( noahmp%energy%flux%FREGI (1:NBAND) )
     if( .not. allocated( noahmp%energy%flux%SOLAD ) ) allocate( noahmp%energy%flux%SOLAD (1:NBAND) )
     if( .not. allocated( noahmp%energy%flux%SOLAI ) ) allocate( noahmp%energy%flux%SOLAI (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%PHI   ) ) allocate( noahmp%energy%flux%PHI   (-NSNOW+1:NSOIL) )
+    if( .not. allocated( noahmp%energy%flux%PHI   ) ) allocate( noahmp%energy%flux%PHI   (-NumSnowLayerMax+1:NumSoilLayer) )
     
     noahmp%energy%flux%FABD(:)          = undefined_real
     noahmp%energy%flux%FABI(:)          = undefined_real
@@ -319,7 +319,7 @@ contains
     
     if( .not. allocated( noahmp%energy%param%LAIM   ) ) allocate( noahmp%energy%param%LAIM   (1:12   ) )
     if( .not. allocated( noahmp%energy%param%SAIM   ) ) allocate( noahmp%energy%param%SAIM   (1:12   ) )
-    if( .not. allocated( noahmp%energy%param%QUARTZ ) ) allocate( noahmp%energy%param%QUARTZ (1:NSOIL) )
+    if( .not. allocated( noahmp%energy%param%QUARTZ ) ) allocate( noahmp%energy%param%QUARTZ (1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%param%ALBSAT ) ) allocate( noahmp%energy%param%ALBSAT (1:NBAND) )
     if( .not. allocated( noahmp%energy%param%ALBDRY ) ) allocate( noahmp%energy%param%ALBDRY (1:NBAND) )
     if( .not. allocated( noahmp%energy%param%ALBLAK ) ) allocate( noahmp%energy%param%ALBLAK (1:NBAND) )
@@ -362,16 +362,15 @@ contains
     integer                          :: ISOIL
 
     associate(                                                  &
-              I           => noahmp%config%domain%ILOC         ,&
-              J           => noahmp%config%domain%JLOC         ,&
-              KTS         => NoahmpIO%KTS                      ,&
-              VEGTYP      => noahmp%config%domain%VEGTYP       ,&
+              I           => noahmp%config%domain%GridIndexI   ,&
+              J           => noahmp%config%domain%GridIndexJ   ,&
+              VegType     => noahmp%config%domain%VegType      ,&
               SOILTYP     => noahmp%config%domain%SOILTYP      ,&
-              CROPTYP     => noahmp%config%domain%CROPTYP      ,&
+              CropType    => noahmp%config%domain%CropType     ,&
               SOILCOLOR   => noahmp%config%domain%SOILCOLOR    ,&
               URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG   ,&
-              NSNOW       => noahmp%config%domain%NSNOW        ,&
-              NSOIL       => noahmp%config%domain%NSOIL        ,&
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
               NBAND       => noahmp%config%domain%NBAND         &
              )
 
@@ -382,37 +381,35 @@ contains
     noahmp%energy%state%QSFC              = NoahmpIO%QSFC   (I,J)
     noahmp%energy%state%TG                = NoahmpIO%TGXY   (I,J)
     noahmp%energy%state%TV                = NoahmpIO%TVXY   (I,J)
-    noahmp%energy%state%STC(-NSNOW+1:0)   = NoahmpIO%TSNOXY (I,-NSNOW+1:0,J)
-    noahmp%energy%state%STC(1:NSOIL)      = NoahmpIO%TSLB   (I,1:NSOIL,J)
+    noahmp%energy%state%STC(-NumSnowLayerMax+1:0)   = NoahmpIO%TSNOXY (I,-NumSnowLayerMax+1:0,J)
+    noahmp%energy%state%STC(1:NumSoilLayer)      = NoahmpIO%TSLB   (I,1:NumSoilLayer,J)
     noahmp%energy%state%TAUSS             = NoahmpIO%TAUSSXY(I,J)
     noahmp%energy%state%ALBOLD            = NoahmpIO%ALBOLDXY(I,J)
     noahmp%energy%state%EAH               = NoahmpIO%EAHXY (I,J)
     noahmp%energy%state%TAH               = NoahmpIO%TAHXY (I,J)
     noahmp%energy%state%CH                = NoahmpIO%CHXY  (I,J) 
     noahmp%energy%state%CM                = NoahmpIO%CMXY  (I,J)
-    noahmp%energy%state%CO2AIR            = NoahmpIO%CO2_TABLE * &
-                                            (NoahmpIO%P8W(I,KTS+1,J)+NoahmpIO%P8W(I,KTS,J))*0.5
-    noahmp%energy%state%O2AIR             = NoahmpIO%O2_TABLE *  &
-                                            (NoahmpIO%P8W(I,KTS+1,J)+NoahmpIO%P8W(I,KTS,J))*0.5
+    noahmp%energy%state%CO2AIR            = NoahmpIO%CO2_TABLE * noahmp%forcing%PressureAirRefHeight
+    noahmp%energy%state%O2AIR             = NoahmpIO%O2_TABLE * noahmp%forcing%PressureAirRefHeight
     ! energy parameter variable
-    noahmp%energy%param%RC                 = NoahmpIO%RC_TABLE(VEGTYP)
-    noahmp%energy%param%HVT                = NoahmpIO%HVT_TABLE(VEGTYP)
-    noahmp%energy%param%HVB                = NoahmpIO%HVB_TABLE(VEGTYP)
-    noahmp%energy%param%Z0MVT              = NoahmpIO%Z0MVT_TABLE(VEGTYP)
-    noahmp%energy%param%CWPVT              = NoahmpIO%CWPVT_TABLE(VEGTYP)
-    noahmp%energy%param%DEN                = NoahmpIO%DEN_TABLE(VEGTYP)
-    noahmp%energy%param%XL                 = NoahmpIO%XL_TABLE(VEGTYP)
-    noahmp%energy%param%BP                 = NoahmpIO%BP_TABLE(VEGTYP)
-    noahmp%energy%param%KC25               = NoahmpIO%KC25_TABLE(VEGTYP)
-    noahmp%energy%param%KO25               = NoahmpIO%KO25_TABLE(VEGTYP)
-    noahmp%energy%param%AKC                = NoahmpIO%AKC_TABLE(VEGTYP)
-    noahmp%energy%param%AKO                = NoahmpIO%AKO_TABLE(VEGTYP)
-    noahmp%energy%param%RGL                = NoahmpIO%RGL_TABLE(VEGTYP)
-    noahmp%energy%param%RSMIN              = NoahmpIO%RS_TABLE(VEGTYP)
-    noahmp%energy%param%RSMAX              = NoahmpIO%RSMAX_TABLE(VEGTYP)
-    noahmp%energy%param%TOPT               = NoahmpIO%TOPT_TABLE(VEGTYP)
-    noahmp%energy%param%HS                 = NoahmpIO%HS_TABLE(VEGTYP)
-    noahmp%energy%param%DLEAF              = NoahmpIO%DLEAF_TABLE(VEGTYP)
+    noahmp%energy%param%RC                 = NoahmpIO%RC_TABLE(VegType)
+    noahmp%energy%param%HVT                = NoahmpIO%HVT_TABLE(VegType)
+    noahmp%energy%param%HVB                = NoahmpIO%HVB_TABLE(VegType)
+    noahmp%energy%param%Z0MVT              = NoahmpIO%Z0MVT_TABLE(VegType)
+    noahmp%energy%param%CWPVT              = NoahmpIO%CWPVT_TABLE(VegType)
+    noahmp%energy%param%DEN                = NoahmpIO%DEN_TABLE(VegType)
+    noahmp%energy%param%XL                 = NoahmpIO%XL_TABLE(VegType)
+    noahmp%energy%param%BP                 = NoahmpIO%BP_TABLE(VegType)
+    noahmp%energy%param%KC25               = NoahmpIO%KC25_TABLE(VegType)
+    noahmp%energy%param%KO25               = NoahmpIO%KO25_TABLE(VegType)
+    noahmp%energy%param%AKC                = NoahmpIO%AKC_TABLE(VegType)
+    noahmp%energy%param%AKO                = NoahmpIO%AKO_TABLE(VegType)
+    noahmp%energy%param%RGL                = NoahmpIO%RGL_TABLE(VegType)
+    noahmp%energy%param%RSMIN              = NoahmpIO%RS_TABLE(VegType)
+    noahmp%energy%param%RSMAX              = NoahmpIO%RSMAX_TABLE(VegType)
+    noahmp%energy%param%TOPT               = NoahmpIO%TOPT_TABLE(VegType)
+    noahmp%energy%param%HS                 = NoahmpIO%HS_TABLE(VegType)
+    noahmp%energy%param%DLEAF              = NoahmpIO%DLEAF_TABLE(VegType)
     noahmp%energy%param%CSOIL              = NoahmpIO%CSOIL_TABLE
     noahmp%energy%param%TAU0               = NoahmpIO%TAU0_TABLE
     noahmp%energy%param%GRAIN_GROWTH       = NoahmpIO%GRAIN_GROWTH_TABLE
@@ -443,13 +440,12 @@ contains
     noahmp%energy%param%RSURF_SNOW         = NoahmpIO%RSURF_SNOW_TABLE
     noahmp%energy%param%SHDMAX             = NoahmpIO%GVFMAX(I,J) / 100.0
     noahmp%energy%param%SHDFAC             = NoahmpIO%VEGFRA(I,J) / 100.0
-
-    noahmp%energy%param%LAIM(1:12)         = NoahmpIO%LAIM_TABLE(VEGTYP,1:12)
-    noahmp%energy%param%SAIM(1:12)         = NoahmpIO%SAIM_TABLE(VEGTYP,1:12)
-    noahmp%energy%param%RHOL(1:NBAND)      = NoahmpIO%RHOL_TABLE(VEGTYP,1:NBAND)
-    noahmp%energy%param%RHOS(1:NBAND)      = NoahmpIO%RHOS_TABLE(VEGTYP,1:NBAND)
-    noahmp%energy%param%TAUL(1:NBAND)      = NoahmpIO%TAUL_TABLE(VEGTYP,1:NBAND)
-    noahmp%energy%param%TAUS(1:NBAND)      = NoahmpIO%TAUS_TABLE(VEGTYP,1:NBAND)
+    noahmp%energy%param%LAIM(1:12)         = NoahmpIO%LAIM_TABLE(VegType,1:12)
+    noahmp%energy%param%SAIM(1:12)         = NoahmpIO%SAIM_TABLE(VegType,1:12)
+    noahmp%energy%param%RHOL(1:NBAND)      = NoahmpIO%RHOL_TABLE(VegType,1:NBAND)
+    noahmp%energy%param%RHOS(1:NBAND)      = NoahmpIO%RHOS_TABLE(VegType,1:NBAND)
+    noahmp%energy%param%TAUL(1:NBAND)      = NoahmpIO%TAUL_TABLE(VegType,1:NBAND)
+    noahmp%energy%param%TAUS(1:NBAND)      = NoahmpIO%TAUS_TABLE(VegType,1:NBAND)
     noahmp%energy%param%ALBSAT(1:NBAND)    = NoahmpIO%ALBSAT_TABLE(SOILCOLOR,1:NBAND)
     noahmp%energy%param%ALBDRY(1:NBAND)    = NoahmpIO%ALBDRY_TABLE(SOILCOLOR,1:NBAND)
     noahmp%energy%param%ALBLAK(1:NBAND)    = NoahmpIO%ALBLAK_TABLE(1:NBAND)
@@ -463,12 +459,12 @@ contains
        noahmp%energy%param%CSOIL = 3.0e6
     endif
 
-    if ( CROPTYP > 0 ) then
-       noahmp%energy%param%BP              = NoahmpIO%BPI_TABLE(CROPTYP)
-       noahmp%energy%param%KC25            = NoahmpIO%KC25I_TABLE(CROPTYP)
-       noahmp%energy%param%KO25            = NoahmpIO%KO25I_TABLE(CROPTYP)
-       noahmp%energy%param%AKC             = NoahmpIO%AKCI_TABLE(CROPTYP)
-       noahmp%energy%param%AKO             = NoahmpIO%AKOI_TABLE(CROPTYP)
+    if ( CropType > 0 ) then
+       noahmp%energy%param%BP              = NoahmpIO%BPI_TABLE(CropType)
+       noahmp%energy%param%KC25            = NoahmpIO%KC25I_TABLE(CropType)
+       noahmp%energy%param%KO25            = NoahmpIO%KO25I_TABLE(CropType)
+       noahmp%energy%param%AKC             = NoahmpIO%AKCI_TABLE(CropType)
+       noahmp%energy%param%AKO             = NoahmpIO%AKOI_TABLE(CropType)
     endif
 
 

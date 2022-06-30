@@ -28,8 +28,8 @@ contains
 ! ----------------------------------------------------------------------
     associate(                                                        &
               LLANDUSE        => noahmp%config%domain%LLANDUSE       ,& ! in,     landuse data name (USGS or MODIS_IGBP)
-              VEGTYP          => noahmp%config%domain%VEGTYP         ,& ! in,     vegetation type
-              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod,& ! in,     irrigation method option
+              VegType         => noahmp%config%domain%VegType                 ,& ! in,    vegetation type
+              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,    irrigation method option
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
               IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     total input irrigation fraction
@@ -52,9 +52,9 @@ contains
 
     ! determine cropland
     if ( trim(LLANDUSE) == "USGS" ) then
-       if ( (VEGTYP >= 3) .and. (VEGTYP <= 6) ) CROPLU = .true.
+       if ( (VegType >= 3) .and. (VegType <= 6) ) CROPLU = .true.
     elseif ( trim(LLANDUSE) == "MODIFIED_IGBP_MODIS_NOAH") then
-       if ( (VEGTYP == 12) .or. (VEGTYP == 14) ) CROPLU = .true.
+       if ( (VegType == 12) .or. (VegType == 14) ) CROPLU = .true.
     endif
 
     ! assign irrigation fraction from input data 

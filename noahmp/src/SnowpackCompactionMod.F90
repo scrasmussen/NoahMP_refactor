@@ -3,7 +3,7 @@ module SnowpackCompactionMod
 !!! Snowpack compaction process
 !!! Update snow depth via compaction due to destructive metamorphism, overburden, & melt
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -34,7 +34,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
               SNICE           => noahmp%water%state%SNICE            ,& ! in,     snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! in,     snow layer liquid water [mm]
@@ -46,7 +46,7 @@ contains
               C5              => noahmp%water%param%C5_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter3 
               DM              => noahmp%water%param%DM_SnowCompact   ,& ! in,     upper Limit on destructive metamorphism compaction [kg/m3]
               ETA0            => noahmp%water%param%ETA0_SnowCompact ,& ! in,     snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               DDZ1            => noahmp%water%flux%DDZ1              ,& ! out,    rate of settling of snowpack due to destructive metamorphism [1/s]
               DDZ2            => noahmp%water%flux%DDZ2              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
@@ -65,7 +65,7 @@ contains
 
 ! start snow compaction
     BURDEN = 0.0
-    do J = ISNOW+1, 0
+    do J = NumSnowLayerNeg+1, 0
        WX      = SNICE(J) + SNLIQ(J)
        FICE(J) = SNICE(J) / WX
        VOID    = 1.0 - ( SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater ) / DZSNSO(J)
@@ -87,13 +87,13 @@ contains
           ! Compaction occurring during melt
           if ( IMELT(J) == 1 ) then
              DDZ3(J) = max( 0.0, (FICEOLD(J)-FICE(J)) / max(1.0e-6,FICEOLD(J)) )
-             DDZ3(J) = -DDZ3(J) / DT   ! sometimes too large
+             DDZ3(J) = -DDZ3(J) / MainTimeStep   ! sometimes too large
           else
              DDZ3(J) = 0.0
           endif
 
           ! Time rate of fractional change in DZ (units of s-1)
-          PDZDTC(J) = ( DDZ1(J) + DDZ2(J) + DDZ3(J) ) * DT
+          PDZDTC(J) = ( DDZ1(J) + DDZ2(J) + DDZ3(J) ) * MainTimeStep
           PDZDTC(J) = max( -0.5, PDZDTC(J) )
 
           ! The change in DZ due to compaction

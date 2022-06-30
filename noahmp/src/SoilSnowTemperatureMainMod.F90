@@ -5,7 +5,7 @@ module SoilSnowTemperatureMainMod
 !!! point but later in SoilSnowPhaseChange subroutine the snow
 !!! temperatures are reset to melting point for melting snow.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilSnowTemperatureSolverMod, only : SoilSnowTemperatureSolver
@@ -37,36 +37,36 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,    depth of lower boundary condition (m) from soil surface
-              ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,   depth of lower boundary condition (m) from snow surface
-              PHI             => noahmp%energy%flux%PHI               & ! out,   light penetrating through soil/snow water (W/m2)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax,& ! in,   maximum number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,   main noahmp timestep (s)
+              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,   snow depth [m]
+              ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,   depth of lower boundary condition (m) from soil surface
+              ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,  depth of lower boundary condition (m) from snow surface
+              PHI             => noahmp%energy%flux%PHI               & ! out,  light penetrating through soil/snow water (W/m2)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTS (-NSNOW+1:NSOIL) )
-    allocate( AI    (-NSNOW+1:NSOIL) )
-    allocate( BI    (-NSNOW+1:NSOIL) )
-    allocate( CI    (-NSNOW+1:NSOIL) )
+    allocate( RHSTS (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( AI    (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( BI    (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( CI    (-NumSnowLayerMax+1:NumSoilLayer) )
     RHSTS(:) = 0.0
     AI(:)    = 0.0
     BI(:)    = 0.0
     CI(:)    = 0.0
 
     ! compute solar penetration through water, needs more work
-    PHI(ISNOW+1:NSOIL) = 0.0
+    PHI(NumSnowLayerNeg+1:NumSoilLayer) = 0.0
 
     ! adjust ZBOT from soil surface to ZBOTSNO from snow surface
     ZBOTSNO = ZBOT - SNOWH
 
     ! compute soil temperatures
     call SoilSnowThermalDiffusion(noahmp, AI, BI, CI, RHSTS)
-    call SoilSnowTemperatureSolver(noahmp, DT, AI, BI, CI, RHSTS)
+    call SoilSnowTemperatureSolver(noahmp, MainTimeStep, AI, BI, CI, RHSTS)
 
     end associate
 

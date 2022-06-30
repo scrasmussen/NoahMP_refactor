@@ -2,7 +2,7 @@ module RunoffSurfaceBatsMod
 
 !!! Calculate surface runoff based on TOPMODEL with groundwater scheme (Niu et al., 2007)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -29,15 +29,15 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil water content [m3/m3]
-              FCR             => noahmp%water%state%FCR              ,& ! in,     impermeable fraction due to frozen soil
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              FSAT            => noahmp%water%state%FSAT             ,& ! out,    fractional saturated area for soil moisture
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              SMC             => noahmp%water%state%SMC              ,& ! in,   total soil water content [m3/m3]
+              FCR             => noahmp%water%state%FCR              ,& ! in,   impermeable fraction due to frozen soil
+              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
+              FSAT            => noahmp%water%state%FSAT             ,& ! out,  fractional saturated area for soil moisture
+              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
+              PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ contains
     DZTOT  = 0.0
 
     ! compute mean soil moisture, depth and saturation fraction
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        DZTOT   = DZTOT  + DZSNSO(K)
        SMCTOT  = SMCTOT + SMC(K) / SMCMAX(K) * DZSNSO(K)
        if ( DZTOT >= 2.0 ) exit

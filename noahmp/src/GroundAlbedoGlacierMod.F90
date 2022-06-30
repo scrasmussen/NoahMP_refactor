@@ -2,7 +2,7 @@ module GroundAlbedoGlacierMod
 
 !!! Compute glacier ground albedo based on snow and ice albedo
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -28,7 +28,6 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,     cosine solar zenith angle
               FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               ALBICE          => noahmp%energy%param%ALBICE          ,& ! in,     albedo land ice: 1=vis, 2=nir
               ALBSND          => noahmp%energy%state%ALBSND          ,& ! in,     snow albedo for direct(1=vis, 2=nir)

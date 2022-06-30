@@ -2,7 +2,7 @@ module WaterTableEquilibriumMod
 
 !!! Calculate equilibrium water table depth (Niu et al., 2005)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,29 +33,29 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,     saturated soil matric potential (m)
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
-              ZWT             => noahmp%water%state%ZWT               & ! out,    water table depth [m]
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,   depth [m] of layer-bottom from soil surface
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
+              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,   saturated soil matric potential (m)
+              BEXP            => noahmp%water%param%BEXP             ,& ! in,   soil B parameter
+              ZWT             => noahmp%water%state%ZWT               & ! out,  water table depth [m]
              )
 ! ----------------------------------------------------------------------
 
     ZFINE(1:NFINE) = 0.0
     WD1 = 0.0
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        WD1 = WD1 + (SMCMAX(1) - SH2O(K)) * DZSNSO(K) ! [m]
     enddo
 
-    DZFINE = 3.0 * ( -ZSOIL(NSOIL) ) / NFINE
+    DZFINE = 3.0 * ( -DepthSoilLayer(NumSoilLayer) ) / NFINE
     do K = 1, NFINE
        ZFINE(K) = float(K) * DZFINE
     enddo
 
-    ZWT = -3.0 * ZSOIL(NSOIL) - 0.001   ! initial value [m]
+    ZWT = -3.0 * DepthSoilLayer(NumSoilLayer) - 0.001   ! initial value [m]
 
     WD2 = 0.0
     do K = 1, NFINE

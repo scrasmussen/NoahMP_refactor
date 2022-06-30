@@ -3,7 +3,7 @@ module SnowWaterMainMod
 !!! Main snow water module including all snowpack processes
 !!! Snowfall -> Snowpack compaction -> Snow layer combination -> Snow layer division -> Snow Hydrology
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowfallBelowCanopyMod, only : SnowfallAfterCanopyIntercept
@@ -34,14 +34,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax,& ! in,     maximum number of snow layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step [s]
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               SWEMAXGLA       => noahmp%water%param%SWEMAXGLA        ,& ! in,     Maximum SWE allowed at glaciers (mm)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! inout,  depth of snow/soil layer-bottom (m)
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
@@ -64,19 +64,19 @@ contains
     ! do following snow layer compaction, combination, and division only for multi-layer snowpack
 
     ! snowpack compaction
-    if ( ISNOW < 0 ) call SnowpackCompaction(noahmp)
+    if ( NumSnowLayerNeg < 0 ) call SnowpackCompaction(noahmp)
 
     ! snow layer combination
-    if ( ISNOW < 0 ) call SnowLayerCombine(noahmp)
+    if ( NumSnowLayerNeg < 0 ) call SnowLayerCombine(noahmp)
 
     ! snow layer division
-    if ( ISNOW < 0 ) call SnowLayerDivide(noahmp)
+    if ( NumSnowLayerNeg < 0 ) call SnowLayerDivide(noahmp)
 
     ! snow hydrology for all snow cases
     call SnowpackHydrology(noahmp)
 
     ! set empty snow layer properties to zero
-    do IZ = -NSNOW+1, ISNOW
+    do IZ = -NumSnowLayerMax+1, NumSnowLayerNeg
        SNICE(IZ)  = 0.0
        SNLIQ(IZ)  = 0.0
        STC(IZ)    = 0.0
@@ -90,30 +90,30 @@ contains
        SNOFLOW     = SNEQV - SWEMAXGLA
        SNICE(0)    = SNICE(0)  - SNOFLOW
        DZSNSO(0)   = DZSNSO(0) - SNOFLOW / BDSNOW
-       SNOFLOW     = SNOFLOW / DT
+       SNOFLOW     = SNOFLOW / MainTimeStep
     endif
 
     ! sum up snow mass for layered snow
-    if ( ISNOW < 0 ) then  ! MB: only do for multi-layer
+    if ( NumSnowLayerNeg < 0 ) then  ! MB: only do for multi-layer
        SNEQV = 0.0
-       do IZ = ISNOW+1, 0
+       do IZ = NumSnowLayerNeg+1, 0
           SNEQV = SNEQV + SNICE(IZ) + SNLIQ(IZ)
        enddo
     endif
 
     ! Reset ZSNSO and layer thinkness DZSNSO
-    do IZ = ISNOW+1, 0
+    do IZ = NumSnowLayerNeg+1, 0
        DZSNSO(IZ) = -DZSNSO(IZ)
     enddo
-    DZSNSO(1) = ZSOIL(1)
-    do IZ = 2, NSOIL
-       DZSNSO(IZ) = ( ZSOIL(IZ) - ZSOIL(IZ-1) )
+    DZSNSO(1) = DepthSoilLayer(1)
+    do IZ = 2, NumSoilLayer
+       DZSNSO(IZ) = ( DepthSoilLayer(IZ) - DepthSoilLayer(IZ-1) )
     enddo
-    ZSNSO(ISNOW+1) = DZSNSO(ISNOW+1)
-    do IZ = ISNOW+2 ,NSOIL
+    ZSNSO(NumSnowLayerNeg+1) = DZSNSO(NumSnowLayerNeg+1)
+    do IZ = NumSnowLayerNeg+2, NumSoilLayer
        ZSNSO(IZ) = ZSNSO(IZ-1) + DZSNSO(IZ)
     enddo
-    do IZ = ISNOW+1 ,NSOIL
+    do IZ = NumSnowLayerNeg+1, NumSoilLayer
        DZSNSO(IZ) = -DZSNSO(IZ)
     enddo
 

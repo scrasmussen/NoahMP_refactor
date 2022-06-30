@@ -60,8 +60,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
               OptRunoffSurface => noahmp%config%nmlist%OptRunoffSurface ,& ! in,     options for surface runoff
@@ -91,11 +91,11 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTT (1:NSOIL) )
-    allocate( AI    (1:NSOIL) )
-    allocate( BI    (1:NSOIL) )
-    allocate( CI    (1:NSOIL) )
-    allocate( MLIQ  (1:NSOIL) )
+    allocate( RHSTT (1:NumSoilLayer) )
+    allocate( AI    (1:NumSoilLayer) )
+    allocate( BI    (1:NumSoilLayer) )
+    allocate( CI    (1:NumSoilLayer) )
+    allocate( MLIQ  (1:NumSoilLayer) )
     RHSTT  = 0.0
     AI     = 0.0
     BI     = 0.0
@@ -108,14 +108,14 @@ contains
     FACC   = 1.0e-06
 
     ! for the case when snowmelt water is too large
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        EPORE(K)= max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
        RSAT    = RSAT + max( 0.0, SH2O(K) - EPORE(K) ) * DZSNSO(K)
        SH2O(K) = min( EPORE(K), SH2O(K) )
     enddo
 
     ! impermeable fraction due to frozen soil
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        FICE(K) = min( 1.0, SICE(K) / SMCMAX(K) )
        FCR(K)  = max( 0.0, exp(-A*(1.0-FICE(K))) - exp(-A) ) / (1.0 - exp(-A))
     enddo
@@ -124,7 +124,7 @@ contains
     SICEMAX = 0.0
     FCRMAX  = 0.0
     SH2OMIN = SMCMAX(1)
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        if ( SICE(K) > SICEMAX ) SICEMAX = SICE(K)
        if ( FCR(K)  > FCRMAX  ) FCRMAX  = FCR(K)
        if ( SH2O(K) < SH2OMIN ) SH2OMIN = SH2O(K)
@@ -139,19 +139,19 @@ contains
 
     if ( OptRunoffSurface == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
     if ( OptRunoffSurface == 2 ) call RunoffSurfaceTopModelEqui(noahmp)
-    if ( OptRunoffSurface == 3 ) call RunoffSurfaceFreeDrain(noahmp,DT)
+    if ( OptRunoffSurface == 3 ) call RunoffSurfaceFreeDrain(noahmp,MainTimeStep)
     if ( OptRunoffSurface == 4 ) call RunoffSurfaceBATS(noahmp)
     if ( OptRunoffSurface == 5 ) call RunoffSurfaceTopModelMMF(noahmp)
-    if ( OptRunoffSurface == 6 ) call RunoffSurfaceVIC(noahmp,DT)
-    if ( OptRunoffSurface == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DT)
-    if ( OptRunoffSurface == 8 ) call RunoffSurfaceDynamicVic(noahmp,DT,FACC)
+    if ( OptRunoffSurface == 6 ) call RunoffSurfaceVIC(noahmp,MainTimeStep)
+    if ( OptRunoffSurface == 7 ) call RunoffSurfaceXinAnJiang(noahmp,MainTimeStep)
+    if ( OptRunoffSurface == 8 ) call RunoffSurfaceDynamicVic(noahmp,MainTimeStep,FACC)
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
-    if ( (PDDUM*DT) > (DZSNSO(1)*SMCMAX(1)) ) then
+    if ( (PDDUM*MainTimeStep) > (DZSNSO(1)*SMCMAX(1)) ) then
        NITER = NITER*2
     endif
-    DTFINE  = DT / NITER
+    DTFINE  = MainTimeStep / NITER
 
     ! solve soil moisture
     FACC        = 1.0e-06
@@ -174,7 +174,7 @@ contains
 
     QDRAIN = QDRAIN_SAVE / NITER
     RUNSRF = RUNSRF_SAVE / NITER
-    RUNSRF = RUNSRF * 1000.0 + RSAT * 1000.0 / DT  ! m/s -> mm/s
+    RUNSRF = RUNSRF * 1000.0 + RSAT * 1000.0 / MainTimeStep  ! m/s -> mm/s
     QDRAIN = QDRAIN * 1000.0
 
     ! compute tile drainage ! pvk
@@ -188,11 +188,11 @@ contains
     ! removal of soil water due to subsurface runoff (option 2)
     if ( OptRunoffSubsurface == 2 ) then
        WTSUB = 0.0
-       do K = 1, NSOIL
+       do K = 1, NumSoilLayer
           WTSUB = WTSUB + WCND(K) * DZSNSO(K)
        enddo
-       do K = 1, NSOIL
-          MH2O    = RUNSUB * DT * (WCND(K)*DZSNSO(K)) / WTSUB  ! mm
+       do K = 1, NumSoilLayer
+          MH2O    = RUNSUB * MainTimeStep * (WCND(K)*DZSNSO(K)) / WTSUB  ! mm
           SH2O(K) = SH2O(K) - MH2O / (DZSNSO(K)*1000.0)
        enddo
     endif
@@ -200,12 +200,12 @@ contains
     ! Limit MLIQ to be greater than or equal to watmin.
     ! Get water needed to bring MLIQ equal WATMIN from lower layer.
     if ( OptRunoffSubsurface /= 1 ) then
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           MLIQ(IZ) = SH2O(IZ) * DZSNSO(IZ) * 1000.0
        enddo
 
        WATMIN = 0.01   ! mm
-       do IZ = 1, NSOIL-1
+       do IZ = 1, NumSoilLayer-1
           if ( MLIQ(IZ) < 0.0 ) then
              XS = WATMIN - MLIQ(IZ)
           else
@@ -214,18 +214,18 @@ contains
           MLIQ(IZ  ) = MLIQ(IZ  ) + XS
           MLIQ(IZ+1) = MLIQ(IZ+1) - XS
        enddo
-       IZ = NSOIL
+       IZ = NumSoilLayer
        if ( MLIQ(IZ) < WATMIN ) then
            XS = WATMIN - MLIQ(IZ)
        else
            XS = 0.0
        endif
        MLIQ(IZ) = MLIQ(IZ) + XS
-       RUNSUB   = RUNSUB - XS/DT
+       RUNSUB   = RUNSUB - XS/MainTimeStep
 
        if ( OptRunoffSubsurface == 5 ) DEEPRECH = DEEPRECH - XS * 1.0e-3
 
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           SH2O(IZ) = MLIQ(IZ) / (DZSNSO(IZ)*1000.0)
        enddo
     endif ! OptRunoffSubsurface /= 1
@@ -240,7 +240,7 @@ contains
     endif
 
     ! update soil moisture
-    do IZ = 1, NSOIL
+    do IZ = 1, NumSoilLayer
         SMC(IZ) = SH2O(IZ) + SICE(IZ)
     enddo
 

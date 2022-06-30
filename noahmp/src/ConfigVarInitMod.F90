@@ -54,13 +54,13 @@ contains
     noahmp%config%domain%CROPLU       = .false.
     noahmp%config%domain%CROP_ACTIVE  = .false.
     noahmp%config%domain%DVEG_ACTIVE  = .false.
-    noahmp%config%domain%NSNOW        = undefined_int
-    noahmp%config%domain%NSOIL        = undefined_int
-    noahmp%config%domain%ILOC         = undefined_int
-    noahmp%config%domain%JLOC         = undefined_int
-    noahmp%config%domain%VEGTYP       = undefined_int
-    noahmp%config%domain%CROPTYP      = undefined_int
-    noahmp%config%domain%ISNOW        = undefined_int
+    noahmp%config%domain%NumSnowLayerMax = undefined_int
+    noahmp%config%domain%NumSnowLayerNeg = undefined_int
+    noahmp%config%domain%NumSoilLayer    = undefined_int
+    noahmp%config%domain%GridIndexI   = undefined_int
+    noahmp%config%domain%GridIndexJ   = undefined_int
+    noahmp%config%domain%VegType      = undefined_int
+    noahmp%config%domain%CropType     = undefined_int
     noahmp%config%domain%IST          = undefined_int
     noahmp%config%domain%NBAND        = undefined_int
     noahmp%config%domain%SOILCOLOR    = undefined_int
@@ -73,13 +73,13 @@ contains
     noahmp%config%domain%EBLFOREST    = undefined_int
     noahmp%config%domain%YEARLEN      = undefined_int
     noahmp%config%domain%SLOPETYP     = undefined_int
-    noahmp%config%domain%DT           = undefined_real
-    noahmp%config%domain%DX           = undefined_real
+    noahmp%config%domain%MainTimeStep = undefined_real
+    noahmp%config%domain%GridSize     = undefined_real
     noahmp%config%domain%JULIAN       = undefined_real
-    noahmp%config%domain%COSZ         = undefined_real
+    noahmp%config%domain%CosSolarZenithAngle    = undefined_real
     noahmp%config%domain%ZREF         = undefined_real
-    noahmp%config%domain%DZ8W         = undefined_real
-    noahmp%config%domain%LAT          = undefined_real
+    noahmp%config%domain%ThicknessAtmosBotLayer = undefined_real
+    noahmp%config%domain%Latitude               = undefined_real
 
   end subroutine ConfigVarInitDefault
 
@@ -93,10 +93,10 @@ contains
     type(noahmp_type),    intent(inout) :: noahmp
  
     associate(                                      &
-              I     => NoahmpIO%I                  ,&
-              J     => NoahmpIO%J                  ,&
-              NSNOW => NoahmpIO%NSNOW              ,&
-              NSOIL => NoahmpIO%NSOIL               &
+              I               => NoahmpIO%I        ,&
+              J               => NoahmpIO%J        ,&
+              NumSnowLayerMax => NoahmpIO%NSNOW    ,&
+              NNumSoilLayer   => NoahmpIO%NSOIL     &
              )
 
     ! config namelist variable
@@ -125,24 +125,24 @@ contains
     noahmp%config%nmlist%OptGlacierTreatment        = NoahmpIO%IOPT_GLA
 
     ! config domain variable
-    noahmp%config%domain%NSNOW      = NoahmpIO%NSNOW
-    noahmp%config%domain%NSOIL      = NoahmpIO%NSOIL
-    noahmp%config%domain%ILOC       = NoahmpIO%I
-    noahmp%config%domain%JLOC       = NoahmpIO%J
+    noahmp%config%domain%NumSnowLayerMax = NoahmpIO%NSNOW
+    noahmp%config%domain%NumSnowLayerNeg = NoahmpIO%ISNOWXY(I,J)
+    noahmp%config%domain%NumSoilLayer    = NoahmpIO%NSOIL
+    noahmp%config%domain%GridIndexI = NoahmpIO%I
+    noahmp%config%domain%GridIndexJ = NoahmpIO%J
     noahmp%config%domain%IST        = 1
     noahmp%config%domain%NBAND      = 2 
     noahmp%config%domain%SOILCOLOR  = 4
-    noahmp%config%domain%DT         = NoahmpIO%DTBL
-    noahmp%config%domain%DX         = NoahmpIO%DX
+    noahmp%config%domain%MainTimeStep = NoahmpIO%DTBL
+    noahmp%config%domain%GridSize     = NoahmpIO%DX
     noahmp%config%domain%LLANDUSE   = NoahmpIO%LLANDUSE
-    noahmp%config%domain%VEGTYP     = NoahmpIO%IVGTYP   (I,  J)
-    noahmp%config%domain%CROPTYP    = NoahmpIO%CROPCAT  (I,  J)
+    noahmp%config%domain%VegType      = NoahmpIO%IVGTYP(I,J)
+    noahmp%config%domain%CropType     = NoahmpIO%CROPCAT  (I,  J)
     noahmp%config%domain%ICE        = NoahmpIO%ICE
     noahmp%config%domain%JULIAN     = NoahmpIO%JULIAN
     noahmp%config%domain%ZREF       = 0.5*NoahmpIO%DZ8W (I,1,J) 
-    noahmp%config%domain%DZ8W       = NoahmpIO%DZ8W     (I,1,J)
-    noahmp%config%domain%COSZ       = NoahmpIO%COSZEN   (I,  J)
-    noahmp%config%domain%ISNOW      = NoahmpIO%ISNOWXY  (I,  J)
+    noahmp%config%domain%ThicknessAtmosBotLayer = NoahmpIO%DZ8W(I,1,J)
+    noahmp%config%domain%CosSolarZenithAngle    = NoahmpIO%COSZEN(I,J)
   
     noahmp%config%domain%URBAN_FLAG = .false.
     noahmp%config%domain%ISWATER    = NoahmpIO%ISWATER_TABLE
@@ -152,34 +152,34 @@ contains
     noahmp%config%domain%EBLFOREST  = NoahmpIO%EBLFOREST_TABLE
     noahmp%config%domain%YEARLEN    = NoahmpIO%YEARLEN
     noahmp%config%domain%SLOPETYP   = NoahmpIO%SLOPETYP
-    noahmp%config%domain%LAT        = NoahmpIO%XLAT(I,J)
+    noahmp%config%domain%Latitude   = NoahmpIO%XLAT(I,J)
     noahmp%config%domain%NSTAGE     = 8
 
-    if( .not. allocated( noahmp%config%domain%ZSOIL   ) ) allocate( noahmp%config%domain%ZSOIL  (       1:NSOIL) )
-    if( .not. allocated( noahmp%config%domain%ZLAYER  ) ) allocate( noahmp%config%domain%ZLAYER (       1:NSOIL) )
-    if( .not. allocated( noahmp%config%domain%SOILTYP ) ) allocate( noahmp%config%domain%SOILTYP(       1:NSOIL) )
-    if( .not. allocated( noahmp%config%domain%DZSNSO  ) ) allocate( noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) )
-    if( .not. allocated( noahmp%config%domain%ZSNSO   ) ) allocate( noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) )
+    if( .not. allocated(noahmp%config%domain%DepthSoilLayer) ) allocate( noahmp%config%domain%DepthSoilLayer(1:NumSoilLayer) )
+    if( .not. allocated( noahmp%config%domain%ZLAYER  ) ) allocate( noahmp%config%domain%ZLAYER (1:NumSoilLayer) )
+    if( .not. allocated( noahmp%config%domain%SOILTYP ) ) allocate( noahmp%config%domain%SOILTYP(1:NumSoilLayer) )
+    if( .not. allocated( noahmp%config%domain%DZSNSO  ) ) allocate( noahmp%config%domain%DZSNSO (-NumSnowLayerMax+1:NumSoilLayer) )
+    if( .not. allocated( noahmp%config%domain%ZSNSO   ) ) allocate( noahmp%config%domain%ZSNSO  (-NumSnowLayerMax+1:NumSoilLayer) )
     
-    noahmp%config%domain%SOILTYP(       1:NSOIL) = undefined_int
-    noahmp%config%domain%ZSOIL  (       1:NSOIL) = undefined_real
-    noahmp%config%domain%ZLAYER (       1:NSOIL) = undefined_real
-    noahmp%config%domain%DZSNSO (-NSNOW+1:NSOIL) = undefined_real
-    noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = undefined_real
+    noahmp%config%domain%SOILTYP(1:NumSoilLayer) = undefined_int
+    noahmp%config%domain%DepthSoilLayer(1:NumSoilLayer) = undefined_real
+    noahmp%config%domain%ZLAYER (1:NumSoilLayer) = undefined_real
+    noahmp%config%domain%DZSNSO (-NumSnowLayerMax+1:NumSoilLayer) = undefined_real
+    noahmp%config%domain%ZSNSO  (-NumSnowLayerMax+1:NumSoilLayer) = undefined_real
 
     if(noahmp%config%nmlist%OptSoilProperty == 1) then
-       noahmp%config%domain%SOILTYP(1:NSOIL) = NoahmpIO%ISLTYP(I,J)      ! soil type same in all layers
+       noahmp%config%domain%SOILTYP(1:NumSoilLayer) = NoahmpIO%ISLTYP(I,J)      ! soil type same in all layers
     elseif(noahmp%config%nmlist%OptSoilProperty == 2) then
        noahmp%config%domain%SOILTYP(1) = nint(NoahmpIO%SOILCL1(I,J))     ! soil type in layer1
        noahmp%config%domain%SOILTYP(2) = nint(NoahmpIO%SOILCL2(I,J))     ! soil type in layer2
        noahmp%config%domain%SOILTYP(3) = nint(NoahmpIO%SOILCL3(I,J))     ! soil type in layer3
        noahmp%config%domain%SOILTYP(4) = nint(NoahmpIO%SOILCL4(I,J))     ! soil type in layer4
     elseif(noahmp%config%nmlist%OptSoilProperty == 3) then
-       noahmp%config%domain%SOILTYP(1:NSOIL) = NoahmpIO%ISLTYP(I,J)      ! to initialize with default
+       noahmp%config%domain%SOILTYP(1:NumSoilLayer) = NoahmpIO%ISLTYP(I,J)      ! to initialize with default
     endif 
        
-    noahmp%config%domain%ZSOIL  (       1:NSOIL) = NoahmpIO%ZSOIL  (     1:NSOIL      )
-    noahmp%config%domain%ZSNSO  (-NSNOW+1:NSOIL) = NoahmpIO%ZSNSOXY(I,-NSNOW+1:NSOIL,J)
+    noahmp%config%domain%DepthSoilLayer(1:NumSoilLayer) = NoahmpIO%ZSOIL(1:NumSoilLayer)
+    noahmp%config%domain%ZSNSO  (-NumSnowLayerMax+1:NumSoilLayer) = NoahmpIO%ZSNSOXY(I,-NumSnowLayerMax+1:NumSoilLayer,J)
 
     if ( (NoahmpIO%IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE) .or. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_1_TABLE) .or. &
          (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_2_TABLE)   .or. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_3_TABLE) .or. &
@@ -191,21 +191,21 @@ contains
        noahmp%config%domain%URBAN_FLAG = .true.
        
        if(NoahmpIO%SF_URBAN_PHYSICS == 0 ) then
-           noahmp%config%domain%VEGTYP = NoahmpIO%ISURBAN_TABLE
+           noahmp%config%domain%VegType = NoahmpIO%ISURBAN_TABLE
        else
-           noahmp%config%domain%VEGTYP = NoahmpIO%NATURAL_TABLE  ! set urban vegetation type based on table natural
+           noahmp%config%domain%VegType = NoahmpIO%NATURAL_TABLE  ! set urban vegetation type based on table natural
            NoahmpIO%GVFMAX(I,J)        = 0.96 * 100.0            ! in %
        endif
          
     endif
 
-    noahmp%config%domain%CROPTYP = 0
+    noahmp%config%domain%CropType = 0
     if ((NoahmpIO%IOPT_CROP > 0) .and. (NoahmpIO%IVGTYP(I,J) == NoahmpIO%ISCROP_TABLE)) &
-       noahmp%config%domain%CROPTYP = NoahmpIO%DEFAULT_CROP_TABLE   
+       noahmp%config%domain%CropType = NoahmpIO%DEFAULT_CROP_TABLE   
        
     if (NoahmpIO%IOPT_CROP > 0 .and. NoahmpIO%CROPCAT(I,J) > 0) then
-       noahmp%config%domain%CROPTYP  = NoahmpIO%CROPCAT(I,J)             
-       noahmp%config%domain%VEGTYP   = NoahmpIO%ISCROP_TABLE
+       noahmp%config%domain%CropType  = NoahmpIO%CROPCAT(I,J)             
+       noahmp%config%domain%VegType   = NoahmpIO%ISCROP_TABLE
        NoahmpIO%VEGFRA(I,J)          = 0.95 * 100.0              ! in %
        NoahmpIO%GVFMAX(I,J)          = 0.95 * 100.0              ! in %
     endif

@@ -37,15 +37,15 @@ contains
     associate(                                                     &
               OptDynamicVeg   => noahmp%config%nmlist%OptDynamicVeg  ,& ! in,    dynamic vegetation option
               OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,    crop model option
-              VEGTYP          => noahmp%config%domain%VEGTYP      ,& ! in,    vegetation type 
-              CROPTYPE        => noahmp%config%domain%CROPTYP     ,& ! in,    crop type 
+              VegType         => noahmp%config%domain%VegType        ,& ! in,    vegetation type 
+              CropType        => noahmp%config%domain%CropType       ,& ! in,    crop type 
               ISICE           => noahmp%config%domain%ISICE       ,& ! in,    land ice flag
               ISBARREN        => noahmp%config%domain%ISBARREN    ,& ! in,    bare soil flag
               ISWATER         => noahmp%config%domain%ISWATER     ,& ! in,    water point flag
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG  ,& ! in,    urban point flag
               DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE ,& ! in,    flag to activate dynamic vegetation model
               CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE ,& ! in,    flag to activate dynamic crop model
-              LAT             => noahmp%config%domain%LAT         ,& ! in,    latitude (radians)
+              Latitude        => noahmp%config%domain%Latitude    ,& ! in,    latitude (degree)
               YEARLEN         => noahmp%config%domain%YEARLEN     ,& ! in,    Number of days in the particular year
               JULIAN          => noahmp%config%domain%JULIAN      ,& ! in,    Julian day of year (fractional) (0<=JULIAN<YEARLEN)
               HVT             => noahmp%energy%param%HVT          ,& ! in,    top of canopy (m)
@@ -69,11 +69,11 @@ contains
 !----------------------------------------------------------------------
 
     ! compute LAI based on dynamic vegetation option
-    if ( CROPTYPE == 0 ) then
+    if ( CropType == 0 ) then
 
        ! no dynamic vegetation, use table LAI
        if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 4) ) then
-          if ( LAT >= 0.0 ) then
+          if ( Latitude >= 0.0 ) then
             ! Northern Hemisphere
             DAY = JULIAN
           else
@@ -101,13 +101,13 @@ contains
        if ( (LAI < 0.05) .or. (SAI == 0.0) ) LAI = 0.0  ! MB: LAI CHECK
 
        ! for non-vegetation point
-       if ( (VEGTYP == ISWATER) .or. (VEGTYP == ISBARREN) .or. &
-            (VEGTYP == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
+       if ( (VegType == ISWATER) .or. (VegType == ISBARREN) .or. &
+            (VegType == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
           LAI = 0.0
           SAI = 0.0
        endif
 
-    endif   ! CROPTYPE == 0
+    endif   ! CropType == 0
 
     ! vegetation fraction buried by snow
     DB = min( max(SNOWH-HVB,0.0), (HVT-HVB) )
@@ -120,12 +120,12 @@ contains
     ! adjust LAI and SAI bused on snow bury
     ELAI = LAI * (1.0 - FB)
     ESAI = SAI * (1.0 - FB)
-    if ( (ESAI < 0.05) .and. (CROPTYPE == 0) ) ESAI = 0.0                       ! MB: ESAI CHECK, change to 0.05 v3.6
-    if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CROPTYPE == 0) ) ELAI = 0.0  ! MB: LAI CHECK
+    if ( (ESAI < 0.05) .and. (CropType == 0) ) ESAI = 0.0                       ! MB: ESAI CHECK, change to 0.05 v3.6
+    if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CropType == 0) ) ELAI = 0.0  ! MB: LAI CHECK
 
     ! set growing season flag
-    if ( ((TV > TMIN) .and. (CROPTYPE == 0)) .or. &
-         ((PGS > 2) .and. (PGS < 7) .and. (CROPTYPE > 0))) then
+    if ( ((TV > TMIN) .and. (CropType == 0)) .or. &
+         ((PGS > 2) .and. (PGS < 7) .and. (CropType > 0))) then
        IGS = 1.0
     else
        IGS = 0.0
@@ -149,20 +149,20 @@ contains
        stop "error"
     endif
     ! use maximum vegetation fraction for crop run
-    if ( (OptCropModel > 0) .and. (CROPTYPE > 0) ) then
+    if ( (OptCropModel > 0) .and. (CropType > 0) ) then
        FVEG = SHDMAX
     endif
 
     ! adjust unreasonable vegetation fraction
     if ( FVEG <= 0.05 ) FVEG = 0.05
-    if ( (URBAN_FLAG .eqv. .true.) .or. (VEGTYP == ISBARREN) ) FVEG = 0.0
+    if ( (URBAN_FLAG .eqv. .true.) .or. (VegType == ISBARREN) ) FVEG = 0.0
     if ( (ELAI+ESAI) == 0.0 ) FVEG = 0.0
 
     ! determine if activate dynamic vegetation or crop run
     CROP_ACTIVE = .false.
     DVEG_ACTIVE = .false.
     if ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 6) ) DVEG_ACTIVE = .true.
-    if ( (OptCropModel > 0) .and. (CROPTYPE > 0) ) then
+    if ( (OptCropModel > 0) .and. (CropType > 0) ) then
        CROP_ACTIVE = .true.
        DVEG_ACTIVE = .false.
     endif

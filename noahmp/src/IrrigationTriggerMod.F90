@@ -37,11 +37,10 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface (m)
+              DepthSoilLayer      => noahmp%config%domain%DepthSoilLayer      ,& ! in,    depth [m] of layer-bottom from soil surface
               JULIAN          => noahmp%config%domain%JULIAN         ,& ! in,     julian day of the year
               OptIrrigation   => noahmp%config%nmlist%OptIrrigation  ,& ! in,     irrigation option
-              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod,& ! in,     irrigation method option
+              OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,     irrigation method option
               PLTDAY          => noahmp%biochem%param%PLTDAY         ,& ! in,     Planting day (day of year)
               HSDAY           => noahmp%biochem%param%HSDAY          ,& ! in,     Harvest date (day of year)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
@@ -82,11 +81,11 @@ contains
        ! estimate available water and field capacity for the root zone
        SMCAVL = 0.0
        SMCLIM = 0.0
-       SMCAVL = ( SH2O(1) - SMCWLT(1) ) * (-1.0) * ZSOIL(1)    ! current soil water (m) 
-       SMCLIM = ( SMCREF(1) - SMCWLT(1) ) * (-1.0) * ZSOIL(1)  ! available water (m)
+       SMCAVL = ( SH2O(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)    ! current soil water (m) 
+       SMCLIM = ( SMCREF(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)  ! available water (m)
        do K = 2, NROOT
-         SMCAVL = SMCAVL + ( SH2O(K) - SMCWLT(K) ) * ( ZSOIL(K-1) - ZSOIL(K) )
-         SMCLIM = SMCLIM + ( SMCREF(K) - SMCWLT(K) ) * ( ZSOIL(K-1) - ZSOIL(K) )
+         SMCAVL = SMCAVL + ( SH2O(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
+         SMCLIM = SMCLIM + ( SMCREF(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
        enddo
 
       ! check if root zone soil moisture < IRR_MAD (calibratable)

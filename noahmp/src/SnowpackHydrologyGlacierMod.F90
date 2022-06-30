@@ -36,9 +36,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,     option for glacier treatment
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,    option for glacier treatment
+              NumSnowLayerMax     => noahmp%config%domain%NumSnowLayerMax     ,& ! in,    maximum number of snow layers
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               FSH             => noahmp%energy%flux%FSH              ,& ! in,     total sensible heat (w/m2) [+ to atm]
               QSNFRO          => noahmp%water%flux%QSNFRO            ,& ! in,     snow surface frost rate[mm/s]
               QSNSUB          => noahmp%water%flux%QSNSUB            ,& ! in,     snow surface sublimation rate[mm/s]
@@ -46,7 +46,7 @@ contains
               SNLIQMAXFRAC    => noahmp%water%param%SNLIQMAXFRAC     ,& ! in,     maximum liquid water fraction in snow
               SSI             => noahmp%water%param%SSI              ,& ! in,     liquid water holding capacity for snowpack (m3/m3)
               SNOW_RET_FAC    => noahmp%water%param%SNOW_RET_FAC     ,& ! in,     snowpack water release timescale factor (1/s)
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
@@ -63,8 +63,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( VOL_LIQ(-NSNOW+1:0) )
-    allocate( VOL_ICE(-NSNOW+1:0) )
+    allocate( VOL_LIQ(-NumSnowLayerMax+1:0) )
+    allocate( VOL_ICE(-NumSnowLayerMax+1:0) )
     VOL_LIQ(:) = 0.0
     VOL_ICE(:) = 0.0
     EPORE  (:) = 0.0
@@ -75,7 +75,7 @@ contains
     ! for the case when SNEQV becomes '0' after 'COMBINE'
     if ( SNEQV == 0.0 ) then
        if ( OptGlacierTreatment == 1 ) then
-          SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * DT / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
+          SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * MainTimeStep / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
        elseif ( OptGlacierTreatment == 2 ) then
           FSH    = FSH - (QSNFRO - QSNSUB) * ConstLatHeatSublim
           QSNFRO = 0.0
@@ -86,10 +86,10 @@ contains
     ! for shallow snow without a layer
     ! snow surface sublimation may be larger than existing snow mass. To conserve water,
     ! excessive sublimation is used to reduce soil water. Smaller time steps would tend to aviod this problem.
-    if ( (ISNOW == 0) .and. (SNEQV > 0.0) ) then
+    if ( (NumSnowLayerNeg == 0) .and. (SNEQV > 0.0) ) then
        if ( OptGlacierTreatment == 1 ) then
           TEMP   = SNEQV
-          SNEQV  = SNEQV - QSNSUB*DT + QSNFRO*DT
+          SNEQV  = SNEQV - QSNSUB*MainTimeStep + QSNFRO*MainTimeStep
           PROPOR = SNEQV / TEMP
           SNOWH  = max( 0.0, PROPOR*SNOWH )
           SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
@@ -115,29 +115,29 @@ contains
     endif
 
     ! for multi-layer (>=1) snow
-    if ( ISNOW < 0 ) then
-      WGDIF          = SNICE(ISNOW+1) - QSNSUB*DT + QSNFRO*DT
-      SNICE(ISNOW+1) = WGDIF
-      if ( (WGDIF < 1.0e-6) .and. (ISNOW < 0) ) call SnowLayerCombineGlacier(noahmp)
-      if ( ISNOW < 0 ) then
-         SNLIQ(ISNOW+1) = SNLIQ(ISNOW+1) + QRAIN * DT
-         SNLIQ(ISNOW+1) = max( 0.0, SNLIQ(ISNOW+1) )
+    if ( NumSnowLayerNeg < 0 ) then
+      WGDIF          = SNICE(NumSnowLayerNeg+1) - QSNSUB*MainTimeStep + QSNFRO*MainTimeStep
+      SNICE(NumSnowLayerNeg+1) = WGDIF
+      if ( (WGDIF < 1.0e-6) .and. (NumSnowLayerNeg < 0) ) call SnowLayerCombineGlacier(noahmp)
+      if ( NumSnowLayerNeg < 0 ) then
+         SNLIQ(NumSnowLayerNeg+1) = SNLIQ(NumSnowLayerNeg+1) + QRAIN * MainTimeStep
+         SNLIQ(NumSnowLayerNeg+1) = max( 0.0, SNLIQ(NumSnowLayerNeg+1) )
       endif
     endif
 
     ! Porosity and partial volume
-    do J = ISNOW+1, 0
+    do J = NumSnowLayerNeg+1, 0
        VOL_ICE(J) = min( 1.0, SNICE(J)/(DZSNSO(J)*ConstDensityIce) )
        EPORE(J)   = 1.0 - VOL_ICE(J)
     enddo
 
     ! compute inter-layer snow water flow
-    do J = ISNOW+1, 0
+    do J = NumSnowLayerNeg+1, 0
        SNLIQ(J)   = SNLIQ(J) + QIN
        VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*ConstDensityWater)
        QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * DZSNSO(J) )
        if ( J == 0 ) then
-          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * DT * QOUT )
+          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * MainTimeStep * QOUT )
        endif
        QOUT     = QOUT * ConstDensityWater
        SNLIQ(J) = SNLIQ(J) - QOUT
@@ -149,12 +149,12 @@ contains
     enddo
 
     ! update snow depth
-    do J = ISNOW+1, 0
+    do J = NumSnowLayerNeg+1, 0
        DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/ConstDensityWater + SNICE(J)/ConstDensityIce )
     enddo
 
     ! Liquid water from snow bottom to soil (mm/s)
-    QSNBOT = QOUT / DT
+    QSNBOT = QOUT / MainTimeStep
 
     end associate
 

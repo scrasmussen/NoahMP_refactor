@@ -3,7 +3,7 @@ module BiochemNatureVegMainMod
 !!! Main Biogeochemistry module for dynamic natural vegetation (as opposed to cropland)
 !!! currently only include carbon processes (RE Dickinson et al.(1998) and Guo-Yue Niu(2004))
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod 
   use CarbonFluxNatureVegMod,  only : CarbonFluxNatureVeg
@@ -30,8 +30,8 @@ contains
 
 !------------------------------------------------------------------------
     associate(                                                        &
-              VEGTYP           => noahmp%config%domain%VEGTYP        ,& ! in,    dynamic vegetation option
-              ZSOIL            => noahmp%config%domain%ZSOIL         ,& ! in,    depth of layer-bottom from soil surface
+              VegType          => noahmp%config%domain%VegType       ,& ! in,    vegetation type
+              DepthSoilLayer            => noahmp%config%domain%DepthSoilLayer         ,& ! in,    depth [m] of layer-bottom from soil surface
               DZSNSO           => noahmp%config%domain%DZSNSO        ,& ! in,    snow/soil layer thickness [m]
               ISWATER          => noahmp%config%domain%ISWATER       ,& ! in,    water point flag
               ISICE            => noahmp%config%domain%ISICE         ,& ! in,    land ice flag
@@ -69,8 +69,8 @@ contains
     GPP = 0.0
 
     ! no biogeochemistry in non-vegetated points
-    if ( (VEGTYP == ISWATER) .or. (VEGTYP == ISBARREN) .or. &
-         (VEGTYP == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
+    if ( (VegType == ISWATER) .or. (VegType == ISBARREN) .or. &
+         (VegType == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
        XLAI   = 0.0
        XSAI   = 0.0
        GPP    = 0.0
@@ -96,7 +96,7 @@ contains
     WSTRES = 1.0 - BTRAN
     WROOT  = 0.0
     do J = 1, NROOT
-       WROOT = WROOT + SMC(J) / SMCMAX(J) * DZSNSO(J) / (-ZSOIL(NROOT))
+       WROOT = WROOT + SMC(J) / SMCMAX(J) * DZSNSO(J) / (-DepthSoilLayer(NROOT))
     enddo
 
     ! start carbon process

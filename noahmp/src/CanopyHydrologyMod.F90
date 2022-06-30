@@ -3,7 +3,7 @@ module CanopyHydrologyMod
 !!! Canopy Hydrology processes for intercepted rain and snow water
 !!! Canopy liquid water evaporation and dew; canopy ice water sublimation and frost
   
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -25,7 +25,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,    noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    noahmp main time step (s)
               FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
               FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
@@ -88,8 +88,8 @@ contains
 
     ! canopy water balance. for convenience allow dew to bring CANLIQ above
     ! maxh2o or else would have to re-adjust drip
-    QEVAC   = min( CANLIQ/DT, QEVAC )
-    CANLIQ  = max( 0.0, CANLIQ+(QDEWC-QEVAC)*DT )
+    QEVAC   = min( CANLIQ/MainTimeStep, QEVAC )
+    CANLIQ  = max( 0.0, CANLIQ+(QDEWC-QEVAC)*MainTimeStep )
     if ( CANLIQ <= 1.0e-06 ) CANLIQ = 0.0
 
 !=== canopy ice 
@@ -97,8 +97,8 @@ contains
     MAXSNO = 6.6 * (0.27 + 46.0/BDFALL) * (ELAI + ESAI)
 
     ! canopy sublimation and frost
-    QSUBC = min( CANICE/DT, QSUBC )
-    CANICE= max( 0.0, CANICE+(QFROC-QSUBC)*DT )
+    QSUBC = min( CANICE/MainTimeStep, QSUBC )
+    CANICE= max( 0.0, CANICE+(QFROC-QSUBC)*MainTimeStep )
     if ( CANICE <= 1.0e-6 ) CANICE = 0.0
 
 !=== wetted fraction of canopy
@@ -112,17 +112,17 @@ contains
 !=== phase change
     ! canopy ice melting
     if ( (CANICE > 1.0e-6) .and. (TV > ConstFreezePoint) ) then
-       QMELTC = min( CANICE/DT, (TV-ConstFreezePoint)*ConstHeatCapacIce*CANICE/ConstDensityIce/(DT*ConstLatHeatFusion) )
-       CANICE = max( 0.0, CANICE - QMELTC*DT )
-       CANLIQ = max( 0.0, CANLIQ + QMELTC*DT )
+       QMELTC = min( CANICE/MainTimeStep, (TV-ConstFreezePoint)*ConstHeatCapacIce*CANICE/ConstDensityIce/(MainTimeStep*ConstLatHeatFusion) )
+       CANICE = max( 0.0, CANICE - QMELTC*MainTimeStep )
+       CANLIQ = max( 0.0, CANLIQ + QMELTC*MainTimeStep )
        TV     = FWET*ConstFreezePoint + (1.0 - FWET)*TV
     endif
 
     ! canopy water refreeezing
     if ( (CANLIQ > 1.0e-6) .and. (TV < ConstFreezePoint) ) then
-       QFRZC  = min( CANLIQ/DT, (ConstFreezePoint-TV)*ConstHeatCapacWater*CANLIQ/ConstDensityWater/(DT*ConstLatHeatFusion) )
-       CANLIQ = max( 0.0, CANLIQ - QFRZC*DT )
-       CANICE = max( 0.0, CANICE + QFRZC*DT )
+       QFRZC  = min( CANLIQ/MainTimeStep, (ConstFreezePoint-TV)*ConstHeatCapacWater*CANLIQ/ConstDensityWater/(MainTimeStep*ConstLatHeatFusion) )
+       CANLIQ = max( 0.0, CANLIQ - QFRZC*MainTimeStep )
+       CANICE = max( 0.0, CANICE + QFRZC*MainTimeStep )
        TV     = FWET*ConstFreezePoint + (1.0 - FWET)*TV
     ENDIF
 

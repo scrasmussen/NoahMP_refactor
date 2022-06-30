@@ -3,7 +3,7 @@ module CarbonFluxNatureVegMod
 !!! Main Carbon assimilation for natural vegetation
 !!! based on RE Dickinson et al.(1998), modifed by Guo-Yue Niu, 2004
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
         
@@ -32,8 +32,8 @@ contains
 
 !------------------------------------------------------------------------
     associate(                                                        &
-              VEGTYP          => noahmp%config%domain%VEGTYP         ,& ! in,    dynamic vegetation option
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
+              VegType         => noahmp%config%domain%VegType        ,& ! in,    vegetation type
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               EBLFOREST       => noahmp%config%domain%EBLFOREST      ,& ! in,    flag for Evergreen Broadleaf Forest
               WRRAT           => noahmp%biochem%param%WRRAT          ,& ! in,    wood to non-wood ratio
               LTOVRC          => noahmp%biochem%param%LTOVRC         ,& ! in,    leaf turnover coefficient [1/s]
@@ -139,7 +139,7 @@ contains
     FNF    = min( FOLN / max(1.0e-06,FOLNMX), 1.0 )
     TF     = ARM**((TV - 298.16) / 10.0)
     RESP   = RMF25 * TF * FNF * XLAI * RF * (1.0 - WSTRES)           ! umol/m2/s
-    RSLEAF = min( (LFMASS-LFMSMN)/DT, RESP*12.0e-6 )                 ! g/m2/s
+    RSLEAF = min( (LFMASS-LFMSMN)/MainTimeStep, RESP*12.0e-6 )                 ! g/m2/s
     RSROOT = RMR25 * (RTMASS*1.0e-3) * TF * RF * 12.0e-6             ! g/m2/s
     RSSTEM = RMS25 * ((STMASS-STMSMN) * 1.0e-3) * TF * RF * 12.0e-6  ! g/m2/s
     RSWOOD = RSWOODC * r(TV) * WOOD * WDPOOL
@@ -150,7 +150,7 @@ contains
 
     ! fraction of carbon into leaf versus nonleaf
     LEAFPT = exp(0.01 * (1.0 - exp(0.75*XLAI)) * XLAI)
-    if ( VEGTYP == EBLFOREST ) LEAFPT = exp(0.01 * (1.0 - exp(0.50*XLAI)) * XLAI)
+    if ( VegType == EBLFOREST ) LEAFPT = exp(0.01 * (1.0 - exp(0.50*XLAI)) * XLAI)
     NONLEF = 1.0 - LEAFPT
     STEMPT = XLAI / 10.0 * LEAFPT
     LEAFPT = LEAFPT - STEMPT
@@ -193,8 +193,8 @@ contains
      
     ! update leaf, root, and wood carbon
     ! avoid reducing leaf mass below its minimum value but conserve mass
-    LFDEL = (LFMASS - LFMSMN) / DT
-    STDEL = (STMASS - STMSMN) / DT
+    LFDEL = (LFMASS - LFMSMN) / MainTimeStep
+    STDEL = (STMASS - STMSMN) / MainTimeStep
     DIELF = min( DIELF, LFDEL+ADDNPPLF-LFTOVR )
     DIEST = min( DIEST, STDEL+ADDNPPST-STTOVR )
       
@@ -205,23 +205,23 @@ contains
     NPPW  = WOODPT * CARBFX - RSWOOD - GRWOOD
        
     ! masses of plant components
-    LFMASS = LFMASS + (NPPL - LFTOVR - DIELF) * DT
-    STMASS = STMASS + (NPPS - STTOVR - DIEST) * DT   ! g/m2
-    RTMASS = RTMASS + (NPPR - RTTOVR) * DT
+    LFMASS = LFMASS + (NPPL - LFTOVR - DIELF) * MainTimeStep
+    STMASS = STMASS + (NPPS - STTOVR - DIEST) * MainTimeStep   ! g/m2
+    RTMASS = RTMASS + (NPPR - RTTOVR) * MainTimeStep
     if ( RTMASS < 0.0 ) then
        RTTOVR = NPPR
        RTMASS = 0.0
     endif 
-    WOOD = (WOOD + (NPPW - WDTOVR) * DT ) * WDPOOL
+    WOOD = (WOOD + (NPPW - WDTOVR) * MainTimeStep ) * WDPOOL
 
     ! soil carbon budgets 
-    FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+WDTOVR+DIELF+DIEST) * DT  ! MB: add DIEST v3.7
+    FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+WDTOVR+DIELF+DIEST) * MainTimeStep  ! MB: add DIEST v3.7
     FST    = 2.0**( (STC(1) - 283.16) / 10.0 )
     FSW    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
     RSSOIL = FSW * FST * MRP * max(0.0, FASTCP*1.0e-3) * 12.0e-6
     STABLC = 0.1 * RSSOIL
-    FASTCP = FASTCP - (RSSOIL + STABLC) * DT
-    STBLCP = STBLCP + STABLC * DT
+    FASTCP = FASTCP - (RSSOIL + STABLC) * MainTimeStep
+    STBLCP = STBLCP + STABLC * MainTimeStep
      
     !  total carbon flux     
     CFLUX  = - CARBFX + RSLEAF + RSROOT + RSWOOD + RSSTEM &     ! MB: add RSSTEM,GRSTEM,0.9*RSSOIL v3.7

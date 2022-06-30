@@ -23,7 +23,7 @@ contains
 
     implicit none 
    
-    type(NoahmpIO_type)    :: NoahmpIO
+    type(NoahmpIO_type), intent(inout) :: NoahmpIO
 
     !local
     integer                                     :: ids, ide, jds, jde, kds, kde, &
@@ -49,7 +49,6 @@ contains
               CANWAT            => NoahmpIO%CANWAT,            & 
               ISLTYP            => NoahmpIO%ISLTYP,            &
               IVGTYP            => NoahmpIO%IVGTYP,            &
-              XLAT              => NoahmpIO%XLAT,              &
               TSLB              => NoahmpIO%TSLB,              &
               SMOIS             => NoahmpIO%SMOIS,             &
               SH2O              => NoahmpIO%SH2O,              &
@@ -91,7 +90,7 @@ contains
               lai               => NoahmpIO%LAI,               &
               grainxy           => NoahmpIO%GRAINXY,           &
               gddxy             => NoahmpIO%GDDXY,             &
-              croptype          => NoahmpIO%CROPTYPE,          &
+              CropType          => NoahmpIO%CROPTYPE,          &
               cropcat           => NoahmpIO%CROPCAT,           &
               irnumsi           => NoahmpIO%irnumsi,           &
               irnummi           => NoahmpIO%irnummi,           &
@@ -335,21 +334,21 @@ contains
 
                 if(OptCropModel == 1 ) then
                    cropcat    (i,j) = NoahmpIO%default_crop_table
-                if(croptype(i,5,j) >= 0.5) then
+                if(CropType(i,5,j) >= 0.5) then
                    rtmassxy(i,j) = 0.0
                    woodxy  (i,j) = 0.0                    
 
-                if(croptype(i,1,j) > croptype(i,2,j) .and. &
-                   croptype(i,1,j) > croptype(i,3,j) .and. &
-                   croptype(i,1,j) > croptype(i,4,j) ) then        ! choose corn
+                if(CropType(i,1,j) > CropType(i,2,j) .and. &
+                   CropType(i,1,j) > CropType(i,3,j) .and. &
+                   CropType(i,1,j) > CropType(i,4,j) ) then        ! choose corn
 
                       cropcat (i,j) = 1
                       lfmassxy(i,j) =    lai(i,j)/0.015               ! Initialize lfmass Zhe Zhang 2020-07-13
                       stmassxy(i,j) = xsaixy(i,j)/0.003
 
-                elseif(croptype(i,2,j) > croptype(i,1,j) .and. &
-                       croptype(i,2,j) > croptype(i,3,j) .and. &
-                       croptype(i,2,j) > croptype(i,4,j) ) then        ! choose soybean
+                elseif(CropType(i,2,j) > CropType(i,1,j) .and. &
+                       CropType(i,2,j) > CropType(i,3,j) .and. &
+                       CropType(i,2,j) > CropType(i,4,j) ) then        ! choose soybean
                        cropcat (i,j) = 2
                        lfmassxy(i,j) =    lai(i,j)/0.030               ! Initialize lfmass Zhe Zhang 2020-07-13
                        stmassxy(i,j) = xsaixy(i,j)/0.003

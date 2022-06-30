@@ -52,9 +52,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of glacier/soil layers
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of glacier/soil layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment,& ! in,    options for glacier treatment 
@@ -117,8 +116,8 @@ contains
     QFX    = 0.0
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
-    CGH    = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
-    allocate(SICEtemp(1:NSOIL))
+    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
+    allocate(SICEtemp(1:NumSoilLayer))
     SICEtemp = 0.0
 
     ! begin stability iteration for ground temperature and flux
@@ -155,7 +154,7 @@ contains
        IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
        SHB = CSH * (TGB        - TemperatureAirRefHeight      )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
-       GHB = CGH * (TGB        - STC(ISNOW+1))
+       GHB = CGH * (TGB        - STC(NumSnowLayerNeg+1))
        B   = SAG - IRB - SHB - EVB - GHB + PAHB
        A   = 4.0*CIR*TGB**3 + CSH + CEV*DESTG + CGH
        DTG = B / A

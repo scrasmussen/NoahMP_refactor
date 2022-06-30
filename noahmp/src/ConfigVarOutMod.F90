@@ -8,9 +8,9 @@ module ConfigVarOutMod
 ! Refactered code: P. Valayamkunnath, C. He & refactor team (April 27, 2022)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
-  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -25,15 +25,15 @@ contains
     type(NoahmpIO_type) , intent(inout) :: NoahmpIO
     type(noahmp_type),    intent(inout) :: noahmp
 
-    associate(                                      &
-              I     => NoahmpIO%I                  ,&
-              J     => NoahmpIO%J                  ,&
-              NSNOW => noahmp%config%domain%NSNOW  ,&
-              NSOIL => noahmp%config%domain%NSOIL   &
+    associate(                                                         &
+              I               => noahmp%config%domain%GridIndexI      ,&
+              J               => noahmp%config%domain%GridIndexJ      ,&
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer     &
              )
 
-    NoahmpIO%ISNOWXY  (I,J)                = noahmp%config%domain%ISNOW
-    NoahmpIO%ZSNSOXY  (I,-NSNOW+1:NSOIL,J) = noahmp%config%domain%ZSNSO (-NSNOW+1:NSOIL)
+    NoahmpIO%ISNOWXY(I,J) = noahmp%config%domain%NumSnowLayerNeg
+    NoahmpIO%ZSNSOXY(I,-NumSnowLayerMax+1:NumSoilLayer,J) = noahmp%config%domain%ZSNSO(-NumSnowLayerMax+1:NumSoilLayer)
 
     end associate
 

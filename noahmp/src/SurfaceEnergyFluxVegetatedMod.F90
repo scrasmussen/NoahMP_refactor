@@ -71,8 +71,10 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
+              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
+              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               OptSurfaceDrag => noahmp%config%nmlist%OptSurfaceDrag,& ! in,    options for surface layer drag/exchange coefficient
               OptStomataResistance => noahmp%config%nmlist%OptStomataResistance ,& ! in,    options for canopy stomatal resistance
@@ -197,22 +199,11 @@ contains
     UC = UR * log( (HCAN - ZPD + Z0M)/Z0M ) / log(ZLVL/Z0M)   ! MB: add ZPD v3.7
     if ( (HCAN-ZPD) <= 0.0 ) then
        print*, 'CRITICAL PROBLEM: HCAN <= ZPD'
-       !print*, 'i,j point =',ILOC, JLOC
+       print*, 'GridIndexI,GridIndexJ =',GridIndexI, GridIndexJ
        print*, 'HCAN  =',HCAN
        print*, 'ZPD   =',ZPD
        print*, 'SNOWH =',SNOWH
        stop 'error'
-       ! WRITE(message,*) "CRITICAL PROBLEM: HCAN <= ZPD"
-       ! call wrf_message ( message )
-       ! WRITE(message,*) 'i,j point=',ILOC, JLOC
-       ! call wrf_message ( message )
-       ! WRITE(message,*) 'HCAN  =',HCAN
-       ! call wrf_message ( message )
-       ! WRITE(message,*) 'ZPD   =',ZPD
-       ! call wrf_message ( message )
-       ! write (message, *) 'SNOWH =',SNOWH
-       ! call wrf_message ( message )
-       ! call wrf_error_fatal ( "CRITICAL PROBLEM IN MODULE_SF_NOAHMPLSM:VEGEFLUX" )
     endif
 
     ! prepare for longwave rad.
@@ -294,9 +285,9 @@ contains
        EVC  = FVEG * RHOAIR * ConstHeatCapacAir * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
        TR   = FVEG * RHOAIR * ConstHeatCapacAir * CTW * (ESTV - EAH) / GAMMAV
        if ( TV > ConstFreezePoint ) then
-          EVC = min( CANLIQ*LATHEAV/DT, EVC )    ! Barlage: add if block for canice in v3.6
+          EVC = min( CANLIQ*LATHEAV/MainTimeStep, EVC )    ! Barlage: add if block for canice in v3.6
        else
-          EVC = min( CANICE*LATHEAV/DT, EVC )
+          EVC = min( CANICE*LATHEAV/MainTimeStep, EVC )
        endif
        B    = SAV - IRC - SHC - EVC - TR + PAHV  ! additional w/m2
        A    = FVEG * ( 4.0*CIR*TV**3 + CSH + (CEV+CTR)*DESTV ) !volumetric heat capacity
@@ -327,7 +318,7 @@ contains
     CIR = EMG * ConstStefanBoltzmann
     CSH = RHOAIR * ConstHeatCapacAir / RAHG
     CEV = RHOAIR * ConstHeatCapacAir / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
-    CGH = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
+    CGH = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
     ! begin stability iteration
     loop2: do ITER = 1, NITERG
        T = TDC(TGV)
@@ -342,7 +333,7 @@ contains
        IRG = CIR * TGV**4 + AIR
        SHG = CSH * (TGV        - TAH         )
        EVG = CEV * (ESTG*RHSUR - EAH         )
-       GH  = CGH * (TGV        - STC(ISNOW+1))
+       GH  = CGH * (TGV        - STC(NumSnowLayerNeg+1))
        B   = SAG - IRG - SHG - EVG - GH + PAHG
        A   = 4.0 * CIR * TGV**3 + CSH + CEV*DESTG + CGH
        DTG = B / A

@@ -32,7 +32,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
+              CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,   ground albedo (direct beam: vis, nir)
               ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! out,   ground albedo (diffuse: vis, nir)
@@ -53,13 +53,13 @@ contains
        ALBSNI(IB) = 0.0
     enddo
 
-    ! solar radiation process is only done if COSZ > 0
-    if ( COSZ > 0 ) then
+    ! solar radiation process is only done if there is light
+    if ( CosSolarZenithAngle > 0 ) then
 
        ! snow aging
        call SnowAgingBats(noahmp)
 
-       ! snow albedos: only if COSZ > 0 and FSNO > 0
+       ! snow albedo
        if ( OptSnowAlbedo == 1 )  call SnowAlbedoBats(noahmp)
        if ( OptSnowAlbedo == 2 )  call SnowAlbedoClass(noahmp)
 
@@ -70,7 +70,7 @@ contains
        ALBD = ALBGRD
        ALBI = ALBGRI
 
-    endif  ! COSZ > 0
+    endif  ! CosSolarZenithAngle > 0
 
     end associate
 

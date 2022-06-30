@@ -2,7 +2,7 @@ module SnowAlbedoBatsMod
 
 !!! Compute snow albedo based on BATS scheme (Yang et al. (1997) J.of Climate)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -33,7 +33,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,     cosine solar zenith angle
+              CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               BATS_COSZ       => noahmp%energy%param%BATS_COSZ       ,& ! in,     zenith angle snow albedo adjustment
               BATS_VIS_NEW    => noahmp%energy%param%BATS_VIS_NEW    ,& ! in,     new snow visible albedo
@@ -52,11 +52,11 @@ contains
     ALBSND(1: NBAND) = 0.0
     ALBSNI(1: NBAND) = 0.0
 
-    ! when cosz > 0
+    ! when CosSolarZenithAngle > 0
     SL        = BATS_COSZ
     SL1       = 1.0 / SL
     SL2       = 2.0 * SL
-    CF1       = ( (1.0 + SL1) / (1.0 + SL2*COSZ) - SL1 )
+    CF1       = ( (1.0 + SL1) / (1.0 + SL2*CosSolarZenithAngle) - SL1 )
     FZEN      = amax1( CF1, 0.0 )
     ALBSNI(1) = BATS_VIS_NEW * ( 1.0 - BATS_VIS_AGE * FAGE )           ! vis diffuse
     ALBSNI(2) = BATS_NIR_NEW * ( 1.0 - BATS_NIR_AGE * FAGE )           ! nir diffuse

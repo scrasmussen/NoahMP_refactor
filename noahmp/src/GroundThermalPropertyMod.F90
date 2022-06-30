@@ -2,7 +2,7 @@ module GroundThermalPropertyMod
 
 !!! Compute snow and soil thermal conductivity and heat capacity
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowThermalPropertyMod, only : SnowThermalProperty
@@ -29,12 +29,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     maximum number of soil layers
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
-              DT              => noahmp%config%domain%DT             ,& ! in,     main noahmp timestep (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,     actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,     snow depth [m]
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
@@ -50,19 +49,19 @@ contains
 
     ! compute snow thermal conductivity and heat capacity
     call SnowThermalProperty(noahmp)
-    do IZ = ISNOW+1, 0
+    do IZ = NumSnowLayerNeg+1, 0
        DF   (IZ) = TKSNO(IZ)
        HCPCT(IZ) = CVSNO(IZ)
     enddo
 
     ! compute soil thermal properties
     call SoilThermalProperty(noahmp)
-    do IZ = 1, NSOIL
+    do IZ = 1, NumSoilLayer
        DF   (IZ) = TKSOIL(IZ)
        HCPCT(IZ) = CVSOIL(IZ)
     enddo
     if ( URBAN_FLAG .eqv. .true. ) then
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           DF(IZ) = 3.24
        enddo
     endif
@@ -75,7 +74,7 @@ contains
 
     ! compute lake thermal properties (no consideration of turbulent mixing for this version)
     if ( IST == 2 ) then
-       do IZ = 1, NSOIL
+       do IZ = 1, NumSoilLayer
           if ( STC(IZ) > ConstFreezePoint) then
              HCPCT(IZ) = ConstHeatCapacWater
              DF(IZ)    = ConstThermConductWater  !+ KEDDY * ConstHeatCapacWater 
@@ -87,12 +86,12 @@ contains
     endif
 
     ! combine a temporary variable used for melting/freezing of snow and frozen soil
-    do IZ = ISNOW+1, NSOIL
-       FACT(IZ) = DT / (HCPCT(IZ) * DZSNSO(IZ))
+    do IZ = NumSnowLayerNeg+1, NumSoilLayer
+       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * DZSNSO(IZ))
     enddo
 
     ! snow/soil interface
-    if ( ISNOW == 0 ) then
+    if ( NumSnowLayerNeg == 0 ) then
        DF(1) = (DF(1)*DZSNSO(1) + 0.35*SNOWH) / (SNOWH + DZSNSO(1))
     else
        DF(1) = (DF(1)*DZSNSO(1) + DF(0)*DZSNSO(0)) / (DZSNSO(0) + DZSNSO(1))

@@ -2,7 +2,7 @@ module GroundAlbedoMod
 
 !!! Compute ground albedo based on soil and snow albedo
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -30,7 +30,7 @@ contains
     associate(                                                        &
               NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
               IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,     cosine solar zenith angle
+              CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
               ALBSAT          => noahmp%energy%param%ALBSAT          ,& ! in,     saturated soil albedos: 1=vis, 2=nir
@@ -54,7 +54,7 @@ contains
           ALBSOD(IB) = min( ALBSAT(IB)+INC, ALBDRY(IB) )
           ALBSOI(IB) = ALBSOD(IB)
        elseif ( TG > ConstFreezePoint ) then  ! unfrozen lake, wetland
-          ALBSOD(IB) = 0.06 / ( max(0.01, COSZ)**1.7 + 0.15 )
+          ALBSOD(IB) = 0.06 / ( max(0.01, CosSolarZenithAngle)**1.7 + 0.15 )
           ALBSOI(IB) = 0.06
        else    !frozen lake, wetland
           ALBSOD(IB) = ALBLAK(IB)

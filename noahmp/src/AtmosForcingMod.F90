@@ -36,19 +36,19 @@ contains
     integer, parameter                 :: NITER = 10             ! iterations for Twet calculation
 
 ! ------------------------------------------------------------------------
-    associate(                                                           &
-              COSZ                  => noahmp%config%domain%COSZ        ,& ! in,   cosine solar zenith angle [0-1]
-              OptRainSnowPartition    => noahmp%config%nmlist%OptRainSnowPartition,& ! in,   rain-snow partition physics option
-              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight,& ! in,   air pressure [Pa] at reference height
-              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,   air temperature [K] at reference height
-              SpecHumidityRefHeight   => noahmp%forcing%SpecHumidityRefHeight, & ! in,  specific humidity (kg/kg) forcing at reference height
-              PrecipConvRefHeight     => noahmp%forcing%PrecipConvRefHeight,& ! in,   convective precipitation rate [mm/s] at reference height
-              PrecipNonConvRefHeight  => noahmp%forcing%PrecipNonConvRefHeight,& ! in,   non-convective precipitation rate [mm/s] at reference height
-              PrecipShConvRefHeight   => noahmp%forcing%PrecipShConvRefHeight ,& ! in,   shallow convective precipitation rate [mm/s] at reference height
-              PrecipSnowRefHeight     => noahmp%forcing%PrecipSnowRefHeight,& ! in,   snowfall rate [mm/s] at reference height
-              PrecipGraupelRefHeight  => noahmp%forcing%PrecipGraupelRefHeight,& ! in,   graupel rate [mm/s] at reference height
-              PrecipHailRefHeight     => noahmp%forcing%PrecipHailRefHeight,& ! in,   hail rate [mm/s] at reference height
-              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight ,& ! in,   downward shortwave radiation (W/m2) at reference height
+    associate(                                                                      &
+              CosSolarZenithAngle     => noahmp%config%domain%CosSolarZenithAngle  ,& ! in,  cosine solar zenith angle [0-1]
+              OptRainSnowPartition    => noahmp%config%nmlist%OptRainSnowPartition ,& ! in,  rain-snow partition physics option
+              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight       ,& ! in,  air pressure [Pa] at reference height
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight    ,& ! in,  air temperature [K] at reference height
+              SpecHumidityRefHeight   => noahmp%forcing%SpecHumidityRefHeight      ,& ! in,  specific humidity (kg/kg) forcing at reference height
+              PrecipConvRefHeight     => noahmp%forcing%PrecipConvRefHeight        ,& ! in,  convective precipitation rate [mm/s] at reference height
+              PrecipNonConvRefHeight  => noahmp%forcing%PrecipNonConvRefHeight     ,& ! in,  non-convective precipitation rate [mm/s] at reference height
+              PrecipShConvRefHeight   => noahmp%forcing%PrecipShConvRefHeight      ,& ! in,  shallow convective precipitation rate [mm/s] at reference height
+              PrecipSnowRefHeight     => noahmp%forcing%PrecipSnowRefHeight        ,& ! in,  snowfall rate [mm/s] at reference height
+              PrecipGraupelRefHeight  => noahmp%forcing%PrecipGraupelRefHeight     ,& ! in,  graupel rate [mm/s] at reference height
+              PrecipHailRefHeight     => noahmp%forcing%PrecipHailRefHeight        ,& ! in,  hail rate [mm/s] at reference height
+              RadSWDownRefHeight      => noahmp%forcing%RadSWDownRefHeight         ,& ! in,  downward shortwave radiation (W/m2) at reference height
               THAIR                 => noahmp%energy%state%THAIR        ,& ! out,  surface potential temperature (k)
               EAIR                  => noahmp%energy%state%EAIR         ,& ! out,  vapor pressure air (pa)
               RHOAIR                => noahmp%energy%state%RHOAIR       ,& ! out,  density air (kg/m3)
@@ -74,7 +74,7 @@ contains
     ! downward solar radiation
     dir_frac = 0.7
     vis_frac = 0.5
-    if ( COSZ <= 0.0 ) RadSWDownRefHeight = 0.0     ! filter by solar zenith angle
+    if ( CosSolarZenithAngle <= 0.0 ) RadSWDownRefHeight = 0.0     ! filter by solar zenith angle
     SOLAD(1) = RadSWDownRefHeight * dir_frac       * vis_frac        ! direct  vis
     SOLAD(2) = RadSWDownRefHeight * dir_frac       * (1.0-vis_frac)  ! direct  nir
     SOLAI(1) = RadSWDownRefHeight * (1.0-dir_frac) * vis_frac        ! diffuse vis

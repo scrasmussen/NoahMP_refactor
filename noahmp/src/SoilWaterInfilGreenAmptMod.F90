@@ -4,7 +4,7 @@ module SoilWaterInfilGreenAmptMod
 !!! We use its three parameter version of the smith-parlage equation, where gamma = 0, Eq 6.25 = Green-Ampt.
 !!! Reference: Smith, R.E. (2002) Infiltration Theory for Hydrologic Applications, Water Resources Monograph
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilHydraulicPropertyMod, only : SoilDiffusivityConductivityOpt2
@@ -37,7 +37,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
@@ -55,7 +55,7 @@ contains
        call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMCWLT(ISOIL), 0.0, ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-       JJ   = GDVIC * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (-1.0) * ZSOIL(ISOIL)
+       JJ   = GDVIC * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (-1.0) * DepthSoilLayer(ISOIL)
        FSUR = DKSAT(ISOIL) + ( (JJ/1.0e-05) * (DKSAT(ISOIL) - WCND) )
 
        !maximum infiltration rate at surface
@@ -67,7 +67,7 @@ contains
        call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMC(ISOIL), SICE(ISOIL), ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * (-1.0) * ZSOIL(ISOIL)
+       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * (-1.0) * DepthSoilLayer(ISOIL)
        FSUR = DKSAT(ISOIL) + ( (JJ/FACC) * (DKSAT(ISOIL) - WCND) )
 
        ! infiltration rate at surface

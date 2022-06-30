@@ -55,9 +55,9 @@ contains
 
 ! --------------------------------------------------------------------
      associate(                                                        &
-               NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-               ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-               OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration,& ! in,     options for infiltration in dynamic VIC runoff scheme
+               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+               DepthSoilLayer        => noahmp%config%domain%DepthSoilLayer        ,& ! in,  depth [m] of layer-bottom from soil surface
+               OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration ,& ! in,  options for infiltration in dynamic VIC runoff scheme
                SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
                SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
                SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
@@ -88,9 +88,9 @@ contains
      ERROR         = 1.388889E-07 * DT ! 0.5 mm per hour time step
      BB            = BBVIC
 
-     do IZ = 1, NSOIL-2
-        TOP_MOIST     = TOP_MOIST + (SMC(IZ) * (-1.0) * ZSOIL(IZ))            ! actual moisture in top layers, [m]
-        TOP_MAX_MOIST = TOP_MAX_MOIST + (SMCMAX(IZ) * (-1.0) * ZSOIL(IZ))     ! maximum moisture in top layers, [m]  
+     do IZ = 1, NumSoilLayer-2
+        TOP_MOIST     = TOP_MOIST + (SMC(IZ) * (-1.0) * DepthSoilLayer(IZ))            ! actual moisture in top layers, [m]
+        TOP_MAX_MOIST = TOP_MAX_MOIST + (SMCMAX(IZ) * (-1.0) * DepthSoilLayer(IZ))     ! maximum moisture in top layers, [m]  
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
 

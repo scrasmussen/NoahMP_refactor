@@ -27,20 +27,20 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,     actual number of snow layers
-              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,     depth of snow/soil layer-bottom (m)
-              STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! out,    thickness of snow/soil layers (m)
-              TROOT           => noahmp%energy%state%TROOT            & ! out,    root-zone averaged temperature (k)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
+              NROOT           => noahmp%water%param%NROOT            ,& ! in,   number of soil layers with root present
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
+              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,   depth of snow/soil layer-bottom (m)
+              STC             => noahmp%energy%state%STC             ,& ! in,   snow and soil layer temperature [k]
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! out,  thickness of snow/soil layers (m)
+              TROOT           => noahmp%energy%state%TROOT            & ! out,  root-zone averaged temperature (k)
              )
 ! ----------------------------------------------------------------------
 
     ! initialize snow/soil layer thickness (m)
-    do IZ = ISNOW+1, NSOIL
-       if ( IZ == ISNOW+1 ) then
+    do IZ = NumSnowLayerNeg+1, NumSoilLayer
+       if ( IZ == NumSnowLayerNeg+1 ) then
           DZSNSO(IZ) = - ZSNSO(IZ)
        else
           DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)
@@ -50,7 +50,7 @@ contains
     ! initialize root-zone soil temperature
     TROOT = 0.0
     do IZ = 1, NROOT
-       TROOT = TROOT + STC(IZ) * DZSNSO(IZ) / (-ZSOIL(NROOT))
+       TROOT = TROOT + STC(IZ) * DZSNSO(IZ) / (-DepthSoilLayer(NROOT))
     enddo
 
     end associate

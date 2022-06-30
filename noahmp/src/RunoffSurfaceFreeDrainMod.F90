@@ -2,7 +2,7 @@ module RunoffSurfaceFreeDrainMod
 
 !!! Calculate inflitration rate at soil surface and surface runoff for free drainage scheme
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilHydraulicPropertyMod, only : SoilDiffusivityConductivityOpt2
@@ -45,25 +45,25 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              SICEMAX         => noahmp%water%state%SICEMAX          ,& ! in,     maximum soil ice content (m3/m3)
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
-              KDT             => noahmp%water%param%KDT              ,& ! in,     parameter to calculate maximum infiltration rate
-              FRZX            => noahmp%water%param%FRZX             ,& ! in,     parameter to calculate frozen soil impermeable fraction
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
+              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,   logical flag for urban grid
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
+              SICE            => noahmp%water%state%SICE             ,& ! in,   soil ice content [m3/m3]
+              SICEMAX         => noahmp%water%state%SICEMAX          ,& ! in,   maximum soil ice content (m3/m3)
+              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
+              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,   wilting point soil moisture [m3/m3]
+              KDT             => noahmp%water%param%KDT              ,& ! in,   parameter to calculate maximum infiltration rate
+              FRZX            => noahmp%water%param%FRZX             ,& ! in,   parameter to calculate frozen soil impermeable fraction
+              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
+              PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
     ! initialize
-    allocate( DMAX(1:NSOIL) )
-    DMAX(1:NSOIL) = 0.0
+    allocate( DMAX(1:NumSoilLayer) )
+    DMAX(1:NumSoilLayer) = 0.0
 
     ! start infiltration for free drainage scheme
     if ( QINSUR > 0.0 ) then
@@ -72,13 +72,13 @@ contains
        SMCAV = SMCMAX(1) - SMCWLT(1)
 
        ! compute maximum infiltration rate
-       DMAX(1) = -ZSOIL(1) * SMCAV
-       DICE    = -ZSOIL(1) * SICE(1)
+       DMAX(1) = -DepthSoilLayer(1) * SMCAV
+       DICE    = -DepthSoilLayer(1) * SICE(1)
        DMAX(1) =  DMAX(1)  * ( 1.0 - (SH2O(1) + SICE(1) - SMCWLT(1)) / SMCAV )
        DD      =  DMAX(1)
-       do K = 2, NSOIL
-          DICE    = DICE + ( ZSOIL(K-1) - ZSOIL(K) ) * SICE(K)
-          DMAX(K) = ( ZSOIL(K-1) - ZSOIL(K) ) * SMCAV
+       do K = 2, NumSoilLayer
+          DICE    = DICE + ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SICE(K)
+          DMAX(K) = ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SMCAV
           DMAX(K) = DMAX(K) * ( 1.0 - (SH2O(K) + SICE(K) - SMCWLT(K)) / SMCAV )
           DD      = DD + DMAX(K)
        enddo

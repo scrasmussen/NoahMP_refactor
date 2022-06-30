@@ -2,7 +2,7 @@ module GlacierIceThermalPropertyMod
 
 !!! Compute glacier ice thermal conductivity based on Noah scheme
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -28,14 +28,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    maximum number of soil layers
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              CVGLAICE        => noahmp%energy%state%CVGLAICE        ,& ! out,   glacier ice layer volumetric specific heat (j/m3/k)
-              TKGLAICE        => noahmp%energy%state%TKGLAICE         & ! out,   glacier ice layer thermal conductivity (w/m/k)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              CVGLAICE        => noahmp%energy%state%CVGLAICE        ,& ! out,  glacier ice layer volumetric specific heat (j/m3/k)
+              TKGLAICE        => noahmp%energy%state%TKGLAICE         & ! out,  glacier ice layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
-    do IZ = 1, NSOIL
+    do IZ = 1, NumSoilLayer
        ZMID = 0.5 * DZSNSO(IZ)
        do IZ2 = 1, IZ-1
           ZMID = ZMID + DZSNSO(IZ2)

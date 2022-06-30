@@ -32,9 +32,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              DT              => noahmp%config%domain%DT             ,& ! in,    noahmp time step (s)
-              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
-              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
+              MainTimeStep           => noahmp%config%domain%MainTimeStep     ,& ! in,    noahmp main time step (s)
+              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight  ,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight ,& ! in,    wind speed [m/s] in northward direction at reference height
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
@@ -84,17 +84,17 @@ contains
     ! average rain interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
        QINTR  = FVEG * RAIN * FP  ! interception capability
-       QINTR  = min( QINTR, (MAXLIQ-CANLIQ)/DT * (1.0-exp(-RAIN*DT/MAXLIQ)) )
+       QINTR  = min( QINTR, (MAXLIQ-CANLIQ)/MainTimeStep * (1.0-exp(-RAIN*MainTimeStep/MAXLIQ)) )
        QINTR  = max( QINTR, 0.0 )
        QDRIPR = FVEG * RAIN - QINTR
        QTHROR = (1.0 - FVEG) * RAIN
-       CANLIQ = max( 0.0, CANLIQ + QINTR*DT )
+       CANLIQ = max( 0.0, CANLIQ + QINTR*MainTimeStep )
     else
        QINTR  = 0.0
        QDRIPR = 0.0
        QTHROR = RAIN
        if ( CANLIQ > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPR = QDRIPR + CANLIQ / DT
+          QDRIPR = QDRIPR + CANLIQ / MainTimeStep
           CANLIQ = 0.0
        endif
     endif
@@ -106,21 +106,21 @@ contains
     ! average snow interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
        QINTS = FVEG * SNOW * FP
-       QINTS = min( QINTS, (MAXSNO-CANICE)/DT * (1.0-exp(-SNOW*DT/MAXSNO)) )
+       QINTS = min( QINTS, (MAXSNO-CANICE)/MainTimeStep * (1.0-exp(-SNOW*MainTimeStep/MAXSNO)) )
        QINTS = max( QINTS, 0.0 )
        FT    = max( 0.0, (TV - 270.15) / 1.87e5 )
        FV    = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
-       ICEDRIP = max( 0.0, CANICE ) * (FV + FT)    !MB: removed /DT
+       ICEDRIP = max( 0.0, CANICE ) * (FV + FT)
        QDRIPS  = (FVEG * SNOW - QINTS) + ICEDRIP
        QTHROS  = (1.0 - FVEG) * SNOW
-       CANICE  = max( 0.0, CANICE + (QINTS-ICEDRIP)*DT )
+       CANICE  = max( 0.0, CANICE + (QINTS-ICEDRIP)*MainTimeStep )
     else
        QINTS  = 0.0
        QDRIPS = 0.0
        QTHROS = SNOW
        if ( CANICE > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPS = QDRIPS + CANICE / DT
+          QDRIPS = QDRIPS + CANICE / MainTimeStep
           CANICE = 0.0
        endif
     endif

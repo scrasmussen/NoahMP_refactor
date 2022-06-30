@@ -2,7 +2,7 @@ module GeneralInitGlacierMod
 
 !!! General initialization for glacier variables
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
  
@@ -27,17 +27,16 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,     actual number of snow layers
-              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,     depth of snow/soil layer-bottom (m)
-              DZSNSO          => noahmp%config%domain%DZSNSO          & ! out,    thickness of snow/soil layers (m)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
+              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,   depth of snow/soil layer-bottom (m)
+              DZSNSO          => noahmp%config%domain%DZSNSO          & ! out,  thickness of snow/soil layers (m)
              )
 ! ----------------------------------------------------------------------
 
     ! initialize snow/soil layer thickness (m)
-    do IZ = ISNOW+1, NSOIL
-       if ( IZ == ISNOW+1 ) then
+    do IZ = NumSnowLayerNeg+1, NumSoilLayer
+       if ( IZ == NumSnowLayerNeg+1 ) then
           DZSNSO(IZ) = - ZSNSO(IZ)
        else
           DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)

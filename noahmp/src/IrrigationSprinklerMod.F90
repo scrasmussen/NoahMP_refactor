@@ -37,10 +37,10 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,     air temperature [K] at reference height
-              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
-              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,     wind speed [m/s] in northward direction at reference height
+              MainTimeStep            => noahmp%config%domain%MainTimeStep      ,& ! in,    noahmp main time step (s)
+              TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight ,& ! in,    air temperature [K] at reference height
+              WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
               SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
               SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
@@ -60,11 +60,11 @@ contains
     SICE(:) = max(0.0, SMC(:)-SH2O(:))
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationInfilPhilip(noahmp, DT, FSUR)
+    call IrrigationInfilPhilip(noahmp, MainTimeStep, FSUR)
 
     ! irrigation rate of sprinkler
-    TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * DT / 3600.0   ! NRCS rate/time step - calibratable
-    IRSIRATE  = min( FSUR*DT, IRAMTSI, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
+    TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * MainTimeStep / 3600.0   ! NRCS rate/time step - calibratable
+    IRSIRATE  = min( FSUR*MainTimeStep, IRAMTSI, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
                                                           ! and to the NRCS recommended rate, (m)
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
     ! losses from sprinkler irrigation systems under various operating 
@@ -95,11 +95,11 @@ contains
     IRSIRATE = IRSIRATE - IREVPLOS
 
     ! include sprinkler water to total rain for canopy process later
-    RAIN = RAIN + (IRSIRATE * 1000.0 / DT) ![mm/s]
+    RAIN = RAIN + (IRSIRATE * 1000.0 / MainTimeStep) ![mm/s]
 
     ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-    FIRR = IREVPLOS * 1000.0 * ConstLatHeatVapor / DT   ! heat used for evaporation (W/m2)
-    EIRR = IREVPLOS * 1000.0 / DT          ! sprinkler evaporation (mm/s)
+    FIRR = IREVPLOS * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
+    EIRR = IREVPLOS * 1000.0 / MainTimeStep          ! sprinkler evaporation (mm/s)
 
     end associate
 

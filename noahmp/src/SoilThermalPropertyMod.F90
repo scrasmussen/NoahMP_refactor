@@ -40,7 +40,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     maximum number of soil layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               CSOIL           => noahmp%energy%param%CSOIL           ,& ! in,     soil volumetric specific heat (j/m3/k)
               QUARTZ          => noahmp%energy%param%QUARTZ          ,& ! in,     soil quartz content
@@ -52,13 +52,13 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initiazliation
-    allocate( SICE_TMP(1:NSOIL) )
+    allocate( SICE_TMP(1:NumSoilLayer) )
     SICE_TMP(:) = 0.0
     THKW = 0.57              ! water thermal conductivity
     THKO = 2.0               ! thermal conductivity for other soil components
     THKQTZ = 7.7             ! thermal conductivity for quartz
 
-    do ISOIL = 1, NSOIL
+    do ISOIL = 1, NumSoilLayer
 
        ! ==== soil heat capacity
 

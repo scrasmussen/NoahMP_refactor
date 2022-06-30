@@ -3,7 +3,7 @@ module WaterMainMod
 !!! Main water module including all water relevant processes
 !!! canopy water -> snowpack water -> soil water -> ground water
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use CanopyHydrologyMod,  only : CanopyHydrology
@@ -33,8 +33,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake 
               CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     urban point flag
@@ -50,7 +49,7 @@ contains
               CH              => noahmp%energy%state%CH              ,& ! in,     exchange coefficient (m/s) for heat, surface, grid mean
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,     specific humidity (kg/kg) at reference height
               FGEV            => noahmp%energy%flux%FGEV             ,& ! in,     soil evap heat (w/m2) [+ to atm]
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
@@ -105,7 +104,7 @@ contains
     ! ground sublimation and evaporation
     QSNSUB = 0.0
     if ( SNEQV > 0.0 ) then
-       QSNSUB = min( QVAP, SNEQV/DT )
+       QSNSUB = min( QVAP, SNEQV/MainTimeStep )
     endif
     QSEVA = QVAP - QSNSUB
 
@@ -121,7 +120,7 @@ contains
 
     ! treat frozen ground/soil
     if ( FROZEN_GROUND .eqv. .true. ) then
-       SICE(1) =  SICE(1) + (QSDEW-QSEVA) * DT / (DZSNSO(1)*1000.0)
+       SICE(1) =  SICE(1) + (QSDEW-QSEVA) * MainTimeStep / (DZSNSO(1)*1000.0)
        QSDEW = 0.0
        QSEVA = 0.0
        if ( SICE(1) < 0.0 ) then
@@ -137,15 +136,15 @@ contains
     enddo
 
     ! total surface input water to soil
-    QINSUR = (PONDING + PONDING1 + PONDING2) / DT * 0.001  ! convert units (mm/s -> m/s)
-    if ( ISNOW == 0 ) then
+    QINSUR = (PONDING + PONDING1 + PONDING2) / MainTimeStep * 0.001  ! convert units (mm/s -> m/s)
+    if ( NumSnowLayerNeg == 0 ) then
        QINSUR = QINSUR + (QSNBOT + QSDEW + QRAIN) * 0.001
     else
        QINSUR = QINSUR + (QSNBOT + QSDEW) * 0.001
     endif
 
 #ifdef WRF_HYDRO
-    QINSUR = QINSUR + sfcheadrt / DT * 0.001
+    QINSUR = QINSUR + sfcheadrt / MainTimeStep * 0.001
 #endif
 
     ! irrigation: call flood irrigation and add to QINSUR
@@ -159,7 +158,7 @@ contains
     if ( IST == 2 ) then   ! lake
        RUNSRF = 0.0
        if ( WSLAKE >= WSLMAX ) RUNSRF = QINSUR * 1000.0   ! mm/s
-       WSLAKE = WSLAKE + (QINSUR-QSEVA) * 1000.0 * DT - RUNSRF * DT   !mm
+       WSLAKE = WSLAKE + (QINSUR-QSEVA) * 1000.0 * MainTimeStep - RUNSRF * MainTimeStep   !mm
     else                   ! soil
        ! soil water processes (including groundwater and shallow water MMF update)
        call SoilWaterMain(noahmp)

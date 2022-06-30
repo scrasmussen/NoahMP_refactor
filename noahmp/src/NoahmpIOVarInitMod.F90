@@ -1605,7 +1605,7 @@ contains
               NSNOW   =>  NoahmpIO%NSNOW     &
              )
     allocate ( NoahmpIO%COSZEN       (XSTART:XEND,YSTART:YEND) )    ! cosine zenith angle
-    allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )    ! latitude [rad] 
+    allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )    ! latitude [radians] 
     allocate ( NoahmpIO%DZ8W         (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! thickness of atmo layers [m]
     allocate ( NoahmpIO%DZS          (1:NSOIL)                   )  ! thickness of soil layers [m]
     allocate ( NoahmpIO%ZSOIL        (1:NSOIL)                   )  ! depth to soil interfaces [m] 

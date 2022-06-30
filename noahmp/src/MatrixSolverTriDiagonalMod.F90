@@ -2,7 +2,7 @@ module MatrixSolverTriDiagonalMod
 
 !!! Solve tri-diagonal matrix problem
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -10,7 +10,7 @@ module MatrixSolverTriDiagonalMod
 
 contains
 
-  subroutine MatrixSolverTriDiagonal(P, A, B, C, D, DELTA, NTOP, NSOIL, NSNOW)
+  subroutine MatrixSolverTriDiagonal(P, A, B, C, D, DELTA, NTOP, NumSoilLayer, NumSnowLayerMax)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: ROSR12
@@ -37,34 +37,35 @@ contains
 
 ! in & out variables
     integer               , intent(in)    :: NTOP          ! top layer index: soil layer starts from NTOP = 1
-    integer               , intent(in)    :: NSOIL,NSNOW   ! soil and snow layers
-    real(kind=kind_noahmp), dimension(-NSNOW+1:NSOIL), intent(in)    :: A, B, D
-    real(kind=kind_noahmp), dimension(-NSNOW+1:NSOIL), intent(inout) :: C,P,DELTA
+    integer               , intent(in)    :: NumSoilLayer      ! number of soil layers
+    integer               , intent(in)    :: NumSnowLayerMax   ! maximum number of snow layers
+    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(in)    :: A, B, D
+    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(inout) :: C,P,DELTA
 
 ! local variables
     integer  :: K, KK   ! loop indices
 ! ----------------------------------------------------------------------
 
     ! INITIALIZE EQN COEF C FOR THE LOWEST SOIL LAYER
-    C (NSOIL) = 0.0
+    C (NumSoilLayer) = 0.0
     P (NTOP) = - C (NTOP) / B (NTOP)
 
     ! SOLVE THE COEFS FOR THE 1ST SOIL LAYER
     DELTA (NTOP) = D (NTOP) / B (NTOP)
 
-    ! SOLVE THE COEFS FOR SOIL LAYERS 2 THRU NSOIL
-    do K = NTOP+1, NSOIL
+    ! SOLVE THE COEFS FOR SOIL LAYERS 2 THRU NumSoilLayer
+    do K = NTOP+1, NumSoilLayer
        P (K)     = - C (K) * ( 1.0 / (B (K) + A (K) * P (K -1)) )
        DELTA (K) = (D (K) - A (K) * DELTA (K -1)) * (1.0 / (B (K) + A (K) &
                    * P (K -1)))
     enddo
 
     ! SET P TO DELTA FOR LOWEST SOIL LAYER
-    P (NSOIL) = DELTA (NSOIL)
+    P (NumSoilLayer) = DELTA (NumSoilLayer)
 
-    ! ADJUST P FOR SOIL LAYERS 2 THRU NSOIL
-    do K = NTOP+1, NSOIL
-       KK     = NSOIL - K + (NTOP-1) + 1
+    ! ADJUST P FOR SOIL LAYERS 2 THRU NumSoilLayer
+    do K = NTOP+1, NumSoilLayer
+       KK     = NumSoilLayer - K + (NTOP-1) + 1
        P (KK) = P (KK) * P (KK +1) + DELTA (KK)
     enddo
 

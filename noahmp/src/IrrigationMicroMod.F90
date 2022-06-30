@@ -5,7 +5,7 @@ module IrrigationMicroMod
 !!! Irrigation water is applied under the canopy, within first layer 
 !!! (at ~5 cm depth) considering current soil moisture
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use IrrigationInfilPhilipMod, only : IrrigationInfilPhilip
@@ -32,8 +32,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,     noahmp time step (s)
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               MIFAC           => noahmp%water%state%MIFAC            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
               MICIR_RATE      => noahmp%water%param%MICIR_RATE       ,& ! in,     micro irrigation rate (mm/hr)
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
@@ -47,11 +47,11 @@ contains
     TEMP_RATE = 0.0
 
     ! estimate infiltration rate based on Philips Eq.
-    call IrrigationInfilPhilip(noahmp, DT, FSUR)
+    call IrrigationInfilPhilip(noahmp, MainTimeStep, FSUR)
 
     ! irrigation rate of micro irrigation
-    TEMP_RATE = MICIR_RATE * (1.0/1000.0) * DT/ 3600.0   ! NRCS rate/time step - calibratable
-    IRMIRATE  = min( 0.5*FSUR*DT, IRAMTMI, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
+    TEMP_RATE = MICIR_RATE * (1.0/1000.0) * MainTimeStep/ 3600.0   ! NRCS rate/time step - calibratable
+    IRMIRATE  = min( 0.5*FSUR*MainTimeStep, IRAMTMI, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
                                                          ! and to the NRCS recommended rate, (m)
     IRMIRATE  = IRMIRATE * MIFAC
 
@@ -64,7 +64,7 @@ contains
 
     ! update soil moisture
     ! we implement drip in first layer of the Noah-MP. Change layer 1 moisture wrt to MI rate
-    SH2O(1) = SH2O(1) + ( IRMIRATE / (-1.0*ZSOIL(1)) )
+    SH2O(1) = SH2O(1) + ( IRMIRATE / (-1.0*DepthSoilLayer(1)) )
 
     end associate
 

@@ -3,7 +3,7 @@ module GlacierTemperatureSolverMod
 !!! Compute Glacier and snow layer temperature using tri-diagonal matrix solution
 !!! Dependent on the output from GlacierThermalDiffusion module
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use MatrixSolverTriDiagonalMod, only : MatrixSolverTriDiagonal
@@ -37,21 +37,21 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of glacier/soil layers
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,    maximum number of snow layers
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,& ! in,    number of glacier/soil layers
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,    maximum number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! in,    actual number of snow layers (negative)
               STC             => noahmp%energy%state%STC              & ! inout, snow and glacier layer temperature [K]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTSIN (-NSNOW+1:NSOIL) )
-    allocate( CIIN    (-NSNOW+1:NSOIL) )
+    allocate( RHSTSIN (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( CIIN    (-NumSnowLayerMax+1:NumSoilLayer) )
     RHSTSIN  = 0.0
     CIIN     = 0.0
 
     ! update tri-diagonal matrix elements
-    do K = ISNOW+1, NSOIL
+    do K = NumSnowLayerNeg+1, NumSoilLayer
        RHSTS(K) =    RHSTS(K) * DT
        AI(K)    =       AI(K) * DT
        BI(K)    = 1.0 + BI(K) * DT
@@ -59,16 +59,16 @@ contains
     enddo
 
     ! copy values for input variables before call to rosr12
-    do K = ISNOW+1, NSOIL
+    do K = NumSnowLayerNeg+1, NumSoilLayer
        RHSTSIN(K) = RHSTS(K)
        CIIN(K)    = CI(K)
     enddo
 
     ! solve the tri-diagonal matrix equation
-    call MatrixSolverTriDiagonal(CI,AI,BI,CIIN,RHSTSIN,RHSTS,ISNOW+1,NSOIL,NSNOW)
+    call MatrixSolverTriDiagonal(CI,AI,BI,CIIN,RHSTSIN,RHSTS,NumSnowLayerNeg+1,NumSoilLayer,NumSnowLayerMax)
 
     ! update snow & glacier temperature
-    do K = ISNOW+1, NSOIL
+    do K = NumSnowLayerNeg+1, NumSoilLayer
        STC(K) = STC(K) + CI(K)
     enddo
 

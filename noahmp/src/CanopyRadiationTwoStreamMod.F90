@@ -60,7 +60,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               OptCanopyRadiationTransfer => noahmp%config%nmlist%OptCanopyRadiationTransfer,& ! in,    options for canopy radiation transfer
-              COSZ            => noahmp%config%domain%COSZ           ,& ! in,    cosine solar zenith angle
+              CosSolarZenithAngle        => noahmp%config%domain%CosSolarZenithAngle ,& ! in,    cosine solar zenith angle
               FWET            => noahmp%water%state%FWET             ,& ! in,    wetted or snowed fraction of the canopy
               RC              => noahmp%energy%param%RC              ,& ! in,    tree crown radius (m)
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
@@ -107,12 +107,12 @@ contains
           DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * RC**2)
           HD      = HVT - HVB
           BB      = 0.5 * HD
-          THETAP  = atan( BB / RC * tan(acos(max(0.01, COSZ))) )
+          THETAP  = atan( BB / RC * tan(acos(max(0.01, CosSolarZenithAngle))) )
          !BGAP    = exp( DEN * ConstPI * RC**2 / cos(THETAP) )
           BGAP    = exp( -DENFVEG * ConstPI * RC**2 / cos(THETAP) )
           FA      = VAI / ( 1.33 * ConstPI * RC**3.0 * (BB/RC) * DENFVEG )
           NEWVAI  = HD * FA
-          WGAP    = (1.0 - BGAP) * exp(-0.5 * NEWVAI / COSZ)
+          WGAP    = (1.0 - BGAP) * exp(-0.5 * NEWVAI / CosSolarZenithAngle)
           GAP     = min( 1.0-FVEG, BGAP+WGAP )
           KOPEN   = 0.05
        endif
@@ -133,7 +133,7 @@ contains
     ! also, the transmittances and reflectances (TAU, RHO) are linear
     ! weights of leaf and stem values.
 
-    COSZI  = max( 0.001, COSZ )
+    COSZI  = max( 0.001, CosSolarZenithAngle )
     CHIL   = min( max(XL, -0.4), 0.6 )
     if ( abs(CHIL) <= 0.01 ) CHIL = 0.01
     PHI1   = 0.5 - 0.633 * CHIL - 0.330 * CHIL * CHIL

@@ -37,7 +37,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
@@ -52,7 +52,7 @@ contains
 ! ----------------------------------------------------------------------
 
 ! check and combine small ice content layer
-    ISNOW_OLD = ISNOW
+    ISNOW_OLD = NumSnowLayerNeg
 
     do J = ISNOW_OLD+1,0
        if ( SNICE(J) <= 0.1 ) then
@@ -61,12 +61,12 @@ contains
              SNICE(J+1)  = SNICE(J+1)  + SNICE(J)
              DZSNSO(J+1) = DZSNSO(J+1) + DZSNSO(J)
           else
-             if ( ISNOW_OLD < -1 ) then    ! MB/KM: change to ISNOW
+             if ( ISNOW_OLD < -1 ) then    ! MB/KM: change to NumSnowLayerNeg
                 SNLIQ(J-1)  = SNLIQ(J-1)  + SNLIQ(J)
                 SNICE(J-1)  = SNICE(J-1)  + SNICE(J)
                 DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
              else
-                PONDING1  = PONDING1 +SNLIQ(J)       ! ISNOW WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
+                PONDING1  = PONDING1 +SNLIQ(J)       ! NumSnowLayerNeg WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
                 SNEQV     = SNICE(J)                 ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
                 SNOWH     = DZSNSO(J)                ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
                 SNLIQ(J)  = 0.0
@@ -79,15 +79,15 @@ contains
           endif ! if(J /= 0)
 
           ! shift all elements above this down by one.
-          if ( (J > ISNOW+1) .and. (ISNOW < -1) ) then
-             do I = J, ISNOW+2, -1
+          if ( (J > NumSnowLayerNeg+1) .and. (NumSnowLayerNeg < -1) ) then
+             do I = J, NumSnowLayerNeg+2, -1
                 STC(I)    = STC(I-1)
                 SNLIQ(I)  = SNLIQ(I-1)
                 SNICE(I)  = SNICE(I-1)
                 DZSNSO(I) = DZSNSO(I-1)
              enddo
           endif
-          ISNOW = ISNOW + 1
+          NumSnowLayerNeg = NumSnowLayerNeg + 1
 
        endif ! if(SNICE(J) <= 0.1)
     enddo ! do J
@@ -98,14 +98,14 @@ contains
        SICE(1) = 0.0
     endif
 
-    if ( ISNOW ==0 ) return   ! MB: get out if no longer multi-layer
+    if ( NumSnowLayerNeg ==0 ) return   ! MB: get out if no longer multi-layer
 
     SNEQV  = 0.0
     SNOWH  = 0.0
     ZWICE  = 0.0
     ZWLIQ  = 0.0
 
-    do J = ISNOW+1, 0
+    do J = NumSnowLayerNeg+1, 0
        SNEQV = SNEQV + SNICE(J) + SNLIQ(J)
        SNOWH = SNOWH + DZSNSO(J)
        ZWICE = ZWICE + SNICE(J)
@@ -113,21 +113,21 @@ contains
     enddo
 
 ! check the snow depth - all snow gone, the liquid water assumes ponding on soil surface.
-    if ( (SNOWH < 0.05) .and. (ISNOW < 0) ) then
-    !if ( (SNOWH < 0.025) .and. (ISNOW < 0) ) then ! MB: change limit
-       ISNOW    = 0
+    if ( (SNOWH < 0.05) .and. (NumSnowLayerNeg < 0) ) then
+    !if ( (SNOWH < 0.025) .and. (NumSnowLayerNeg < 0) ) then ! MB: change limit
+       NumSnowLayerNeg    = 0
        SNEQV    = ZWICE
-       PONDING2 = ZWLIQ                ! LIMIT OF ISNOW < 0 MEANS INPUT PONDING
+       PONDING2 = ZWLIQ                ! LIMIT OF NumSnowLayerNeg < 0 MEANS INPUT PONDING
        if ( SNEQV <= 0.0 ) SNOWH = 0.0 ! SHOULD BE ZERO; SEE ABOVE
     endif
 
 ! check the snow depth - snow layers combined
-    if ( ISNOW < -1 ) then
-       ISNOW_OLD = ISNOW
+    if ( NumSnowLayerNeg < -1 ) then
+       ISNOW_OLD = NumSnowLayerNeg
        MSSI      = 1
        do I = ISNOW_OLD+1, 0
           if ( DZSNSO(I) < DZMIN(MSSI) ) then
-             if ( I == ISNOW+1 ) then
+             if ( I == NumSnowLayerNeg+1 ) then
                 NEIBOR = I + 1
              else if ( I == 0 ) then
                 NEIBOR = I - 1
@@ -149,8 +149,8 @@ contains
                                       DZSNSO(L), SNLIQ(L), SNICE(L), STC(L) )
 
              ! Now shift all elements above this down one.
-             if ( (J-1) > (ISNOW+1) ) then
-                do K = J-1, ISNOW+2, -1
+             if ( (J-1) > (NumSnowLayerNeg+1) ) then
+                do K = J-1, NumSnowLayerNeg+2, -1
                    STC(K)    = STC(K-1)
                    SNICE(K)  = SNICE(K-1)
                    SNLIQ(K)  = SNLIQ(K-1)
@@ -158,8 +158,8 @@ contains
                 enddo
              endif
              ! Decrease the number of snow layers
-             ISNOW = ISNOW + 1
-             if ( ISNOW >= -1 ) EXIT
+             NumSnowLayerNeg = NumSnowLayerNeg + 1
+             if ( NumSnowLayerNeg >= -1 ) EXIT
           else 
              ! The layer thickness is greater than the prescribed minimum value
              MSSI = MSSI + 1

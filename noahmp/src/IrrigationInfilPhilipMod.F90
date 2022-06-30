@@ -4,7 +4,7 @@ module IrrigationInfilPhilipMod
 !!! Reference: Eq.2 in Valiantzas (2010): New linearized two-parameter infiltration equation for direct
 !!! determination of conductivity and sorptivity, J. Hydrology.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilHydraulicPropertyMod, only : SoilDiffusivityConductivityOpt2
@@ -39,13 +39,13 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
-              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,  number of soil layers
+              SMC             => noahmp%water%state%SMC              ,& ! in,  total soil moisture [m3/m3]
+              SH2O            => noahmp%water%state%SH2O             ,& ! in,  soil water content [m3/m3]
+              SICE            => noahmp%water%state%SICE             ,& ! in,  soil ice content [m3/m3]
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,  saturated value of soil moisture [m3/m3]
+              DWSAT           => noahmp%water%param%DWSAT            ,& ! in,  saturated soil hydraulic diffusivity (m2/s)
+              DKSAT           => noahmp%water%param%DKSAT             & ! in,  saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ contains
     AP      = 0.0
 
     ! maximum ice fraction
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        if ( SICE(K) > SICEMAX ) SICEMAX = SICE(K)
     enddo
 

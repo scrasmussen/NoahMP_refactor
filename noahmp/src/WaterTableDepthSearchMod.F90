@@ -2,7 +2,7 @@ module WaterTableDepthSearchMod
 
 !!! Calculate/search water table depth as on WRF-Hydro/NWM
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -31,8 +31,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               ZLAYER          => noahmp%config%domain%ZLAYER         ,& ! in,     soil layer thickness (m)
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
@@ -48,24 +48,24 @@ contains
     CWATAVAIL = 0.0  !set wat avail for subsfc rtng = 0.
 
     ! calculate/search for water table depth
-    do K = NSOIL, 1, -1
+    do K = NumSoilLayer, 1, -1
        if ( (SMC(K) >= SMCREF(K)) .and. (SMCREF(K) > SMCWLT(K)) ) then
-          if ( (SATLYRCHK == (K+1)) .or. (K == NSOIL) ) SATLYRCHK = K
+          if ( (SATLYRCHK == (K+1)) .or. (K == NumSoilLayer) ) SATLYRCHK = K
        endif
     enddo
 
     if ( SATLYRCHK /= 0 ) then
        if ( SATLYRCHK /= 1 ) then  ! soil column is partially sat.
-          WATBLED = -ZSOIL(SATLYRCHK-1)
+          WATBLED = -DepthSoilLayer(SATLYRCHK-1)
        else  ! soil column is fully saturated to sfc.
           WATBLED = 0.0
        endif
-       do K = SATLYRCHK, NSOIL
+       do K = SATLYRCHK, NumSoilLayer
           CWATAVAIL = CWATAVAIL + (SMC(K) - SMCREF(K)) * ZLAYER(K)
        enddo
     else  ! no saturated layers...
-       WATBLED   = -ZSOIL(NSOIL)
-       SATLYRCHK = NSOIL + 1
+       WATBLED   = -DepthSoilLayer(NumSoilLayer)
+       SATLYRCHK = NumSoilLayer + 1
     endif
 
     ZWT = WATBLED

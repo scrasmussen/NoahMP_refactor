@@ -2,7 +2,7 @@ module BalanceErrorCheckGlacierMod
 
 !!! Check glacier water and energy balance and report error
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -60,10 +60,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,    number of soil layers
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
+              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
+              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
+              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
               SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier water content [m3/m3]
               SICE            => noahmp%water%state%SICE             ,& ! in,    glacier ice moisture (m3/m3)
@@ -81,7 +80,7 @@ contains
     ! compute total glacier water storage before NoahMP processes
     ! need more work on including glacier ice mass underneath snow
     END_WB = SNEQV
-    ERRWAT = END_WB - BEG_WB - (PRCP - EDIR - RUNSRF - RUNSUB) * DT
+    ERRWAT = END_WB - BEG_WB - (PRCP - EDIR - RUNSRF - RUNSUB) * MainTimeStep
 
 #ifndef WRF_HYDRO
     if ( abs(ERRWAT) > 0.1 ) then
@@ -95,10 +94,10 @@ contains
        write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
        !call wrf_message(trim(message))
        write(*, &
-           '("  I    J   END_WB   BEG_WB     PRCP     EDIR    RUNSRF   RUNSUB")')
+           '("  GridIndexI   GridIndexJ   END_WB   BEG_WB     PRCP     EDIR    RUNSRF   RUNSUB")')
        !call wrf_message(trim(message))
-       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)')ILOC,JLOC,END_WB,BEG_WB,PRCP*DT,&
-             EDIR*DT,RUNSRF*DT,RUNSUB*DT
+       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,END_WB,BEG_WB,PRCP*MainTimeStep,&
+             EDIR*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
        stop "Error"
@@ -128,8 +127,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ILOC            => noahmp%config%domain%ILOC           ,& ! in,    grid index
-              JLOC            => noahmp%config%domain%JLOC           ,& ! in,    grid index
+              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
+              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
               FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
@@ -148,7 +147,7 @@ contains
     ERRSW = RadSWDownRefHeight - (FSA + FSR)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
-       write(*,*) 'I, J =',  ILOC, JLOC
+       write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
        write(*,*) 'ERRSW =',  ERRSW
        write(*,*) "RadSWDownRefHeight =", RadSWDownRefHeight
        write(*,*) "FSR    =", FSR
@@ -163,7 +162,7 @@ contains
     ERRENG = SAG + PAH - (FIRA + FSH + FGEV + SSOIL)
     ! print out diagnostics when error is large
     if ( abs(ERRENG) > 0.01 ) then
-       write(*,*) 'ERRENG =',ERRENG,' at i,j: ',ILOC,JLOC
+       write(*,*) 'ERRENG =',ERRENG,' at GridIndexI,GridIndexJ: ',GridIndexI,GridIndexJ
        !call wrf_message(trim(message))
        write(*,'(a17,F10.4)') "Net longwave:     ",FIRA
        !call wrf_message(trim(message))

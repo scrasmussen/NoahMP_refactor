@@ -52,8 +52,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DT              => noahmp%config%domain%DT             ,& ! in,    main noahmp timestep (s)
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! in,    actual number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
               URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
               OptSurfaceDrag  => noahmp%config%nmlist%OptSurfaceDrag ,& ! in,    options for surface layer drag/exchange coefficient
@@ -116,7 +115,7 @@ contains
     QFX    = 0.0
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
-    CGH    = 2.0 * DF(ISNOW+1) / DZSNSO(ISNOW+1)
+    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
 
     ! begin stability iteration for ground temperature and flux
     loop3: do ITER = 1, NITERB
@@ -153,7 +152,7 @@ contains
        IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
        SHB = CSH * (TGB        - TemperatureAirRefHeight )
        EVB = CEV * (ESTG*RHSUR - EAIR        )
-       GHB = CGH * (TGB        - STC(ISNOW+1))
+       GHB = CGH * (TGB        - STC(NumSnowLayerNeg+1))
        B   = SAG - IRB - SHB - EVB - GHB + PAHB
        A   = 4.0*CIR*TGB**3 + CSH + CEV*DESTG + CGH
        DTG = B / A

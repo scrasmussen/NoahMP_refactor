@@ -9,7 +9,7 @@ MODULE module_sf_noahmp_groundwater
 
   use NoahmpIOVarType
   use NoahmpVarType
-  use Machine, only : kind_noahmp
+  use Machine
 
    implicit none
 

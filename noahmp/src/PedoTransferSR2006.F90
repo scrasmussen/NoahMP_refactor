@@ -2,7 +2,7 @@ module PedoTransferSR2006
 
 !!! Compute soil water infiltration based on different soil composition
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
 
@@ -10,7 +10,7 @@ module PedoTransferSR2006
 
 contains
 
-  subroutine PedoTransfer_SR2006(NoahmpIO, noahmp, SOILTYP, sand, clay, orgm)
+  subroutine PedoTransfer_SR2006(NoahmpIO, noahmp, sand, clay, orgm)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: PEDOTRANSFER_SR2006
@@ -23,7 +23,6 @@ contains
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
     type(noahmp_type),   intent(inout) :: noahmp
 
-    integer,                dimension(1:NoahmpIO%nsoil)     :: SOILTYP
     real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil) &
                                         , intent(inout)     :: SAND
     real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil) &

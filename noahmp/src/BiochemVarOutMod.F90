@@ -9,9 +9,9 @@ module BiochemVarOutMod
 ! Refactered code: P. Valayamkunnath, C. He, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpVarType
-  use Machine, only : kind_noahmp
 
   implicit none
 
@@ -26,9 +26,9 @@ contains
     type(noahmp_type),   intent(inout) :: noahmp
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
 
-    associate(                                       &
-              I        => noahmp%config%domain%ILOC ,&
-              J        => noahmp%config%domain%JLOC  &
+    associate(                                         &
+              I    => noahmp%config%domain%GridIndexI ,&
+              J    => noahmp%config%domain%GridIndexJ  &
              )
 
     NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LFMASS

@@ -5,7 +5,7 @@ module RunoffSurfaceXinAnJiangMod
 !!! Toolbox (MARRMoT) v1.2 an open-source, extendable framework providing implementations 
 !!! of 46 conceptual hydrologic models as continuous state-space formulations.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -34,18 +34,18 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              FCR             => noahmp%water%state%FCR              ,& ! in,     fraction of imperviousness due to frozen soil
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
-              AXAJ            => noahmp%water%param%AXAJ             ,& ! in,     Tension water distribution inflection parameter
-              BXAJ            => noahmp%water%param%BXAJ             ,& ! in,     Tension water distribution shape parameter
-              XXAJ            => noahmp%water%param%XXAJ             ,& ! in,     Free water distribution shape parameter
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
+              SMC             => noahmp%water%state%SMC              ,& ! in,   total soil moisture [m3/m3]
+              FCR             => noahmp%water%state%FCR              ,& ! in,   fraction of imperviousness due to frozen soil
+              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
+              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
+              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,   reference soil moisture (field capacity) (m3/m3)
+              AXAJ            => noahmp%water%param%AXAJ             ,& ! in,   Tension water distribution inflection parameter
+              BXAJ            => noahmp%water%param%BXAJ             ,& ! in,   Tension water distribution shape parameter
+              XXAJ            => noahmp%water%param%XXAJ             ,& ! in,   Free water distribution shape parameter
+              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
+              PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -59,15 +59,15 @@ contains
     RUNSRF  = 0.0
     PDDUM   = 0.0
 
-    do IZ = 1, NSOIL-2
+    do IZ = 1, NumSoilLayer-2
        if ( (SMC(IZ) - SMCREF(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
-          SM  = SM + ( SMC(IZ) - SMCREF(IZ) ) * (-1.0) * ZSOIL(IZ)   !m
-          WM  = WM + SMCREF(IZ) * (-1.0) * ZSOIL(IZ)                 !m  
+          SM  = SM + ( SMC(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)   !m
+          WM  = WM + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)                 !m  
        else
-          WM  = WM + SMC(IZ) * (-1.0) * ZSOIL(IZ)
+          WM  = WM + SMC(IZ) * (-1.0) * DepthSoilLayer(IZ)
        endif
-       WM_MAX = WM_MAX + SMCREF(IZ) * (-1.0) * ZSOIL(IZ)
-       SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * (-1.0) * ZSOIL(IZ)
+       WM_MAX = WM_MAX + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)
+       SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)
     enddo
     WM = min( WM, WM_MAX ) ! tension water (m) 
     SM = min( SM, SM_MAX ) ! free water (m)

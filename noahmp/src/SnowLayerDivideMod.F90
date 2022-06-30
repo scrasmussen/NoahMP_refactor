@@ -39,36 +39,36 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSNOW           => noahmp%config%domain%NSNOW          ,& ! in,     maximum number of snow layers
-              ISNOW           => noahmp%config%domain%ISNOW          ,& ! inout,  actual number of snow layers
-              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
-              SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
-              DZSNSO          => noahmp%config%domain%DZSNSO          & ! inout,  thickness of snow/soil layers (m)
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,    maximum number of snow layers
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! inout, actual number of snow layers (negative)
+              STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [k]
+              SNICE           => noahmp%water%state%SNICE            ,& ! inout, snow layer ice [mm]
+              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout, snow layer liquid water [mm]
+              DZSNSO          => noahmp%config%domain%DZSNSO          & ! inout, thickness of snow/soil layers (m)
              )
 ! ----------------------------------------------------------------------
 
 ! initialization
-    allocate( SWICE (1:NSNOW) )
-    allocate( SWLIQ (1:NSNOW) )
-    allocate( TSNO  (1:NSNOW) )
-    allocate( DZ    (1:NSNOW) )
+    allocate( SWICE (1:NumSnowLayerMax) )
+    allocate( SWLIQ (1:NumSnowLayerMax) )
+    allocate( TSNO  (1:NumSnowLayerMax) )
+    allocate( DZ    (1:NumSnowLayerMax) )
     SWICE(:) = 0.0
     SWLIQ(:) = 0.0
     TSNO (:) = 0.0
     DZ   (:) = 0.0
 
-    do J = 1, NSNOW
-       if ( J <= abs(ISNOW) ) then
-          DZ(J)    = DZSNSO(J+ISNOW)
-          SWICE(J) = SNICE(J+ISNOW)
-          SWLIQ(J) = SNLIQ(J+ISNOW)
-          TSNO(J)  = STC(J+ISNOW)
+    do J = 1, NumSnowLayerMax
+       if ( J <= abs(NumSnowLayerNeg) ) then
+          DZ(J)    = DZSNSO(J+NumSnowLayerNeg)
+          SWICE(J) = SNICE(J+NumSnowLayerNeg)
+          SWLIQ(J) = SNLIQ(J+NumSnowLayerNeg)
+          TSNO(J)  = STC(J+NumSnowLayerNeg)
        endif
     enddo
 
 ! start snow layer division
-    MSNO = abs(ISNOW)
+    MSNO = abs(NumSnowLayerNeg)
 
     if ( MSNO == 1 ) then
        ! Specify a new snow layer
@@ -138,13 +138,13 @@ contains
        endif
     endif
 
-    ISNOW = -MSNO
+    NumSnowLayerNeg = -MSNO
 
-    do J = ISNOW+1, 0
-       DZSNSO(J) = DZ(J-ISNOW)
-       SNICE(J)  = SWICE(J-ISNOW)
-       SNLIQ(J)  = SWLIQ(J-ISNOW)
-       STC(J)    = TSNO(J-ISNOW)
+    do J = NumSnowLayerNeg+1, 0
+       DZSNSO(J) = DZ(J-NumSnowLayerNeg)
+       SNICE(J)  = SWICE(J-NumSnowLayerNeg)
+       SNLIQ(J)  = SWLIQ(J-NumSnowLayerNeg)
+       STC(J)    = TSNO(J-NumSnowLayerNeg)
     enddo
 
     end associate

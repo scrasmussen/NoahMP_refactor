@@ -5,7 +5,7 @@ module SoilWaterDiffusionRichardsMod
 !!! water diffusion equation.  also to compute ( prepare ) the matrix
 !!! coefficients for the tri-diagonal matrix of the implicit time scheme.
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SoilHydraulicPropertyMod
@@ -44,8 +44,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NSOIL           => noahmp%config%domain%NSOIL          ,& ! in,     number of soil layers
-              ZSOIL           => noahmp%config%domain%ZSOIL          ,& ! in,     depth of layer-bottom from soil surface
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
+              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               OptSoilPermeabilityFrozen => noahmp%config%nmlist%OptSoilPermeabilityFrozen,& ! in,     options for frozen soil permeability
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
               SLOPE           => noahmp%water%param%SLOPE            ,& ! in,     slope index for soil drainage
@@ -66,11 +66,11 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( DDZ  (1:NSOIL) )
-    allocate( DENOM(1:NSOIL) )
-    allocate( DSMDZ(1:NSOIL) )
-    allocate( WFLUX(1:NSOIL) )
-    allocate( SMX  (1:NSOIL) )
+    allocate( DDZ  (1:NumSoilLayer) )
+    allocate( DENOM(1:NumSoilLayer) )
+    allocate( DSMDZ(1:NumSoilLayer) )
+    allocate( WFLUX(1:NumSoilLayer) )
+    allocate( SMX  (1:NumSoilLayer) )
     RHSTT(:) = 0.0
     AI(:)    = 0.0
     BI(:)    = 0.0
@@ -83,7 +83,7 @@ contains
 
     ! compute soil hydraulic conductivity and diffusivity
     if ( OptSoilPermeabilityFrozen == 1 ) then
-       do K = 1, NSOIL
+       do K = 1, NumSoilLayer
           call SoilDiffusivityConductivityOpt1(noahmp,WDF(K),WCND(K),SMC(K),FCR(K),K) 
           SMX(K) = SMC(K)
        enddo
@@ -91,30 +91,30 @@ contains
     endif
 
     if ( OptSoilPermeabilityFrozen == 2 ) then
-       do K = 1, NSOIL
+       do K = 1, NumSoilLayer
           call SoilDiffusivityConductivityOpt2(noahmp,WDF(K),WCND(K),SH2O(K),SICEMAX,K)
           SMX(K) = SH2O(K)
        enddo
-       if ( OptRunoffSubsurface == 5 ) SMXWTD = SMCWTD * SH2O(NSOIL) / SMC(NSOIL)  !same liquid fraction as in the bottom layer
+       if ( OptRunoffSubsurface == 5 ) SMXWTD = SMCWTD * SH2O(NumSoilLayer) / SMC(NumSoilLayer)  !same liquid fraction as in the bottom layer
     endif
 
     ! compute gradient and flux of soil water diffusion terms
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        if ( K == 1 ) then
-          DENOM(K) = - ZSOIL(K)
-          TEMP1    = - ZSOIL(K+1)
+          DENOM(K) = - DepthSoilLayer(K)
+          TEMP1    = - DepthSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
           WFLUX(K) = WDF(K) * DSMDZ(K) + WCND(K) - PDDUM + ETRANI(K) + QSEVA
-       else if ( K < NSOIL ) then
-          DENOM(k) = (ZSOIL(K-1) - ZSOIL(K))
-          TEMP1    = (ZSOIL(K-1) - ZSOIL(K+1))
+       else if ( K < NumSoilLayer ) then
+          DENOM(k) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
+          TEMP1    = (DepthSoilLayer(K-1) - DepthSoilLayer(K+1))
           DDZ(K)   = 2.0 / TEMP1
           DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
           WFLUX(K) = WDF(K  ) * DSMDZ(K  ) + WCND(K  )         &
                    - WDF(K-1) * DSMDZ(K-1) - WCND(K-1) + ETRANI(K)
        else
-          DENOM(K) = (ZSOIL(K-1) - ZSOIL(K))
+          DENOM(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
           if ( (OptRunoffSubsurface == 1) .or. (OptRunoffSubsurface == 2) ) then
              QDRAIN = 0.0
           endif
@@ -127,10 +127,10 @@ contains
           endif
           if ( OptRunoffSubsurface == 5 ) then   !gmm new m-m&f water table dynamics formulation
              TEMP1  = 2.0 * DENOM(K)
-             if ( ZWT < (ZSOIL(NSOIL)-DENOM(NSOIL)) ) then
+             if ( ZWT < (DepthSoilLayer(NumSoilLayer)-DENOM(NumSoilLayer)) ) then
                 ! gmm interpolate from below, midway to the water table, 
                 ! to the middle of the auxiliary layer below the soil bottom
-                SMXBOT = SMX(K) - (SMX(K) - SMXWTD) * DENOM(K) * 2.0 / (DENOM(K) + ZSOIL(K) - ZWT)
+                SMXBOT = SMX(K) - (SMX(K) - SMXWTD) * DENOM(K) * 2.0 / (DENOM(K) + DepthSoilLayer(K) - ZWT)
              else
                 SMXBOT = SMXWTD
              endif
@@ -142,12 +142,12 @@ contains
     enddo
 
     ! prepare the matrix coefficients for the tri-diagonal matrix
-    do K = 1, NSOIL
+    do K = 1, NumSoilLayer
        if ( K == 1 ) then
           AI(K)    =   0.0
           BI(K)    =   WDF(K  ) * DDZ(K  ) / DENOM(K)
           CI(K)    = - BI (K)
-       else if ( K < NSOIL ) then
+       else if ( K < NumSoilLayer ) then
           AI(K)    = - WDF(K-1) * DDZ(K-1) / DENOM(K)
           CI(K)    = - WDF(K  ) * DDZ(K  ) / DENOM(K)
           BI(K)    = - ( AI (K) + CI (K) )
