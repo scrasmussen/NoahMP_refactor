@@ -97,7 +97,7 @@ contains
               I               => NoahmpIO%I        ,&
               J               => NoahmpIO%J        ,&
               NumSnowLayerMax => NoahmpIO%NSNOW    ,&
-              NNumSoilLayer   => NoahmpIO%NSOIL     &
+              NumSoilLayer    => NoahmpIO%NSOIL     &
              )
 
     ! config namelist variable

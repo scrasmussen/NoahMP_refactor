@@ -51,7 +51,6 @@ contains
     integer                             :: I
     integer                             :: J
     integer                             :: K
-    integer                             :: ICE
     integer                             :: JMONTH, JDAY
     LOGICAL                             :: IPRINT    =  .false.     ! debug printout
     real(kind=kind_noahmp)              :: SOLAR_TIME
@@ -168,8 +167,8 @@ contains
           if(noahmp%config%domain%VegType == 27) noahmp%energy%state%FVEG = 0.0
           if(noahmp%config%domain%VegType == 27) noahmp%energy%state%LAI  = 0.0
 
-          if (noahmp%config%domain%VegType == noahmp%config%domain%ISICE ) then
-              noahmp%config%domain%ICE = -1                                       ! Land-ice point      
+          if (noahmp%config%domain%VegType == noahmp%config%domain%IndexIcePoint ) then
+              noahmp%config%domain%IndicatorIceSfc = -1                          ! Land-ice point      
               noahmp%forcing%TemperatureSoilBottom = min(noahmp%forcing%TemperatureSoilBottom,263.15) ! set deep temp to at most -10C
 
               !---------------------------------------------------------------------
@@ -199,7 +198,7 @@ contains
               !  Call 1D Noah-MP LSM for land points
               !---------------------------------------------------------------------
               
-              noahmp%config%domain%ICE = 0                                        ! Neither sea ice or land ice.
+              noahmp%config%domain%IndicatorIceSfc = 0          ! Neither sea ice or land ice.
          
               call NoahmpMain(noahmp)
               
