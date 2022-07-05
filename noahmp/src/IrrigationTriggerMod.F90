@@ -38,7 +38,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               DepthSoilLayer      => noahmp%config%domain%DepthSoilLayer      ,& ! in,    depth [m] of layer-bottom from soil surface
-              JULIAN          => noahmp%config%domain%JULIAN         ,& ! in,     julian day of the year
+              DayJulianInYear          => noahmp%config%domain%DayJulianInYear         ,& ! in,     Julian day of the year
               OptIrrigation   => noahmp%config%nmlist%OptIrrigation  ,& ! in,     irrigation option
               OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,     irrigation method option
               PLTDAY          => noahmp%biochem%param%PLTDAY         ,& ! in,     Planting day (day of year)
@@ -70,7 +70,7 @@ contains
 
     ! check if irrigation is can be activated or not
     if ( OptIrrigation == 2 ) then ! activate irrigation if within crop season
-       if ( (JULIAN < PLTDAY) .or. (JULIAN > (HSDAY-IRR_HAR)) ) IRR_ACTIVE = .false.
+       if ( (DayJulianInYear < PLTDAY) .or. (DayJulianInYear > (HSDAY-IRR_HAR)) ) IRR_ACTIVE = .false.
     elseif ( OptIrrigation == 3) then ! activate if LAI > threshold LAI
        if ( LAI < IRR_LAI) IRR_ACTIVE = .false.
     elseif ( (OptIrrigation > 3) .or. (OptIrrigation < 1) ) then

@@ -3,7 +3,7 @@ module SnowLayerCombineGlacierMod
 !!! Snowpack layer combination process over glacier
 !!! Update snow ice, snow water, snow thickness, snow temperature
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use SnowLayerWaterComboMod, only: SnowLayerWaterCombo
@@ -45,7 +45,7 @@ contains
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil liquid moisture (m3/m3)
               SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               PONDING1        => noahmp%water%state%PONDING1         ,& ! out,    surface ponding 1 (mm)
               PONDING2        => noahmp%water%state%PONDING2          & ! out,    surface ponding 2 (mm)
              )
@@ -59,23 +59,23 @@ contains
           if ( J /= 0 ) then
              SNLIQ(J+1)  = SNLIQ(J+1)  + SNLIQ(J)
              SNICE(J+1)  = SNICE(J+1)  + SNICE(J)
-             DZSNSO(J+1) = DZSNSO(J+1) + DZSNSO(J)
+             ThicknessSnowSoilLayer(J+1) = ThicknessSnowSoilLayer(J+1) + ThicknessSnowSoilLayer(J)
           else
              if ( ISNOW_OLD < -1 ) then    ! MB/KM: change to NumSnowLayerNeg
                 SNLIQ(J-1)  = SNLIQ(J-1)  + SNLIQ(J)
                 SNICE(J-1)  = SNICE(J-1)  + SNICE(J)
-                DZSNSO(J-1) = DZSNSO(J-1) + DZSNSO(J)
+                ThicknessSnowSoilLayer(J-1) = ThicknessSnowSoilLayer(J-1) + ThicknessSnowSoilLayer(J)
              else
                 PONDING1  = PONDING1 +SNLIQ(J)       ! NumSnowLayerNeg WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
                 SNEQV     = SNICE(J)                 ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
-                SNOWH     = DZSNSO(J)                ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
+                SNOWH     = ThicknessSnowSoilLayer(J)                ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
                 SNLIQ(J)  = 0.0
                 SNICE(J)  = 0.0
-                DZSNSO(J) = 0.0
+                ThicknessSnowSoilLayer(J) = 0.0
              endif ! if(ISNOW_OLD < -1)
 
-             !SH2O(1) = SH2O(1) + SNLIQ(J)/(DZSNSO(1)*1000.0)
-             !SICE(1) = SICE(1) + SNICE(J)/(DZSNSO(1)*1000.0)
+             !SH2O(1) = SH2O(1) + SNLIQ(J)/(ThicknessSnowSoilLayer(1)*1000.0)
+             !SICE(1) = SICE(1) + SNICE(J)/(ThicknessSnowSoilLayer(1)*1000.0)
           endif ! if(J /= 0)
 
           ! shift all elements above this down by one.
@@ -84,7 +84,7 @@ contains
                 STC(I)    = STC(I-1)
                 SNLIQ(I)  = SNLIQ(I-1)
                 SNICE(I)  = SNICE(I-1)
-                DZSNSO(I) = DZSNSO(I-1)
+                ThicknessSnowSoilLayer(I) = ThicknessSnowSoilLayer(I-1)
              enddo
           endif
           NumSnowLayerNeg = NumSnowLayerNeg + 1
@@ -107,7 +107,7 @@ contains
 
     do J = NumSnowLayerNeg+1, 0
        SNEQV = SNEQV + SNICE(J) + SNLIQ(J)
-       SNOWH = SNOWH + DZSNSO(J)
+       SNOWH = SNOWH + ThicknessSnowSoilLayer(J)
        ZWICE = ZWICE + SNICE(J)
        ZWLIQ = ZWLIQ + SNLIQ(J)
     enddo
@@ -126,14 +126,14 @@ contains
        ISNOW_OLD = NumSnowLayerNeg
        MSSI      = 1
        do I = ISNOW_OLD+1, 0
-          if ( DZSNSO(I) < DZMIN(MSSI) ) then
+          if ( ThicknessSnowSoilLayer(I) < DZMIN(MSSI) ) then
              if ( I == NumSnowLayerNeg+1 ) then
                 NEIBOR = I + 1
              else if ( I == 0 ) then
                 NEIBOR = I - 1
              else
                 NEIBOR = I + 1
-                if ( (DZSNSO(I-1)+DZSNSO(I)) < (DZSNSO(I+1)+DZSNSO(I)) ) NEIBOR = I-1
+                if ( (ThicknessSnowSoilLayer(I-1)+ThicknessSnowSoilLayer(I)) < (ThicknessSnowSoilLayer(I+1)+ThicknessSnowSoilLayer(I)) ) NEIBOR = I-1
              endif
              ! Node l and j are combined and stored as node j.
              if ( NEIBOR > I ) then
@@ -145,8 +145,8 @@ contains
              endif
 
              ! update combined snow water & temperature
-             call SnowLayerWaterCombo(DZSNSO(J), SNLIQ(J), SNICE(J), STC(J), &
-                                      DZSNSO(L), SNLIQ(L), SNICE(L), STC(L) )
+             call SnowLayerWaterCombo(ThicknessSnowSoilLayer(J), SNLIQ(J), SNICE(J), STC(J), &
+                                      ThicknessSnowSoilLayer(L), SNLIQ(L), SNICE(L), STC(L) )
 
              ! Now shift all elements above this down one.
              if ( (J-1) > (NumSnowLayerNeg+1) ) then
@@ -154,7 +154,7 @@ contains
                    STC(K)    = STC(K-1)
                    SNICE(K)  = SNICE(K-1)
                    SNLIQ(K)  = SNLIQ(K-1)
-                   DZSNSO(K) = DZSNSO(K-1)
+                   ThicknessSnowSoilLayer(K) = ThicknessSnowSoilLayer(K-1)
                 enddo
              endif
              ! Decrease the number of snow layers

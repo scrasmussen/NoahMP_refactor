@@ -27,7 +27,7 @@ contains
 
 ! ----------------------------------------------------------------------
     associate(                                                        &
-              LLANDUSE        => noahmp%config%domain%LLANDUSE       ,& ! in,     landuse data name (USGS or MODIS_IGBP)
+              LandUseDataName        => noahmp%config%domain%LandUseDataName       ,& ! in,     landuse data name (USGS or MODIS_IGBP)
               VegType         => noahmp%config%domain%VegType                 ,& ! in,    vegetation type
               OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,    irrigation method option
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
@@ -40,7 +40,7 @@ contains
               IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  flood irrigation water amount [m]
               IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
               RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! out,    flag to identify croplands
+              FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! out,    flag to identify croplands
               SIFAC           => noahmp%water%state%SIFAC            ,& ! out,    sprinkler irrigation fraction (0 to 1)
               MIFAC           => noahmp%water%state%MIFAC            ,& ! out,    fraction of grid under micro irrigation (0 to 1)
               FIFAC           => noahmp%water%state%FIFAC             & ! out,    fraction of grid under flood irrigation (0 to 1)
@@ -48,13 +48,13 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialize
-    CROPLU = .false.
+    FlagCropland = .false.
 
     ! determine cropland
-    if ( trim(LLANDUSE) == "USGS" ) then
-       if ( (VegType >= 3) .and. (VegType <= 6) ) CROPLU = .true.
-    elseif ( trim(LLANDUSE) == "MODIFIED_IGBP_MODIS_NOAH") then
-       if ( (VegType == 12) .or. (VegType == 14) ) CROPLU = .true.
+    if ( trim(LandUseDataName) == "USGS" ) then
+       if ( (VegType >= 3) .and. (VegType <= 6) ) FlagCropland = .true.
+    elseif ( trim(LandUseDataName) == "MODIFIED_IGBP_MODIS_NOAH") then
+       if ( (VegType == 12) .or. (VegType == 14) ) FlagCropland = .true.
     endif
 
     ! assign irrigation fraction from input data 
@@ -84,7 +84,7 @@ contains
     endif
 
     ! trigger irrigation
-    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. &
+    if ( (FlagCropland .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) .and. &
          (RAIN < (IR_RAIN/3600.0)) .and. ((IRAMTSI+IRAMTMI+IRAMTFI) == 0.0) ) then
        call IrrigationTrigger(noahmp)
     endif

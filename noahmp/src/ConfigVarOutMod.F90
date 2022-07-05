@@ -33,7 +33,8 @@ contains
              )
 
     NoahmpIO%ISNOWXY(I,J) = noahmp%config%domain%NumSnowLayerNeg
-    NoahmpIO%ZSNSOXY(I,-NumSnowLayerMax+1:NumSoilLayer,J) = noahmp%config%domain%ZSNSO(-NumSnowLayerMax+1:NumSoilLayer)
+    NoahmpIO%ZSNSOXY(I,-NumSnowLayerMax+1:NumSoilLayer,J) = &
+            noahmp%config%domain%DepthSnowSoilLayer(-NumSnowLayerMax+1:NumSoilLayer)
 
     end associate
 

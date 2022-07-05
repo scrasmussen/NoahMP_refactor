@@ -32,11 +32,11 @@ contains
     associate(                                                        &
               VegType          => noahmp%config%domain%VegType       ,& ! in,    vegetation type
               DepthSoilLayer            => noahmp%config%domain%DepthSoilLayer         ,& ! in,    depth [m] of layer-bottom from soil surface
-              DZSNSO           => noahmp%config%domain%DZSNSO        ,& ! in,    snow/soil layer thickness [m]
-              ISWATER          => noahmp%config%domain%ISWATER       ,& ! in,    water point flag
-              ISICE            => noahmp%config%domain%ISICE         ,& ! in,    land ice flag
-              ISBARREN         => noahmp%config%domain%ISBARREN      ,& ! in,    bare soil flag
-              URBAN_FLAG       => noahmp%config%domain%URBAN_FLAG    ,& ! in,    urban point flag
+              ThicknessSnowSoilLayer           => noahmp%config%domain%ThicknessSnowSoilLayer        ,& ! in,    snow/soil layer thickness [m]
+              IndexWaterPoint          => noahmp%config%domain%IndexWaterPoint       ,& ! in,    water point flag
+              IndexIcePoint            => noahmp%config%domain%IndexIcePoint         ,& ! in,    land ice flag
+              IndexBarrenPoint         => noahmp%config%domain%IndexBarrenPoint      ,& ! in,    bare soil flag
+              FlagUrban       => noahmp%config%domain%FlagUrban    ,& ! in,    urban point flag
               NROOT            => noahmp%water%param%NROOT           ,& ! in,    number of soil layers with root present
               SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
               SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
@@ -69,8 +69,8 @@ contains
     GPP = 0.0
 
     ! no biogeochemistry in non-vegetated points
-    if ( (VegType == ISWATER) .or. (VegType == ISBARREN) .or. &
-         (VegType == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
+    if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
+         (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
        XLAI   = 0.0
        XSAI   = 0.0
        GPP    = 0.0
@@ -96,7 +96,7 @@ contains
     WSTRES = 1.0 - BTRAN
     WROOT  = 0.0
     do J = 1, NROOT
-       WROOT = WROOT + SMC(J) / SMCMAX(J) * DZSNSO(J) / (-DepthSoilLayer(NROOT))
+       WROOT = WROOT + SMC(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
     enddo
 
     ! start carbon process

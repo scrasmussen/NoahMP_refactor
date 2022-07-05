@@ -67,8 +67,8 @@ module ConfigVarType
                                                                 ! 4 -> Verseghy (1991) scheme
                                                                 ! 5 -> Douvill(Yen, 1981) scheme
     integer                   :: OptSoilTemperatureBottom    ! options for lower boundary condition of soil temperature
-                                                                ! 1 -> zero heat flux from bottom (ZBOT & TemperatureSoilBottom not used)
-                                                                ! 2 -> TBOT at ZBOT (8m) read from a file (original Noah) (default)
+                                                                ! 1 -> zero heat flux from bottom (DepthSoilTempBottom & TemperatureSoilBottom not used)
+                                                                ! 2 -> TemperatureSoilBottom at DepthSoilTempBottom (8m) read from a file (original Noah) (default)
     integer                   :: OptSoilSupercoolWater       ! options for soil supercooled liquid water
                                                                 ! 1 -> no iteration (Niu and Yang, 2006 JHM) (default)
                                                                 ! 2 -> Koren's iteration (Koren et al., 1999 JGR)
@@ -124,50 +124,52 @@ module ConfigVarType
 
   end type namelist_type
 
+
 !=== define "domain" sub-type of config_type (config%domain%variable)
   type :: domain_type
 
     ! define specific domain variables
-    character(len=256)        :: LLANDUSE      ! landuse data name (USGS or MODIS_IGBP)
-    logical                   :: URBAN_FLAG    ! flag for urban grid
-    logical                   :: CROPLU        ! flag to identify croplands
-    logical                   :: CROP_ACTIVE   ! flag to activate crop model
-    logical                   :: DVEG_ACTIVE   ! flag to activate dynamic vegetation model
-    integer                   :: GridIndexI              ! model grid index in x-direction
-    integer                   :: GridIndexJ              ! model grid index in y-direction
-    integer                   :: VegType                 ! vegetation type
-    integer                   :: CropType                ! crop type
-    integer                   :: NumSoilLayer            ! number of soil layers
-    integer                   :: NumSnowLayerMax         ! maximum number of snow layers
-    integer                   :: NumSnowLayerNeg         ! actual number of snow layers (negative)
-    integer                   :: IST           ! surface type 1-soil; 2-lake
-    integer                   :: NBAND         ! number of solar radiation wave bands
-    integer                   :: SOILCOLOR     ! soil texture type for albedo
-    integer                   :: ICE           ! flag for seaice point (=1: ice point)
-    integer                   :: ISWATER       ! flag to identify water
-    integer                   :: ISBARREN      ! flag to identify barren land
-    integer                   :: ISICE         ! flag to identify ice
-    integer                   :: ISCROP        ! flag to identify crop
-    integer                   :: EBLFOREST     ! flag to identify EBL Forest
-    integer                   :: NSTAGE        ! number of growth stages
-    integer                   :: YEARLEN       ! Number of days in the particular year
-    integer                   :: SLOPETYP      ! underground runoff slope term
-    real(kind=kind_noahmp)    :: MainTimeStep            ! noahmp main timestep [sec]
-    real(kind=kind_noahmp)    :: GridSize                ! noahmp model grid spacing [m]
-    real(kind=kind_noahmp)    :: JULIAN        ! julian day of the year
-    real(kind=kind_noahmp)    :: CosSolarZenithAngle     ! cosine solar zenith angle
-    real(kind=kind_noahmp)    :: ZREF          ! reference height  [m]
-    real(kind=kind_noahmp)    :: ThicknessAtmosBotLayer  ! thickness of atmospheric bottom layers [m]
-    real(kind=kind_noahmp)    :: ZLVL          ! thickness of surface atmospheric layers [m]
-    real(kind=kind_noahmp)    :: Latitude                ! latitude [degree]
+    character(len=256)        :: LandUseDataName             ! landuse dataset name (USGS or MODIFIED_IGBP_MODIS_NOAH)
+    logical                   :: FlagUrban                   ! flag for urban grid
+    logical                   :: FlagCropland                ! flag to identify croplands
+    logical                   :: FlagDynamicCrop             ! flag to activate dynamic crop model
+    logical                   :: FlagDynamicVeg              ! flag to activate dynamic vegetation scheme
+    integer                   :: GridIndexI                  ! model grid index in x-direction
+    integer                   :: GridIndexJ                  ! model grid index in y-direction
+    integer                   :: VegType                     ! vegetation type
+    integer                   :: CropType                    ! crop type
+    integer                   :: NumSoilLayer                ! number of soil layers
+    integer                   :: NumSnowLayerMax             ! maximum number of snow layers
+    integer                   :: NumSnowLayerNeg             ! actual number of snow layers (negative)
+    integer                   :: SurfaceType                 ! surface type: 1=soil; 2=lake
+    integer                   :: NumSWRadBand                ! number of shortwave radiation bands
+    integer                   :: SoilColor                   ! soil color type for albedo
+    integer                   :: IndicatorIceSfc             ! indicator for ice surface/point (1=sea ice, 0=non-ice, -1=land ice)
+    integer                   :: IndexWaterPoint             ! land type index for water point
+    integer                   :: IndexBarrenPoint            ! land type index for barren land point
+    integer                   :: IndexIcePoint               ! land type index for  ice point
+    integer                   :: IndexCropPoint              ! land type index for cropland point
+    integer                   :: IndexEBLForest              ! land type index for evergreen broadleaf (EBL) Forest
+    integer                   :: NumCropGrowStage            ! number of crop growth stages
+    integer                   :: NumDayInYear                ! Number of days in the particular year
+    integer                   :: RunoffSlopeType             ! underground runoff slope term type
+    real(kind=kind_noahmp)    :: MainTimeStep                ! noahmp main timestep [sec]
+    real(kind=kind_noahmp)    :: GridSize                    ! noahmp model grid spacing [m]
+    real(kind=kind_noahmp)    :: DayJulianInYear             ! julian day of the year
+    real(kind=kind_noahmp)    :: CosSolarZenithAngle         ! cosine solar zenith angle
+    real(kind=kind_noahmp)    :: RefHeightAboveSfc           ! reference height [m] above surface zero plane (including vegetation)
+    real(kind=kind_noahmp)    :: ThicknessAtmosBotLayer      ! thickness of atmospheric bottom layers [m]
+    real(kind=kind_noahmp)    :: Latitude                    ! latitude [degree]
+    real(kind=kind_noahmp)    :: DepthSoilTempBottom         ! depth [m, negative] from soil surface for lower boundary soil temperature forcing
 
-    integer               , allocatable, dimension(:) :: SOILTYP ! soil type for each soil layer
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSoilLayer   ! depth [m] of layer-bottom from soil surface
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DZSNSO  ! thickness of snow/soil layers (m)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ZSNSO   ! depth of snow/soil layer-bottom (m)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ZLAYER  ! soil layer thickness (m)
+    integer               , allocatable, dimension(:) :: SoilType                  ! soil type for each soil layer
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSoilLayer            ! depth [m] of layer-bottom from soil surface
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThicknessSnowSoilLayer    ! snow and soil layer thickness [m]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSnowSoilLayer        ! snow and soil layer-bottom depth [m]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThicknessSoilLayer        ! soil layer thickness [m]
 
   end type domain_type
+
 
 !=== define config type that includes namelist & domain subtypes
   type, public :: config_type

@@ -47,7 +47,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,   logical flag for urban grid
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,   logical flag for urban grid
               SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
               SICE            => noahmp%water%state%SICE             ,& ! in,   soil ice content [m3/m3]
               SICEMAX         => noahmp%water%state%SICEMAX          ,& ! in,   maximum soil ice content (m3/m3)
@@ -106,7 +106,7 @@ contains
        ! correction of infiltration limitation
        INFMAX = INFMAX * FCR
        ! jref for urban areas
-       ! if ( URBAN_FLAG .eqv. .true. ) INFMAX == INFMAX * 0.05
+       ! if ( FlagUrban .eqv. .true. ) INFMAX == INFMAX * 0.05
 
        ! soil hydraulic conductivity and diffusivity
        call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SH2O(1), SICEMAX, 1)

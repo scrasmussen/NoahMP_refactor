@@ -45,7 +45,7 @@ contains
               SSI             => noahmp%water%param%SSI              ,& ! in,     liquid water holding capacity for snowpack (m3/m3)
               SNOW_RET_FAC    => noahmp%water%param%SNOW_RET_FAC     ,& ! in,     snowpack water release timescale factor (1/s)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
@@ -72,7 +72,7 @@ contains
 
     ! for the case when SNEQV becomes '0' after 'COMBINE'
     if ( SNEQV == 0.0 ) then
-       SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * MainTimeStep / (DZSNSO(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
+       SICE(1) =  SICE(1) + (QSNFRO - QSNSUB) * MainTimeStep / (ThicknessSnowSoilLayer(1)*1000.0)  ! Barlage: SH2O->SICE v3.6
        if ( SICE(1) < 0.0 ) then
           SH2O(1) = SH2O(1) + SICE(1)
           SICE(1) = 0.0
@@ -89,7 +89,7 @@ contains
        SNOWH  = max( 0.0, PROPOR*SNOWH )
        SNOWH  = min( max(SNOWH, SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
        if ( SNEQV < 0.0 ) then
-          SICE(1) = SICE(1) + SNEQV / (DZSNSO(1)*1000.0)
+          SICE(1) = SICE(1) + SNEQV / (ThicknessSnowSoilLayer(1)*1000.0)
           SNEQV   = 0.0
           SNOWH   = 0.0
        endif
@@ -117,17 +117,17 @@ contains
 
     ! Porosity and partial volume
     do J = NumSnowLayerNeg+1, 0
-       VOL_ICE(J) = min( 1.0, SNICE(J)/(DZSNSO(J)*ConstDensityIce) )
+       VOL_ICE(J) = min( 1.0, SNICE(J)/(ThicknessSnowSoilLayer(J)*ConstDensityIce) )
        EPORE(J)   = 1.0 - VOL_ICE(J)
     enddo
 
     ! compute inter-layer snow water flow
     do J = NumSnowLayerNeg+1, 0
        SNLIQ(J)   = SNLIQ(J) + QIN
-       VOL_LIQ(J) = SNLIQ(J) / (DZSNSO(J)*ConstDensityWater)
-       QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * DZSNSO(J) )
+       VOL_LIQ(J) = SNLIQ(J) / (ThicknessSnowSoilLayer(J)*ConstDensityWater)
+       QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*EPORE(J)) * ThicknessSnowSoilLayer(J) )
        if ( J == 0 ) then
-          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * DZSNSO(J), SNOW_RET_FAC * MainTimeStep * QOUT )
+          QOUT = max( (VOL_LIQ(J) - EPORE(J)) * ThicknessSnowSoilLayer(J), SNOW_RET_FAC * MainTimeStep * QOUT )
        endif
        QOUT     = QOUT * ConstDensityWater
        SNLIQ(J) = SNLIQ(J) - QOUT
@@ -140,7 +140,7 @@ contains
 
     ! update snow depth
     do J = NumSnowLayerNeg+1, 0
-       DZSNSO(J) = max( DZSNSO(J), SNLIQ(J)/ConstDensityWater + SNICE(J)/ConstDensityIce )
+       ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SNLIQ(J)/ConstDensityWater + SNICE(J)/ConstDensityIce )
     enddo
 
     ! Liquid water from snow bottom to soil (mm/s)

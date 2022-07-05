@@ -32,7 +32,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               BATS_COSZ       => noahmp%energy%param%BATS_COSZ       ,& ! in,     zenith angle snow albedo adjustment
@@ -49,8 +49,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    ALBSND(1: NBAND) = 0.0
-    ALBSNI(1: NBAND) = 0.0
+    ALBSND(1: NumSWRadBand) = 0.0
+    ALBSNI(1: NumSWRadBand) = 0.0
 
     ! when CosSolarZenithAngle > 0
     SL        = BATS_COSZ

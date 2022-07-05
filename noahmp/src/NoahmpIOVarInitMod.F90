@@ -651,7 +651,7 @@ contains
 
     !---------------- NoahmpTable.TBL vegetation parameters
 
-    DATASET_IDENTIFIER = NoahmpIO%llanduse
+    DATASET_IDENTIFIER = NoahmpIO%LLANDUSE
 
     inquire( file='NoahmpTable.TBL', exist=file_named )
     if ( file_named ) then
@@ -2428,6 +2428,7 @@ contains
     NoahmpIO%XLAND             = 1.0   ! water = 2.0, land = 1.0
     NoahmpIO%XICE              = 0.0   ! fraction of grid that is seaice
     NoahmpIO%XICE_THRESHOLD    = 0.5   ! fraction of grid determining seaice (from WRF)
+    NoahmpIO%SLOPETYP          =  1
 
 #ifdef WRF_HYDRO
     NoahmpIO%infxsrt           = 0.0

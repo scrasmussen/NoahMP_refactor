@@ -53,8 +53,8 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               OptSurfaceDrag  => noahmp%config%nmlist%OptSurfaceDrag ,& ! in,    options for surface layer drag/exchange coefficient
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
@@ -66,9 +66,9 @@ contains
               FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
-              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
+              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at reference height
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
@@ -115,7 +115,7 @@ contains
     QFX    = 0.0
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
-    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
+    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
 
     ! begin stability iteration for ground temperature and flux
     loop3: do ITER = 1, NITERB
@@ -127,7 +127,7 @@ contains
           Z0H = Z0M !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0M))
        endif
 
-       ! aerodyn resistances between heights zlvl and d+z0v
+       ! aerodyn resistances between reference heigths and d+z0v
        if ( OptSurfaceDrag == 1 ) call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
        if ( OptSurfaceDrag == 2 ) call ResistanceBareGroundChen97(noahmp, ITER)
 
@@ -206,7 +206,7 @@ contains
           T2MB = TGB - SHB / (RHOAIR*ConstHeatCapacAir) * 1.0 / EHB2
           Q2B  = QSFC - EVB / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
        endif
-       if ( URBAN_FLAG .eqv. .true. ) Q2B = QSFC
+       if ( FlagUrban .eqv. .true. ) Q2B = QSFC
     endif
 
     ! update CH 

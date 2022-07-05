@@ -2,7 +2,7 @@ module GroundRoughnessPropertyMod
 
 !!! Compute ground roughness length, displacement height, and surface reference height
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -26,9 +26,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              ZREF            => noahmp%config%domain%ZREF           ,& ! in,    reference height  (m)
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
+              RefHeightAboveSfc => noahmp%config%domain%RefHeightAboveSfc ,& ! in,  reference height [m] above surface zero plane
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
@@ -41,12 +41,12 @@ contains
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
               ZPD             => noahmp%energy%state%ZPD             ,& ! out,   surface zero plane displacement (m)
               ZPDG            => noahmp%energy%state%ZPDG            ,& ! out,   ground zero plane displacement (m)
-              ZLVL            => noahmp%energy%state%ZLVL             & ! out,   surface reference height  (m)
+              RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround  & ! out,  reference height [m] above ground
              )
 ! ----------------------------------------------------------------------
 
     ! ground roughness length
-    if ( IST == 2 ) then ! Lake 
+    if ( SurfaceType == 2 ) then ! Lake 
        if ( TG <= ConstFreezePoint ) then
           Z0MG = Z0LAKE * (1.0 - FSNO) + FSNO * Z0SNO
        else
@@ -68,16 +68,16 @@ contains
     endif
 
     ! special case for urban
-    if ( URBAN_FLAG .eqv. .true. ) then
+    if ( FlagUrban .eqv. .true. ) then
        Z0MG = Z0MVT
        ZPDG = 0.65 * HVT
        Z0M  = Z0MG
        ZPD  = ZPDG
     endif
 
-    ! surface reference height  (m)
-    ZLVL = max( ZPD, HVT ) + ZREF
-    if ( ZPDG >= ZLVL ) ZLVL = ZPDG + ZREF
+    ! reference height above ground
+    RefHeightAboveGround = max( ZPD, HVT ) + RefHeightAboveSfc
+    if ( ZPDG >= RefHeightAboveGround ) RefHeightAboveGround = ZPDG + RefHeightAboveSfc
 
     end associate
 

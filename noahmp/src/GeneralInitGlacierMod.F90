@@ -29,17 +29,17 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
-              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,   depth of snow/soil layer-bottom (m)
-              DZSNSO          => noahmp%config%domain%DZSNSO          & ! out,  thickness of snow/soil layers (m)
+              DepthSnowSoilLayer           => noahmp%config%domain%DepthSnowSoilLayer          ,& ! in,   depth of snow/soil layer-bottom (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! out,  thickness of snow/soil layers (m)
              )
 ! ----------------------------------------------------------------------
 
     ! initialize snow/soil layer thickness (m)
     do IZ = NumSnowLayerNeg+1, NumSoilLayer
        if ( IZ == NumSnowLayerNeg+1 ) then
-          DZSNSO(IZ) = - ZSNSO(IZ)
+          ThicknessSnowSoilLayer(IZ) = - DepthSnowSoilLayer(IZ)
        else
-          DZSNSO(IZ) = ZSNSO(IZ-1) - ZSNSO(IZ)
+          ThicknessSnowSoilLayer(IZ) = DepthSnowSoilLayer(IZ-1) - DepthSnowSoilLayer(IZ)
        endif
     enddo
 

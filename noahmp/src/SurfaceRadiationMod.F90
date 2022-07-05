@@ -36,7 +36,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
               FSUN            => noahmp%energy%state%FSUN            ,& ! in,    sunlit fraction of canopy
@@ -70,8 +70,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( CAD (1:NBAND) )
-    allocate( CAI (1:NBAND) )
+    allocate( CAD (1:NumSWRadBand) )
+    allocate( CAI (1:NumSWRadBand) )
     MPE    = 1.0e-6
     SAG    = 0.0
     SAV    = 0.0
@@ -82,7 +82,7 @@ contains
     PARSUN = 0.0
     PARSHA = 0.0
 
-    do IB = 1, NBAND
+    do IB = 1, NumSWRadBand
        ! absorbed by canopy
        CAD(IB) = SOLAD(IB) * FABD(IB)
        CAI(IB) = SOLAI(IB) * FABI(IB)

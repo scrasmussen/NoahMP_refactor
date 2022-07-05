@@ -40,7 +40,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               ZWT             => noahmp%water%state%ZWT              ,& ! in,     water table depth [m]
@@ -90,15 +90,15 @@ contains
     ! for MMF scheme, there is soil moisture below NumSoilLayer, to the water table
     if ( OptRunoffSubsurface == 5 ) then
        ! update smcwtd
-       if ( ZWT < DepthSoilLayer(NumSoilLayer)-DZSNSO(NumSoilLayer) ) then
+       if ( ZWT < DepthSoilLayer(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer) ) then
           ! accumulate qdrain to update deep water table and soil moisture later
           DEEPRECH =  DEEPRECH + DT * QDRAIN
        else
-          SMCWTD      = SMCWTD + DT * QDRAIN  / DZSNSO(NumSoilLayer)
-          WPLUS       = max( (SMCWTD - SMCMAX(NumSoilLayer)), 0.0 ) * DZSNSO(NumSoilLayer)
-          WMINUS      = max( (1.0e-4 - SMCWTD), 0.0 ) * DZSNSO(NumSoilLayer)
+          SMCWTD      = SMCWTD + DT * QDRAIN  / ThicknessSnowSoilLayer(NumSoilLayer)
+          WPLUS       = max( (SMCWTD - SMCMAX(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
+          WMINUS      = max( (1.0e-4 - SMCWTD), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
           SMCWTD      = max( min(SMCWTD, SMCMAX(NumSoilLayer)), 1.0e-4 )
-          SH2O(NumSoilLayer) = SH2O(NumSoilLayer) + WPLUS / DZSNSO(NumSoilLayer)
+          SH2O(NumSoilLayer) = SH2O(NumSoilLayer) + WPLUS / ThicknessSnowSoilLayer(NumSoilLayer)
           ! reduce fluxes at the bottom boundaries accordingly
           QDRAIN   = QDRAIN - WPLUS/DT
           DEEPRECH = DEEPRECH - WMINUS
@@ -107,25 +107,25 @@ contains
 
     do K = NumSoilLayer, 2, -1
        EPORE(K)  = max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-       WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * DZSNSO(K)
+       WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
        SH2O(K)   = min( EPORE(K), SH2O(K) )
-       SH2O(K-1) = SH2O(K-1) + WPLUS / DZSNSO(K-1)
+       SH2O(K-1) = SH2O(K-1) + WPLUS / ThicknessSnowSoilLayer(K-1)
     enddo
 
     EPORE(1) = max( 1.0e-4, (SMCMAX(1) - SICE(1)) )
-    WPLUS    = max( (SH2O(1)-EPORE(1)), 0.0 ) * DZSNSO(1)
+    WPLUS    = max( (SH2O(1)-EPORE(1)), 0.0 ) * ThicknessSnowSoilLayer(1)
     SH2O(1)  = min( EPORE(1), SH2O(1) )
 
     if ( WPLUS > 0.0 ) then
-       SH2O(2) = SH2O(2) + WPLUS / DZSNSO(2)
+       SH2O(2) = SH2O(2) + WPLUS / ThicknessSnowSoilLayer(2)
        do K = 2, NumSoilLayer-1
           EPORE(K)  = max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-          WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * DZSNSO(K)
+          WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
           SH2O(K)   = min( EPORE(K), SH2O(K) )
-          SH2O(K+1) = SH2O(K+1) + WPLUS / DZSNSO(K+1)
+          SH2O(K+1) = SH2O(K+1) + WPLUS / ThicknessSnowSoilLayer(K+1)
        enddo
        EPORE(NumSoilLayer) = max( 1.0e-4, (SMCMAX(NumSoilLayer) - SICE(NumSoilLayer)) )
-       WPLUS        = max( (SH2O(NumSoilLayer)-EPORE(NumSoilLayer)), 0.0 ) * DZSNSO(NumSoilLayer)
+       WPLUS        = max( (SH2O(NumSoilLayer)-EPORE(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
        SH2O(NumSoilLayer)  = min( EPORE(NumSoilLayer), SH2O(NumSoilLayer) )
     endif
 

@@ -54,7 +54,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of glacier/soil layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment,& ! in,    options for glacier treatment 
               RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
@@ -67,9 +67,9 @@ contains
               SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier/soil water content [m3/m3]
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
-              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
+              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at reference height
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
@@ -116,7 +116,7 @@ contains
     QFX    = 0.0
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
-    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
+    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
     allocate(SICEtemp(1:NumSoilLayer))
     SICEtemp = 0.0
 
@@ -126,7 +126,7 @@ contains
        ! ground roughness length
        Z0H = Z0M
 
-       ! aerodyn resistances between heights zlvl and d+z0v
+       ! aerodyn resistances between heights reference height and d+z0v
        call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
 
        ! conductance variables for diagnostics         

@@ -33,9 +33,9 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,    depth [m] of layer-bottom from soil surface
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,    logical flag for urban grid
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               OptGroundResistanceEvap => noahmp%config%nmlist%OptGroundResistanceEvap,& ! in,    options for ground resistance to evaporation/sublimation
               RSURF_EXP       => noahmp%energy%param%RSURF_EXP       ,& ! in,    exponent in the shape parameter for soil resistance
               RSURF_SNOW      => noahmp%energy%param%RSURF_SNOW      ,& ! in,    surface resistance for snow(s/m)
@@ -54,7 +54,7 @@ contains
 
     ! initialization
     BEVAP = max( 0.0, SH2O(1)/SMCMAX(1) )
-    if ( IST == 2 ) then  ! lake point
+    if ( SurfaceType == 2 ) then  ! lake point
        RSURF = 1.0        ! avoid being divided by 0
        RHSUR = 1.0
     else    ! soil point
@@ -80,7 +80,7 @@ contains
     endif
 
     ! urban
-    if ( (URBAN_FLAG .eqv. .true.) .and. (SNOWH == 0.0) ) then
+    if ( (FlagUrban .eqv. .true.) .and. (SNOWH == 0.0) ) then
        RSURF = 1.0e6
     endif
 

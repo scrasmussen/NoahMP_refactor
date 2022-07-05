@@ -291,8 +291,9 @@ contains
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
               VegType         => noahmp%config%domain%VegType         ,&
-              SOILTYP     => noahmp%config%domain%SOILTYP      ,&
-              URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG   ,&
+              SoilType     => noahmp%config%domain%SoilType      ,&
+              FlagUrban  => noahmp%config%domain%FlagUrban   ,&
+              RunoffSlopeType => noahmp%config%domain%RunoffSlopeType ,&
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg  &
              )
 
@@ -372,48 +373,48 @@ contains
     noahmp%water%param%MFSNO             = NoahmpIO%MFSNO_TABLE(VegType)
     noahmp%water%param%SCFFAC            = NoahmpIO%SCFFAC_TABLE(VegType)
 
-    noahmp%water%param%BVIC              = NoahmpIO%BVIC_TABLE(SOILTYP(1))
-    noahmp%water%param%AXAJ              = NoahmpIO%AXAJ_TABLE(SOILTYP(1))
-    noahmp%water%param%BXAJ              = NoahmpIO%BXAJ_TABLE(SOILTYP(1))
-    noahmp%water%param%XXAJ              = NoahmpIO%XXAJ_TABLE(SOILTYP(1))
-    noahmp%water%param%BBVIC             = NoahmpIO%BBVIC_TABLE(SOILTYP(1))
-    noahmp%water%param%GDVIC             = NoahmpIO%GDVIC_TABLE(SOILTYP(1))
-    noahmp%water%param%BDVIC             = NoahmpIO%BDVIC_TABLE(SOILTYP(1))
-    noahmp%water%param%SLOPE             = NoahmpIO%SLOPE_TABLE(NoahmpIO%SLOPETYP)
-    noahmp%water%param%TD_DC             = NoahmpIO%TD_DC_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_DEPTH          = NoahmpIO%TD_DEPTH_TABLE(SOILTYP(1))
-    noahmp%water%param%TDSMC_FAC         = NoahmpIO%TDSMC_FAC_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_DCOEF          = NoahmpIO%TD_DCOEF_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_ADEPTH         = NoahmpIO%TD_ADEPTH_TABLE(SOILTYP(1))
-    noahmp%water%param%KLAT_FAC          = NoahmpIO%KLAT_FAC_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_DDRAIN         = NoahmpIO%TD_DDRAIN_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_SPAC           = NoahmpIO%TD_SPAC_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_RADI           = NoahmpIO%TD_RADI_TABLE(SOILTYP(1))
-    noahmp%water%param%TD_D              = NoahmpIO%TD_D_TABLE(SOILTYP(1))
+    noahmp%water%param%BVIC              = NoahmpIO%BVIC_TABLE(SoilType(1))
+    noahmp%water%param%AXAJ              = NoahmpIO%AXAJ_TABLE(SoilType(1))
+    noahmp%water%param%BXAJ              = NoahmpIO%BXAJ_TABLE(SoilType(1))
+    noahmp%water%param%XXAJ              = NoahmpIO%XXAJ_TABLE(SoilType(1))
+    noahmp%water%param%BBVIC             = NoahmpIO%BBVIC_TABLE(SoilType(1))
+    noahmp%water%param%GDVIC             = NoahmpIO%GDVIC_TABLE(SoilType(1))
+    noahmp%water%param%BDVIC             = NoahmpIO%BDVIC_TABLE(SoilType(1))
+    noahmp%water%param%TD_DC             = NoahmpIO%TD_DC_TABLE(SoilType(1))
+    noahmp%water%param%TD_DEPTH          = NoahmpIO%TD_DEPTH_TABLE(SoilType(1))
+    noahmp%water%param%TDSMC_FAC         = NoahmpIO%TDSMC_FAC_TABLE(SoilType(1))
+    noahmp%water%param%TD_DCOEF          = NoahmpIO%TD_DCOEF_TABLE(SoilType(1))
+    noahmp%water%param%TD_ADEPTH         = NoahmpIO%TD_ADEPTH_TABLE(SoilType(1))
+    noahmp%water%param%KLAT_FAC          = NoahmpIO%KLAT_FAC_TABLE(SoilType(1))
+    noahmp%water%param%TD_DDRAIN         = NoahmpIO%TD_DDRAIN_TABLE(SoilType(1))
+    noahmp%water%param%TD_SPAC           = NoahmpIO%TD_SPAC_TABLE(SoilType(1))
+    noahmp%water%param%TD_RADI           = NoahmpIO%TD_RADI_TABLE(SoilType(1))
+    noahmp%water%param%TD_D              = NoahmpIO%TD_D_TABLE(SoilType(1))
     noahmp%water%param%NROOT             = NoahmpIO%NROOT_TABLE(VegType)
+    noahmp%water%param%SLOPE             = NoahmpIO%SLOPE_TABLE(RunoffSlopeType)
 
-    do ISOIL = 1, size(SOILTYP)
-       noahmp%water%param%SMCMAX(ISOIL)   = NoahmpIO%SMCMAX_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%SMCWLT(ISOIL)   = NoahmpIO%SMCWLT_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%SMCREF(ISOIL)   = NoahmpIO%SMCREF_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%SMCDRY(ISOIL)   = NoahmpIO%SMCDRY_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%DWSAT(ISOIL)    = NoahmpIO%DWSAT_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%DKSAT(ISOIL)    = NoahmpIO%DKSAT_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%BEXP(ISOIL)     = NoahmpIO%BEXP_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%PSISAT(ISOIL)   = NoahmpIO%PSISAT_TABLE(SOILTYP(ISOIL))
-       noahmp%water%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SOILTYP(ISOIL))
+    do ISOIL = 1, size(SoilType)
+       noahmp%water%param%SMCMAX(ISOIL)   = NoahmpIO%SMCMAX_TABLE(SoilType(ISOIL))
+       noahmp%water%param%SMCWLT(ISOIL)   = NoahmpIO%SMCWLT_TABLE(SoilType(ISOIL))
+       noahmp%water%param%SMCREF(ISOIL)   = NoahmpIO%SMCREF_TABLE(SoilType(ISOIL))
+       noahmp%water%param%SMCDRY(ISOIL)   = NoahmpIO%SMCDRY_TABLE(SoilType(ISOIL))
+       noahmp%water%param%DWSAT(ISOIL)    = NoahmpIO%DWSAT_TABLE(SoilType(ISOIL))
+       noahmp%water%param%DKSAT(ISOIL)    = NoahmpIO%DKSAT_TABLE(SoilType(ISOIL))
+       noahmp%water%param%BEXP(ISOIL)     = NoahmpIO%BEXP_TABLE(SoilType(ISOIL))
+       noahmp%water%param%PSISAT(ISOIL)   = NoahmpIO%PSISAT_TABLE(SoilType(ISOIL))
+       noahmp%water%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SoilType(ISOIL))
     enddo
 
     ! derived parameters
     noahmp%water%param%KDT  = noahmp%water%param%REFKDT * noahmp%water%param%DKSAT(1) / &
                               noahmp%water%param%REFDK
-    if ( URBAN_FLAG .eqv. .true. ) then
+    if ( FlagUrban .eqv. .true. ) then
        noahmp%water%param%SMCMAX = 0.45
        noahmp%water%param%SMCREF = 0.42
        noahmp%water%param%SMCWLT = 0.40
        noahmp%water%param%SMCDRY = 0.40
     endif
-    if ( SOILTYP(1) /= 14 ) then
+    if ( SoilType(1) /= 14 ) then
        noahmp%water%param%FRZX = noahmp%water%param%FRZK * &
             ((noahmp%water%param%SMCMAX(1) / noahmp%water%param%SMCREF(1)) * (0.412/0.468))
     endif
@@ -422,7 +423,7 @@ contains
     noahmp%water%state%FICEOLD_SNOW(NumSnowLayerNeg+1:0) = NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J)   &  ! snow ice fraction  
                                                           / (NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) &
                                                              + NoahmpIO%SNLIQXY(I,NumSnowLayerNeg+1:0,J))
-    if ( (noahmp%config%nmlist%OptSoilProperty == 3) .and. (.not. noahmp%config%domain%urban_flag) ) then
+    if ( (noahmp%config%nmlist%OptSoilProperty == 3) .and. (.not. noahmp%config%domain%FlagUrban) ) then
        allocate( SAND(1:NumSoilLayer) )
        allocate( CLAY(1:NumSoilLayer) )
        allocate( ORGM(1:NumSoilLayer) )

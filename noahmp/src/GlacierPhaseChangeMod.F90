@@ -44,7 +44,7 @@ contains
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax,& ! in,    maximum number of snow layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers [m]
               FACT            => noahmp%energy%state%FACT            ,& ! in,    energy factor for soil & snow phase change
               STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [K]
               SH2O            => noahmp%water%state%SH2O             ,& ! inout, soil water content [m3/m3]
@@ -174,8 +174,8 @@ contains
 
        ! ice layer water mass
        do J = 1, NumSoilLayer
-          MLIQ(J) = SH2O(J) * DZSNSO(J) * 1000.0
-          MICE(J) = (SMC(J) - SH2O(J)) * DZSNSO(J) * 1000.0
+          MLIQ(J) = SH2O(J) * ThicknessSnowSoilLayer(J) * 1000.0
+          MICE(J) = (SMC(J) - SH2O(J)) * ThicknessSnowSoilLayer(J) * 1000.0
        enddo
 
        ! other required variables
@@ -382,7 +382,7 @@ contains
     enddo
     do J = 1, NumSoilLayer       ! glacier ice
        if ( OptGlacierTreatment == 1 ) then
-          SH2O(J) = MLIQ(J) / (1000.0 * DZSNSO(J))
+          SH2O(J) = MLIQ(J) / (1000.0 * ThicknessSnowSoilLayer(J))
           SH2O(J) = max( 0.0, min(1.0,SH2O(J)) )
        elseif ( OptGlacierTreatment == 2 ) then
           SH2O(J) = 0.0             ! ice, assume all frozen forever

@@ -73,14 +73,14 @@ contains
     logical                          :: VEG          ! true if vegetated surface
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              PressureAirRefHeight   => noahmp%forcing%PressureAirRefHeight  ,& ! in,    air pressure [Pa] at reference height
-              RadLWDownRefHeight     => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
-              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
-              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,   wind speed [m/s] in northward direction at reference height
-              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
-              OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
+    associate(                                                                    &
+              PressureAirRefHeight   => noahmp%forcing%PressureAirRefHeight      ,& ! in,    air pressure [Pa] at reference height
+              RadLWDownRefHeight     => noahmp%forcing%RadLWDownRefHeight        ,& ! in,    downward longwave radiation [W/m2] at reference height
+              WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight     ,& ! in,    wind speed [m/s] in eastward direction at reference height
+              WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight    ,& ! in,    wind speed [m/s] in northward direction at reference height
+              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight        ,& ! in,    downward shortwave radiation [W/m2] at reference height
+              OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
+              FlagCropland           => noahmp%config%domain%FlagCropland        ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
@@ -112,7 +112,7 @@ contains
               LAISHA          => noahmp%energy%state%LAISHA          ,& ! out,   shaded leaf area index, one-sided (m2/m2)
               EMISSI          => noahmp%energy%state%EMISSI          ,& ! out,   surface emissivity
               VAI             => noahmp%energy%state%VAI             ,& ! out,   one-sided leaf+stem area index (m2/m2)
-              UR              => noahmp%energy%state%UR              ,& ! out,   wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! out,   wind speed (m/s) at reference height
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
               TAUXV           => noahmp%energy%state%TAUXV           ,& ! out,   wind stress: east-west (n/m2) above canopy
@@ -321,7 +321,7 @@ contains
     call SoilSnowWaterPhaseChange(noahmp)
 
     ! update sensible heat flux due to sprinkler irrigation evaporation
-    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
+    if ( (FlagCropland .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
 
     ! update total surface albedo
     if ( RadSWDownRefHeight > 0.0 ) then

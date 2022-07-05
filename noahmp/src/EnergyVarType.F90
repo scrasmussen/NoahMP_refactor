@@ -149,7 +149,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: CH2V            ! exchange coefficient (m/s) for heat, 2m, vegetated from MOST scheme
     real(kind=kind_noahmp) :: CH2B            ! exchange coefficient (m/s) for heat, 2m, bare ground from MOST scheme
     real(kind=kind_noahmp) :: CHV2            ! exchange coefficient (m/s) for heat, 2m, vegetated from vege_flux
-    real(kind=kind_noahmp) :: CAW             ! latent heat conductance/exchange coeff, canopy air ZLVL air (m/s)
+    real(kind=kind_noahmp) :: CAW             ! latent heat conductance/exchange coeff, canopy air (m/s)
     real(kind=kind_noahmp) :: CTW             ! transpiration conductance, leaf to canopy air (m/s)
     real(kind=kind_noahmp) :: CEW             ! evaporation conductance, leaf to canopy air (m/s)
     real(kind=kind_noahmp) :: CGW             ! latent heat conductance, ground to canopy air (m/s)
@@ -164,7 +164,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RAWB            ! aerodynamic resistance for water vapor (s/m), bare ground
     real(kind=kind_noahmp) :: RB              ! bulk leaf boundary layer resistance (s/m)
     real(kind=kind_noahmp) :: THAIR           ! potential temp at reference height (K)
-    real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height ZLVL
+    real(kind=kind_noahmp) :: UR              ! wind speed (m/s) at reference height
     real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)
     real(kind=kind_noahmp) :: WSTARB          ! friction velocity in vertical direction (m/s), bare ground (only for Chen97)
     real(kind=kind_noahmp) :: EMV             ! vegetation emissivity
@@ -196,7 +196,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: EHB             ! bare ground sensible heat exchange coefficient (m/s)
     real(kind=kind_noahmp) :: EHB2            ! bare ground 2-m sensible heat exchange coefficient (m/s)
     real(kind=kind_noahmp) :: EMB             ! bare ground momentum exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: ZLVL            ! surface reference height  (m)
+    real(kind=kind_noahmp) :: RefHeightAboveGround    ! reference height [m] above ground
     real(kind=kind_noahmp) :: FB_snow         ! fraction of canopy buried by snow
     real(kind=kind_noahmp) :: ZBOTSNO         ! depth of lower boundary condition (m) from snow surface
     real(kind=kind_noahmp) :: Z0WRF           ! roughness length, momentum, surface, sent to coupled model
@@ -271,7 +271,6 @@ module EnergyVarType
     real(kind=kind_noahmp) :: SNOW_EMIS        ! snow emissivity
     real(kind=kind_noahmp) :: CWPVT            ! empirical canopy wind absorption parameter
     real(kind=kind_noahmp) :: Z0SNO            ! snow surface roughness length (m) (0.002)
-    real(kind=kind_noahmp) :: ZBOT             ! depth of lower boundary condition (m) from soil surface
     real(kind=kind_noahmp) :: Z0SOIL           ! Bare-soil roughness length (m) (i.e., under the canopy)
     real(kind=kind_noahmp) :: Z0LAKE           ! lake surface roughness length (m)
     real(kind=kind_noahmp) :: EICE             ! ice surface emissivity

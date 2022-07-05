@@ -29,7 +29,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               SOLAD           => noahmp%energy%flux%SOLAD            ,& ! in,    incoming direct solar radiation (w/m2)
               SOLAI           => noahmp%energy%flux%SOLAI            ,& ! in,    incoming diffuse solar radiation (w/m2)
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! in,    ground albedo (direct beam: vis, nir)
@@ -45,7 +45,7 @@ contains
     FSA    = 0.0
     FSR    = 0.0
 
-    do IB = 1, NBAND
+    do IB = 1, NumSWRadBand
        ! solar radiation absorbed by glacier surface
        ABSG = SOLAD(IB) * (1.0 - ALBGRD(IB)) + SOLAI(IB) * (1.0 - ALBGRI(IB))
        SAG  = SAG + ABSG

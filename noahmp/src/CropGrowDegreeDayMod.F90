@@ -31,7 +31,7 @@ contains
 !------------------------------------------------------------------------
     associate(                                                       &
               MainTimeStep     => noahmp%config%domain%MainTimeStep ,& ! in,    main noahmp timestep (s)
-              JULIAN           => noahmp%config%domain%JULIAN       ,& ! in,    Julian day of year (fractional) (0<=JULIAN<YEARLEN)
+              DayJulianInYear           => noahmp%config%domain%DayJulianInYear       ,& ! in,    Julian day of year
               T2M              => noahmp%energy%state%T2M           ,& ! in,    2-m air temperature (K)
               PLTDAY           => noahmp%biochem%param%PLTDAY       ,& ! in,    Planting day (day of year)
               HSDAY            => noahmp%biochem%param%HSDAY        ,& ! in,    Harvest date (day of year)
@@ -57,10 +57,10 @@ contains
     IHA = 1  ! off
 
     ! turn on/off the planting 
-    if ( JULIAN < PLTDAY ) IPA = 0   ! off
+    if ( DayJulianInYear < PLTDAY ) IPA = 0   ! off
         
     ! turn on/off the harvesting
-    if ( JULIAN >= HSDAY ) IHA = 0   ! on            
+    if ( DayJulianInYear >= HSDAY ) IHA = 0   ! on            
 
     ! Calculate the growing degree days               
     if ( TC < GDDTBASE ) then
@@ -98,8 +98,8 @@ contains
     if ( GDDDAY >= GDDS3 ) PGS = 5
     if ( GDDDAY >= GDDS4 ) PGS = 6
     if ( GDDDAY >= GDDS5 ) PGS = 7
-    if ( JULIAN >= HSDAY ) PGS = 8
-    if ( JULIAN < PLTDAY ) PGS = 1   
+    if ( DayJulianInYear >= HSDAY ) PGS = 8
+    if ( DayJulianInYear < PLTDAY ) PGS = 1   
 
     end associate
 

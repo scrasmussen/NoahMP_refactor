@@ -37,11 +37,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE    ,& ! in,     flag to activate dynamic vegetation model
-              CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE    ,& ! in,     flag to activate dynamic crop model
+              FlagDynamicVeg     => noahmp%config%domain%FlagDynamicVeg    ,& ! in,     flag to activate dynamic vegetation model
+              FlagDynamicCrop     => noahmp%config%domain%FlagDynamicCrop    ,& ! in,     flag to activate dynamic crop model
               OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,     option for crop model
               IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] for sprinkler
-              CROPLU          => noahmp%config%domain%CROPLU          & ! out,    flag to identify croplands
+              FlagCropland    => noahmp%config%domain%FlagCropland          & ! out,    flag to identify croplands
              )
 ! ----------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ contains
     !--------------------------------------------------------------------- 
 
     ! call sprinkler irrigation before canopy process to have canopy interception
-    if ( (CROPLU .eqv. .true.) .and. (IRAMTSI > 0.0) ) call IrrigationSprinkler(noahmp)
+    if ( (FlagCropland .eqv. .true.) .and. (IRAMTSI > 0.0) ) call IrrigationSprinkler(noahmp)
 
     !---------------------------------------------------------------------
     ! Canopy water interception and precip heat advection
@@ -105,8 +105,8 @@ contains
     ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
-    if ( DVEG_ACTIVE .eqv. .true. ) call BiochemNatureVegMain(noahmp)                     ! for natural vegetation
-    if ( (OptCropModel == 1) .and. (CROP_ACTIVE .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
+    if ( FlagDynamicVeg .eqv. .true. ) call BiochemNatureVegMain(noahmp)                     ! for natural vegetation
+    if ( (OptCropModel == 1) .and. (FlagDynamicCrop .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
 
     !---------------------------------------------------------------------
     ! Error check for energy and water balance

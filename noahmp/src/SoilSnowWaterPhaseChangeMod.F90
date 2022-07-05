@@ -46,8 +46,8 @@ contains
               NumSnowLayerMax       => noahmp%config%domain%NumSnowLayerMax       ,& ! in,    maximum number of snow layers
               NumSnowLayerNeg       => noahmp%config%domain%NumSnowLayerNeg       ,& ! in,    actual number of snow layers (negative)
               MainTimeStep          => noahmp%config%domain%MainTimeStep          ,& ! in,    main noahmp timestep (s)
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
@@ -88,8 +88,8 @@ contains
     enddo
     ! soil layer water mass
     do J = 1, NumSoilLayer
-       MLIQ(J) = SH2O(J) * DZSNSO(J) * 1000.0
-       MICE(J) = (SMC(J) - SH2O(J)) * DZSNSO(J) * 1000.0
+       MLIQ(J) = SH2O(J) * ThicknessSnowSoilLayer(J) * 1000.0
+       MICE(J) = (SMC(J) - SH2O(J)) * ThicknessSnowSoilLayer(J) * 1000.0
     enddo
     ! other required variables
     do J = NumSnowLayerNeg+1, NumSoilLayer
@@ -102,18 +102,18 @@ contains
     enddo
 
     !--- compute soil supercool water content
-    if ( IST == 1 ) then ! land points
+    if ( SurfaceType == 1 ) then ! land points
        do J = 1, NumSoilLayer
           if ( OptSoilSupercoolWater == 1 ) then
              if ( STC(J) < ConstFreezePoint ) then
                 SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
                 SUPERCOOL(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
-                SUPERCOOL(J) = SUPERCOOL(J) * DZSNSO(J) * 1000.0        !(mm)
+                SUPERCOOL(J) = SUPERCOOL(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
              endif
           endif
           if ( OptSoilSupercoolWater == 2 ) then
                call SoilWaterSupercoolLiquid(noahmp, J, SUPERCOOL(J), STC(J), SMC(J), SH2O(J))
-               SUPERCOOL(J) = SUPERCOOL(J) * DZSNSO(J) * 1000.0        !(mm)
+               SUPERCOOL(J) = SUPERCOOL(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
           endif
        enddo
     endif
@@ -219,8 +219,8 @@ contains
        SNICE(J) = MICE(J)
     enddo
     do J = 1, NumSoilLayer       ! soil
-       SH2O(J) = MLIQ(J) / (1000.0 * DZSNSO(J))
-       SMC(J)  = (MLIQ(J) + MICE(J)) / (1000.0 * DZSNSO(J))
+       SH2O(J) = MLIQ(J) / (1000.0 * ThicknessSnowSoilLayer(J))
+       SMC(J)  = (MLIQ(J) + MICE(J)) / (1000.0 * ThicknessSnowSoilLayer(J))
     enddo
 
     end associate

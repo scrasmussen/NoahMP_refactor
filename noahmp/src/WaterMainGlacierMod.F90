@@ -45,7 +45,7 @@ contains
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               FGEV            => noahmp%energy%flux%FGEV             ,& ! inout,  glacier evap heat (w/m2) [+ to atm]
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/glacier layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/glacier layers (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  glacier water content [m3/m3]
@@ -116,7 +116,7 @@ contains
     if ( OptGlacierTreatment == 1 ) then
        REPLACE = 0.0
        do ILEV = 1, NumSoilLayer
-          REPLACE = REPLACE + DZSNSO(ILEV)*(SICE(ILEV) - SICE_SAVE(ILEV) + SH2O(ILEV) - SH2O_SAVE(ILEV))
+          REPLACE = REPLACE + ThicknessSnowSoilLayer(ILEV)*(SICE(ILEV) - SICE_SAVE(ILEV) + SH2O(ILEV) - SH2O_SAVE(ILEV))
        enddo
        REPLACE = REPLACE * 1000.0 / MainTimeStep     ! convert to [mm/s]
        SICE    = min(1.0, SICE_SAVE)

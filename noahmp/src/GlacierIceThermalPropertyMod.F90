@@ -29,16 +29,16 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
               CVGLAICE        => noahmp%energy%state%CVGLAICE        ,& ! out,  glacier ice layer volumetric specific heat (j/m3/k)
               TKGLAICE        => noahmp%energy%state%TKGLAICE         & ! out,  glacier ice layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
     do IZ = 1, NumSoilLayer
-       ZMID = 0.5 * DZSNSO(IZ)
+       ZMID = 0.5 * ThicknessSnowSoilLayer(IZ)
        do IZ2 = 1, IZ-1
-          ZMID = ZMID + DZSNSO(IZ2)
+          ZMID = ZMID + ThicknessSnowSoilLayer(IZ2)
        enddo
        CVGLAICE(IZ) = 1.0e6 * (0.8194 + 0.1309 * ZMID)
        TKGLAICE(IZ) = 0.32333 + (0.10073 * ZMID)

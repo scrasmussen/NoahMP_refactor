@@ -2,7 +2,7 @@ module GroundRoughnessPropertyGlacierMod
 
 !!! Compute glacier ground roughness length, displacement height, and surface reference height
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -25,14 +25,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ZREF            => noahmp%config%domain%ZREF           ,& ! in,    reference height  (m)
+              RefHeightAboveSfc => noahmp%config%domain%RefHeightAboveSfc ,& ! in,    reference height [m] above surface zero plane
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
               Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! in,    snow surface roughness length (m)
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
               ZPD             => noahmp%energy%state%ZPD             ,& ! out,   surface zero plane displacement (m)
               ZPDG            => noahmp%energy%state%ZPDG            ,& ! out,   ground zero plane displacement (m)
-              ZLVL            => noahmp%energy%state%ZLVL             & ! out,   surface reference height  (m)
+              RefHeightAboveGround => noahmp%energy%state%RefHeightAboveGround & ! out, reference height [m] above ground
              )
 ! ----------------------------------------------------------------------
 
@@ -44,8 +44,8 @@ contains
     ZPDG = SNOWH
     ZPD = ZPDG
 
-    ! surface reference height  (m)
-    ZLVL = ZPD + ZREF
+    ! reference height above ground
+    RefHeightAboveGround = ZPD + RefHeightAboveSfc
 
     end associate
 

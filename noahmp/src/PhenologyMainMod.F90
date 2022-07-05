@@ -29,7 +29,7 @@ contains
     real(kind=kind_noahmp)           :: DB          ! thickness of canopy buried by snow (m)
     real(kind=kind_noahmp)           :: FB          ! fraction of canopy buried by snow
     real(kind=kind_noahmp)           :: SNOWHC      ! critical snow depth at which short vege is fully covered by snow
-    real(kind=kind_noahmp)           :: DAY         ! current day of year ( 0 <= DAY < YEARLEN )
+    real(kind=kind_noahmp)           :: DAY         ! current day of year (0<=DAY<NumDayInYear)
     real(kind=kind_noahmp)           :: WT1,WT2     ! interpolation weights
     real(kind=kind_noahmp)           :: T           ! current month (1.00, ..., 12.00)
 
@@ -39,15 +39,15 @@ contains
               OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,    crop model option
               VegType         => noahmp%config%domain%VegType        ,& ! in,    vegetation type 
               CropType        => noahmp%config%domain%CropType       ,& ! in,    crop type 
-              ISICE           => noahmp%config%domain%ISICE       ,& ! in,    land ice flag
-              ISBARREN        => noahmp%config%domain%ISBARREN    ,& ! in,    bare soil flag
-              ISWATER         => noahmp%config%domain%ISWATER     ,& ! in,    water point flag
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG  ,& ! in,    urban point flag
-              DVEG_ACTIVE     => noahmp%config%domain%DVEG_ACTIVE ,& ! in,    flag to activate dynamic vegetation model
-              CROP_ACTIVE     => noahmp%config%domain%CROP_ACTIVE ,& ! in,    flag to activate dynamic crop model
+              IndexIcePoint           => noahmp%config%domain%IndexIcePoint       ,& ! in,    land ice flag
+              IndexBarrenPoint        => noahmp%config%domain%IndexBarrenPoint    ,& ! in,    bare soil flag
+              IndexWaterPoint         => noahmp%config%domain%IndexWaterPoint     ,& ! in,    water point flag
+              FlagUrban      => noahmp%config%domain%FlagUrban  ,& ! in,    urban point flag
+              FlagDynamicVeg     => noahmp%config%domain%FlagDynamicVeg ,& ! in,    flag to activate dynamic vegetation model
+              FlagDynamicCrop     => noahmp%config%domain%FlagDynamicCrop ,& ! in,    flag to activate dynamic crop model
               Latitude        => noahmp%config%domain%Latitude    ,& ! in,    latitude (degree)
-              YEARLEN         => noahmp%config%domain%YEARLEN     ,& ! in,    Number of days in the particular year
-              JULIAN          => noahmp%config%domain%JULIAN      ,& ! in,    Julian day of year (fractional) (0<=JULIAN<YEARLEN)
+              NumDayInYear    => noahmp%config%domain%NumDayInYear ,& ! in,    Number of days in the particular year
+              DayJulianInYear          => noahmp%config%domain%DayJulianInYear      ,& ! in,    Julian day of year
               HVT             => noahmp%energy%param%HVT          ,& ! in,    top of canopy (m)
               HVB             => noahmp%energy%param%HVB          ,& ! in,    bottom of canopy (m)
               LAIM            => noahmp%energy%param%LAIM         ,& ! in,    monthly leaf area index, one-sided
@@ -75,13 +75,13 @@ contains
        if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 4) ) then
           if ( Latitude >= 0.0 ) then
             ! Northern Hemisphere
-            DAY = JULIAN
+            DAY = DayJulianInYear
           else
             ! Southern Hemisphere.  DAY is shifted by 1/2 year.
-            DAY = mod( JULIAN+(0.5*YEARLEN), real(YEARLEN) )
+            DAY = mod( DayJulianInYear+(0.5*NumDayInYear), real(NumDayInYear) )
           endif
           ! interpolate from montly to target time point
-          T   = 12.0 * DAY / real(YEARLEN)
+          T   = 12.0 * DAY / real(NumDayInYear)
           IT1 = T + 0.5
           IT2 = IT1 + 1
           WT1 = (IT1 + 0.5) - T
@@ -101,8 +101,8 @@ contains
        if ( (LAI < 0.05) .or. (SAI == 0.0) ) LAI = 0.0  ! MB: LAI CHECK
 
        ! for non-vegetation point
-       if ( (VegType == ISWATER) .or. (VegType == ISBARREN) .or. &
-            (VegType == ISICE  ) .or. (URBAN_FLAG .eqv. .true.) ) then
+       if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
+            (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
           LAI = 0.0
           SAI = 0.0
        endif
@@ -155,16 +155,16 @@ contains
 
     ! adjust unreasonable vegetation fraction
     if ( FVEG <= 0.05 ) FVEG = 0.05
-    if ( (URBAN_FLAG .eqv. .true.) .or. (VegType == ISBARREN) ) FVEG = 0.0
+    if ( (FlagUrban .eqv. .true.) .or. (VegType == IndexBarrenPoint) ) FVEG = 0.0
     if ( (ELAI+ESAI) == 0.0 ) FVEG = 0.0
 
     ! determine if activate dynamic vegetation or crop run
-    CROP_ACTIVE = .false.
-    DVEG_ACTIVE = .false.
-    if ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 6) ) DVEG_ACTIVE = .true.
+    FlagDynamicCrop = .false.
+    FlagDynamicVeg = .false.
+    if ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 6) ) FlagDynamicVeg = .true.
     if ( (OptCropModel > 0) .and. (CropType > 0) ) then
-       CROP_ACTIVE = .true.
-       DVEG_ACTIVE = .false.
+       FlagDynamicCrop = .true.
+       FlagDynamicVeg = .false.
     endif
 
     end associate

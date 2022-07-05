@@ -28,8 +28,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
-              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,     surface type 1-soil; 2-lake
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
@@ -46,11 +46,11 @@ contains
              )
 ! ----------------------------------------------------------------------
 
-    do IB = 1, NBAND
+    do IB = 1, NumSWRadBand
 
        INC = max( 0.11 - 0.40*SMC(1), 0.0 )
 
-       if ( IST == 1 )  then  ! soil
+       if ( SurfaceType == 1 )  then  ! soil
           ALBSOD(IB) = min( ALBSAT(IB)+INC, ALBDRY(IB) )
           ALBSOI(IB) = ALBSOD(IB)
        elseif ( TG > ConstFreezePoint ) then  ! unfrozen lake, wetland

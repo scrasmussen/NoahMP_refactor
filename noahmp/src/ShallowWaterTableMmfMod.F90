@@ -37,7 +37,7 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth of soil layer-bottom [m]
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               SMCEQ           => noahmp%water%state%SMCEQ            ,& ! in,     equilibrium soil water  content [m3/m3]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,     saturated soil matric potential (m)
@@ -73,13 +73,13 @@ contains
              if ( KWTD >= 1 ) then
                 if ( SMC(KWTD) > SMCEQ(KWTD) ) then
                    WTDOLD = WTD
-                   WTD  = min( ( SMC(KWTD)*DZSNSO(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
+                   WTD  = min( ( SMC(KWTD)*ThicknessSnowSoilLayer(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
                           SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SMCEQ(KWTD)), DepthSoilLayer0(IWTD) )
                    RECH = RECH - (WTDOLD-WTD) * (SMCMAX(KWTD)-SMCEQ(KWTD))
                 endif
              endif
           else  ! wtd stays in the layer
-             WTD  = min( ( SMC(KWTD)*DZSNSO(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
+             WTD  = min( ( SMC(KWTD)*ThicknessSnowSoilLayer(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
                     SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SMCEQ(KWTD)), DepthSoilLayer0(IWTD) )
              RECH = -(WTDOLD-WTD) * (SMCMAX(KWTD)-SMCEQ(KWTD))
           endif
@@ -92,7 +92,7 @@ contains
           if ( KWTD <= NumSoilLayer ) then
              WTDOLD = WTD
              if ( SMC(KWTD) > SMCEQ(KWTD) ) then
-                WTD = min( ( SMC(KWTD)*DZSNSO(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
+                WTD = min( ( SMC(KWTD)*ThicknessSnowSoilLayer(KWTD) - SMCEQ(KWTD)*DepthSoilLayer0(IWTD) + &
                       SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SMCEQ(KWTD)), DepthSoilLayer0(IWTD) )
              else
                 WTD = DepthSoilLayer0(KWTD)
@@ -102,33 +102,33 @@ contains
              WTDOLD = WTD
              ! restore smoi to equilibrium value with water from the ficticious layer below
              ! SMCWTD=SMCWTD-(SMCEQ(NumSoilLayer)-SMC(NumSoilLayer))
-             ! QDRAIN = QDRAIN - 1000 * (SMCEQ(NumSoilLayer)-SMC(NumSoilLayer)) * DZSNSO(NumSoilLayer) / MainTimeStep
+             ! QDRAIN = QDRAIN - 1000 * (SMCEQ(NumSoilLayer)-SMC(NumSoilLayer)) * ThicknessSnowSoilLayer(NumSoilLayer) / MainTimeStep
              ! SMC(NumSoilLayer)=SMCEQ(NumSoilLayer)
 
              ! adjust wtd in the ficticious layer below
              SMCEQDEEP = SMCMAX(NumSoilLayer) * &
-                        (-PSISAT(NumSoilLayer)/(-PSISAT(NumSoilLayer)-DZSNSO(NumSoilLayer)))**(1.0/BEXP(NumSoilLayer))
-             WTD = min( (SMCWTD*DZSNSO(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
-                         SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-DZSNSO(NumSoilLayer))) / &
+                        (-PSISAT(NumSoilLayer)/(-PSISAT(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)))**(1.0/BEXP(NumSoilLayer))
+             WTD = min( (SMCWTD*ThicknessSnowSoilLayer(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
+                         SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
                         (SMCMAX(NumSoilLayer)-SMCEQDEEP),DepthSoilLayer0(NumSoilLayer))
              RECH = RECH - (WTDOLD-WTD) * (SMCMAX(NumSoilLayer)-SMCEQDEEP)
           endif
        endif
-    else if ( WTD >= (DepthSoilLayer0(NumSoilLayer)-DZSNSO(NumSoilLayer)) ) then
+    else if ( WTD >= (DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) then
     ! if wtd was already below the bottom of the resolved soil crust
        WTDOLD = WTD
        SMCEQDEEP = SMCMAX(NumSoilLayer) * ( -PSISAT(NumSoilLayer) / &
-                   (-PSISAT(NumSoilLayer)-DZSNSO(NumSoilLayer)) )**(1.0/BEXP(NumSoilLayer))
+                   (-PSISAT(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) )**(1.0/BEXP(NumSoilLayer))
        if ( SMCWTD > SMCEQDEEP ) then
-          WTD = min( (SMCWTD*DZSNSO(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
-                      SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-DZSNSO(NumSoilLayer))) / &
+          WTD = min( (SMCWTD*ThicknessSnowSoilLayer(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
+                      SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
                     (SMCMAX(NumSoilLayer)-SMCEQDEEP), DepthSoilLayer0(NumSoilLayer) )
           RECH = -(WTDOLD-WTD) * (SMCMAX(NumSoilLayer)-SMCEQDEEP)
        else
-          RECH = -( WTDOLD - (DepthSoilLayer0(NumSoilLayer)-DZSNSO(NumSoilLayer)) ) * (SMCMAX(NumSoilLayer) - SMCEQDEEP)
-          WTDOLD = DepthSoilLayer0(NumSoilLayer) - DZSNSO(NumSoilLayer)
+          RECH = -( WTDOLD - (DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) * (SMCMAX(NumSoilLayer) - SMCEQDEEP)
+          WTDOLD = DepthSoilLayer0(NumSoilLayer) - ThicknessSnowSoilLayer(NumSoilLayer)
           ! and now even further down
-          DZUP = (SMCEQDEEP-SMCWTD) * DZSNSO(NumSoilLayer) / (SMCMAX(NumSoilLayer)-SMCEQDEEP)
+          DZUP = (SMCEQDEEP-SMCWTD) * ThicknessSnowSoilLayer(NumSoilLayer) / (SMCMAX(NumSoilLayer)-SMCEQDEEP)
           WTD  = WTDOLD - DZUP
           RECH = RECH - (SMCMAX(NumSoilLayer)-SMCEQDEEP) * DZUP
           SMCWTD = SMCEQDEEP

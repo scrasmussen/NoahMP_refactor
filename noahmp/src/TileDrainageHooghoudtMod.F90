@@ -49,11 +49,10 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
-              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,    depth [m] of layer-bottom from soil surface
+              DepthSoilLayer     => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               GridSize        => noahmp%config%domain%GridSize       ,& ! in,    noahmp model grid spacing (m)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
-              ZLAYER          => noahmp%config%domain%ZLAYER         ,& ! in,    soil layer thickness (m)
+              ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
               TD_DCOEF        => noahmp%water%param%TD_DCOEF         ,& ! in,    drainage coefficent (m/day)
               TD_ADEPTH       => noahmp%water%param%TD_ADEPTH        ,& ! in,    Actual depth to impermeable layer from surface (m)
@@ -88,9 +87,9 @@ contains
     ! Thickness of soil layers    
     do K = 1, NumSoilLayer
        if ( K == 1 ) then
-          ZLAYER(K) = -1.0 * DepthSoilLayer(K)
+          ThicknessSoilLayer(K) = -1.0 * DepthSoilLayer(K)
        else
-          ZLAYER(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
+          ThicknessSoilLayer(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
        endif
     enddo
 
@@ -120,7 +119,7 @@ contains
     ! amount of water over field capacity
     OVRFCS = 0.0
     do K = 1, NumSoilLayer
-       OVRFC(K) = (SH2O(K) - (SMCREF(K)-SICE(K))) * ZLAYER(K) * 1000.0 !mm
+       OVRFC(K) = (SH2O(K) - (SMCREF(K)-SICE(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
        if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
        OVRFCS   = OVRFCS + OVRFC(K)
     enddo
@@ -160,7 +159,7 @@ contains
           if ( (TD_SATZ(K) > 0.0) .and. (OVRFC(K) > 0.0) ) then
              RMSH2O(K) = OVRFC(K) - QTLDRN1 ! remaining water after tile drain
              if ( RMSH2O(K) > 0.0 ) then
-                SH2O(K) = (SMCREF(K) - SICE(K)) + RMSH2O(K) / (ZLAYER(K) * 1000.0)
+                SH2O(K) = (SMCREF(K) - SICE(K)) + RMSH2O(K) / (ThicknessSoilLayer(K) * 1000.0)
                 SMC(K)  = SH2O(K) + SICE(K)
                 exit
              else

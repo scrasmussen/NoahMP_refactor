@@ -44,7 +44,7 @@ contains
               STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [k]
               SNICE           => noahmp%water%state%SNICE            ,& ! inout, snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout, snow layer liquid water [mm]
-              DZSNSO          => noahmp%config%domain%DZSNSO          & ! inout, thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout, thickness of snow/soil layers (m)
              )
 ! ----------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ contains
 
     do J = 1, NumSnowLayerMax
        if ( J <= abs(NumSnowLayerNeg) ) then
-          DZ(J)    = DZSNSO(J+NumSnowLayerNeg)
+          DZ(J)    = ThicknessSnowSoilLayer(J+NumSnowLayerNeg)
           SWICE(J) = SNICE(J+NumSnowLayerNeg)
           SWLIQ(J) = SNLIQ(J+NumSnowLayerNeg)
           TSNO(J)  = STC(J+NumSnowLayerNeg)
@@ -141,7 +141,7 @@ contains
     NumSnowLayerNeg = -MSNO
 
     do J = NumSnowLayerNeg+1, 0
-       DZSNSO(J) = DZ(J-NumSnowLayerNeg)
+       ThicknessSnowSoilLayer(J) = DZ(J-NumSnowLayerNeg)
        SNICE(J)  = SWICE(J-NumSnowLayerNeg)
        SNLIQ(J)  = SWLIQ(J-NumSnowLayerNeg)
        STC(J)    = TSNO(J-NumSnowLayerNeg)

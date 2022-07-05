@@ -30,9 +30,8 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,     snow depth [m]
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
@@ -62,14 +61,14 @@ contains
 
     ! combine a temporary variable used for melting/freezing of snow and glacier ice
     do IZ = NumSnowLayerNeg+1, NumSoilLayer
-       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * DZSNSO(IZ))
+       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * ThicknessSnowSoilLayer(IZ))
     enddo
 
     ! snow/glacier ice interface
     if ( NumSnowLayerNeg == 0 ) then
-       DF(1) = (DF(1)*DZSNSO(1) + 0.35*SNOWH) / (SNOWH + DZSNSO(1))
+       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SNOWH) / (SNOWH + ThicknessSnowSoilLayer(1))
     else
-       DF(1) = (DF(1)*DZSNSO(1) + DF(0)*DZSNSO(0)) / (DZSNSO(0) + DZSNSO(1))
+       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + DF(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
     endif
 
     end associate

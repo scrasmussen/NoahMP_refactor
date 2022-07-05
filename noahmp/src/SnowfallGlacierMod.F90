@@ -38,7 +38,7 @@ contains
               SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
               SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
-              DZSNSO          => noahmp%config%domain%DZSNSO          & ! inout,  thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout,  thickness of snow/soil layers (m)
              ) 
 ! ----------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ contains
    if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.05) ) then
        NumSnowLayerNeg     = -1
        NEWNODE   =  1
-       DZSNSO(0) = SNOWH
+       ThicknessSnowSoilLayer(0) = SNOWH
        SNOWH     = 0.0
        STC(0)    = min(273.16, TemperatureAirRefHeight)   ! temporary setup
        SNICE(0)  = SNEQV
@@ -65,7 +65,7 @@ contains
 ! snow with layers
     if ( (NumSnowLayerNeg < 0) .and. (NEWNODE == 0) .and. (QSNOW > 0.0) ) then
        SNICE(NumSnowLayerNeg+1)  = SNICE(NumSnowLayerNeg+1)   + QSNOW   * MainTimeStep
-       DZSNSO(NumSnowLayerNeg+1) = DZSNSO(NumSnowLayerNeg+1)  + SNOWHIN * MainTimeStep
+       ThicknessSnowSoilLayer(NumSnowLayerNeg+1) = ThicknessSnowSoilLayer(NumSnowLayerNeg+1)  + SNOWHIN * MainTimeStep
     endif
 
     end associate

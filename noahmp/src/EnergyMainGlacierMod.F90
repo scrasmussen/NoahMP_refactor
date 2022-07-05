@@ -58,7 +58,7 @@ contains
               T2M             => noahmp%energy%state%T2M             ,& ! out,   grid mean 2-m air temperature (K)
               T2MB            => noahmp%energy%state%T2MB            ,& ! out,   2 m height air temperature (k) bare ground
               EMISSI          => noahmp%energy%state%EMISSI          ,& ! out,   surface emissivity
-              UR              => noahmp%energy%state%UR              ,& ! out,   wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! out,   wind speed (m/s) at reference height
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
               TAUXB           => noahmp%energy%state%TAUXB           ,& ! out,   wind stress: east-west (n/m2) bare ground

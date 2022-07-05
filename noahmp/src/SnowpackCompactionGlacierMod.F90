@@ -47,7 +47,7 @@ contains
               DM              => noahmp%water%param%DM_SnowCompact   ,& ! in,     upper Limit on destructive metamorphism compaction [kg/m3]
               ETA0            => noahmp%water%param%ETA0_SnowCompact ,& ! in,     snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               DDZ1            => noahmp%water%flux%DDZ1              ,& ! out,    rate of settling of snowpack due to destructive metamorphism [1/s]
               DDZ2            => noahmp%water%flux%DDZ2              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
               DDZ3            => noahmp%water%flux%DDZ3              ,& ! out,    rate of compaction of snowpack due to melt [1/s]
@@ -68,18 +68,18 @@ contains
     do J = NumSnowLayerNeg+1, 0
        WX      = SNICE(J) + SNLIQ(J)
        FICE(J) = SNICE(J) / WX
-       VOID    = 1.0 - ( SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater ) / DZSNSO(J)
+       VOID    = 1.0 - ( SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater ) / ThicknessSnowSoilLayer(J)
 
        ! Allow compaction only for non-saturated node and higher ice lens node.
        if ( (VOID > 0.001) .and. (SNICE(J) > 0.1) ) then
-          BI    = SNICE(J) / DZSNSO(J)
+          BI    = SNICE(J) / ThicknessSnowSoilLayer(J)
           TD    = max( 0.0, ConstFreezePoint-STC(J) )
 
           ! Settling/compaction as a result of destructive metamorphism
           DEXPF   = exp( -C4 * TD )
           DDZ1(J) = -C3 * DEXPF
           if ( BI > DM ) DDZ1(J) = DDZ1(J) * exp( -46.0e-3 * (BI-DM) )
-          if ( SNLIQ(J) > (0.01*DZSNSO(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
+          if ( SNLIQ(J) > (0.01*ThicknessSnowSoilLayer(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
 
           ! Compaction due to overburden
           DDZ2(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden
@@ -97,8 +97,8 @@ contains
           PDZDTC(J) = max( -0.5, PDZDTC(J) )
 
           ! The change in DZ due to compaction
-          DZSNSO(J) = DZSNSO(J) * ( 1.0 + PDZDTC(J) )
-          DZSNSO(J) = max( DZSNSO(J), SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater )
+          ThicknessSnowSoilLayer(J) = ThicknessSnowSoilLayer(J) * ( 1.0 + PDZDTC(J) )
+          ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater )
 
        endif
 

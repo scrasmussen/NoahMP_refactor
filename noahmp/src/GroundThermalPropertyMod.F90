@@ -30,11 +30,11 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,     surface type 1-soil; 2-lake
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,     logical flag for urban grid
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,     snow depth [m]
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
               DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
@@ -60,7 +60,7 @@ contains
        DF   (IZ) = TKSOIL(IZ)
        HCPCT(IZ) = CVSOIL(IZ)
     enddo
-    if ( URBAN_FLAG .eqv. .true. ) then
+    if ( FlagUrban .eqv. .true. ) then
        do IZ = 1, NumSoilLayer
           DF(IZ) = 3.24
        enddo
@@ -73,7 +73,7 @@ contains
     ! DF(1) = DF(1) * EXP (SBETA * SHDFAC)
 
     ! compute lake thermal properties (no consideration of turbulent mixing for this version)
-    if ( IST == 2 ) then
+    if ( SurfaceType == 2 ) then
        do IZ = 1, NumSoilLayer
           if ( STC(IZ) > ConstFreezePoint) then
              HCPCT(IZ) = ConstHeatCapacWater
@@ -87,14 +87,14 @@ contains
 
     ! combine a temporary variable used for melting/freezing of snow and frozen soil
     do IZ = NumSnowLayerNeg+1, NumSoilLayer
-       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * DZSNSO(IZ))
+       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * ThicknessSnowSoilLayer(IZ))
     enddo
 
     ! snow/soil interface
     if ( NumSnowLayerNeg == 0 ) then
-       DF(1) = (DF(1)*DZSNSO(1) + 0.35*SNOWH) / (SNOWH + DZSNSO(1))
+       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SNOWH) / (SNOWH + ThicknessSnowSoilLayer(1))
     else
-       DF(1) = (DF(1)*DZSNSO(1) + DF(0)*DZSNSO(0)) / (DZSNSO(0) + DZSNSO(1))
+       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + DF(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
     endif
 
     end associate

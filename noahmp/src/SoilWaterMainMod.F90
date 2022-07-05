@@ -44,7 +44,7 @@ contains
     integer                :: NITER         ! iteration times soil moisture (-)
     real(kind=kind_noahmp) :: DTFINE        ! fine time step (s)
     real(kind=kind_noahmp) :: RSAT          ! accumulation of WPLUS (saturation excess) [m]
-    real(kind=kind_noahmp) :: WTSUB         ! sum of WCND(K)*DZSNSO(K)
+    real(kind=kind_noahmp) :: WTSUB         ! sum of WCND(K)*ThicknessSnowSoilLayer(K)
     real(kind=kind_noahmp) :: MH2O          ! water mass removal (mm)
     real(kind=kind_noahmp) :: XS            ! temporary
     real(kind=kind_noahmp) :: WATMIN        ! minimum soil water
@@ -62,8 +62,8 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,     thickness of snow/soil layers (m)
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     logical flag for urban grid
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
+              FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,     logical flag for urban grid
               OptRunoffSurface => noahmp%config%nmlist%OptRunoffSurface ,& ! in,     options for surface runoff
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface,& ! in,     options for subsurface runoff
               OptTileDrainage => noahmp%config%nmlist%OptTileDrainage,& ! in,     options for tile drainage
@@ -110,7 +110,7 @@ contains
     ! for the case when snowmelt water is too large
     do K = 1, NumSoilLayer
        EPORE(K)= max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-       RSAT    = RSAT + max( 0.0, SH2O(K) - EPORE(K) ) * DZSNSO(K)
+       RSAT    = RSAT + max( 0.0, SH2O(K) - EPORE(K) ) * ThicknessSnowSoilLayer(K)
        SH2O(K) = min( EPORE(K), SH2O(K) )
     enddo
 
@@ -135,7 +135,7 @@ contains
 
     !!! surface runoff and infiltration rate using different schemes
     ! jref impermable surface at urban
-    if ( URBAN_FLAG .eqv. .true. ) FCR(1) = 0.95
+    if ( FlagUrban .eqv. .true. ) FCR(1) = 0.95
 
     if ( OptRunoffSurface == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
     if ( OptRunoffSurface == 2 ) call RunoffSurfaceTopModelEqui(noahmp)
@@ -148,7 +148,7 @@ contains
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
-    if ( (PDDUM*MainTimeStep) > (DZSNSO(1)*SMCMAX(1)) ) then
+    if ( (PDDUM*MainTimeStep) > (ThicknessSnowSoilLayer(1)*SMCMAX(1)) ) then
        NITER = NITER*2
     endif
     DTFINE  = MainTimeStep / NITER
@@ -189,11 +189,11 @@ contains
     if ( OptRunoffSubsurface == 2 ) then
        WTSUB = 0.0
        do K = 1, NumSoilLayer
-          WTSUB = WTSUB + WCND(K) * DZSNSO(K)
+          WTSUB = WTSUB + WCND(K) * ThicknessSnowSoilLayer(K)
        enddo
        do K = 1, NumSoilLayer
-          MH2O    = RUNSUB * MainTimeStep * (WCND(K)*DZSNSO(K)) / WTSUB  ! mm
-          SH2O(K) = SH2O(K) - MH2O / (DZSNSO(K)*1000.0)
+          MH2O    = RUNSUB * MainTimeStep * (WCND(K)*ThicknessSnowSoilLayer(K)) / WTSUB  ! mm
+          SH2O(K) = SH2O(K) - MH2O / (ThicknessSnowSoilLayer(K)*1000.0)
        enddo
     endif
 
@@ -201,7 +201,7 @@ contains
     ! Get water needed to bring MLIQ equal WATMIN from lower layer.
     if ( OptRunoffSubsurface /= 1 ) then
        do IZ = 1, NumSoilLayer
-          MLIQ(IZ) = SH2O(IZ) * DZSNSO(IZ) * 1000.0
+          MLIQ(IZ) = SH2O(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
 
        WATMIN = 0.01   ! mm
@@ -226,7 +226,7 @@ contains
        if ( OptRunoffSubsurface == 5 ) DEEPRECH = DEEPRECH - XS * 1.0e-3
 
        do IZ = 1, NumSoilLayer
-          SH2O(IZ) = MLIQ(IZ) / (DZSNSO(IZ)*1000.0)
+          SH2O(IZ) = MLIQ(IZ) / (ThicknessSnowSoilLayer(IZ)*1000.0)
        enddo
     endif ! OptRunoffSubsurface /= 1
 

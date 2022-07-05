@@ -31,8 +31,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              SurfaceType     => noahmp%config%domain%SurfaceType    ,& ! in,    surface type 1-soil; 2-lake
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,    depth [m] of layer-bottom from soil surface
               OptSoilWaterTranspiration => noahmp%config%nmlist%OptSoilWaterTranspiration,& ! in,    options for soil moisture factor for stomatal resistance & ET
               NROOT           => noahmp%water%param%NROOT            ,& ! in,    number of soil layers with root present
@@ -54,7 +54,7 @@ contains
     BTRAN = 0.0
 
     ! only for soil point
-    if ( IST ==1 ) then
+    if ( SurfaceType ==1 ) then
        do IZ = 1, NROOT
           if ( OptSoilWaterTranspiration == 1 ) then  ! Noah
              GX = (SH2O(IZ) - SMCWLT(IZ)) / (SMCREF(IZ) - SMCWLT(IZ))
@@ -69,7 +69,7 @@ contains
           endif
           GX = min( 1.0, max(0.0,GX) )
 
-          BTRANI(IZ) = max( MPE, DZSNSO(IZ) / (-DepthSoilLayer(NROOT)) * GX )
+          BTRANI(IZ) = max( MPE, ThicknessSnowSoilLayer(IZ) / (-DepthSoilLayer(NROOT)) * GX )
           BTRAN      = BTRAN + BTRANI(IZ)
        enddo
 

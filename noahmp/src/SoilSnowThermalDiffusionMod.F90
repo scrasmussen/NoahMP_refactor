@@ -45,7 +45,7 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,& ! in,  number of soil layers
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,  maximum number of snow layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! in,  actual number of snow layers (negative)
-              ZSNSO           => noahmp%config%domain%ZSNSO          ,& ! in,    depth of snow/soil layer-bottom (m)
+              DepthSnowSoilLayer           => noahmp%config%domain%DepthSnowSoilLayer          ,& ! in,    depth of snow/soil layer-bottom (m)
               OptSoilTemperatureBottom => noahmp%config%nmlist%OptSoilTemperatureBottom ,& ! in,  options for lower boundary condition of soil temperature
               OptSnowSoilTempTime      => noahmp%config%nmlist%OptSnowSoilTempTime      ,& ! in,  options for snow/soil temperature time scheme
               TemperatureSoilBottom    => noahmp%forcing%TemperatureSoilBottom          ,& ! in,  bottom boundary soil temperature [K]
@@ -78,25 +78,25 @@ contains
     ! compute gradient and flux of soil/snow thermal diffusion
     do K = NumSnowLayerNeg+1, NumSoilLayer
        if ( K == (NumSnowLayerNeg+1) ) then
-          DENOM(K) = - ZSNSO(K) * HCPCT(K)
-          TEMP1    = - ZSNSO(K+1)
+          DENOM(K) = - DepthSnowSoilLayer(K) * HCPCT(K)
+          TEMP1    = - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
           EFLUX(K) = DF(K) * DTSDZ(K) - SSOIL - PHI(K)
        elseif ( K < NumSoilLayer ) then
-          DENOM(K) = (ZSNSO(K-1) - ZSNSO(K)) * HCPCT(K)
-          TEMP1    = ZSNSO(K-1) - ZSNSO(K+1)
+          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
+          TEMP1    = DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
           EFLUX(K) = ( DF(K)*DTSDZ(K) - DF(K-1)*DTSDZ(K-1) ) - PHI(K)
        elseif ( K == NumSoilLayer ) then
-          DENOM(K) = (ZSNSO(K-1) - ZSNSO(K)) * HCPCT(K)
-          TEMP1    =  ZSNSO(K-1) - ZSNSO(K)
+          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
+          TEMP1    =  DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)
           if ( OptSoilTemperatureBottom == 1 ) then
              BOTFLX = 0.0
           endif
           if ( OptSoilTemperatureBottom == 2 ) then
-             DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (ZSNSO(K-1)+ZSNSO(K)) - ZBOT)
+             DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - ZBOT)
              BOTFLX   = -DF(K) * DTSDZ(K)
           endif
           EFLUX(K) = ( -BOTFLX - DF(K-1)*DTSDZ(K-1) ) - PHI(K)
@@ -112,7 +112,7 @@ contains
              BI(K) = - CI(K)
           endif
           if ( OptSnowSoilTempTime == 2 ) then
-             BI(K) = - CI(K) + DF(K) / ( 0.5*ZSNSO(K)*ZSNSO(K)*HCPCT(K) )
+             BI(K) = - CI(K) + DF(K) / ( 0.5*DepthSnowSoilLayer(K)*DepthSnowSoilLayer(K)*HCPCT(K) )
           endif
        elseif ( K < NumSoilLayer ) then
           AI(K) = - DF(K-1) * DDZ(K-1) / DENOM(K)

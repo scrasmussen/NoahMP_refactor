@@ -29,8 +29,8 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
               CANICE          => noahmp%water%state%CANICE           ,& ! in,    canopy intercepted ice mass (mm)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
@@ -41,10 +41,10 @@ contains
 ! ----------------------------------------------------------------------
 
     ! compute total water storage before NoahMP processes
-    if ( IST == 1 ) then  ! soil
+    if ( SurfaceType == 1 ) then  ! soil
        BEG_WB = CANLIQ + CANICE + SNEQV + WA
        do IZ = 1, NumSoilLayer
-          BEG_WB = BEG_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
+          BEG_WB = BEG_WB + SMC(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
     endif
 
@@ -72,12 +72,12 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,    flag to identify croplands
+              FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
               IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
               ZWT             => noahmp%water%state%ZWT              ,& ! in,    water table depth [m]
@@ -103,15 +103,15 @@ contains
 ! ----------------------------------------------------------------------
 
     ! before water balance check add irrigation water to precipitation
-    if ( (CROPLU .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) then
+    if ( (FlagCropland .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) then
        PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / MainTimeStep  ! irrigation
     endif
 
     ! Error in water balance should be < 0.1 mm
-    if ( IST == 1 ) then        !soil
+    if ( SurfaceType == 1 ) then        !soil
        END_WB = CANLIQ + CANICE + SNEQV + WA
        do IZ = 1, NumSoilLayer
-          END_WB = END_WB + SMC(IZ) * DZSNSO(IZ) * 1000.0
+          END_WB = END_WB + SMC(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
        ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * MainTimeStep
 #ifndef WRF_HYDRO

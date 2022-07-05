@@ -2,7 +2,7 @@ module SurfaceEmissivityMod
 
 !!! Compute ground, vegetation, and total surface longwave emissivity
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -25,8 +25,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              ICE             => noahmp%config%domain%ICE            ,& ! in,    flag for sea ice point: 1->seaice; -1->land ice; 0->soil
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              IndicatorIceSfc => noahmp%config%domain%IndicatorIceSfc ,& ! in,    indicator for ice point: 1->seaice; -1->land ice; 0->soil
+              SurfaceType     => noahmp%config%domain%SurfaceType     ,& ! in,    surface type 1-soil; 2-lake
               SNOW_EMIS       => noahmp%energy%param%SNOW_EMIS       ,& ! in,    snow emissivity
               EG              => noahmp%energy%param%EG              ,& ! in,    emissivity soil surface
               EICE            => noahmp%energy%param%EICE            ,& ! in,    emissivity ice surface
@@ -44,10 +44,10 @@ contains
     EMV = 1.0 - exp( -(ELAI + ESAI) / 1.0 )
 
     ! ground emissivity
-    if ( ICE == 1 ) then
+    if ( IndicatorIceSfc == 1 ) then
        EMG = EICE * (1.0 - FSNO) + SNOW_EMIS * FSNO  ! move hard-coded snow emissivity as a global parameter to MPTABLE
     else
-       EMG = EG(IST) * (1.0 - FSNO) + SNOW_EMIS * FSNO
+       EMG = EG(SurfaceType) * (1.0 - FSNO) + SNOW_EMIS * FSNO
     endif
 
     ! net surface emissivity

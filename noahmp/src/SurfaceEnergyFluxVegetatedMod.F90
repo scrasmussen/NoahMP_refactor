@@ -40,7 +40,7 @@ contains
     integer, parameter                    :: NITERC = 20  ! number of iterations for surface temperature (5~20)
     integer, parameter                    :: NITERG = 5   ! number of iterations for ground temperature (3~5)
     character(len=80)                     :: message      ! error message
-    real(kind=kind_noahmp)                :: CAH          ! sensible heat conductance, canopy air to ZLVL air (m/s)
+    real(kind=kind_noahmp)                :: CAH          ! sensible heat conductance, canopy air to reference height air (m/s)
     real(kind=kind_noahmp)                :: DTV          ! change in tv, last iteration (k)
     real(kind=kind_noahmp)                :: DTG          ! change in tg, last iteration (k)
     real(kind=kind_noahmp)                :: AIR,CIR      ! coefficients for ir as function of ts**4
@@ -75,7 +75,7 @@ contains
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,    thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               OptSurfaceDrag => noahmp%config%nmlist%OptSurfaceDrag,& ! in,    options for surface layer drag/exchange coefficient
               OptStomataResistance => noahmp%config%nmlist%OptStomataResistance ,& ! in,    options for canopy stomatal resistance
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
@@ -95,11 +95,11 @@ contains
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
               PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
-              ZLVL            => noahmp%energy%state%ZLVL            ,& ! in,    surface reference height (m)
+              RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    surface reference height (m)
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
-              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at zlvl
+              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at reference height
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
@@ -142,7 +142,7 @@ contains
               RAWC            => noahmp%energy%state%RAWC            ,& ! out,   aerodynamic resistance for water vapor (s/m), above canopy
               RAHG            => noahmp%energy%state%RAHG            ,& ! out,   ground aerodynamic resistance for sensible heat (s/m)
               RAWG            => noahmp%energy%state%RAWG            ,& ! out,   ground aerodynamic resistance for water vapor (s/m)
-              CAW             => noahmp%energy%state%CAW             ,& ! out,   latent heat conductance, canopy air ZLVL air (m/s)
+              CAW             => noahmp%energy%state%CAW             ,& ! out,   latent heat conductance, canopy air to reference height air (m/s)
               CTW             => noahmp%energy%state%CTW             ,& ! out,   transpiration conductance, leaf to canopy air (m/s)
               CEW             => noahmp%energy%state%CEW             ,& ! out,   evaporation conductance, leaf to canopy air (m/s)
               CGW             => noahmp%energy%state%CGW             ,& ! out,   latent heat conductance, ground to canopy air (m/s)
@@ -195,8 +195,8 @@ contains
     ! canopy height
     HCAN = HVT
     ! wind speed at canopy height
-    !UC = UR * log(HCAN/Z0M) / log(ZLVL/Z0M)
-    UC = UR * log( (HCAN - ZPD + Z0M)/Z0M ) / log(ZLVL/Z0M)   ! MB: add ZPD v3.7
+    !UC = UR * log(HCAN/Z0M) / log(RefHeightAboveGround/Z0M)
+    UC = UR * log( (HCAN - ZPD + Z0M)/Z0M ) / log(RefHeightAboveGround/Z0M)   ! MB: add ZPD v3.7
     if ( (HCAN-ZPD) <= 0.0 ) then
        print*, 'CRITICAL PROBLEM: HCAN <= ZPD'
        print*, 'GridIndexI,GridIndexJ =',GridIndexI, GridIndexJ
@@ -223,7 +223,7 @@ contains
           Z0HG = Z0MG   !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0MG))
        endif
 
-       ! aerodyn resistances between heights zlvl and d+z0v
+       ! aerodyn resistances between RefHeightAboveGround and d+z0v
        if ( OptSurfaceDrag == 1 ) call ResistanceAboveCanopyMOST(noahmp, ITER, H, MOZSGN)
        if ( OptSurfaceDrag == 2 ) call ResistanceAboveCanopyChen97(noahmp, ITER)
 
@@ -318,7 +318,7 @@ contains
     CIR = EMG * ConstStefanBoltzmann
     CSH = RHOAIR * ConstHeatCapacAir / RAHG
     CEV = RHOAIR * ConstHeatCapacAir / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
-    CGH = 2.0 * DF(NumSnowLayerNeg+1) / DZSNSO(NumSnowLayerNeg+1)
+    CGH = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
     ! begin stability iteration
     loop2: do ITER = 1, NITERG
        T = TDC(TGV)

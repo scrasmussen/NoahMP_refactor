@@ -74,9 +74,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               CZIL            => noahmp%energy%param%CZIL            ,& ! in,    Calculate roughness length of heat
-              ZLM             => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
+              RefHeightAboveGround             => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
               THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
-              SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
+              SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               Z0              => noahmp%energy%state%Z0M             ,& ! in,    roughness length, momentum, (m), surface
               THZ0            => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
               AKMS            => noahmp%energy%state%CMV             ,& ! inout, drag coefficient for momentum, above ZPD, vegetated
@@ -96,7 +96,7 @@ contains
     ILECH = 0
     ZILFC = -CZIL * VKRM * SQVISC
     ZU    = Z0
-    RDZ   = 1.0 / ZLM
+    RDZ   = 1.0 / RefHeightAboveGround
     CXCH  = EXCM * RDZ
     DTHV  = THLM - THZ0
 
@@ -115,8 +115,8 @@ contains
 
     ! ZILITINKEVITCH approach for ZT
     ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*Z0)) * Z0 )
-    ZSLU  = ZLM + ZU
-    ZSLT  = ZLM + ZT
+    ZSLU  = RefHeightAboveGround + ZU
+    ZSLT  = RefHeightAboveGround + ZT
     RLOGU = log(ZSLU / ZU)
     RLOGT = log(ZSLT / ZT)
 
@@ -171,7 +171,7 @@ contains
 
     ! ZILITINKEVITCH fix for ZT
     ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * Z0)) * Z0 )
-    ZSLT   = ZLM + ZT
+    ZSLT   = RefHeightAboveGround + ZT
     RLOGT  = log(ZSLT / ZT)
     USTARK = USTAR * VKRM
 

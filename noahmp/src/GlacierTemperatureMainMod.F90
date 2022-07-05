@@ -42,7 +42,7 @@ contains
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              ZBOT            => noahmp%energy%param%ZBOT            ,& ! in,    depth of lower boundary condition (m) from glacier/soil surface
+              DepthSoilTempBottom => noahmp%energy%param%DepthSoilTempBottom ,& ! in,    depth [m] from glacier/soil surface for lower soil temperature boundary forcing
               ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,   depth of lower boundary condition (m) from snow surface
               PHI             => noahmp%energy%flux%PHI               & ! out,   light penetrating through snow/ice (W/m2)
              )
@@ -61,8 +61,8 @@ contains
     ! compute solar penetration through water, needs more work
     PHI(NumSnowLayerNeg+1:NumSoilLayer) = 0.0
 
-    ! adjust ZBOT from glacier ice surface to ZBOTSNO from snow surface
-    ZBOTSNO = ZBOT - SNOWH
+    ! adjust DepthSoilTempBottom from glacier ice surface to ZBOTSNO from snow surface
+    ZBOTSNO = DepthSoilTempBottom - SNOWH
 
     ! compute soil temperatures
     call GlacierThermalDiffusion(noahmp, AI, BI, CI, RHSTS)

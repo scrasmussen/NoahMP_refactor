@@ -28,7 +28,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,     number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
               SWEMX           => noahmp%water%param%SWEMX            ,& ! in,     new snow mass to fully cover old snow (mm)
@@ -42,8 +42,8 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    ALBSND(1: NBAND) = 0.0
-    ALBSNI(1: NBAND) = 0.0
+    ALBSND(1: NumSWRadBand) = 0.0
+    ALBSNI(1: NumSWRadBand) = 0.0
 
     ! when CosSolarZenithAngle > 0
     ALB = CLASS_ALB_REF + (ALBOLD - CLASS_ALB_REF) * exp( -0.01 * MainTimeStep / CLASS_SNO_AGE )

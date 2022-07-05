@@ -34,7 +34,7 @@ contains
     associate(                                                        &
               VegType         => noahmp%config%domain%VegType        ,& ! in,    vegetation type
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              EBLFOREST       => noahmp%config%domain%EBLFOREST      ,& ! in,    flag for Evergreen Broadleaf Forest
+              IndexEBLForest       => noahmp%config%domain%IndexEBLForest      ,& ! in,    flag for Evergreen Broadleaf Forest
               WRRAT           => noahmp%biochem%param%WRRAT          ,& ! in,    wood to non-wood ratio
               LTOVRC          => noahmp%biochem%param%LTOVRC         ,& ! in,    leaf turnover coefficient [1/s]
               TDLEF           => noahmp%biochem%param%TDLEF          ,& ! in,    characteristic T for leaf freezing [K]
@@ -150,7 +150,7 @@ contains
 
     ! fraction of carbon into leaf versus nonleaf
     LEAFPT = exp(0.01 * (1.0 - exp(0.75*XLAI)) * XLAI)
-    if ( VegType == EBLFOREST ) LEAFPT = exp(0.01 * (1.0 - exp(0.50*XLAI)) * XLAI)
+    if ( VegType == IndexEBLForest ) LEAFPT = exp(0.01 * (1.0 - exp(0.50*XLAI)) * XLAI)
     NONLEF = 1.0 - LEAFPT
     STEMPT = XLAI / 10.0 * LEAFPT
     LEAFPT = LEAFPT - STEMPT

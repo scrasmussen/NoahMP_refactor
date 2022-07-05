@@ -31,7 +31,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              IST             => noahmp%config%domain%IST            ,& ! in,    surface type 1-soil; 2-lake
+              SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               MainTimeStep           => noahmp%config%domain%MainTimeStep     ,& ! in,    noahmp main time step (s)
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight  ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight ,& ! in,    wind speed [m/s] in northward direction at reference height
@@ -140,7 +140,7 @@ contains
     QRAIN   = QDRIPR + QTHROR
     QSNOW   = QDRIPS + QTHROS
     SNOWHIN = QSNOW / BDFALL
-    if ( (IST == 2) .and. (TG > ConstFreezePoint) ) then
+    if ( (SurfaceType == 2) .and. (TG > ConstFreezePoint) ) then
        QSNOW   = 0.0
        SNOWHIN = 0.0
     endif

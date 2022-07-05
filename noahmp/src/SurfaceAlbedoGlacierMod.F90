@@ -31,7 +31,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,   ground albedo (direct beam: vis, nir)
@@ -44,7 +44,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    do IB = 1, NBAND
+    do IB = 1, NumSWRadBand
        ALBD(IB)   = 0.0
        ALBI(IB)   = 0.0
        ALBGRD(IB) = 0.0

@@ -23,7 +23,7 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    associate( NSTAGE => noahmp%config%domain%NSTAGE )
+    associate( NumCropGrowStage => noahmp%config%domain%NumCropGrowStage )
 
     ! biochem state variables
     noahmp%biochem%state%PGS            = undefined_int
@@ -161,18 +161,18 @@ contains
     noahmp%biochem%param%RSDRYC         = undefined_real
     noahmp%biochem%param%RSWOODC        = undefined_real
 
-    if( .not. allocated( noahmp%biochem%param%DILE_FC ) ) allocate( noahmp%biochem%param%DILE_FC (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%DILE_FW ) ) allocate( noahmp%biochem%param%DILE_FW (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%LFCT    ) ) allocate( noahmp%biochem%param%LFCT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%STCT    ) ) allocate( noahmp%biochem%param%STCT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%RTCT    ) ) allocate( noahmp%biochem%param%RTCT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%LFPT    ) ) allocate( noahmp%biochem%param%LFPT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%STPT    ) ) allocate( noahmp%biochem%param%STPT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%RTPT    ) ) allocate( noahmp%biochem%param%RTPT    (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%GRAINPT ) ) allocate( noahmp%biochem%param%GRAINPT (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%LF_OVRC ) ) allocate( noahmp%biochem%param%LF_OVRC (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%ST_OVRC ) ) allocate( noahmp%biochem%param%ST_OVRC (1:NSTAGE) )
-    if( .not. allocated( noahmp%biochem%param%RT_OVRC ) ) allocate( noahmp%biochem%param%RT_OVRC (1:NSTAGE) )
+    if( .not. allocated( noahmp%biochem%param%DILE_FC ) ) allocate( noahmp%biochem%param%DILE_FC (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%DILE_FW ) ) allocate( noahmp%biochem%param%DILE_FW (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%LFCT    ) ) allocate( noahmp%biochem%param%LFCT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%STCT    ) ) allocate( noahmp%biochem%param%STCT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%RTCT    ) ) allocate( noahmp%biochem%param%RTCT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%LFPT    ) ) allocate( noahmp%biochem%param%LFPT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%STPT    ) ) allocate( noahmp%biochem%param%STPT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%RTPT    ) ) allocate( noahmp%biochem%param%RTPT    (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%GRAINPT ) ) allocate( noahmp%biochem%param%GRAINPT (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%LF_OVRC ) ) allocate( noahmp%biochem%param%LF_OVRC (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%ST_OVRC ) ) allocate( noahmp%biochem%param%ST_OVRC (1:NumCropGrowStage) )
+    if( .not. allocated( noahmp%biochem%param%RT_OVRC ) ) allocate( noahmp%biochem%param%RT_OVRC (1:NumCropGrowStage) )
 
     noahmp%biochem%param%DILE_FC(:)     = undefined_real
     noahmp%biochem%param%DILE_FW(:)     = undefined_real
@@ -204,10 +204,7 @@ contains
               I           => noahmp%config%domain%GridIndexI   ,&
               J           => noahmp%config%domain%GridIndexJ   ,&
               VegType     => noahmp%config%domain%VegType      ,&
-              SOILTYP     => noahmp%config%domain%SOILTYP      ,&
-              CropType    => noahmp%config%domain%CropType     ,&
-              SOILCOLOR   => noahmp%config%domain%SOILCOLOR    ,&
-              NBAND       => noahmp%config%domain%NBAND         &
+              CropType    => noahmp%config%domain%CropType      &
              )
 
     ! biochem state variables

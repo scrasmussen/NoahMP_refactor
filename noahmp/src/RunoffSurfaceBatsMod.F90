@@ -30,7 +30,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
               SMC             => noahmp%water%state%SMC              ,& ! in,   total soil water content [m3/m3]
               FCR             => noahmp%water%state%FCR              ,& ! in,   impermeable fraction due to frozen soil
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
@@ -47,8 +47,8 @@ contains
 
     ! compute mean soil moisture, depth and saturation fraction
     do K = 1, NumSoilLayer
-       DZTOT   = DZTOT  + DZSNSO(K)
-       SMCTOT  = SMCTOT + SMC(K) / SMCMAX(K) * DZSNSO(K)
+       DZTOT   = DZTOT  + ThicknessSnowSoilLayer(K)
+       SMCTOT  = SMCTOT + SMC(K) / SMCMAX(K) * ThicknessSnowSoilLayer(K)
        if ( DZTOT >= 2.0 ) exit
     enddo
     SMCTOT = SMCTOT / DZTOT

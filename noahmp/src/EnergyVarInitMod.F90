@@ -26,7 +26,7 @@ contains
     associate(                                                         &
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              NBAND => noahmp%config%domain%NBAND   &
+              NumSWRadBand => noahmp%config%domain%NumSWRadBand   &
              )
     
     ! energy state variable
@@ -153,7 +153,6 @@ contains
     noahmp%energy%state%T2MV            = undefined_real
     noahmp%energy%state%T2MB            = undefined_real
     noahmp%energy%state%T2M             = undefined_real
-    noahmp%energy%state%ZLVL            = undefined_real
     noahmp%energy%state%FB_snow         = undefined_real
     noahmp%energy%state%ZBOTSNO         = undefined_real
     noahmp%energy%state%Z0WRF           = undefined_real
@@ -162,7 +161,8 @@ contains
     noahmp%energy%state%ALBEDO          = undefined_real
     noahmp%energy%state%ERRENG          = undefined_real
     noahmp%energy%state%ERRSW           = undefined_real
-    
+    noahmp%energy%state%RefHeightAboveGround            = undefined_real
+ 
     if( .not. allocated( noahmp%energy%state%STC      ) ) allocate( noahmp%energy%state%STC      (-NumSnowLayerMax+1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%state%DF       ) ) allocate( noahmp%energy%state%DF       (-NumSnowLayerMax+1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%state%HCPCT    ) ) allocate( noahmp%energy%state%HCPCT    (-NumSnowLayerMax+1:NumSoilLayer) )
@@ -173,16 +173,16 @@ contains
     if( .not. allocated( noahmp%energy%state%TKSOIL   ) ) allocate( noahmp%energy%state%TKSOIL   (       1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%state%CVGLAICE ) ) allocate( noahmp%energy%state%CVGLAICE (       1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%state%TKGLAICE ) ) allocate( noahmp%energy%state%TKGLAICE (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%energy%state%ALBSND   ) ) allocate( noahmp%energy%state%ALBSND   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBSNI   ) ) allocate( noahmp%energy%state%ALBSNI   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBSOD   ) ) allocate( noahmp%energy%state%ALBSOD   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBSOI   ) ) allocate( noahmp%energy%state%ALBSOI   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBGRD   ) ) allocate( noahmp%energy%state%ALBGRD   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBGRI   ) ) allocate( noahmp%energy%state%ALBGRI   (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%RHO      ) ) allocate( noahmp%energy%state%RHO      (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%TAU      ) ) allocate( noahmp%energy%state%TAU      (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBD     ) ) allocate( noahmp%energy%state%ALBD     (       1:NBAND) )
-    if( .not. allocated( noahmp%energy%state%ALBI     ) ) allocate( noahmp%energy%state%ALBI     (       1:NBAND) )
+    if( .not. allocated( noahmp%energy%state%ALBSND   ) ) allocate( noahmp%energy%state%ALBSND   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBSNI   ) ) allocate( noahmp%energy%state%ALBSNI   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBSOD   ) ) allocate( noahmp%energy%state%ALBSOD   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBSOI   ) ) allocate( noahmp%energy%state%ALBSOI   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBGRD   ) ) allocate( noahmp%energy%state%ALBGRD   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBGRI   ) ) allocate( noahmp%energy%state%ALBGRI   (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%RHO      ) ) allocate( noahmp%energy%state%RHO      (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%TAU      ) ) allocate( noahmp%energy%state%TAU      (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBD     ) ) allocate( noahmp%energy%state%ALBD     (       1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%state%ALBI     ) ) allocate( noahmp%energy%state%ALBI     (       1:NumSWRadBand) )
     
     noahmp%energy%state%STC(:)          = undefined_real
     noahmp%energy%state%DF(:)           = undefined_real
@@ -241,18 +241,18 @@ contains
     noahmp%energy%flux%APAR             = undefined_real
     noahmp%energy%flux%FIRE             = undefined_real
     
-    if( .not. allocated( noahmp%energy%flux%FABD  ) ) allocate( noahmp%energy%flux%FABD  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FABI  ) ) allocate( noahmp%energy%flux%FABI  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FTDD  ) ) allocate( noahmp%energy%flux%FTDD  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FTDI  ) ) allocate( noahmp%energy%flux%FTDI  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FTID  ) ) allocate( noahmp%energy%flux%FTID  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FTII  ) ) allocate( noahmp%energy%flux%FTII  (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FREVD ) ) allocate( noahmp%energy%flux%FREVD (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FREVI ) ) allocate( noahmp%energy%flux%FREVI (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FREGD ) ) allocate( noahmp%energy%flux%FREGD (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%FREGI ) ) allocate( noahmp%energy%flux%FREGI (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%SOLAD ) ) allocate( noahmp%energy%flux%SOLAD (1:NBAND) )
-    if( .not. allocated( noahmp%energy%flux%SOLAI ) ) allocate( noahmp%energy%flux%SOLAI (1:NBAND) )
+    if( .not. allocated( noahmp%energy%flux%FABD  ) ) allocate( noahmp%energy%flux%FABD  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FABI  ) ) allocate( noahmp%energy%flux%FABI  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FTDD  ) ) allocate( noahmp%energy%flux%FTDD  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FTDI  ) ) allocate( noahmp%energy%flux%FTDI  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FTID  ) ) allocate( noahmp%energy%flux%FTID  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FTII  ) ) allocate( noahmp%energy%flux%FTII  (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FREVD ) ) allocate( noahmp%energy%flux%FREVD (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FREVI ) ) allocate( noahmp%energy%flux%FREVI (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FREGD ) ) allocate( noahmp%energy%flux%FREGD (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%FREGI ) ) allocate( noahmp%energy%flux%FREGI (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%SOLAD ) ) allocate( noahmp%energy%flux%SOLAD (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%flux%SOLAI ) ) allocate( noahmp%energy%flux%SOLAI (1:NumSWRadBand) )
     if( .not. allocated( noahmp%energy%flux%PHI   ) ) allocate( noahmp%energy%flux%PHI   (-NumSnowLayerMax+1:NumSoilLayer) )
     
     noahmp%energy%flux%FABD(:)          = undefined_real
@@ -308,7 +308,6 @@ contains
     noahmp%energy%param%SNOW_EMIS       = undefined_real
     noahmp%energy%param%CWPVT           = undefined_real
     noahmp%energy%param%Z0SNO           = undefined_real
-    noahmp%energy%param%ZBOT            = undefined_real
     noahmp%energy%param%Z0SOIL          = undefined_real
     noahmp%energy%param%Z0LAKE          = undefined_real
     noahmp%energy%param%EICE            = undefined_real
@@ -320,16 +319,16 @@ contains
     if( .not. allocated( noahmp%energy%param%LAIM   ) ) allocate( noahmp%energy%param%LAIM   (1:12   ) )
     if( .not. allocated( noahmp%energy%param%SAIM   ) ) allocate( noahmp%energy%param%SAIM   (1:12   ) )
     if( .not. allocated( noahmp%energy%param%QUARTZ ) ) allocate( noahmp%energy%param%QUARTZ (1:NumSoilLayer) )
-    if( .not. allocated( noahmp%energy%param%ALBSAT ) ) allocate( noahmp%energy%param%ALBSAT (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%ALBDRY ) ) allocate( noahmp%energy%param%ALBDRY (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%ALBLAK ) ) allocate( noahmp%energy%param%ALBLAK (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%OMEGAS ) ) allocate( noahmp%energy%param%OMEGAS (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%RHOL   ) ) allocate( noahmp%energy%param%RHOL   (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%RHOS   ) ) allocate( noahmp%energy%param%RHOS   (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%TAUL   ) ) allocate( noahmp%energy%param%TAUL   (1:NBAND) )
-    if( .not. allocated( noahmp%energy%param%TAUS   ) ) allocate( noahmp%energy%param%TAUS   (1:NBAND) )
+    if( .not. allocated( noahmp%energy%param%ALBSAT ) ) allocate( noahmp%energy%param%ALBSAT (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%ALBDRY ) ) allocate( noahmp%energy%param%ALBDRY (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%ALBLAK ) ) allocate( noahmp%energy%param%ALBLAK (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%OMEGAS ) ) allocate( noahmp%energy%param%OMEGAS (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%RHOL   ) ) allocate( noahmp%energy%param%RHOL   (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%RHOS   ) ) allocate( noahmp%energy%param%RHOS   (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%TAUL   ) ) allocate( noahmp%energy%param%TAUL   (1:NumSWRadBand) )
+    if( .not. allocated( noahmp%energy%param%TAUS   ) ) allocate( noahmp%energy%param%TAUS   (1:NumSWRadBand) )
     if( .not. allocated( noahmp%energy%param%EG     ) ) allocate( noahmp%energy%param%EG     (1:2    ) )
-    if( .not. allocated( noahmp%energy%param%ALBICE ) ) allocate( noahmp%energy%param%ALBICE (1:NBAND) )
+    if( .not. allocated( noahmp%energy%param%ALBICE ) ) allocate( noahmp%energy%param%ALBICE (1:NumSWRadBand) )
     
     noahmp%energy%param%LAIM(:)         = undefined_real
     noahmp%energy%param%SAIM(:)         = undefined_real
@@ -365,13 +364,13 @@ contains
               I           => noahmp%config%domain%GridIndexI   ,&
               J           => noahmp%config%domain%GridIndexJ   ,&
               VegType     => noahmp%config%domain%VegType      ,&
-              SOILTYP     => noahmp%config%domain%SOILTYP      ,&
+              SoilType     => noahmp%config%domain%SoilType      ,&
               CropType    => noahmp%config%domain%CropType     ,&
-              SOILCOLOR   => noahmp%config%domain%SOILCOLOR    ,&
-              URBAN_FLAG  => noahmp%config%domain%URBAN_FLAG   ,&
+              SoilColor   => noahmp%config%domain%SoilColor    ,&
+              FlagUrban  => noahmp%config%domain%FlagUrban   ,&
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              NBAND       => noahmp%config%domain%NBAND         &
+              NumSWRadBand       => noahmp%config%domain%NumSWRadBand         &
              )
 
     !energy state variable
@@ -432,7 +431,6 @@ contains
     noahmp%energy%param%EG                 = NoahmpIO%EG_TABLE
     noahmp%energy%param%ALBICE             = NoahmpIO%ALBICE_TABLE
     noahmp%energy%param%Z0SNO              = NoahmpIO%Z0SNO_TABLE
-    noahmp%energy%param%ZBOT               = NoahmpIO%ZBOT_TABLE
     noahmp%energy%param%Z0SOIL             = NoahmpIO%Z0SOIL_TABLE
     noahmp%energy%param%Z0LAKE             = NoahmpIO%Z0LAKE_TABLE
     noahmp%energy%param%EICE               = NoahmpIO%EICE_TABLE
@@ -442,20 +440,20 @@ contains
     noahmp%energy%param%SHDFAC             = NoahmpIO%VEGFRA(I,J) / 100.0
     noahmp%energy%param%LAIM(1:12)         = NoahmpIO%LAIM_TABLE(VegType,1:12)
     noahmp%energy%param%SAIM(1:12)         = NoahmpIO%SAIM_TABLE(VegType,1:12)
-    noahmp%energy%param%RHOL(1:NBAND)      = NoahmpIO%RHOL_TABLE(VegType,1:NBAND)
-    noahmp%energy%param%RHOS(1:NBAND)      = NoahmpIO%RHOS_TABLE(VegType,1:NBAND)
-    noahmp%energy%param%TAUL(1:NBAND)      = NoahmpIO%TAUL_TABLE(VegType,1:NBAND)
-    noahmp%energy%param%TAUS(1:NBAND)      = NoahmpIO%TAUS_TABLE(VegType,1:NBAND)
-    noahmp%energy%param%ALBSAT(1:NBAND)    = NoahmpIO%ALBSAT_TABLE(SOILCOLOR,1:NBAND)
-    noahmp%energy%param%ALBDRY(1:NBAND)    = NoahmpIO%ALBDRY_TABLE(SOILCOLOR,1:NBAND)
-    noahmp%energy%param%ALBLAK(1:NBAND)    = NoahmpIO%ALBLAK_TABLE(1:NBAND)
-    noahmp%energy%param%OMEGAS(1:NBAND)    = NoahmpIO%OMEGAS_TABLE(1:NBAND)
+    noahmp%energy%param%RHOL(1:NumSWRadBand)      = NoahmpIO%RHOL_TABLE(VegType,1:NumSWRadBand)
+    noahmp%energy%param%RHOS(1:NumSWRadBand)      = NoahmpIO%RHOS_TABLE(VegType,1:NumSWRadBand)
+    noahmp%energy%param%TAUL(1:NumSWRadBand)      = NoahmpIO%TAUL_TABLE(VegType,1:NumSWRadBand)
+    noahmp%energy%param%TAUS(1:NumSWRadBand)      = NoahmpIO%TAUS_TABLE(VegType,1:NumSWRadBand)
+    noahmp%energy%param%ALBSAT(1:NumSWRadBand)    = NoahmpIO%ALBSAT_TABLE(SoilColor,1:NumSWRadBand)
+    noahmp%energy%param%ALBDRY(1:NumSWRadBand)    = NoahmpIO%ALBDRY_TABLE(SoilColor,1:NumSWRadBand)
+    noahmp%energy%param%ALBLAK(1:NumSWRadBand)    = NoahmpIO%ALBLAK_TABLE(1:NumSWRadBand)
+    noahmp%energy%param%OMEGAS(1:NumSWRadBand)    = NoahmpIO%OMEGAS_TABLE(1:NumSWRadBand)
 
-    do ISOIL = 1, size(SOILTYP)
-       noahmp%energy%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SOILTYP(ISOIL))
+    do ISOIL = 1, size(SoilType)
+       noahmp%energy%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SoilType(ISOIL))
     enddo
 
-    if ( URBAN_FLAG .eqv. .true. ) then
+    if ( FlagUrban .eqv. .true. ) then
        noahmp%energy%param%CSOIL = 3.0e6
     endif
 

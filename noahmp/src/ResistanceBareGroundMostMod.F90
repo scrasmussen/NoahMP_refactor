@@ -46,10 +46,10 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
-              ZLVL            => noahmp%energy%state%ZLVL            ,& ! in,    reference height  (m)
+              RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight ,& ! in,    specific humidity (kg/kg) at reference height
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height ZLVL
+              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               ZPD             => noahmp%energy%state%ZPDG            ,& ! in,    ground zero plane displacement (m)
               Z0H             => noahmp%energy%state%Z0HB            ,& ! in,    roughness length, sensible heat (m), bare ground
               Z0M             => noahmp%energy%state%Z0MG            ,& ! in,    roughness length, momentum, (m), ground
@@ -73,15 +73,15 @@ contains
     ! initialization
     MPE = 1.0e-6
     MOZOLD = MOZ  ! M-O stability parameter for next iteration
-    if ( ZLVL <= ZPD ) then
-       write(*,*) 'WARNING: critical problem: ZLVL <= ZPD; model stops'
+    if ( RefHeightAboveGround <= ZPD ) then
+       write(*,*) 'WARNING: critical problem: RefHeightAboveGround <= ZPD; model stops'
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
     ! temporary drag coefficients
-    TMPCM  = log( (ZLVL - ZPD) / Z0M )
-    TMPCH  = log( (ZLVL - ZPD) / Z0H )
+    TMPCM  = log( (RefHeightAboveGround - ZPD) / Z0M )
+    TMPCH  = log( (RefHeightAboveGround - ZPD) / Z0H )
     TMPCM2 = log( (2.0 + Z0M) / Z0M )
     TMPCH2 = log( (2.0 + Z0H) / Z0H )
 
@@ -96,7 +96,7 @@ contains
        TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (RHOAIR * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOL  = -1.0 * FV**3 / TMP1
-       MOZ  = min( (ZLVL - ZPD) / MOL, 1.0 )
+       MOZ  = min( (RefHeightAboveGround - ZPD) / MOL, 1.0 )
        MOZ2 = min( (2.0 + Z0H) / MOL, 1.0 )
     endif
 

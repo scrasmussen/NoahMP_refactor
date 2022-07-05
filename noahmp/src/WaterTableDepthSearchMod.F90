@@ -32,8 +32,8 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              ZLAYER          => noahmp%config%domain%ZLAYER         ,& ! in,     soil layer thickness (m)
+              DepthSoilLayer     => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
+              ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
@@ -61,7 +61,7 @@ contains
           WATBLED = 0.0
        endif
        do K = SATLYRCHK, NumSoilLayer
-          CWATAVAIL = CWATAVAIL + (SMC(K) - SMCREF(K)) * ZLAYER(K)
+          CWATAVAIL = CWATAVAIL + (SMC(K) - SMCREF(K)) * ThicknessSoilLayer(K)
        enddo
     else  ! no saturated layers...
        WATBLED   = -DepthSoilLayer(NumSoilLayer)

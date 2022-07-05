@@ -35,7 +35,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,   depth [m] of layer-bottom from soil surface
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! in,   thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
               SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,   saturated soil matric potential (m)
@@ -47,7 +47,7 @@ contains
     ZFINE(1:NFINE) = 0.0
     WD1 = 0.0
     do K = 1, NumSoilLayer
-       WD1 = WD1 + (SMCMAX(1) - SH2O(K)) * DZSNSO(K) ! [m]
+       WD1 = WD1 + (SMCMAX(1) - SH2O(K)) * ThicknessSnowSoilLayer(K) ! [m]
     enddo
 
     DZFINE = 3.0 * ( -DepthSoilLayer(NumSoilLayer) ) / NFINE

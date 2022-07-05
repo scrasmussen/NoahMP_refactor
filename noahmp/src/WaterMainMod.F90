@@ -34,9 +34,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
-              IST             => noahmp%config%domain%IST            ,& ! in,     surface type 1-soil; 2-lake 
-              CROPLU          => noahmp%config%domain%CROPLU         ,& ! in,     flag to identify croplands
-              URBAN_FLAG      => noahmp%config%domain%URBAN_FLAG     ,& ! in,     urban point flag
+              SurfaceType           => noahmp%config%domain%SurfaceType   ,& ! in,     surface type 1-soil; 2-lake 
+              FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! in,     flag to identify croplands
+              FlagUrban             => noahmp%config%domain%FlagUrban     ,& ! in,     urban point flag
               QVAP            => noahmp%water%flux%QVAP              ,& ! in,     soil surface evaporation rate[mm/s]
               QDEW            => noahmp%water%flux%QDEW              ,& ! in,     soil surface dew rate[mm/s]
               QRAIN           => noahmp%water%flux%QRAIN             ,& ! in,     snow surface rain rate[mm/s]
@@ -50,7 +50,7 @@ contains
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,     specific humidity (kg/kg) at reference height
               FGEV            => noahmp%energy%flux%FGEV             ,& ! in,     soil evap heat (w/m2) [+ to atm]
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
-              DZSNSO          => noahmp%config%domain%DZSNSO         ,& ! inout,  thickness of snow/soil layers (m)
+              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
               SNEQVO          => noahmp%water%state%SNEQVO           ,& ! inout,  snow mass at last time step(mm)
               SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
@@ -120,7 +120,7 @@ contains
 
     ! treat frozen ground/soil
     if ( FROZEN_GROUND .eqv. .true. ) then
-       SICE(1) =  SICE(1) + (QSDEW-QSEVA) * MainTimeStep / (DZSNSO(1)*1000.0)
+       SICE(1) =  SICE(1) + (QSDEW-QSEVA) * MainTimeStep / (ThicknessSnowSoilLayer(1)*1000.0)
        QSDEW = 0.0
        QSEVA = 0.0
        if ( SICE(1) < 0.0 ) then
@@ -148,14 +148,14 @@ contains
 #endif
 
     ! irrigation: call flood irrigation and add to QINSUR
-    if ( (CROPLU .eqv. .true.) .and. (IRAMTFI > 0.0) ) call IrrigationFlood(noahmp)
+    if ( (FlagCropland .eqv. .true.) .and. (IRAMTFI > 0.0) ) call IrrigationFlood(noahmp)
 
     ! irrigation: call micro irrigation assuming we implement drip in first layer
     ! of the Noah-MP. Change layer 1 moisture wrt to MI rate
-    if ( (CROPLU .eqv. .true.) .and. (IRAMTMI > 0.0) ) call IrrigationMicro(noahmp)
+    if ( (FlagCropland .eqv. .true.) .and. (IRAMTMI > 0.0) ) call IrrigationMicro(noahmp)
 
     ! lake/soil water balances
-    if ( IST == 2 ) then   ! lake
+    if ( SurfaceType == 2 ) then   ! lake
        RUNSRF = 0.0
        if ( WSLAKE >= WSLMAX ) RUNSRF = QINSUR * 1000.0   ! mm/s
        WSLAKE = WSLAKE + (QINSUR-QSEVA) * 1000.0 * MainTimeStep - RUNSRF * MainTimeStep   !mm
@@ -169,7 +169,7 @@ contains
 
     ! update surface water vapor flux ! urban - jref
     QFX = ETRAN + ECAN + EDIR
-    if ( (URBAN_FLAG .eqv. .true.) ) then
+    if ( (FlagUrban .eqv. .true.) ) then
        QSFC = QFX / (RHOAIR * CH) + SpecHumidityRefHeight
        Q2B  = QSFC
     endif

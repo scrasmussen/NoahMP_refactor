@@ -38,7 +38,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              NBAND           => noahmp%config%domain%NBAND          ,& ! in,    number of solar radiation wave bands
+              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
               RHOL            => noahmp%energy%param%RHOL            ,& ! in,    leaf reflectance: 1=vis, 2=nir
@@ -84,7 +84,7 @@ contains
     RHO   = 0.0
     TAU   = 0.0
     FSUN  = 0.0
-    do IB = 1, NBAND
+    do IB = 1, NumSWRadBand
        ALBD(IB)   = 0.0
        ALBI(IB)   = 0.0
        ALBGRD(IB) = 0.0
@@ -110,7 +110,7 @@ contains
        ! weight reflectance/transmittance by LAI and SAI
        WL  = ELAI / max(VAI, MPE)
        WS  = ESAI / max(VAI, MPE)
-       do IB = 1, NBAND
+       do IB = 1, NumSWRadBand
           RHO(IB) = max( RHOL(IB)*WL + RHOS(IB)*WS, MPE )
           TAU(IB) = max( TAUL(IB)*WL + TAUS(IB)*WS, MPE )
        enddo
@@ -125,9 +125,9 @@ contains
        ! ground surface albedo
        call GroundAlbedo(noahmp)
 
-       ! loop over NBAND wavebands to calculate surface albedos and solar
+       ! loop over shortwave bands to calculate surface albedos and solar
        ! fluxes for unit incoming direct (IC=0) and diffuse flux (IC=1)
-       do IB = 1, NBAND
+       do IB = 1, NumSWRadBand
           IC = 0      ! direct
           call CanopyRadiationTwoStream(noahmp, IB, IC)
           IC = 1      ! diffuse
