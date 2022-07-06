@@ -55,7 +55,7 @@ contains
               SHDMAX          => noahmp%energy%param%SHDMAX       ,& ! in,    yearly maximum vegetation fraction
               SHDFAC          => noahmp%energy%param%SHDFAC       ,& ! in,    green vegetation fraction
               TMIN            => noahmp%biochem%param%TMIN        ,& ! in,    minimum temperature for photosynthesis (k)
-              PGS             => noahmp%biochem%state%PGS         ,& ! in,    plant growing stage
+              PlantGrowStage             => noahmp%biochem%state%PlantGrowStage         ,& ! in,    plant growing stage
               SNOWH           => noahmp%water%state%SNOWH         ,& ! in,    snow height [m]
               TV              => noahmp%energy%state%TV           ,& ! in,    vegetation temperature (k)
               TROOT           => noahmp%energy%state%TROOT        ,& ! in,    root-zone averaged temperature (k)
@@ -64,7 +64,7 @@ contains
               ELAI            => noahmp%energy%state%ELAI         ,& ! out,   leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI         ,& ! out,   stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG         ,& ! out,   green vegetation fraction 
-              IGS             => noahmp%biochem%state%IGS          & ! out,   growing season index (0=off, 1=on)
+              IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason          & ! out,   growing season index (0=off, 1=on)
              )                    
 !----------------------------------------------------------------------
 
@@ -125,10 +125,10 @@ contains
 
     ! set growing season flag
     if ( ((TV > TMIN) .and. (CropType == 0)) .or. &
-         ((PGS > 2) .and. (PGS < 7) .and. (CropType > 0))) then
-       IGS = 1.0
+         ((PlantGrowStage > 2) .and. (PlantGrowStage < 7) .and. (CropType > 0))) then
+       IndexGrowSeason = 1.0
     else
-       IGS = 0.0
+       IndexGrowSeason = 0.0
     endif 
 
     ! compute vegetation fraction

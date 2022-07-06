@@ -31,12 +31,12 @@ contains
               J    => noahmp%config%domain%GridIndexJ  &
              )
 
-    NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LFMASS
-    NoahmpIO%RTMASSXY (I,J)  =  noahmp%biochem%state%RTMASS
-    NoahmpIO%STMASSXY (I,J)  =  noahmp%biochem%state%STMASS
-    NoahmpIO%WOODXY   (I,J)  =  noahmp%biochem%state%WOOD
-    NoahmpIO%STBLCPXY (I,J)  =  noahmp%biochem%state%STBLCP
-    NoahmpIO%FASTCPXY (I,J)  =  noahmp%biochem%state%FASTCP
+    NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LeafMass
+    NoahmpIO%RTMASSXY (I,J)  =  noahmp%biochem%state%RootMass
+    NoahmpIO%STMASSXY (I,J)  =  noahmp%biochem%state%StemMass
+    NoahmpIO%WOODXY   (I,J)  =  noahmp%biochem%state%WoodMass
+    NoahmpIO%STBLCPXY (I,J)  =  noahmp%biochem%state%CarbonMassDeepSoil
+    NoahmpIO%FASTCPXY (I,J)  =  noahmp%biochem%state%CarbonMassShallowSoil
     NoahmpIO%NEEXY    (I,J)  =  noahmp%biochem%flux%NEE
     NoahmpIO%GPPXY    (I,J)  =  noahmp%biochem%flux%GPP
     NoahmpIO%NPPXY    (I,J)  =  noahmp%biochem%flux%NPP

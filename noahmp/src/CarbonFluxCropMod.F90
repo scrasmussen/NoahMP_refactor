@@ -66,37 +66,33 @@ contains
               WROOT           => noahmp%water%state%WROOT            ,& ! in,    root zone soil water [-]
               WSTRES          => noahmp%water%state%WSTRES           ,& ! in,    water stress coeficient [-]  (1. for wilting)
               PSN             => noahmp%biochem%flux%PSN             ,& ! in,    total leaf photosynthesis (umol co2 /m2 /s)
-              FOLN            => noahmp%biochem%state%FOLN           ,& ! in,    foliage nitrogen concentration (%)
-              IHA             => noahmp%biochem%state%IHA            ,& ! in,    Havest index (0=on,1=off)
-              IPA             => noahmp%biochem%state%IPA            ,& ! in,    Planting index
-              PGS             => noahmp%biochem%state%PGS            ,& ! in,    plant growing stage
+              NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage ,& ! in,    foliage nitrogen concentration (%)
+              IndexPlanting             => noahmp%biochem%state%IndexPlanting            ,& ! in,    Planting index
+              PlantGrowStage             => noahmp%biochem%state%PlantGrowStage            ,& ! in,    plant growing stage
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               XLAI            => noahmp%energy%state%LAI             ,& ! inout, leaf area index [-]
               XSAI            => noahmp%energy%state%SAI             ,& ! inout, stem area index [-]
-              LFMASS          => noahmp%biochem%state%LFMASS         ,& ! inout, leaf mass [g/m2]
-              RTMASS          => noahmp%biochem%state%RTMASS         ,& ! inout, mass of fine roots [g/m2]
-              STMASS          => noahmp%biochem%state%STMASS         ,& ! inout, stem mass [g/m2]
-              WOOD            => noahmp%biochem%state%WOOD           ,& ! inout, mass of wood (incl. woody roots) [g/m2]
-              STBLCP          => noahmp%biochem%state%STBLCP         ,& ! inout, stable carbon in deep soil [g/m2]
-              FASTCP          => noahmp%biochem%state%FASTCP         ,& ! inout, short-lived carbon in shallow soil [g/m2]
-              GDD             => noahmp%biochem%state%GDD            ,& ! inout, growing degree days (XING)
-              GRAIN           => noahmp%biochem%state%GRAIN          ,& ! inout, mass of grain (XING) [g/m2]
-              ADDNPPLF        => noahmp%biochem%state%ADDNPPLF       ,& ! out,   leaf assimil after resp. losses removed [g/m2]
-              ADDNPPST        => noahmp%biochem%state%ADDNPPST       ,& ! out,   stem assimil after resp. losses removed [g/m2]
-              FNF             => noahmp%biochem%state%FNF            ,& ! out,   foliage nitrogen adjustemt to respiration (<= 1)
-              FSW             => noahmp%biochem%state%FSW            ,& ! out,   soil water factor for microbial respiration
-              FST             => noahmp%biochem%state%FST            ,& ! out,   soil temperature factor for microbial respiration
-              LEAFPT          => noahmp%biochem%state%LEAFPT         ,& ! out,   fraction of carbon allocated to leaves [-]
-              NONLEF          => noahmp%biochem%state%NONLEF         ,& ! out,   fraction of carbon to root and wood [-]
-              LFMSMN          => noahmp%biochem%state%LFMSMN         ,& ! out,   minimum leaf mass [g/m2]
-              STMSMN          => noahmp%biochem%state%STMSMN         ,& ! out,   minimum stem mass [g/m2]
-              SAPM            => noahmp%biochem%state%SAPM           ,& ! out,   stem area per unit mass [m2/g]
-              TF              => noahmp%biochem%state%TF             ,& ! out,   temperature factor
-              TOTSC           => noahmp%biochem%state%TOTSC          ,& ! out,   total soil carbon [g/m2 C]
-              TOTLB           => noahmp%biochem%state%TOTLB          ,& ! out,   total living carbon ([g/m2 C]
+              LeafMass          => noahmp%biochem%state%LeafMass         ,& ! inout, leaf mass [g/m2]
+              RootMass          => noahmp%biochem%state%RootMass         ,& ! inout, mass of fine roots [g/m2]
+              StemMass          => noahmp%biochem%state%StemMass         ,& ! inout, stem mass [g/m2]
+              WoodMass        => noahmp%biochem%state%WoodMass    ,& ! inout, mass of wood (incl. woody roots) [g/m2]
+              CarbonMassDeepSoil          => noahmp%biochem%state%CarbonMassDeepSoil         ,& ! inout, stable carbon in deep soil [g/m2]
+              CarbonMassShallowSoil          => noahmp%biochem%state%CarbonMassShallowSoil         ,& ! inout, short-lived carbon in shallow soil [g/m2]
+              GrainMass     => noahmp%biochem%state%GrainMass     ,& ! inout, mass of grain [g/m2]
+              RespFacNitrogenFoliage             => noahmp%biochem%state%RespFacNitrogenFoliage            ,& ! out,   foliage nitrogen adjustemt to respiration (<= 1)
+              MicroRespFactorSoilWater             => noahmp%biochem%state%MicroRespFactorSoilWater            ,& ! out,   soil water factor for microbial respiration
+              MicroRespFactorSoilTemp             => noahmp%biochem%state%MicroRespFactorSoilTemp            ,& ! out,   soil temperature factor for microbial respiration
+              LeafMassMin          => noahmp%biochem%state%LeafMassMin         ,& ! out,   minimum leaf mass [g/m2]
+              StemMassMin          => noahmp%biochem%state%StemMassMin         ,& ! out,   minimum stem mass [g/m2]
+              StemAreaPerMass            => noahmp%biochem%state%StemAreaPerMass           ,& ! out,   stem area per unit mass [m2/g]
+              RespFacTemperature              => noahmp%biochem%state%RespFacTemperature             ,& ! out,   temperature factor
+              CarbonMassSoilTot           => noahmp%biochem%state%CarbonMassSoilTot          ,& ! out,   total soil carbon [g/m2 C]
+              CarbonMassLiveTot           => noahmp%biochem%state%CarbonMassLiveTot          ,& ! out,   total living carbon ([g/m2 C]
               CARBFX          => noahmp%biochem%flux%CARBFX          ,& ! out,   carbon assimilated rate [gC/m2/s]
               CBHYDRAFX       => noahmp%biochem%flux%CBHYDRAFX       ,& ! out,   carbonhydrate assimilated rate [g/m2/s]
+              ADDNPPLF        => noahmp%biochem%flux%ADDNPPLF       ,& ! out,   leaf assimil after resp. losses removed [g/m2/s]
+              ADDNPPST        => noahmp%biochem%flux%ADDNPPST       ,& ! out,   stem assimil after resp. losses removed [g/m2/s]
               LFTOVR          => noahmp%biochem%flux%LFTOVR          ,& ! out,   stem turnover rate [g/m2/s]
               STTOVR          => noahmp%biochem%flux%STTOVR          ,& ! out,   stem turnover rate [g/m2/s]
               WDTOVR          => noahmp%biochem%flux%WDTOVR          ,& ! out,   wood turnover rate [g/m2/s]
@@ -137,47 +133,47 @@ contains
 !----------------------------------------------------------------------
 
     ! initialization
-    SAPM   = 3.0 * 0.001         ! m2/kg -->m2/g
-    LFMSMN = LAIMIN / 0.035
-    STMSMN = XSAMIN / SAPM
+    StemAreaPerMass   = 3.0 * 0.001         ! m2/kg -->m2/g
+    LeafMassMin = LAIMIN / 0.035
+    StemMassMin = XSAMIN / StemAreaPerMass
 
     !!! carbon assimilation starts
     ! 1 mole -> 12 g carbon or 44 g CO2 or 30 g CH20
-    CARBFX    = PSN * 12.0e-6   !*IPA   !umol co2 /m2/ s -> g/m2/s C
-    CBHYDRAFX = PSN * 30.0e-6   !*IPA
+    CARBFX    = PSN * 12.0e-6   !*IndexPlanting   !umol co2 /m2/ s -> g/m2/s C
+    CBHYDRAFX = PSN * 30.0e-6   !*IndexPlanting
 
     ! mainteinance respiration
-    FNF     = min( FOLN / max(1.0e-06, FOLN_MX), 1.0 )
-    TF      = Q10MR**((TV - 298.16) / 10.0)
-    RESP    = LFMR25 * TF * FNF * XLAI * (1.0 - WSTRES)         ! umol/m2/s
-    RSLEAF  = min( (LFMASS - LFMSMN) / MainTimeStep, RESP*30.0e-6 )       ! g/m2/s
-    RSROOT  = RTMR25 * (RTMASS * 1.0e-3) * TF * 30.0e-6         ! g/m2/s
-    RSSTEM  = STMR25 * (STMASS * 1.0e-3) * TF * 30.0e-6         ! g/m2/s
-    RSGRAIN = GRAINMR25 * (GRAIN * 1.0e-3) * TF * 30.0e-6       ! g/m2/s
+    RespFacNitrogenFoliage     = min( NitrogenConcFoliage / max(1.0e-06, FOLN_MX), 1.0 )
+    RespFacTemperature      = Q10MR**((TV - 298.16) / 10.0)
+    RESP    = LFMR25 * RespFacTemperature * RespFacNitrogenFoliage * XLAI * (1.0 - WSTRES)         ! umol/m2/s
+    RSLEAF  = min( (LeafMass - LeafMassMin) / MainTimeStep, RESP*30.0e-6 )       ! g/m2/s
+    RSROOT  = RTMR25 * (RootMass * 1.0e-3) * RespFacTemperature * 30.0e-6         ! g/m2/s
+    RSSTEM  = STMR25 * (StemMass * 1.0e-3) * RespFacTemperature * 30.0e-6         ! g/m2/s
+    RSGRAIN = GRAINMR25 * (GrainMass * 1.0e-3) * RespFacTemperature * 30.0e-6       ! g/m2/s
 
-    ! calculate growth respiration for leaf, rtmass and grain
-    GRLEAF  = max( 0.0, FRA_GR * (LFPT(PGS)*CBHYDRAFX - RSLEAF) )
-    GRSTEM  = max( 0.0, FRA_GR * (STPT(PGS)*CBHYDRAFX - RSSTEM) )
-    GRROOT  = max( 0.0, FRA_GR * (RTPT(PGS)*CBHYDRAFX - RSROOT) )
-    GRGRAIN = max( 0.0, FRA_GR * (GRAINPT(PGS)*CBHYDRAFX - RSGRAIN) )
+    ! calculate growth respiration for leaf, root and grain
+    GRLEAF  = max( 0.0, FRA_GR * (LFPT(PlantGrowStage)*CBHYDRAFX - RSLEAF) )
+    GRSTEM  = max( 0.0, FRA_GR * (STPT(PlantGrowStage)*CBHYDRAFX - RSSTEM) )
+    GRROOT  = max( 0.0, FRA_GR * (RTPT(PlantGrowStage)*CBHYDRAFX - RSROOT) )
+    GRGRAIN = max( 0.0, FRA_GR * (GRAINPT(PlantGrowStage)*CBHYDRAFX - RSGRAIN) )
 
     ! leaf turnover, stem turnover, root turnover and leaf death caused by soil water and soil temperature stress
-    LFTOVR  = LF_OVRC(PGS) * 1.0e-6 * LFMASS
-    RTTOVR  = RT_OVRC(PGS) * 1.0e-6 * RTMASS
-    STTOVR  = ST_OVRC(PGS) * 1.0e-6 * STMASS
-    SC      = exp( -0.3 * max(0.0, TV-LEFREEZ) ) * (LFMASS/120.0)
+    LFTOVR  = LF_OVRC(PlantGrowStage) * 1.0e-6 * LeafMass
+    RTTOVR  = RT_OVRC(PlantGrowStage) * 1.0e-6 * RootMass
+    STTOVR  = ST_OVRC(PlantGrowStage) * 1.0e-6 * StemMass
+    SC      = exp( -0.3 * max(0.0, TV-LEFREEZ) ) * (LeafMass/120.0)
     SD      = exp( (WSTRES - 1.0) * WSTRC )
-    DIELF   = LFMASS * 1.0e-6 * (DILE_FW(PGS) * SD + DILE_FC(PGS) * SC)
+    DIELF   = LeafMass * 1.0e-6 * (DILE_FW(PlantGrowStage) * SD + DILE_FC(PlantGrowStage) * SC)
 
     ! Allocation of CBHYDRAFX to leaf, stem, root and grain at each growth stage
-    ADDNPPLF = max( 0.0, LFPT(PGS)*CBHYDRAFX - GRLEAF - RSLEAF )
-    ADDNPPLF = LFPT(PGS)*CBHYDRAFX - GRLEAF - RSLEAF
-    ADDNPPST = max( 0.0, STPT(PGS)*CBHYDRAFX - GRSTEM - RSSTEM )
-    ADDNPPST = STPT(PGS)*CBHYDRAFX - GRSTEM - RSSTEM
+    ADDNPPLF = max( 0.0, LFPT(PlantGrowStage)*CBHYDRAFX - GRLEAF - RSLEAF )
+    ADDNPPLF = LFPT(PlantGrowStage)*CBHYDRAFX - GRLEAF - RSLEAF
+    ADDNPPST = max( 0.0, STPT(PlantGrowStage)*CBHYDRAFX - GRSTEM - RSSTEM )
+    ADDNPPST = STPT(PlantGrowStage)*CBHYDRAFX - GRSTEM - RSSTEM
     
     ! avoid reducing leaf mass below its minimum value but conserve mass
-    LFDEL  = (LFMASS - LFMSMN) / MainTimeStep
-    STDEL  = (STMASS - STMSMN) / MainTimeStep
+    LFDEL  = (LeafMass - LeafMassMin) / MainTimeStep
+    STDEL  = (StemMass - StemMassMin) / MainTimeStep
     LFTOVR = min( LFTOVR, LFDEL+ADDNPPLF )
     STTOVR = min( STTOVR, STDEL+ADDNPPST )
     DIELF  = min( DIELF, LFDEL+ADDNPPLF-LFTOVR )
@@ -187,55 +183,55 @@ contains
     NPPL   = ADDNPPLF
     NPPS   = max( ADDNPPST, -STDEL )
     NPPS   = ADDNPPST
-    NPPR   = RTPT(PGS) * CBHYDRAFX - RSROOT - GRROOT
-    NPPG   = GRAINPT(PGS) * CBHYDRAFX - RSGRAIN - GRGRAIN
+    NPPR   = RTPT(PlantGrowStage) * CBHYDRAFX - RSROOT - GRROOT
+    NPPG   = GRAINPT(PlantGrowStage) * CBHYDRAFX - RSGRAIN - GRGRAIN
 
     ! masses of plant components
-    LFMASS = LFMASS + (NPPL - LFTOVR - DIELF) * MainTimeStep
-    STMASS = STMASS + (NPPS - STTOVR) * MainTimeStep       ! g/m2
-    RTMASS = RTMASS + (NPPR - RTTOVR) * MainTimeStep
-    GRAIN  = GRAIN + NPPG * MainTimeStep 
+    LeafMass = LeafMass + (NPPL - LFTOVR - DIELF) * MainTimeStep
+    StemMass = StemMass + (NPPS - STTOVR) * MainTimeStep       ! g/m2
+    RootMass = RootMass + (NPPR - RTTOVR) * MainTimeStep
+    GrainMass  = GrainMass + NPPG * MainTimeStep 
     GPP    = CBHYDRAFX * 0.4                                  ! g/m2/s C  0.4=12/30, CH20 to C
 
     ! carbon convert to grain
     LFCONVERT = 0.0              ! Zhe Zhang 2020-07-13
     STCONVERT = 0.0
     RTCONVERT = 0.0
-    LFCONVERT = LFMASS * (LFCT(PGS) * MainTimeStep / 3600.0)
-    STCONVERT = STMASS * (STCT(PGS) * MainTimeStep / 3600.0)
-    RTCONVERT = RTMASS * (RTCT(PGS) * MainTimeStep / 3600.0)
-    LFMASS    = LFMASS - LFCONVERT
-    STMASS    = STMASS - STCONVERT
-    RTMASS    = RTMASS - RTCONVERT
-    GRAIN     = GRAIN + STCONVERT + RTCONVERT + LFCONVERT
-    !if ( PGS==6 ) then
-    !   STCONVERT = STMASS * (0.00005 * MainTimeStep / 3600.0)
-    !   STMASS    = STMASS - STCONVERT
-    !   RTCONVERT = RTMASS * (0.0005 * MainTimeStep / 3600.0)
-    !   RTMASS    = RTMASS - RTCONVERT
-    !   GRAIN     = GRAIN + STCONVERT + RTCONVERT
+    LFCONVERT = LeafMass * (LFCT(PlantGrowStage) * MainTimeStep / 3600.0)
+    STCONVERT = StemMass * (STCT(PlantGrowStage) * MainTimeStep / 3600.0)
+    RTCONVERT = RootMass * (RTCT(PlantGrowStage) * MainTimeStep / 3600.0)
+    LeafMass    = LeafMass - LFCONVERT
+    StemMass    = StemMass - STCONVERT
+    RootMass    = RootMass - RTCONVERT
+    GrainMass     = GrainMass + STCONVERT + RTCONVERT + LFCONVERT
+    !if ( PlantGrowStage==6 ) then
+    !   STCONVERT = StemMass * (0.00005 * MainTimeStep / 3600.0)
+    !   StemMass    = StemMass - STCONVERT
+    !   RTCONVERT = RootMass * (0.0005 * MainTimeStep / 3600.0)
+    !   RootMass    = RootMass - RTCONVERT
+    !   GrainMass     = GrainMass + STCONVERT + RTCONVERT
     !endif
     
-    if ( RTMASS < 0.0 ) then
+    if ( RootMass < 0.0 ) then
        RTTOVR = NPPR
-       RTMASS = 0.0
+       RootMass = 0.0
     endif
-    if ( GRAIN < 0.0 ) then
-       GRAIN = 0.0
+    if ( GrainMass < 0.0 ) then
+       GrainMass = 0.0
     endif
 
     ! soil carbon budgets
-    !if ( (PGS == 1) .or. (PGS == 2) .or. (PGS == 8) ) then
-    !   FASTCP=1000
+    !if ( (PlantGrowStage == 1) .or. (PlantGrowStage == 2) .or. (PlantGrowStage == 8) ) then
+    !   CarbonMassShallowSoil=1000
     !else
-    FASTCP = FASTCP + (RTTOVR+LFTOVR+STTOVR+DIELF) * MainTimeStep 
+    CarbonMassShallowSoil = CarbonMassShallowSoil + (RTTOVR+LFTOVR+STTOVR+DIELF) * MainTimeStep 
     !endif
-    FST    = 2.0**((STC(1) - 283.16) / 10.0)
-    FSW    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
-    RSSOIL = FSW * FST * MRP * max(0.0, FASTCP*1.0e-3) * 12.0e-6
+    MicroRespFactorSoilTemp    = 2.0**((STC(1) - 283.16) / 10.0)
+    MicroRespFactorSoilWater    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
+    RSSOIL = MicroRespFactorSoilWater * MicroRespFactorSoilTemp * MRP * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
     STABLC = 0.1 * RSSOIL
-    FASTCP = FASTCP - (RSSOIL + STABLC) * MainTimeStep
-    STBLCP = STBLCP + STABLC * MainTimeStep
+    CarbonMassShallowSoil = CarbonMassShallowSoil - (RSSOIL + STABLC) * MainTimeStep
+    CarbonMassDeepSoil = CarbonMassDeepSoil + STABLC * MainTimeStep
  
     !  total carbon flux
     CFLUX  = - CARBFX + RSLEAF + RSROOT + RSSTEM &
@@ -247,29 +243,29 @@ contains
              GRLEAF + GRROOT + GRGRAIN                            !g/m2/s C
     HETERS = RSSOIL                                               !g/m2/s C
     NEE    = (AUTORS + HETERS - GPP) * 44.0 / 30.0                !g/m2/s CO2
-    TOTSC  = FASTCP + STBLCP                                      !g/m2   C
-    TOTLB  = LFMASS + RTMASS + GRAIN         
+    CarbonMassSoilTot  = CarbonMassShallowSoil + CarbonMassDeepSoil                                      !g/m2   C
+    CarbonMassLiveTot  = LeafMass + RootMass + GrainMass        
  
     ! leaf area index and stem area index
-    XLAI   = max( LFMASS*BIO2LAI, LAIMIN )
-    XSAI   = max( STMASS*SAPM, XSAMIN )
+    XLAI   = max( LeafMass*BIO2LAI, LAIMIN )
+    XSAI   = max( StemMass*StemAreaPerMass, XSAMIN )
    
     ! After harversting
-    !if ( PGS == 8 ) then
-    !   LFMASS = 0.62
-    !   STMASS = 0
-    !   GRAIN  = 0
+    !if ( PlantGrowStage == 8 ) then
+    !   LeafMass = 0.62
+    !   StemMass = 0
+    !   GrainMass  = 0
     !endif
 
-    !if ( (PGS == 1) .or. (PGS == 2) .or. (PGS == 8) ) then
-    if ( (PGS == 8) .and. &
-         ((GRAIN > 0.0) .or. (LFMASS > 0) .or. (STMASS > 0) .or. (RTMASS > 0)) ) then
+    !if ( (PlantGrowStage == 1) .or. (PlantGrowStage == 2) .or. (PlantGrowStage == 8) ) then
+    if ( (PlantGrowStage == 8) .and. &
+         ((GrainMass > 0.0) .or. (LeafMass > 0) .or. (StemMass > 0) .or. (RootMass > 0)) ) then
        XLAI   = 0.05
        XSAI   = 0.05
-       LFMASS = LFMSMN
-       STMASS = STMSMN
-       RTMASS = 0
-       GRAIN  = 0
+       LeafMass = LeafMassMin
+       StemMass = StemMassMin
+       RootMass = 0
+       GrainMass  = 0
     endif 
         
     end associate

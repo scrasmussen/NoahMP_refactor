@@ -34,7 +34,7 @@ contains
     real(kind=kind_noahmp)           :: KO          ! o2 Michaelis-Menten constant (pa)
     real(kind=kind_noahmp)           :: A,B,C,Q     ! intermediate calculations for RS
     real(kind=kind_noahmp)           :: R1,R2       ! roots for RS
-    real(kind=kind_noahmp)           :: FNF         ! foliage nitrogen adjustment factor (0 to 1)
+    real(kind=kind_noahmp)           :: NitrogenFoliageFac         ! foliage nitrogen adjustment factor (0 to 1)
     real(kind=kind_noahmp)           :: PPF         ! absorb photosynthetic photon flux (umol photons/m2/s)
     real(kind=kind_noahmp)           :: WC          ! Rubisco limited photosynthesis (umol co2/m2/s)
     real(kind=kind_noahmp)           :: WJ          ! light limited photosynthesis (umol co2/m2/s)
@@ -60,8 +60,8 @@ contains
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight   ,& ! in,    air pressure [Pa] at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
-              IGS             => noahmp%biochem%state%IGS            ,& ! in,    growing season index (0=off, 1=on)
-              FOLN            => noahmp%biochem%state%FOLN           ,& ! in,    foliage nitrogen concentration (%)
+              IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason            ,& ! in,    growing season index (0=off, 1=on)
+              NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage  ,& ! in,    foliage nitrogen concentration (%)
               FOLNMX          => noahmp%biochem%param%FOLNMX         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
               QE25            => noahmp%biochem%param%QE25           ,& ! in,    quantum efficiency at 25c (umol co2 / umol photon)
               VCMX25          => noahmp%biochem%param%VCMX25         ,& ! in,    maximum rate of carboxylation at 25c (umol co2/m**2/s)
@@ -101,7 +101,7 @@ contains
        PSNSUN = 0.0           
 
        if ( PARSUN > 0.0 ) then
-          FNF  = min( FOLN / max(MPE, FOLNMX), 1.0 )
+          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSUN
           J    = PPF * QE25
@@ -109,7 +109,7 @@ contains
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = VCMX25 / F2(TC) * FNF * BTRAN * F1(AVCMX, TC)
+          VCMX = VCMX25 / F2(TC) * NitrogenFoliageFac * BTRAN * F1(AVCMX, TC)
           ! first guess ci
           CI = 0.7 * CO2 * C3PSN + 0.4 * CO2 * (1.0 - C3PSN)
           ! rb: s/m -> s m**2 / umol
@@ -122,7 +122,7 @@ contains
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
              WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
-             PSNSUN = min( WJ, WC, WE ) * IGS
+             PSNSUN = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSUN, MPE )
              A      = MP * PSNSUN * PressureAirRefHeight * CEA / (CS * ESTV) + BP
              B      = ( MP * PSNSUN * PressureAirRefHeight / CS + BP ) * RLB - 1.0
@@ -155,7 +155,7 @@ contains
        PSNSHA = 0.0
 
        if ( PARSHA > 0.0 ) then
-          FNF  = min( FOLN / max(MPE, FOLNMX), 1.0 )
+          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSHA
           J    = PPF * QE25
@@ -163,7 +163,7 @@ contains
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = VCMX25 / F2(TC) * FNF * BTRAN * F1(AVCMX, TC)
+          VCMX = VCMX25 / F2(TC) * NitrogenFoliageFac * BTRAN * F1(AVCMX, TC)
           ! first guess ci
           CI = 0.7 * CO2 * C3PSN + 0.4 * CO2 * (1.0 - C3PSN)
           ! rb: s/m -> s m**2 / umol
@@ -176,7 +176,7 @@ contains
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
              WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
-             PSNSHA = min( WJ, WC, WE ) * IGS
+             PSNSHA = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSHA, MPE )
              A      = MP * PSNSHA * PressureAirRefHeight * CEA / (CS * ESTV) + BP
              B      = ( MP * PSNSHA * PressureAirRefHeight / CS + BP ) * RLB - 1.0

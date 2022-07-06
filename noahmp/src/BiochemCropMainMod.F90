@@ -44,12 +44,12 @@ contains
               SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
               SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
               BTRAN            => noahmp%water%state%BTRAN           ,& ! in,    soil water transpiration factor (0 to 1)
-              LFMASS           => noahmp%biochem%state%LFMASS        ,& ! inout, leaf mass [g/m2]
-              RTMASS           => noahmp%biochem%state%RTMASS        ,& ! inout, mass of fine roots [g/m2]
-              STMASS           => noahmp%biochem%state%STMASS        ,& ! inout, stem mass [g/m2]
-              WOOD             => noahmp%biochem%state%WOOD          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
-              STBLCP           => noahmp%biochem%state%STBLCP        ,& ! inout, stable carbon in deep soil [g/m2]
-              FASTCP           => noahmp%biochem%state%FASTCP        ,& ! inout, short-lived carbon in shallow soil [g/m2]
+              LeafMass           => noahmp%biochem%state%LeafMass        ,& ! inout, leaf mass [g/m2]
+              RootMass           => noahmp%biochem%state%RootMass        ,& ! inout, mass of fine roots [g/m2]
+              StemMass           => noahmp%biochem%state%StemMass        ,& ! inout, stem mass [g/m2]
+              WoodMass             => noahmp%biochem%state%WoodMass          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
+              CarbonMassDeepSoil           => noahmp%biochem%state%CarbonMassDeepSoil        ,& ! inout, stable carbon in deep soil [g/m2]
+              CarbonMassShallowSoil           => noahmp%biochem%state%CarbonMassShallowSoil        ,& ! inout, short-lived carbon in shallow soil [g/m2]
               XLAI             => noahmp%energy%state%LAI            ,& ! inout, leaf area index [-]
               XSAI             => noahmp%energy%state%SAI            ,& ! inout, stem area index [-]
               GPP              => noahmp%biochem%flux%GPP            ,& ! out,   net instantaneous assimilation [g/m2/s C]
@@ -57,11 +57,9 @@ contains
               NEE              => noahmp%biochem%flux%NEE            ,& ! out,   net ecosystem exchange [g/m2/s CO2]
               AUTORS           => noahmp%biochem%flux%AUTORS         ,& ! out,   net ecosystem respiration [g/m2/s C]
               HETERS           => noahmp%biochem%flux%HETERS         ,& ! out,   organic respiration [g/m2/s C]
-              TOTSC            => noahmp%biochem%state%TOTSC         ,& ! out,   total soil carbon [g/m2 C]
-              TOTLB            => noahmp%biochem%state%TOTLB         ,& ! out,   total living carbon ([g/m2 C]
-              GRAIN            => noahmp%biochem%state%GRAIN         ,& ! out,   mass of GRAIN [g/m2] 
-              IPA              => noahmp%biochem%state%IPA           ,& ! out,   Planting index
-              IHA              => noahmp%biochem%state%IHA           ,& ! out,   Havest index (0=on,1=off)
+              CarbonMassSoilTot            => noahmp%biochem%state%CarbonMassSoilTot         ,& ! out,   total soil carbon [g/m2 C]
+              CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
+              GrainMass            => noahmp%biochem%state%GrainMass         ,& ! out,   mass of grain [g/m2] 
               WROOT            => noahmp%water%state%WROOT           ,& ! out,   root zone soil water [-]
               WSTRES           => noahmp%water%state%WSTRES           & ! out,   water stress coeficient [-]  (1. for wilting)
              ) 
@@ -82,15 +80,15 @@ contains
        NEE    = 0.0
        AUTORS = 0.0
        HETERS = 0.0
-       TOTSC  = 0.0
-       TOTLB  = 0.0
-       LFMASS = 0.0
-       RTMASS = 0.0
-       STMASS = 0.0
-       WOOD   = 0.0
-       STBLCP = 0.0
-       FASTCP = 0.0
-       GRAIN  = 0.0
+       CarbonMassSoilTot  = 0.0
+       CarbonMassLiveTot  = 0.0
+       LeafMass = 0.0
+       RootMass = 0.0
+       StemMass = 0.0
+       WoodMass   = 0.0
+       CarbonMassDeepSoil = 0.0
+       CarbonMassShallowSoil = 0.0
+       GrainMass  = 0.0
        return
     endif
     

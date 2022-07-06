@@ -42,24 +42,24 @@ contains
               SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
               BTRAN            => noahmp%water%state%BTRAN           ,& ! in,    soil water transpiration factor (0 to 1)
               SLA              => noahmp%biochem%param%SLA           ,& ! in,    single-side leaf area per Kg [m2/kg]
-              LFMASS           => noahmp%biochem%state%LFMASS        ,& ! inout, leaf mass [g/m2]
-              RTMASS           => noahmp%biochem%state%RTMASS        ,& ! inout, mass of fine roots [g/m2]
-              STMASS           => noahmp%biochem%state%STMASS        ,& ! inout, stem mass [g/m2]
-              WOOD             => noahmp%biochem%state%WOOD          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
-              STBLCP           => noahmp%biochem%state%STBLCP        ,& ! inout, stable carbon in deep soil [g/m2]
-              FASTCP           => noahmp%biochem%state%FASTCP        ,& ! inout, short-lived carbon in shallow soil [g/m2]
+              LeafMass           => noahmp%biochem%state%LeafMass        ,& ! inout, leaf mass [g/m2]
+              RootMass           => noahmp%biochem%state%RootMass        ,& ! inout, mass of fine roots [g/m2]
+              StemMass           => noahmp%biochem%state%StemMass        ,& ! inout, stem mass [g/m2]
+              WoodMass             => noahmp%biochem%state%WoodMass          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
+              CarbonMassDeepSoil           => noahmp%biochem%state%CarbonMassDeepSoil        ,& ! inout, stable carbon in deep soil [g/m2]
+              CarbonMassShallowSoil           => noahmp%biochem%state%CarbonMassShallowSoil        ,& ! inout, short-lived carbon in shallow soil [g/m2]
               GPP              => noahmp%biochem%flux%GPP            ,& ! out,   net instantaneous assimilation [g/m2/s C]
               NPP              => noahmp%biochem%flux%NPP            ,& ! out,   net primary productivity [g/m2/s C]
               NEE              => noahmp%biochem%flux%NEE            ,& ! out,   net ecosystem exchange [g/m2/s CO2]
               AUTORS           => noahmp%biochem%flux%AUTORS         ,& ! out,   net ecosystem respiration [g/m2/s C]
               HETERS           => noahmp%biochem%flux%HETERS         ,& ! out,   organic respiration [g/m2/s C]
-              TOTSC            => noahmp%biochem%state%TOTSC         ,& ! out,   total soil carbon [g/m2 C]
-              TOTLB            => noahmp%biochem%state%TOTLB         ,& ! out,   total living carbon ([g/m2 C]
+              CarbonMassSoilTot            => noahmp%biochem%state%CarbonMassSoilTot         ,& ! out,   total soil carbon [g/m2 C]
+              CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
               XLAI             => noahmp%energy%state%LAI            ,& ! out,   leaf area index [-]
               XSAI             => noahmp%energy%state%SAI            ,& ! out,   stem area index [-]
               WROOT            => noahmp%water%state%WROOT           ,& ! out,   root zone soil water [-]
               WSTRES           => noahmp%water%state%WSTRES          ,& ! out,   water stress coeficient [-]  (1. for wilting)
-              LAPM             => noahmp%biochem%state%LAPM           & ! out,   leaf area per unit mass [m2/g]
+              LeafAreaPerMass             => noahmp%biochem%state%LeafAreaPerMass           & ! out,   leaf area per unit mass [m2/g]
              )
 !-----------------------------------------------------------------------
 
@@ -78,19 +78,19 @@ contains
        NEE    = 0.0
        AUTORS = 0.0
        HETERS = 0.0
-       TOTSC  = 0.0
-       TOTLB  = 0.0
-       LFMASS = 0.0
-       RTMASS = 0.0
-       STMASS = 0.0
-       WOOD   = 0.0
-       STBLCP = 0.0
-       FASTCP = 0.0
+       CarbonMassSoilTot  = 0.0
+       CarbonMassLiveTot  = 0.0
+       LeafMass = 0.0
+       RootMass = 0.0
+       StemMass = 0.0
+       WoodMass   = 0.0
+       CarbonMassDeepSoil = 0.0
+       CarbonMassShallowSoil = 0.0
        return
     endif
 
     ! start biogeochemistry process
-    LAPM = SLA / 1000.0   ! m2/kg -> m2/g
+    LeafAreaPerMass = SLA / 1000.0   ! m2/kg -> m2/g
 
     ! water stress
     WSTRES = 1.0 - BTRAN

@@ -42,10 +42,10 @@ contains
               GDDS3            => noahmp%biochem%param%GDDS3        ,& ! in,    GDD from seeding to post vegetative
               GDDS4            => noahmp%biochem%param%GDDS4        ,& ! in,    GDD from seeding to intial reproductive
               GDDS5            => noahmp%biochem%param%GDDS5        ,& ! in,    GDD from seeding to physical maturity
-              GDD              => noahmp%biochem%state%GDD          ,& ! inout, crop growing degree days
-              IPA              => noahmp%biochem%state%IPA          ,& ! out,   Planting index index (0=off, 1=on)
-              IHA              => noahmp%biochem%state%IHA          ,& ! out,   Havest index (0=on,1=off) 
-              PGS              => noahmp%biochem%state%PGS           & ! out,   Plant growth stage (1=S1,2=S2,3=S3)
+              GrowDegreeDay    => noahmp%biochem%state%GrowDegreeDay ,& ! inout, crop growing degree days
+              IndexPlanting              => noahmp%biochem%state%IndexPlanting          ,& ! out,   Planting index index (0=off, 1=on)
+              IndexHarvest              => noahmp%biochem%state%IndexHarvest          ,& ! out,   Havest index (0=on,1=off) 
+              PlantGrowStage              => noahmp%biochem%state%PlantGrowStage           & ! out,   Plant growth stage (1=S1,2=S2,3=S3)
              )
 !------------------------------------------------------------------------
 
@@ -53,14 +53,14 @@ contains
     TC = T2M - 273.15
 
     ! Planting and Havest index
-    IPA = 1  ! on
-    IHA = 1  ! off
+    IndexPlanting = 1  ! on
+    IndexHarvest = 1  ! off
 
     ! turn on/off the planting 
-    if ( DayJulianInYear < PLTDAY ) IPA = 0   ! off
+    if ( DayJulianInYear < PLTDAY ) IndexPlanting = 0   ! off
         
     ! turn on/off the harvesting
-    if ( DayJulianInYear >= HSDAY ) IHA = 0   ! on            
+    if ( DayJulianInYear >= HSDAY ) IndexHarvest = 0   ! on            
 
     ! Calculate the growing degree days               
     if ( TC < GDDTBASE ) then
@@ -70,18 +70,18 @@ contains
     else
        TDIFF = TC - GDDTBASE
     endif
-    GDD      = (GDD + TDIFF * MainTimeStep / 86400.0) * IPA * IHA
-    GDDDAY   = GDD
+    GrowDegreeDay = (GrowDegreeDay + TDIFF * MainTimeStep / 86400.0) * IndexPlanting * IndexHarvest
+    GDDDAY   = GrowDegreeDay
       
     ! Decide corn growth stage, based on Hybrid-Maize 
-    !   PGS = 1 : Before planting
-    !   PGS = 2 : from tassel initiation to silking
-    !   PGS = 3 : from silking to effective grain filling
-    !   PGS = 4 : from effective grain filling to pysiological maturity 
-    !   PGS = 5 : GDDM=1389
-    !   PGS = 6 :
-    !   PGS = 7 :
-    !   PGS = 8 :
+    !   PlantGrowStage = 1 : Before planting
+    !   PlantGrowStage = 2 : from tassel initiation to silking
+    !   PlantGrowStage = 3 : from silking to effective grain filling
+    !   PlantGrowStage = 4 : from effective grain filling to pysiological maturity 
+    !   PlantGrowStage = 5 : GDDM=1389
+    !   PlantGrowStage = 6 :
+    !   PlantGrowStage = 7 :
+    !   PlantGrowStage = 8 :
     !GDDM = 1389
     !GDDM = 1555
     !GDDSK = 0.41 * GDDM + 145.4 + 150 ! from hybrid-maize 
@@ -91,15 +91,15 @@ contains
     !GDDS3 = 170
 
     ! compute plant growth stage
-    PGS = 1   ! MB: set PGS = 1 (for initialization during growing season when no GDD)  
-    if ( GDDDAY > 0.0 )    PGS = 2
-    if ( GDDDAY >= GDDS1 ) PGS = 3
-    if ( GDDDAY >= GDDS2 ) PGS = 4 
-    if ( GDDDAY >= GDDS3 ) PGS = 5
-    if ( GDDDAY >= GDDS4 ) PGS = 6
-    if ( GDDDAY >= GDDS5 ) PGS = 7
-    if ( DayJulianInYear >= HSDAY ) PGS = 8
-    if ( DayJulianInYear < PLTDAY ) PGS = 1   
+    PlantGrowStage = 1   ! MB: set PlantGrowStage = 1 (for initialization during growing season when no GDD)  
+    if ( GDDDAY > 0.0 )    PlantGrowStage = 2
+    if ( GDDDAY >= GDDS1 ) PlantGrowStage = 3
+    if ( GDDDAY >= GDDS2 ) PlantGrowStage = 4 
+    if ( GDDDAY >= GDDS3 ) PlantGrowStage = 5
+    if ( GDDDAY >= GDDS4 ) PlantGrowStage = 6
+    if ( GDDDAY >= GDDS5 ) PlantGrowStage = 7
+    if ( DayJulianInYear >= HSDAY ) PlantGrowStage = 8
+    if ( DayJulianInYear < PLTDAY ) PlantGrowStage = 1   
 
     end associate
 

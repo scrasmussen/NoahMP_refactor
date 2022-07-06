@@ -65,18 +65,18 @@ contains
     noahmp%forcing%WindNorthwardRefHeight  = NoahmpIO%V_PHY(I,1,J)
     noahmp%forcing%SpecHumidityRefHeight   = NoahmpIO%QV_CURR(I,1,J)/(1.0+NoahmpIO%QV_CURR(I,1,J))  ! convert from mixing ratio to specific humidity
     noahmp%forcing%PressureAirRefHeight    = (NoahmpIO%P8W(I,1,J) + NoahmpIO%P8W(I,2,J)) * 0.5      ! air pressure [Pa] at middle point of lowest atmos model layer
-    noahmp%forcing%PressureAirSurface      = NoahmpIO%P8W(I,1,J)
-    noahmp%forcing%RadLWDownRefHeight      = NoahmpIO%GLW(I,J)
-    noahmp%forcing%RadSWDownRefHeight      = NoahmpIO%SWDOWN(I,J)
-    noahmp%forcing%TemperatureSoilBottom   = NoahmpIO%TMN(I,J)
-    noahmp%forcing%PrecipConvRefHeight     = NoahmpIO%MP_RAINC(I,J)  / NoahmpIO%DTBL
+    noahmp%forcing%PressureAirSurface      = NoahmpIO%P8W      (I,1,J)
+    noahmp%forcing%RadLWDownRefHeight      = NoahmpIO%GLW      (I,J)
+    noahmp%forcing%RadSWDownRefHeight      = NoahmpIO%SWDOWN   (I,J)
+    noahmp%forcing%TemperatureSoilBottom   = NoahmpIO%TMN      (I,J)
+    noahmp%forcing%PrecipConvRefHeight     = NoahmpIO%MP_RAINC (I,J) / NoahmpIO%DTBL
     noahmp%forcing%PrecipNonConvRefHeight  = NoahmpIO%MP_RAINNC(I,J) / NoahmpIO%DTBL
-    noahmp%forcing%PrecipShConvRefHeight   = NoahmpIO%MP_SHCV(I,J)   / NoahmpIO%DTBL
-    noahmp%forcing%PrecipSnowRefHeight     = NoahmpIO%MP_SNOW(I,J)   / NoahmpIO%DTBL
-    noahmp%forcing%PrecipGraupelRefHeight  = NoahmpIO%MP_GRAUP(I,J)  / NoahmpIO%DTBL
-    noahmp%forcing%PrecipHailRefHeight     = NoahmpIO%MP_HAIL(I,J)   / NoahmpIO%DTBL
+    noahmp%forcing%PrecipShConvRefHeight   = NoahmpIO%MP_SHCV  (I,J) / NoahmpIO%DTBL
+    noahmp%forcing%PrecipSnowRefHeight     = NoahmpIO%MP_SNOW  (I,J) / NoahmpIO%DTBL
+    noahmp%forcing%PrecipGraupelRefHeight  = NoahmpIO%MP_GRAUP (I,J) / NoahmpIO%DTBL
+    noahmp%forcing%PrecipHailRefHeight     = NoahmpIO%MP_HAIL  (I,J) / NoahmpIO%DTBL
     ! treat other precipitation (e.g. fog) contained in total precipitation
-    PrecipTotalRefHeight                   = NoahmpIO%RAINBL(I,J) / NoahmpIO%DTBL  ! convert precipitation unit from mm/timestep to mm/s
+    PrecipTotalRefHeight                   = NoahmpIO%RAINBL   (I,J) / NoahmpIO%DTBL  ! convert precipitation unit from mm/timestep to mm/s
     PrecipOtherRefHeight                   = PrecipTotalRefHeight - noahmp%forcing%PrecipConvRefHeight - &
                                              noahmp%forcing%PrecipNonConvRefHeight - noahmp%forcing%PrecipShConvRefHeight
     PrecipOtherRefHeight                   = max(0.0, PrecipOtherRefHeight)

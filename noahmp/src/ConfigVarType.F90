@@ -141,7 +141,7 @@ module ConfigVarType
     integer                   :: NumSoilLayer                ! number of soil layers
     integer                   :: NumSnowLayerMax             ! maximum number of snow layers
     integer                   :: NumSnowLayerNeg             ! actual number of snow layers (negative)
-    integer                   :: SurfaceType                 ! surface type: 1=soil; 2=lake
+    integer                   :: SurfaceType                 ! surface type (1=soil; 2=lake)
     integer                   :: NumSWRadBand                ! number of shortwave radiation bands
     integer                   :: SoilColor                   ! soil color type for albedo
     integer                   :: IndicatorIceSfc             ! indicator for ice surface/point (1=sea ice, 0=non-ice, -1=land ice)

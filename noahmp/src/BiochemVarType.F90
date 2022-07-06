@@ -1,14 +1,14 @@
 module BiochemVarType
 
 !!! Define column (1-D) Noah-MP Biochemistry (carbon,nitrogen,etc) variables
-!!! Biochemistry variable initialization is done in BiochemVarInit.F90
+!!! Biochemistry variable initialization is done in BiochemVarInitMod.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
 
   implicit none
   save
@@ -60,47 +60,49 @@ module BiochemVarType
     real(kind=kind_noahmp) :: GRTOVR           ! grain turnover rate [g/m2/s]
     real(kind=kind_noahmp) :: RSGRAIN          ! grain respiration rate [g/m2/s]
     real(kind=kind_noahmp) :: CBHYDRAFX        ! carbonhydrate assimilated rate [g/m2/s]
+    real(kind=kind_noahmp) :: ADDNPPLF         ! leaf assimil after resp. losses removed [g/m2/s]
+    real(kind=kind_noahmp) :: ADDNPPST         ! stem assimil after resp. losses removed [g/m2/s]
 
   end type flux_type
+
 
 !=== define "state" sub-type of biochem_type (biochem%state%variable)
   type :: state_type
 
     ! define specific biochem state variables
-    integer                :: PGS              ! plant growing stage
-    integer                :: IPA              ! Planting index
-    integer                :: IHA              ! Havestindex(0=on,1=off)
-    real(kind=kind_noahmp) :: IGS              ! growing season index (0=off, 1=on)    
-    real(kind=kind_noahmp) :: FOLN             ! foliage nitrogen concentration (%)
-    real(kind=kind_noahmp) :: LFMASS           ! leaf mass [g/m2]
-    real(kind=kind_noahmp) :: RTMASS           ! mass of fine roots [g/m2]
-    real(kind=kind_noahmp) :: STMASS           ! stem mass [g/m2]
-    real(kind=kind_noahmp) :: WOOD             ! mass of wood (incl. woody roots) [g/m2]
-    real(kind=kind_noahmp) :: STBLCP           ! stable carbon in deep soil [g/m2]
-    real(kind=kind_noahmp) :: FASTCP           ! short-lived carbon in shallow soil [g/m2]
-    real(kind=kind_noahmp) :: TOTSC            ! total soil carbon [g/m2 C]
-    real(kind=kind_noahmp) :: TOTLB            ! total living carbon ([g/m2 C]
-    real(kind=kind_noahmp) :: LAPM             ! leaf area per unit mass [m2/g]
-    real(kind=kind_noahmp) :: SAPM             ! stem area per unit mass (m2/g)
-    real(kind=kind_noahmp) :: LFMSMN           ! minimum leaf mass [g/m2]
-    real(kind=kind_noahmp) :: STMSMN           ! minimum stem mass [g/m2]
-    real(kind=kind_noahmp) :: ADDNPPLF         ! leaf assimil after resp. losses removed [g/m2]
-    real(kind=kind_noahmp) :: ADDNPPST         ! stem assimil after resp. losses removed [g/m2]
-    real(kind=kind_noahmp) :: LEAFPT           ! fraction of carbon allocated to leaves [-]
-    real(kind=kind_noahmp) :: WOODF            ! calculated wood to root ratio [-]
-    real(kind=kind_noahmp) :: NONLEF           ! fraction of carbon to root and wood [-]
-    real(kind=kind_noahmp) :: ROOTPT           ! fraction of carbon flux to roots [-]
-    real(kind=kind_noahmp) :: WOODPT           ! fraction of carbon flux to wood [-]
-    real(kind=kind_noahmp) :: STEMPT           ! fraction of carbon flux to stem [-]
-    real(kind=kind_noahmp) :: FSW              ! soil water factor for microbial respiration
-    real(kind=kind_noahmp) :: FST              ! soil temperature factor for microbial respiration
-    real(kind=kind_noahmp) :: FNF              ! foliage nitrogen adjustemt to respiration (<= 1)
-    real(kind=kind_noahmp) :: TF               ! temperature factor
-    real(kind=kind_noahmp) :: RF               ! respiration reduction factor (<= 1)
-    real(kind=kind_noahmp) :: GRAIN            ! mass of GRAIN [g/m2]
-    real(kind=kind_noahmp) :: GDD              ! growing degree days
+    integer                :: PlantGrowStage             ! plant growing stage
+    integer                :: IndexPlanting              ! Planting index (0=off, 1=on)
+    integer                :: IndexHarvest               ! Harvest index (0=on,1=off)
+    real(kind=kind_noahmp) :: IndexGrowSeason            ! growing season index (0=off, 1=on)    
+    real(kind=kind_noahmp) :: NitrogenConcFoliage        ! foliage nitrogen concentration (%)
+    real(kind=kind_noahmp) :: LeafMass                   ! leaf mass [g/m2]
+    real(kind=kind_noahmp) :: RootMass                   ! mass of fine roots [g/m2]
+    real(kind=kind_noahmp) :: StemMass                   ! stem mass [g/m2]
+    real(kind=kind_noahmp) :: WoodMass                   ! mass of wood (include woody roots) [g/m2]
+    real(kind=kind_noahmp) :: CarbonMassDeepSoil         ! stable carbon in deep soil [g/m2]
+    real(kind=kind_noahmp) :: CarbonMassShallowSoil      ! short-lived carbon in shallow soil [g/m2]
+    real(kind=kind_noahmp) :: CarbonMassSoilTot          ! total soil carbon mass [g/m2 C]
+    real(kind=kind_noahmp) :: CarbonMassLiveTot          ! total living carbon mass ([g/m2 C]
+    real(kind=kind_noahmp) :: LeafAreaPerMass            ! leaf area per unit mass [m2/g]
+    real(kind=kind_noahmp) :: StemAreaPerMass            ! stem area per unit mass (m2/g)
+    real(kind=kind_noahmp) :: LeafMassMin                ! minimum leaf mass [g/m2]
+    real(kind=kind_noahmp) :: StemMassMin                ! minimum stem mass [g/m2]
+    real(kind=kind_noahmp) :: CarbonFracToLeaf           ! fraction of carbon flux allocated to leaves [-]
+    real(kind=kind_noahmp) :: CarbonFracToRoot           ! fraction of carbon flux allocated to roots [-]
+    real(kind=kind_noahmp) :: CarbonFracToWood           ! fraction of carbon flux allocated to wood [-]
+    real(kind=kind_noahmp) :: CarbonFracToStem           ! fraction of carbon flux allocated to stem [-]
+    real(kind=kind_noahmp) :: WoodCarbonFrac             ! wood carbon fraction in (root + wood) carbon [-]
+    real(kind=kind_noahmp) :: CarbonFracToWoodRoot       ! fraction of carbon to root and wood [-]
+    real(kind=kind_noahmp) :: MicroRespFactorSoilWater   ! soil water factor for microbial respiration
+    real(kind=kind_noahmp) :: MicroRespFactorSoilTemp    ! soil temperature factor for microbial respiration
+    real(kind=kind_noahmp) :: RespFacNitrogenFoliage     ! foliage nitrogen adjustemt factor to respiration (<= 1)
+    real(kind=kind_noahmp) :: RespFacTemperature         ! temperature factor for respiration
+    real(kind=kind_noahmp) :: RespReductonFac            ! respiration reduction factor (<= 1)
+    real(kind=kind_noahmp) :: GrainMass                  ! mass of GRAIN [g/m2]
+    real(kind=kind_noahmp) :: GrowDegreeDay              ! growing degree days
 
   end type state_type
+
 
 !=== define "parameter" sub-type of biochem_type (biochem%param%variable)
   type :: parameter_type
@@ -178,12 +180,6 @@ module BiochemVarType
 
   end type parameter_type
 
-!=== define "diagnose" sub-type of biochem_type (biochem%diag%variable)
-  type :: diagnose_type
-
-    ! define specific biochem diagnose variables
-
-  end type diagnose_type
 
 !=== define biochem type that includes 4 subtypes (flux,state,parameter,diagnose)
   type, public :: biochem_type

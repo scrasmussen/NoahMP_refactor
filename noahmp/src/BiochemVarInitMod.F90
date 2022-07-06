@@ -26,38 +26,36 @@ contains
     associate( NumCropGrowStage => noahmp%config%domain%NumCropGrowStage )
 
     ! biochem state variables
-    noahmp%biochem%state%PGS            = undefined_int
-    noahmp%biochem%state%IPA            = undefined_int
-    noahmp%biochem%state%IHA            = undefined_int
-    noahmp%biochem%state%IGS            = undefined_real
-    noahmp%biochem%state%FOLN           = undefined_real
-    noahmp%biochem%state%LFMASS         = undefined_real
-    noahmp%biochem%state%RTMASS         = undefined_real
-    noahmp%biochem%state%STMASS         = undefined_real
-    noahmp%biochem%state%WOOD           = undefined_real
-    noahmp%biochem%state%STBLCP         = undefined_real
-    noahmp%biochem%state%FASTCP         = undefined_real
-    noahmp%biochem%state%TOTSC          = undefined_real
-    noahmp%biochem%state%TOTLB          = undefined_real
-    noahmp%biochem%state%LAPM           = undefined_real
-    noahmp%biochem%state%SAPM           = undefined_real
-    noahmp%biochem%state%LFMSMN         = undefined_real
-    noahmp%biochem%state%STMSMN         = undefined_real
-    noahmp%biochem%state%ADDNPPLF       = undefined_real
-    noahmp%biochem%state%ADDNPPST       = undefined_real
-    noahmp%biochem%state%LEAFPT         = undefined_real
-    noahmp%biochem%state%WOODF          = undefined_real
-    noahmp%biochem%state%NONLEF         = undefined_real
-    noahmp%biochem%state%ROOTPT         = undefined_real
-    noahmp%biochem%state%WOODPT         = undefined_real
-    noahmp%biochem%state%STEMPT         = undefined_real
-    noahmp%biochem%state%FSW            = undefined_real
-    noahmp%biochem%state%FST            = undefined_real
-    noahmp%biochem%state%FNF            = undefined_real
-    noahmp%biochem%state%TF             = undefined_real
-    noahmp%biochem%state%RF             = undefined_real
-    noahmp%biochem%state%GRAIN          = undefined_real
-    noahmp%biochem%state%GDD            = undefined_real
+    noahmp%biochem%state%PlantGrowStage            = undefined_int
+    noahmp%biochem%state%IndexPlanting             = undefined_int
+    noahmp%biochem%state%IndexHarvest              = undefined_int
+    noahmp%biochem%state%IndexGrowSeason           = undefined_real
+    noahmp%biochem%state%NitrogenConcFoliage       = undefined_real
+    noahmp%biochem%state%LeafMass                  = undefined_real
+    noahmp%biochem%state%RootMass                  = undefined_real
+    noahmp%biochem%state%StemMass                  = undefined_real
+    noahmp%biochem%state%WoodMass                  = undefined_real
+    noahmp%biochem%state%CarbonMassDeepSoil        = undefined_real
+    noahmp%biochem%state%CarbonMassShallowSoil     = undefined_real
+    noahmp%biochem%state%CarbonMassSoilTot         = undefined_real
+    noahmp%biochem%state%CarbonMassLiveTot         = undefined_real
+    noahmp%biochem%state%LeafAreaPerMass           = undefined_real
+    noahmp%biochem%state%StemAreaPerMass           = undefined_real
+    noahmp%biochem%state%LeafMassMin               = undefined_real
+    noahmp%biochem%state%StemMassMin               = undefined_real
+    noahmp%biochem%state%CarbonFracToLeaf          = undefined_real
+    noahmp%biochem%state%CarbonFracToRoot          = undefined_real
+    noahmp%biochem%state%CarbonFracToWood          = undefined_real
+    noahmp%biochem%state%CarbonFracToStem          = undefined_real
+    noahmp%biochem%state%WoodCarbonFrac            = undefined_real
+    noahmp%biochem%state%CarbonFracToWoodRoot      = undefined_real
+    noahmp%biochem%state%MicroRespFactorSoilWater  = undefined_real
+    noahmp%biochem%state%MicroRespFactorSoilTemp   = undefined_real
+    noahmp%biochem%state%RespFacNitrogenFoliage    = undefined_real
+    noahmp%biochem%state%RespFacTemperature        = undefined_real
+    noahmp%biochem%state%RespReductonFac           = undefined_real
+    noahmp%biochem%state%GrainMass                 = undefined_real
+    noahmp%biochem%state%GrowDegreeDay             = undefined_real
 
     ! biochem flux variables
     noahmp%biochem%flux%PSNSUN          = undefined_real
@@ -102,6 +100,8 @@ contains
     noahmp%biochem%flux%GRTOVR          = undefined_real
     noahmp%biochem%flux%LFCONVERT       = undefined_real
     noahmp%biochem%flux%RSGRAIN         = undefined_real
+    noahmp%biochem%flux%ADDNPPLF        = undefined_real
+    noahmp%biochem%flux%ADDNPPST        = undefined_real
  
     ! biochem parameter variables
     noahmp%biochem%param%DEFAULT_CROP   = undefined_int
@@ -191,8 +191,8 @@ contains
 
   end subroutine BiochemVarInitDefault
 
-!=== initialize with input data or table values
 
+!=== initialize with input data or table values
   subroutine BiochemVarInitTransfer(noahmp, NoahmpIO)
 
     implicit none
@@ -208,92 +208,93 @@ contains
              )
 
     ! biochem state variables
-    noahmp%biochem%state%PGS            = NoahmpIO%PGSXY   (I,J)   
-    noahmp%biochem%state%LFMASS         = NoahmpIO%LFMASSXY(I,J)
-    noahmp%biochem%state%RTMASS         = NoahmpIO%RTMASSXY(I,J)
-    noahmp%biochem%state%STMASS         = NoahmpIO%STMASSXY(I,J) 
-    noahmp%biochem%state%WOOD           = NoahmpIO%WOODXY  (I,J) 
-    noahmp%biochem%state%STBLCP         = NoahmpIO%STBLCPXY(I,J) 
-    noahmp%biochem%state%FASTCP         = NoahmpIO%FASTCPXY(I,J)
-    noahmp%biochem%state%GRAIN          = NoahmpIO%GRAINXY (I,J)  
-    noahmp%biochem%state%GDD            = NoahmpIO%GDDXY   (I,J)  
+    noahmp%biochem%state%PlantGrowStage        = NoahmpIO%PGSXY   (I,J)   
+    noahmp%biochem%state%LeafMass              = NoahmpIO%LFMASSXY(I,J)
+    noahmp%biochem%state%RootMass              = NoahmpIO%RTMASSXY(I,J)
+    noahmp%biochem%state%StemMass              = NoahmpIO%STMASSXY(I,J) 
+    noahmp%biochem%state%WoodMass              = NoahmpIO%WOODXY  (I,J) 
+    noahmp%biochem%state%CarbonMassDeepSoil    = NoahmpIO%STBLCPXY(I,J) 
+    noahmp%biochem%state%CarbonMassShallowSoil = NoahmpIO%FASTCPXY(I,J)
+    noahmp%biochem%state%GrainMass             = NoahmpIO%GRAINXY (I,J)  
+    noahmp%biochem%state%GrowDegreeDay         = NoahmpIO%GDDXY   (I,J)  
+    noahmp%biochem%state%NitrogenConcFoliage   = 1.0                    ! for now, set to nitrogen saturation
 
     ! biochem parameter variables
-    noahmp%biochem%param%FOLNMX         = NoahmpIO%FOLNMX_TABLE(VegType)
-    noahmp%biochem%param%QE25           = NoahmpIO%QE25_TABLE(VegType)
-    noahmp%biochem%param%VCMX25         = NoahmpIO%VCMX25_TABLE(VegType)
-    noahmp%biochem%param%AVCMX          = NoahmpIO%AVCMX_TABLE(VegType)
-    noahmp%biochem%param%C3PSN          = NoahmpIO%C3PSN_TABLE(VegType)
-    noahmp%biochem%param%MP             = NoahmpIO%MP_TABLE(VegType)
-    noahmp%biochem%param%ARM            = NoahmpIO%ARM_TABLE(VegType)
-    noahmp%biochem%param%RMF25          = NoahmpIO%RMF25_TABLE(VegType)
-    noahmp%biochem%param%RMS25          = NoahmpIO%RMS25_TABLE(VegType)
-    noahmp%biochem%param%RMR25          = NoahmpIO%RMR25_TABLE(VegType)
-    noahmp%biochem%param%WRRAT          = NoahmpIO%WRRAT_TABLE(VegType)
-    noahmp%biochem%param%WDPOOL         = NoahmpIO%WDPOOL_TABLE(VegType)
-    noahmp%biochem%param%LTOVRC         = NoahmpIO%LTOVRC_TABLE(VegType)
-    noahmp%biochem%param%TDLEF          = NoahmpIO%TDLEF_TABLE(VegType)
-    noahmp%biochem%param%DILEFW         = NoahmpIO%DILEFW_TABLE(VegType)
-    noahmp%biochem%param%DILEFC         = NoahmpIO%DILEFC_TABLE(VegType)
-    noahmp%biochem%param%FRAGR          = NoahmpIO%FRAGR_TABLE(VegType)
-    noahmp%biochem%param%MRP            = NoahmpIO%MRP_TABLE(VegType)
-    noahmp%biochem%param%TMIN           = NoahmpIO%TMIN_TABLE(VegType)
-    noahmp%biochem%param%SLA            = NoahmpIO%SLA_TABLE(VegType)
     noahmp%biochem%param%DEFAULT_CROP   = NoahmpIO%DEFAULT_CROP_TABLE
-    noahmp%biochem%param%XSAMIN         = NoahmpIO%XSAMIN_TABLE(VegType)
-    noahmp%biochem%param%BF             = NoahmpIO%BF_TABLE(VegType)
-    noahmp%biochem%param%WSTRC          = NoahmpIO%WSTRC_TABLE(VegType)
-    noahmp%biochem%param%LAIMIN         = NoahmpIO%LAIMIN_TABLE(VegType)
-    noahmp%biochem%param%RTOVRC         = NoahmpIO%RTOVRC_TABLE(VegType)
-    noahmp%biochem%param%RSDRYC         = NoahmpIO%RSDRYC_TABLE(VegType)
+    noahmp%biochem%param%FOLNMX         = NoahmpIO%FOLNMX_TABLE (VegType)
+    noahmp%biochem%param%QE25           = NoahmpIO%QE25_TABLE   (VegType)
+    noahmp%biochem%param%VCMX25         = NoahmpIO%VCMX25_TABLE (VegType)
+    noahmp%biochem%param%AVCMX          = NoahmpIO%AVCMX_TABLE  (VegType)
+    noahmp%biochem%param%C3PSN          = NoahmpIO%C3PSN_TABLE  (VegType)
+    noahmp%biochem%param%MP             = NoahmpIO%MP_TABLE     (VegType)
+    noahmp%biochem%param%ARM            = NoahmpIO%ARM_TABLE    (VegType)
+    noahmp%biochem%param%RMF25          = NoahmpIO%RMF25_TABLE  (VegType)
+    noahmp%biochem%param%RMS25          = NoahmpIO%RMS25_TABLE  (VegType)
+    noahmp%biochem%param%RMR25          = NoahmpIO%RMR25_TABLE  (VegType)
+    noahmp%biochem%param%WRRAT          = NoahmpIO%WRRAT_TABLE  (VegType)
+    noahmp%biochem%param%WDPOOL         = NoahmpIO%WDPOOL_TABLE (VegType)
+    noahmp%biochem%param%LTOVRC         = NoahmpIO%LTOVRC_TABLE (VegType)
+    noahmp%biochem%param%TDLEF          = NoahmpIO%TDLEF_TABLE  (VegType)
+    noahmp%biochem%param%DILEFW         = NoahmpIO%DILEFW_TABLE (VegType)
+    noahmp%biochem%param%DILEFC         = NoahmpIO%DILEFC_TABLE (VegType)
+    noahmp%biochem%param%FRAGR          = NoahmpIO%FRAGR_TABLE  (VegType)
+    noahmp%biochem%param%MRP            = NoahmpIO%MRP_TABLE    (VegType)
+    noahmp%biochem%param%TMIN           = NoahmpIO%TMIN_TABLE   (VegType)
+    noahmp%biochem%param%SLA            = NoahmpIO%SLA_TABLE    (VegType)
+    noahmp%biochem%param%XSAMIN         = NoahmpIO%XSAMIN_TABLE (VegType)
+    noahmp%biochem%param%BF             = NoahmpIO%BF_TABLE     (VegType)
+    noahmp%biochem%param%WSTRC          = NoahmpIO%WSTRC_TABLE  (VegType)
+    noahmp%biochem%param%LAIMIN         = NoahmpIO%LAIMIN_TABLE (VegType)
+    noahmp%biochem%param%RTOVRC         = NoahmpIO%RTOVRC_TABLE (VegType)
+    noahmp%biochem%param%RSDRYC         = NoahmpIO%RSDRYC_TABLE (VegType)
     noahmp%biochem%param%RSWOODC        = NoahmpIO%RSWOODC_TABLE(VegType)
 
     if ( CropType > 0 ) then
-       noahmp%biochem%param%PLTDAY      = NoahmpIO%PLTDAY_TABLE(CropType)
-       noahmp%biochem%param%HSDAY       = NoahmpIO%HSDAY_TABLE(CropType)
-       noahmp%biochem%param%C3C4        = NoahmpIO%C3C4_TABLE(CropType)
-       noahmp%biochem%param%FOLNMX      = NoahmpIO%FOLNMXI_TABLE(CropType)
-       noahmp%biochem%param%QE25        = NoahmpIO%QE25I_TABLE(CropType)
-       noahmp%biochem%param%VCMX25      = NoahmpIO%VCMX25I_TABLE(CropType)
-       noahmp%biochem%param%AVCMX       = NoahmpIO%AVCMXI_TABLE(CropType)
-       noahmp%biochem%param%C3PSN       = NoahmpIO%C3PSNI_TABLE(CropType)
-       noahmp%biochem%param%MP          = NoahmpIO%MPI_TABLE(CropType)
-       noahmp%biochem%param%FOLN_MX     = NoahmpIO%FOLN_MX_TABLE(CropType)
-       noahmp%biochem%param%Q10MR       = NoahmpIO%Q10MR_TABLE(CropType)
-       noahmp%biochem%param%LFMR25      = NoahmpIO%LFMR25_TABLE(CropType)
-       noahmp%biochem%param%STMR25      = NoahmpIO%STMR25_TABLE(CropType)
-       noahmp%biochem%param%RTMR25      = NoahmpIO%RTMR25_TABLE(CropType)
+       noahmp%biochem%param%PLTDAY      = NoahmpIO%PLTDAY_TABLE   (CropType)
+       noahmp%biochem%param%HSDAY       = NoahmpIO%HSDAY_TABLE    (CropType)
+       noahmp%biochem%param%C3C4        = NoahmpIO%C3C4_TABLE     (CropType)
+       noahmp%biochem%param%FOLNMX      = NoahmpIO%FOLNMXI_TABLE  (CropType)
+       noahmp%biochem%param%QE25        = NoahmpIO%QE25I_TABLE    (CropType)
+       noahmp%biochem%param%VCMX25      = NoahmpIO%VCMX25I_TABLE  (CropType)
+       noahmp%biochem%param%AVCMX       = NoahmpIO%AVCMXI_TABLE   (CropType)
+       noahmp%biochem%param%C3PSN       = NoahmpIO%C3PSNI_TABLE   (CropType)
+       noahmp%biochem%param%MP          = NoahmpIO%MPI_TABLE      (CropType)
+       noahmp%biochem%param%FOLN_MX     = NoahmpIO%FOLN_MX_TABLE  (CropType)
+       noahmp%biochem%param%Q10MR       = NoahmpIO%Q10MR_TABLE    (CropType)
+       noahmp%biochem%param%LFMR25      = NoahmpIO%LFMR25_TABLE   (CropType)
+       noahmp%biochem%param%STMR25      = NoahmpIO%STMR25_TABLE   (CropType)
+       noahmp%biochem%param%RTMR25      = NoahmpIO%RTMR25_TABLE   (CropType)
+       noahmp%biochem%param%FRA_GR      = NoahmpIO%FRA_GR_TABLE   (CropType)
+       noahmp%biochem%param%LEFREEZ     = NoahmpIO%LEFREEZ_TABLE  (CropType)
+       noahmp%biochem%param%BIO2LAI     = NoahmpIO%BIO2LAI_TABLE  (CropType)
+       noahmp%biochem%param%GDDTBASE    = NoahmpIO%GDDTBASE_TABLE (CropType)
+       noahmp%biochem%param%GDDTCUT     = NoahmpIO%GDDTCUT_TABLE  (CropType)
+       noahmp%biochem%param%GDDS1       = NoahmpIO%GDDS1_TABLE    (CropType)
+       noahmp%biochem%param%GDDS2       = NoahmpIO%GDDS2_TABLE    (CropType)
+       noahmp%biochem%param%GDDS3       = NoahmpIO%GDDS3_TABLE    (CropType)
+       noahmp%biochem%param%GDDS4       = NoahmpIO%GDDS4_TABLE    (CropType)
+       noahmp%biochem%param%GDDS5       = NoahmpIO%GDDS5_TABLE    (CropType)
+       noahmp%biochem%param%I2PAR       = NoahmpIO%I2PAR_TABLE    (CropType)
+       noahmp%biochem%param%TASSIM0     = NoahmpIO%TASSIM0_TABLE  (CropType)
+       noahmp%biochem%param%TASSIM1     = NoahmpIO%TASSIM1_TABLE  (CropType)
+       noahmp%biochem%param%TASSIM2     = NoahmpIO%TASSIM2_TABLE  (CropType)
+       noahmp%biochem%param%AREF        = NoahmpIO%AREF_TABLE     (CropType)
+       noahmp%biochem%param%K           = NoahmpIO%K_TABLE        (CropType)
+       noahmp%biochem%param%EPSI        = NoahmpIO%EPSI_TABLE     (CropType)
+       noahmp%biochem%param%PSNRF       = NoahmpIO%PSNRF_TABLE    (CropType)
        noahmp%biochem%param%GRAINMR25   = NoahmpIO%GRAINMR25_TABLE(CropType)
-       noahmp%biochem%param%FRA_GR      = NoahmpIO%FRA_GR_TABLE(CropType)
-       noahmp%biochem%param%LEFREEZ     = NoahmpIO%LEFREEZ_TABLE(CropType)
-       noahmp%biochem%param%BIO2LAI     = NoahmpIO%BIO2LAI_TABLE(CropType)
-       noahmp%biochem%param%GDDTBASE    = NoahmpIO%GDDTBASE_TABLE(CropType)
-       noahmp%biochem%param%GDDTCUT     = NoahmpIO%GDDTCUT_TABLE(CropType)
-       noahmp%biochem%param%GDDS1       = NoahmpIO%GDDS1_TABLE(CropType)
-       noahmp%biochem%param%GDDS2       = NoahmpIO%GDDS2_TABLE(CropType)
-       noahmp%biochem%param%GDDS3       = NoahmpIO%GDDS3_TABLE(CropType)
-       noahmp%biochem%param%GDDS4       = NoahmpIO%GDDS4_TABLE(CropType)
-       noahmp%biochem%param%GDDS5       = NoahmpIO%GDDS5_TABLE(CropType)
-       noahmp%biochem%param%I2PAR       = NoahmpIO%I2PAR_TABLE(CropType)
-       noahmp%biochem%param%TASSIM0     = NoahmpIO%TASSIM0_TABLE(CropType)
-       noahmp%biochem%param%TASSIM1     = NoahmpIO%TASSIM1_TABLE(CropType)
-       noahmp%biochem%param%TASSIM2     = NoahmpIO%TASSIM2_TABLE(CropType)
-       noahmp%biochem%param%AREF        = NoahmpIO%AREF_TABLE(CropType)
-       noahmp%biochem%param%K           = NoahmpIO%K_TABLE(CropType)
-       noahmp%biochem%param%EPSI        = NoahmpIO%EPSI_TABLE(CropType)
-       noahmp%biochem%param%PSNRF       = NoahmpIO%PSNRF_TABLE(CropType)
-       noahmp%biochem%param%DILE_FC     = NoahmpIO%DILE_FC_TABLE(CropType,:)
-       noahmp%biochem%param%DILE_FW     = NoahmpIO%DILE_FW_TABLE(CropType,:)
-       noahmp%biochem%param%LFCT        = NoahmpIO%LFCT_TABLE(CropType,:)
-       noahmp%biochem%param%STCT        = NoahmpIO%STCT_TABLE(CropType,:)
-       noahmp%biochem%param%RTCT        = NoahmpIO%RTCT_TABLE(CropType,:)
-       noahmp%biochem%param%LFPT        = NoahmpIO%LFPT_TABLE(CropType,:)
-       noahmp%biochem%param%STPT        = NoahmpIO%STPT_TABLE(CropType,:)
-       noahmp%biochem%param%RTPT        = NoahmpIO%RTPT_TABLE(CropType,:)
-       noahmp%biochem%param%GRAINPT     = NoahmpIO%GRAINPT_TABLE(CropType,:)
-       noahmp%biochem%param%LF_OVRC     = NoahmpIO%LF_OVRC_TABLE(CropType,:)
-       noahmp%biochem%param%ST_OVRC     = NoahmpIO%ST_OVRC_TABLE(CropType,:)
-       noahmp%biochem%param%RT_OVRC     = NoahmpIO%RT_OVRC_TABLE(CropType,:)
+       noahmp%biochem%param%DILE_FC     = NoahmpIO%DILE_FC_TABLE  (CropType,:)
+       noahmp%biochem%param%DILE_FW     = NoahmpIO%DILE_FW_TABLE  (CropType,:)
+       noahmp%biochem%param%LFCT        = NoahmpIO%LFCT_TABLE     (CropType,:)
+       noahmp%biochem%param%STCT        = NoahmpIO%STCT_TABLE     (CropType,:)
+       noahmp%biochem%param%RTCT        = NoahmpIO%RTCT_TABLE     (CropType,:)
+       noahmp%biochem%param%LFPT        = NoahmpIO%LFPT_TABLE     (CropType,:)
+       noahmp%biochem%param%STPT        = NoahmpIO%STPT_TABLE     (CropType,:)
+       noahmp%biochem%param%RTPT        = NoahmpIO%RTPT_TABLE     (CropType,:)
+       noahmp%biochem%param%GRAINPT     = NoahmpIO%GRAINPT_TABLE  (CropType,:)
+       noahmp%biochem%param%LF_OVRC     = NoahmpIO%LF_OVRC_TABLE  (CropType,:)
+       noahmp%biochem%param%ST_OVRC     = NoahmpIO%ST_OVRC_TABLE  (CropType,:)
+       noahmp%biochem%param%RT_OVRC     = NoahmpIO%RT_OVRC_TABLE  (CropType,:)
     endif
 
     if((noahmp%config%nmlist%OptCropModel == 1) .and. (noahmp%config%domain%CropType > 0)) then
@@ -315,8 +316,6 @@ contains
        noahmp%biochem%param%PLTDAY = NoahmpIO%PLANTING(I,J)
        noahmp%biochem%param%HSDAY  = NoahmpIO%HARVEST (I,J)
     end if
-    
-    noahmp%biochem%state%FOLN = 1.0 ! for now, set to nitrogen saturation
     
     end associate
 
