@@ -45,12 +45,12 @@ contains
               I2PAR            => noahmp%biochem%param%I2PAR         ,& ! in,    Fraction of incoming solar radiation to photosynthetically active radiation
               TASSIM0          => noahmp%biochem%param%TASSIM0       ,& ! in,    Minimum temperature for CO2 assimulation [C]
               TASSIM1          => noahmp%biochem%param%TASSIM1       ,& ! in,    CO2 assimulation linearly increasing until temperature reaches T1 [C]
-              TASSIM2          => noahmp%biochem%param%TASSIM2       ,& ! in,    CO2 assmilation rate remain at Aref until temperature reaches T2 [C]
-              Aref             => noahmp%biochem%param%AREF          ,& ! in,    reference maximum CO2 assimulation rate
+              TASSIM2          => noahmp%biochem%param%TASSIM2       ,& ! in,    CO2 assmilation rate remain at CarbonAssimRefMax until temperature reaches T2 [C]
+              CarbonAssimRefMax             => noahmp%biochem%param%CarbonAssimRefMax          ,& ! in,    reference maximum CO2 assimulation rate
               k                => noahmp%biochem%param%K             ,& ! in,    light extinction coefficient
               epsi             => noahmp%biochem%param%EPSI          ,& ! in,    initial light use efficiency
-              PSNRF            => noahmp%biochem%param%PSNRF         ,& ! in,    CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
-              PSNCROP          => noahmp%biochem%flux%PSNCROP         & ! out,   crop photosynthesis
+              CarbonAssimReducFac            => noahmp%biochem%param%CarbonAssimReducFac         ,& ! in,    CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
+              PhotosynCrop          => noahmp%biochem%flux%PhotosynCrop         & ! out,   crop photosynthesis [umol co2/m2/s]
              )
 !------------------------------------------------------------------------
 
@@ -62,13 +62,13 @@ contains
     if ( TC < TASSIM0 ) then
        Amax = 1.0e-10
     elseif ( (TC >= TASSIM0) .and. (TC < TASSIM1) ) then
-       Amax = (TC - TASSIM0) * Aref / (TASSIM1 - TASSIM0)
+       Amax = (TC - TASSIM0) * CarbonAssimRefMax / (TASSIM1 - TASSIM0)
     elseif ( (TC >= TASSIM1) .and. (TC < TASSIM2) ) then
-       Amax = Aref
+       Amax = CarbonAssimRefMax
     else
-       Amax= Aref - 0.2 * (T2M - TASSIM2)
+       Amax= CarbonAssimRefMax - 0.2 * (T2M - TASSIM2)
     endif              
-    Amax = max(amax, 0.01)
+    Amax = max(Amax, 0.01)
 
     ! compute coefficients
     if ( XLAI <= 0.05 ) then
@@ -100,8 +100,8 @@ contains
     else
        A = (A1 + A2 + A3) / 3.6 * 4
     endif    
-    A = A * PSNRF ! Attainable 
-    PSNCROP = 6.313 * A   ! (1/44) * 1000000)/3600 = 6.313
+    A = A * CarbonAssimReducFac ! Attainable 
+    PhotosynCrop = 6.313 * A   ! (1/44) * 1000000)/3600 = 6.313
 
     end associate
 

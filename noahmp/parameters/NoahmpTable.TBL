@@ -433,8 +433,6 @@ DEFAULT_CROP = 0                                      ! The default crop type(1-
 PLTDAY     =    111,    131,    111,    111,    111,  ! Planting date
 HSDAY      =    300,    280,    300,    300,    300,  ! Harvest date
 PLANTPOP   =   78.0,   78.0,   78.0,   78.0,   78.0,  ! Plant density [per ha] - used?
-IRRI       =    0.0,    0.0,    0.0,    0.0,    0.0,  ! Irrigation strategy 0= non-irrigation 1=irrigation (no water-stress)
-
 GDDTBASE   =   10.0,   10.0,   10.0,   10.0,   10.0,  ! Base temperature for GDD accumulation [C]
 GDDTCUT    =   30.0,   30.0,   30.0,   30.0,   30.0,  ! Upper temperature for GDD accumulation [C]
 GDDS1      =   50.0,   60.0,   50.0,   50.0,   50.0,  ! GDD from seeding to emergence
@@ -453,12 +451,12 @@ BPI        =   4.E4,   1.E4,   2.E3,   2.E3,   2.E3,  !
 MPI        =     4.,     9.,     6.,     9.,     9.,  !
 FOLNMXI    =    1.5,    1.5,    1.5,    1.5,    1.5,  !
 QE25I      =   0.05,   0.06,   0.06,   0.06,   0.06,  !
-C3C4       =      2,      1,      2,      2,      2,  ! photosynthetic pathway:  1. = c3 2. = c4
-Aref       =    7.0,    7.0,    7.0,    7.0,    7.0,  ! reference maximum CO2 assimulation rate
-PSNRF      =   0.85,   0.85,   0.85,   0.85,   0.85,  ! CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
+C3C4       =      2,      1,      2,      2,      2,  ! photosynthetic pathway: 1=c3, 2=c4 (currently not used)
+Aref       =    7.0,    7.0,    7.0,    7.0,    7.0,  ! reference maximum CO2 assimilation rate
+PSNRF      =   0.85,   0.85,   0.85,   0.85,   0.85,  ! CO2 assimilation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
 I2PAR      =    0.5,    0.5,    0.5,    0.5,    0.5,  ! Fraction of incoming solar radiation to photosynthetically active radiation
-TASSIM0    =    8.0,    8.0,    8.0,    8.0,    8.0,  ! Minimum temperature for CO2 assimulation [C]
-TASSIM1    =   18.0,   18.0,   18.0,   18.0,   18.0,  ! CO2 assimulation linearly increasing until temperature reaches T1 [C]
+TASSIM0    =    8.0,    8.0,    8.0,    8.0,    8.0,  ! Minimum temperature for CO2 assimilation [C]
+TASSIM1    =   18.0,   18.0,   18.0,   18.0,   18.0,  ! CO2 assimilation linearly increasing until temperature reaches T1 [C]
 TASSIM2    =   30.0,   30.0,   30.0,   30.0,   30.0,  ! CO2 assmilation rate remain at Aref until temperature reaches T2 [C]
 K          =   0.55,   0.55,   0.55,   0.55,   0.55,  ! light extinction coefficient
 EPSI       =   12.5,   12.5,   12.5,   12.5,   12.5,  ! initial light use efficiency

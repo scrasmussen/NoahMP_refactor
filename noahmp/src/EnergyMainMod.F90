@@ -156,9 +156,9 @@ contains
               TR              => noahmp%energy%flux%TR               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
               GHV             => noahmp%energy%flux%GHV              ,& ! out,   vegetated ground heat (w/m2) [+ = to soil]
               GHB             => noahmp%energy%flux%GHB              ,& ! out,   bare ground heat flux (w/m2) [+ to soil]
-              PSN             => noahmp%biochem%flux%PSN             ,& ! out,   total leaf photosynthesis (umol co2 /m2 /s)
-              PSNSUN          => noahmp%biochem%flux%PSNSUN          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
-              PSNSHA          => noahmp%biochem%flux%PSNSHA           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynTotal             => noahmp%biochem%flux%PhotosynTotal             ,& ! out,   total leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
              )
 ! ----------------------------------------------------------------------
 
@@ -173,8 +173,8 @@ contains
     EVC     = 0.0
     TR      = 0.0
     GHV     = 0.0
-    PSNSUN  = 0.0
-    PSNSHA  = 0.0
+    PhotosynLeafSunlit  = 0.0
+    PhotosynLeafShade  = 0.0
     T2MV    = 0.0
     Q2V     = 0.0
     CHV     = 0.0
@@ -297,7 +297,7 @@ contains
 
     ! other photosynthesis related quantities for biochem process
     APAR = PARSUN * LAISUN + PARSHA * LAISHA
-    PSN  = PSNSUN * LAISUN + PSNSHA * LAISHA
+    PhotosynTotal  = PhotosynLeafSunlit * LAISUN + PhotosynLeafShade * LAISHA
 
     ! compute snow and soil layer temperature
     call SoilSnowTemperatureMain(noahmp)

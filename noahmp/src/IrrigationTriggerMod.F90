@@ -41,8 +41,8 @@ contains
               DayJulianInYear          => noahmp%config%domain%DayJulianInYear         ,& ! in,     Julian day of the year
               OptIrrigation   => noahmp%config%nmlist%OptIrrigation  ,& ! in,     irrigation option
               OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,     irrigation method option
-              PLTDAY          => noahmp%biochem%param%PLTDAY         ,& ! in,     Planting day (day of year)
-              HSDAY           => noahmp%biochem%param%HSDAY          ,& ! in,     Harvest date (day of year)
+              DatePlanting          => noahmp%biochem%param%DatePlanting         ,& ! in,     Planting day (day of year)
+              DateHarvest           => noahmp%biochem%param%DateHarvest          ,& ! in,     Harvest date (day of year)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
               NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
@@ -70,7 +70,7 @@ contains
 
     ! check if irrigation is can be activated or not
     if ( OptIrrigation == 2 ) then ! activate irrigation if within crop season
-       if ( (DayJulianInYear < PLTDAY) .or. (DayJulianInYear > (HSDAY-IRR_HAR)) ) IRR_ACTIVE = .false.
+       if ( (DayJulianInYear < DatePlanting) .or. (DayJulianInYear > (DateHarvest-IRR_HAR)) ) IRR_ACTIVE = .false.
     elseif ( OptIrrigation == 3) then ! activate if LAI > threshold LAI
        if ( LAI < IRR_LAI) IRR_ACTIVE = .false.
     elseif ( (OptIrrigation > 3) .or. (OptIrrigation < 1) ) then

@@ -33,15 +33,15 @@ contains
               MainTimeStep     => noahmp%config%domain%MainTimeStep ,& ! in,    main noahmp timestep (s)
               DayJulianInYear           => noahmp%config%domain%DayJulianInYear       ,& ! in,    Julian day of year
               T2M              => noahmp%energy%state%T2M           ,& ! in,    2-m air temperature (K)
-              PLTDAY           => noahmp%biochem%param%PLTDAY       ,& ! in,    Planting day (day of year)
-              HSDAY            => noahmp%biochem%param%HSDAY        ,& ! in,    Harvest date (day of year)
-              GDDTBASE         => noahmp%biochem%param%GDDTBASE     ,& ! in,    Base temperature for GDD accumulation [C]
-              GDDTCUT          => noahmp%biochem%param%GDDTCUT      ,& ! in,    Upper temperature for GDD accumulation [C]
-              GDDS1            => noahmp%biochem%param%GDDS1        ,& ! in,    GDD from seeding to emergence
-              GDDS2            => noahmp%biochem%param%GDDS2        ,& ! in,    GDD from seeding to initial vegetative
-              GDDS3            => noahmp%biochem%param%GDDS3        ,& ! in,    GDD from seeding to post vegetative
-              GDDS4            => noahmp%biochem%param%GDDS4        ,& ! in,    GDD from seeding to intial reproductive
-              GDDS5            => noahmp%biochem%param%GDDS5        ,& ! in,    GDD from seeding to physical maturity
+              DatePlanting           => noahmp%biochem%param%DatePlanting       ,& ! in,    Planting day (day of year)
+              DateHarvest            => noahmp%biochem%param%DateHarvest        ,& ! in,    Harvest date (day of year)
+              TempBaseGrowDegDay         => noahmp%biochem%param%TempBaseGrowDegDay     ,& ! in,    Base temperature for grow degree day accumulation [C]
+              TempMaxGrowDegDay          => noahmp%biochem%param%TempMaxGrowDegDay      ,& ! in,    Max temperature for grow degree day accumulation [C]
+              GrowDegDayEmerg            => noahmp%biochem%param%GrowDegDayEmerg        ,& ! in,    grow degree day from seeding to emergence
+              GrowDegDayInitVeg            => noahmp%biochem%param%GrowDegDayInitVeg        ,& ! in,    grow degree day from seeding to initial vegetative
+              GrowDegDayPostVeg            => noahmp%biochem%param%GrowDegDayPostVeg        ,& ! in,    grow degree day from seeding to post vegetative
+              GrowDegDayInitReprod            => noahmp%biochem%param%GrowDegDayInitReprod        ,& ! in,    grow degree day from seeding to intial reproductive
+              GrowDegDayMature            => noahmp%biochem%param%GrowDegDayMature        ,& ! in,    grow degree day from seeding to physical maturity
               GrowDegreeDay    => noahmp%biochem%state%GrowDegreeDay ,& ! inout, crop growing degree days
               IndexPlanting              => noahmp%biochem%state%IndexPlanting          ,& ! out,   Planting index index (0=off, 1=on)
               IndexHarvest              => noahmp%biochem%state%IndexHarvest          ,& ! out,   Havest index (0=on,1=off) 
@@ -57,18 +57,18 @@ contains
     IndexHarvest = 1  ! off
 
     ! turn on/off the planting 
-    if ( DayJulianInYear < PLTDAY ) IndexPlanting = 0   ! off
+    if ( DayJulianInYear < DatePlanting ) IndexPlanting = 0   ! off
         
     ! turn on/off the harvesting
-    if ( DayJulianInYear >= HSDAY ) IndexHarvest = 0   ! on            
+    if ( DayJulianInYear >= DateHarvest ) IndexHarvest = 0   ! on            
 
     ! Calculate the growing degree days               
-    if ( TC < GDDTBASE ) then
+    if ( TC < TempBaseGrowDegDay ) then
        TDIFF = 0.0
-    elseif ( TC >= GDDTCUT ) then
-       TDIFF = GDDTCUT - GDDTBASE
+    elseif ( TC >= TempMaxGrowDegDay ) then
+       TDIFF = TempMaxGrowDegDay - TempBaseGrowDegDay
     else
-       TDIFF = TC - GDDTBASE
+       TDIFF = TC - TempBaseGrowDegDay
     endif
     GrowDegreeDay = (GrowDegreeDay + TDIFF * MainTimeStep / 86400.0) * IndexPlanting * IndexHarvest
     GDDDAY   = GrowDegreeDay
@@ -85,21 +85,21 @@ contains
     !GDDM = 1389
     !GDDM = 1555
     !GDDSK = 0.41 * GDDM + 145.4 + 150 ! from hybrid-maize 
-    !GDDS1 = ((GDDSK - 96) / 38.9 - 4) * 21
-    !GDDS1 = 0.77 * GDDSK
-    !GDDS3 = GDDSK + 170
-    !GDDS3 = 170
+    !GrowDegDayEmerg = ((GDDSK - 96) / 38.9 - 4) * 21
+    !GrowDegDayEmerg = 0.77 * GDDSK
+    !GrowDegDayPostVeg = GDDSK + 170
+    !GrowDegDayPostVeg = 170
 
     ! compute plant growth stage
     PlantGrowStage = 1   ! MB: set PlantGrowStage = 1 (for initialization during growing season when no GDD)  
     if ( GDDDAY > 0.0 )    PlantGrowStage = 2
-    if ( GDDDAY >= GDDS1 ) PlantGrowStage = 3
-    if ( GDDDAY >= GDDS2 ) PlantGrowStage = 4 
-    if ( GDDDAY >= GDDS3 ) PlantGrowStage = 5
-    if ( GDDDAY >= GDDS4 ) PlantGrowStage = 6
-    if ( GDDDAY >= GDDS5 ) PlantGrowStage = 7
-    if ( DayJulianInYear >= HSDAY ) PlantGrowStage = 8
-    if ( DayJulianInYear < PLTDAY ) PlantGrowStage = 1   
+    if ( GDDDAY >= GrowDegDayEmerg ) PlantGrowStage = 3
+    if ( GDDDAY >= GrowDegDayInitVeg ) PlantGrowStage = 4 
+    if ( GDDDAY >= GrowDegDayPostVeg ) PlantGrowStage = 5
+    if ( GDDDAY >= GrowDegDayInitReprod ) PlantGrowStage = 6
+    if ( GDDDAY >= GrowDegDayMature ) PlantGrowStage = 7
+    if ( DayJulianInYear >= DateHarvest ) PlantGrowStage = 8
+    if ( DayJulianInYear < DatePlanting ) PlantGrowStage = 1   
 
     end associate
 

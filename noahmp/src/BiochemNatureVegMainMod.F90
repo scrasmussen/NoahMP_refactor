@@ -48,11 +48,11 @@ contains
               WoodMass             => noahmp%biochem%state%WoodMass          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
               CarbonMassDeepSoil           => noahmp%biochem%state%CarbonMassDeepSoil        ,& ! inout, stable carbon in deep soil [g/m2]
               CarbonMassShallowSoil           => noahmp%biochem%state%CarbonMassShallowSoil        ,& ! inout, short-lived carbon in shallow soil [g/m2]
-              GPP              => noahmp%biochem%flux%GPP            ,& ! out,   net instantaneous assimilation [g/m2/s C]
-              NPP              => noahmp%biochem%flux%NPP            ,& ! out,   net primary productivity [g/m2/s C]
-              NEE              => noahmp%biochem%flux%NEE            ,& ! out,   net ecosystem exchange [g/m2/s CO2]
-              AUTORS           => noahmp%biochem%flux%AUTORS         ,& ! out,   net ecosystem respiration [g/m2/s C]
-              HETERS           => noahmp%biochem%flux%HETERS         ,& ! out,   organic respiration [g/m2/s C]
+              GrossPriProduction              => noahmp%biochem%flux%GrossPriProduction            ,& ! out,   net instantaneous assimilation [g/m2/s C]
+              NetPriProductionTot              => noahmp%biochem%flux%NetPriProductionTot            ,& ! out,   net primary productivity [g/m2/s C]
+              NetEcoExchange              => noahmp%biochem%flux%NetEcoExchange            ,& ! out,   net ecosystem exchange [g/m2/s CO2]
+              RespirationPlantTot           => noahmp%biochem%flux%RespirationPlantTot         ,& ! out,   total plant respiration [g/m2/s C]
+              RespirationSoilOrg           => noahmp%biochem%flux%RespirationSoilOrg         ,& ! out,   soil organic respiration [g/m2/s C]
               CarbonMassSoilTot            => noahmp%biochem%state%CarbonMassSoilTot         ,& ! out,   total soil carbon [g/m2 C]
               CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
               XLAI             => noahmp%energy%state%LAI            ,& ! out,   leaf area index [-]
@@ -64,20 +64,20 @@ contains
 !-----------------------------------------------------------------------
 
     ! initialize
-    NEE = 0.0
-    NPP = 0.0
-    GPP = 0.0
+    NetEcoExchange = 0.0
+    NetPriProductionTot = 0.0
+    GrossPriProduction = 0.0
 
     ! no biogeochemistry in non-vegetated points
     if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
          (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
        XLAI   = 0.0
        XSAI   = 0.0
-       GPP    = 0.0
-       NPP    = 0.0
-       NEE    = 0.0
-       AUTORS = 0.0
-       HETERS = 0.0
+       GrossPriProduction    = 0.0
+       NetPriProductionTot    = 0.0
+       NetEcoExchange    = 0.0
+       RespirationPlantTot = 0.0
+       RespirationSoilOrg = 0.0
        CarbonMassSoilTot  = 0.0
        CarbonMassLiveTot  = 0.0
        LeafMass = 0.0

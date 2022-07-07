@@ -53,61 +53,58 @@ contains
     noahmp%biochem%state%MicroRespFactorSoilTemp   = undefined_real
     noahmp%biochem%state%RespFacNitrogenFoliage    = undefined_real
     noahmp%biochem%state%RespFacTemperature        = undefined_real
-    noahmp%biochem%state%RespReductonFac           = undefined_real
+    noahmp%biochem%state%RespReductionFac           = undefined_real
     noahmp%biochem%state%GrainMass                 = undefined_real
     noahmp%biochem%state%GrowDegreeDay             = undefined_real
 
     ! biochem flux variables
-    noahmp%biochem%flux%PSNSUN          = undefined_real
-    noahmp%biochem%flux%PSNSHA          = undefined_real
-    noahmp%biochem%flux%PSN             = undefined_real
-    noahmp%biochem%flux%GPP             = undefined_real
-    noahmp%biochem%flux%NPP             = undefined_real
-    noahmp%biochem%flux%NEE             = undefined_real
-    noahmp%biochem%flux%AUTORS          = undefined_real
-    noahmp%biochem%flux%HETERS          = undefined_real
-    noahmp%biochem%flux%CFLUX           = undefined_real
-    noahmp%biochem%flux%NPPL            = undefined_real
-    noahmp%biochem%flux%NPPR            = undefined_real
-    noahmp%biochem%flux%NPPW            = undefined_real
-    noahmp%biochem%flux%NPPS            = undefined_real
-    noahmp%biochem%flux%GRLEAF          = undefined_real
-    noahmp%biochem%flux%GRROOT          = undefined_real
-    noahmp%biochem%flux%GRWOOD          = undefined_real
-    noahmp%biochem%flux%GRSTEM          = undefined_real
-    noahmp%biochem%flux%LFDEL           = undefined_real
-    noahmp%biochem%flux%STDEL           = undefined_real
-    noahmp%biochem%flux%STABLC          = undefined_real
-    noahmp%biochem%flux%RESP            = undefined_real
-    noahmp%biochem%flux%RSSTEM          = undefined_real
-    noahmp%biochem%flux%GRGRAIN         = undefined_real
-    noahmp%biochem%flux%NPPG            = undefined_real
-    noahmp%biochem%flux%RTCONVERT       = undefined_real
-    noahmp%biochem%flux%STCONVERT       = undefined_real
-    noahmp%biochem%flux%PSNCROP         = undefined_real
-    noahmp%biochem%flux%RSWOOD          = undefined_real
-    noahmp%biochem%flux%RSLEAF          = undefined_real
-    noahmp%biochem%flux%RSROOT          = undefined_real
-    noahmp%biochem%flux%DIELF           = undefined_real
-    noahmp%biochem%flux%DIEST           = undefined_real
-    noahmp%biochem%flux%CARBFX          = undefined_real
-    noahmp%biochem%flux%LFTOVR          = undefined_real
-    noahmp%biochem%flux%STTOVR          = undefined_real
-    noahmp%biochem%flux%WDTOVR          = undefined_real
-    noahmp%biochem%flux%RSSOIL          = undefined_real
-    noahmp%biochem%flux%RTTOVR          = undefined_real
-    noahmp%biochem%flux%CBHYDRAFX       = undefined_real
-    noahmp%biochem%flux%GRTOVR          = undefined_real
-    noahmp%biochem%flux%LFCONVERT       = undefined_real
-    noahmp%biochem%flux%RSGRAIN         = undefined_real
-    noahmp%biochem%flux%ADDNPPLF        = undefined_real
-    noahmp%biochem%flux%ADDNPPST        = undefined_real
+    noahmp%biochem%flux%PhotosynLeafSunlit         = undefined_real
+    noahmp%biochem%flux%PhotosynLeafShade          = undefined_real
+    noahmp%biochem%flux%PhotosynCrop               = undefined_real
+    noahmp%biochem%flux%PhotosynTotal              = undefined_real
+    noahmp%biochem%flux%GrossPriProduction         = undefined_real
+    noahmp%biochem%flux%NetPriProductionTot        = undefined_real
+    noahmp%biochem%flux%NetEcoExchange             = undefined_real
+    noahmp%biochem%flux%RespirationPlantTot        = undefined_real
+    noahmp%biochem%flux%RespirationSoilOrg         = undefined_real
+    noahmp%biochem%flux%CarbonToAtmos              = undefined_real
+    noahmp%biochem%flux%NetPriProductionLeaf       = undefined_real
+    noahmp%biochem%flux%NetPriProductionRoot       = undefined_real
+    noahmp%biochem%flux%NetPriProductionWood       = undefined_real
+    noahmp%biochem%flux%NetPriProductionStem       = undefined_real
+    noahmp%biochem%flux%GrowthRespLeaf             = undefined_real
+    noahmp%biochem%flux%GrowthRespRoot             = undefined_real
+    noahmp%biochem%flux%GrowthRespWood             = undefined_real
+    noahmp%biochem%flux%GrowthRespStem             = undefined_real
+    noahmp%biochem%flux%LeafMassMaxChg             = undefined_real
+    noahmp%biochem%flux%StemMassMaxChg             = undefined_real
+    noahmp%biochem%flux%CarbonDecayToStable        = undefined_real
+    noahmp%biochem%flux%RespirationLeaf            = undefined_real
+    noahmp%biochem%flux%RespirationStem            = undefined_real
+    noahmp%biochem%flux%GrowthRespGrain            = undefined_real
+    noahmp%biochem%flux%NetPriProductionGrain      = undefined_real
+    noahmp%biochem%flux%ConvRootToGrain            = undefined_real
+    noahmp%biochem%flux%ConvStemToGrain            = undefined_real
+    noahmp%biochem%flux%RespirationWood            = undefined_real
+    noahmp%biochem%flux%RespirationLeafMaint       = undefined_real
+    noahmp%biochem%flux%RespirationRoot            = undefined_real
+    noahmp%biochem%flux%DeathLeaf                  = undefined_real
+    noahmp%biochem%flux%DeathStem                  = undefined_real
+    noahmp%biochem%flux%CarbonAssim                = undefined_real
+    noahmp%biochem%flux%TurnoverLeaf               = undefined_real
+    noahmp%biochem%flux%TurnoverStem               = undefined_real
+    noahmp%biochem%flux%TurnoverWood               = undefined_real
+    noahmp%biochem%flux%RespirationSoil            = undefined_real
+    noahmp%biochem%flux%TurnoverRoot               = undefined_real
+    noahmp%biochem%flux%CarbonHydrateAssim         = undefined_real
+    noahmp%biochem%flux%TurnoverGrain              = undefined_real
+    noahmp%biochem%flux%ConvLeafToGrain            = undefined_real
+    noahmp%biochem%flux%RespirationGrain           = undefined_real
  
     ! biochem parameter variables
-    noahmp%biochem%param%DEFAULT_CROP   = undefined_int
-    noahmp%biochem%param%PLTDAY         = undefined_int
-    noahmp%biochem%param%HSDAY          = undefined_int
-    noahmp%biochem%param%C3C4           = undefined_int
+    noahmp%biochem%param%DatePlanting    = undefined_int
+    noahmp%biochem%param%DateHarvest    = undefined_int
+    noahmp%biochem%param%PhotosynPath   = undefined_int
     noahmp%biochem%param%FOLNMX         = undefined_real
     noahmp%biochem%param%QE25           = undefined_real
     noahmp%biochem%param%VCMX25         = undefined_real
@@ -137,21 +134,21 @@ contains
     noahmp%biochem%param%FRA_GR         = undefined_real
     noahmp%biochem%param%LEFREEZ        = undefined_real
     noahmp%biochem%param%BIO2LAI        = undefined_real
-    noahmp%biochem%param%GDDTBASE       = undefined_real
-    noahmp%biochem%param%GDDTCUT        = undefined_real
-    noahmp%biochem%param%GDDS1          = undefined_real
-    noahmp%biochem%param%GDDS2          = undefined_real
-    noahmp%biochem%param%GDDS3          = undefined_real
-    noahmp%biochem%param%GDDS4          = undefined_real
-    noahmp%biochem%param%GDDS5          = undefined_real
+    noahmp%biochem%param%TempBaseGrowDegDay = undefined_real
+    noahmp%biochem%param%TempMaxGrowDegDay = undefined_real
+    noahmp%biochem%param%GrowDegDayEmerg = undefined_real
+    noahmp%biochem%param%GrowDegDayInitVeg   = undefined_real
+    noahmp%biochem%param%GrowDegDayPostVeg  = undefined_real
+    noahmp%biochem%param%GrowDegDayInitReprod = undefined_real
+    noahmp%biochem%param%GrowDegDayMature = undefined_real
     noahmp%biochem%param%I2PAR          = undefined_real
     noahmp%biochem%param%TASSIM0        = undefined_real
     noahmp%biochem%param%TASSIM1        = undefined_real
     noahmp%biochem%param%TASSIM2        = undefined_real
-    noahmp%biochem%param%AREF           = undefined_real
+    noahmp%biochem%param%CarbonAssimRefMax   = undefined_real
     noahmp%biochem%param%K              = undefined_real
     noahmp%biochem%param%EPSI           = undefined_real
-    noahmp%biochem%param%PSNRF          = undefined_real
+    noahmp%biochem%param%CarbonAssimReducFac = undefined_real
     noahmp%biochem%param%SLAREA         = undefined_real
     noahmp%biochem%param%XSAMIN         = undefined_real
     noahmp%biochem%param%BF             = undefined_real
@@ -220,7 +217,6 @@ contains
     noahmp%biochem%state%NitrogenConcFoliage   = 1.0                    ! for now, set to nitrogen saturation
 
     ! biochem parameter variables
-    noahmp%biochem%param%DEFAULT_CROP   = NoahmpIO%DEFAULT_CROP_TABLE
     noahmp%biochem%param%FOLNMX         = NoahmpIO%FOLNMX_TABLE (VegType)
     noahmp%biochem%param%QE25           = NoahmpIO%QE25_TABLE   (VegType)
     noahmp%biochem%param%VCMX25         = NoahmpIO%VCMX25_TABLE (VegType)
@@ -250,9 +246,9 @@ contains
     noahmp%biochem%param%RSWOODC        = NoahmpIO%RSWOODC_TABLE(VegType)
 
     if ( CropType > 0 ) then
-       noahmp%biochem%param%PLTDAY      = NoahmpIO%PLTDAY_TABLE   (CropType)
-       noahmp%biochem%param%HSDAY       = NoahmpIO%HSDAY_TABLE    (CropType)
-       noahmp%biochem%param%C3C4        = NoahmpIO%C3C4_TABLE     (CropType)
+       noahmp%biochem%param%DatePlanting = NoahmpIO%PLTDAY_TABLE   (CropType)
+       noahmp%biochem%param%DateHarvest  = NoahmpIO%HSDAY_TABLE    (CropType)
+       noahmp%biochem%param%PhotosynPath = NoahmpIO%C3C4_TABLE     (CropType)
        noahmp%biochem%param%FOLNMX      = NoahmpIO%FOLNMXI_TABLE  (CropType)
        noahmp%biochem%param%QE25        = NoahmpIO%QE25I_TABLE    (CropType)
        noahmp%biochem%param%VCMX25      = NoahmpIO%VCMX25I_TABLE  (CropType)
@@ -267,21 +263,21 @@ contains
        noahmp%biochem%param%FRA_GR      = NoahmpIO%FRA_GR_TABLE   (CropType)
        noahmp%biochem%param%LEFREEZ     = NoahmpIO%LEFREEZ_TABLE  (CropType)
        noahmp%biochem%param%BIO2LAI     = NoahmpIO%BIO2LAI_TABLE  (CropType)
-       noahmp%biochem%param%GDDTBASE    = NoahmpIO%GDDTBASE_TABLE (CropType)
-       noahmp%biochem%param%GDDTCUT     = NoahmpIO%GDDTCUT_TABLE  (CropType)
-       noahmp%biochem%param%GDDS1       = NoahmpIO%GDDS1_TABLE    (CropType)
-       noahmp%biochem%param%GDDS2       = NoahmpIO%GDDS2_TABLE    (CropType)
-       noahmp%biochem%param%GDDS3       = NoahmpIO%GDDS3_TABLE    (CropType)
-       noahmp%biochem%param%GDDS4       = NoahmpIO%GDDS4_TABLE    (CropType)
-       noahmp%biochem%param%GDDS5       = NoahmpIO%GDDS5_TABLE    (CropType)
+       noahmp%biochem%param%TempBaseGrowDegDay    = NoahmpIO%GDDTBASE_TABLE (CropType)
+       noahmp%biochem%param%TempMaxGrowDegDay     = NoahmpIO%GDDTCUT_TABLE  (CropType)
+       noahmp%biochem%param%GrowDegDayEmerg  = NoahmpIO%GDDS1_TABLE    (CropType)
+       noahmp%biochem%param%GrowDegDayInitVeg = NoahmpIO%GDDS2_TABLE    (CropType)
+       noahmp%biochem%param%GrowDegDayPostVeg = NoahmpIO%GDDS3_TABLE    (CropType)
+       noahmp%biochem%param%GrowDegDayInitReprod = NoahmpIO%GDDS4_TABLE    (CropType)
+       noahmp%biochem%param%GrowDegDayMature = NoahmpIO%GDDS5_TABLE    (CropType)
        noahmp%biochem%param%I2PAR       = NoahmpIO%I2PAR_TABLE    (CropType)
        noahmp%biochem%param%TASSIM0     = NoahmpIO%TASSIM0_TABLE  (CropType)
        noahmp%biochem%param%TASSIM1     = NoahmpIO%TASSIM1_TABLE  (CropType)
        noahmp%biochem%param%TASSIM2     = NoahmpIO%TASSIM2_TABLE  (CropType)
-       noahmp%biochem%param%AREF        = NoahmpIO%AREF_TABLE     (CropType)
+       noahmp%biochem%param%CarbonAssimRefMax = NoahmpIO%AREF_TABLE     (CropType)
        noahmp%biochem%param%K           = NoahmpIO%K_TABLE        (CropType)
        noahmp%biochem%param%EPSI        = NoahmpIO%EPSI_TABLE     (CropType)
-       noahmp%biochem%param%PSNRF       = NoahmpIO%PSNRF_TABLE    (CropType)
+       noahmp%biochem%param%CarbonAssimReducFac = NoahmpIO%PSNRF_TABLE    (CropType)
        noahmp%biochem%param%GRAINMR25   = NoahmpIO%GRAINMR25_TABLE(CropType)
        noahmp%biochem%param%DILE_FC     = NoahmpIO%DILE_FC_TABLE  (CropType,:)
        noahmp%biochem%param%DILE_FW     = NoahmpIO%DILE_FW_TABLE  (CropType,:)
@@ -298,23 +294,23 @@ contains
     endif
 
     if((noahmp%config%nmlist%OptCropModel == 1) .and. (noahmp%config%domain%CropType > 0)) then
-       noahmp%biochem%param%PLTDAY = NoahmpIO%PLANTING(I,J)
-       noahmp%biochem%param%HSDAY  = NoahmpIO%HARVEST (I,J)
-       noahmp%biochem%param%GDDS1  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
-                                     noahmp%biochem%param%GDDS1
-       noahmp%biochem%param%GDDS2  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
-                                     noahmp%biochem%param%GDDS2
-       noahmp%biochem%param%GDDS3  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
-                                     noahmp%biochem%param%GDDS3
-       noahmp%biochem%param%GDDS4  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
-                                     noahmp%biochem%param%GDDS4
-       noahmp%biochem%param%GDDS5  = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
-                                     noahmp%biochem%param%GDDS5
+       noahmp%biochem%param%DatePlanting = NoahmpIO%PLANTING(I,J)
+       noahmp%biochem%param%DateHarvest  = NoahmpIO%HARVEST (I,J)
+       noahmp%biochem%param%GrowDegDayEmerg = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
+                                     noahmp%biochem%param%GrowDegDayEmerg
+       noahmp%biochem%param%GrowDegDayInitVeg = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
+                                     noahmp%biochem%param%GrowDegDayInitVeg
+       noahmp%biochem%param%GrowDegDayPostVeg = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
+                                     noahmp%biochem%param%GrowDegDayPostVeg
+       noahmp%biochem%param%GrowDegDayInitReprod = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
+                                     noahmp%biochem%param%GrowDegDayInitReprod
+       noahmp%biochem%param%GrowDegDayMature = NoahmpIO%SEASON_GDD(I,J) / 1770.0 * &
+                                     noahmp%biochem%param%GrowDegDayMature
     end if
 
     if(noahmp%config%nmlist%OptIrrigation == 2) then
-       noahmp%biochem%param%PLTDAY = NoahmpIO%PLANTING(I,J)
-       noahmp%biochem%param%HSDAY  = NoahmpIO%HARVEST (I,J)
+       noahmp%biochem%param%DatePlanting = NoahmpIO%PLANTING(I,J)
+       noahmp%biochem%param%DateHarvest  = NoahmpIO%HARVEST (I,J)
     end if
     
     end associate

@@ -83,8 +83,8 @@ contains
               PARSHA          => noahmp%energy%flux%PARSHA           ,& ! in,    average absorbed par for shaded leaves (w/m2)
               RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
               RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
-              PSNSUN          => noahmp%biochem%flux%PSNSUN          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
-              PSNSHA          => noahmp%biochem%flux%PSNSHA           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
              )
 ! ----------------------------------------------------------------------
 
@@ -94,11 +94,11 @@ contains
     ! Sunlit case
     if ( IndexShade == 0 ) then
 
-       ! initialize RS=RSMAX and PSN=0 because will only do calculations
-       ! for PARSUN  > 0, in which case RS <= RSMAX and PSN >= 0
+       ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
+       ! for PARSUN  > 0, in which case RS <= RSMAX and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSUN  = 1.0 / BP * CF  
-       PSNSUN = 0.0           
+       PhotosynLeafSunlit = 0.0           
 
        if ( PARSUN > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
@@ -122,10 +122,10 @@ contains
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
              WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
-             PSNSUN = min( WJ, WC, WE ) * IndexGrowSeason
-             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSUN, MPE )
-             A      = MP * PSNSUN * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = ( MP * PSNSUN * PressureAirRefHeight / CS + BP ) * RLB - 1.0
+             PhotosynLeafSunlit = min( WJ, WC, WE ) * IndexGrowSeason
+             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafSunlit, MPE )
+             A      = MP * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = ( MP * PhotosynLeafSunlit * PressureAirRefHeight / CS + BP ) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -135,7 +135,7 @@ contains
              R1     = Q / A
              R2     = C / Q
              RSSUN  = max(R1, R2)
-             CI     = max( CS - PSNSUN*PressureAirRefHeight*1.65*RSSUN, 0.0 )
+             CI     = max( CS - PhotosynLeafSunlit*PressureAirRefHeight*1.65*RSSUN, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m
@@ -145,14 +145,14 @@ contains
     endif ! IndexShade == 0
 
     ! Shaded case
-    ! same as Sunlit case but using different input (PARSHA) and output (RSSHA,PSNSHA)
+    ! same as Sunlit case but using shaded input and output
     if ( IndexShade == 1 ) then
 
-       ! initialize RS=RSMAX and PSN=0 because will only do calculations
-       ! for PARSHA  > 0, in which case RS <= RSMAX and PSN >= 0
+       ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
+       ! for PARSHA  > 0, in which case RS <= RSMAX and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSHA  = 1.0 / BP * CF
-       PSNSHA = 0.0
+       PhotosynLeafShade = 0.0
 
        if ( PARSHA > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
@@ -176,10 +176,10 @@ contains
              WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
              WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
-             PSNSHA = min( WJ, WC, WE ) * IndexGrowSeason
-             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PSNSHA, MPE )
-             A      = MP * PSNSHA * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = ( MP * PSNSHA * PressureAirRefHeight / CS + BP ) * RLB - 1.0
+             PhotosynLeafShade = min( WJ, WC, WE ) * IndexGrowSeason
+             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafShade, MPE )
+             A      = MP * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = ( MP * PhotosynLeafShade * PressureAirRefHeight / CS + BP ) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -189,7 +189,7 @@ contains
              R1     = Q / A
              R2     = C / Q
              RSSHA  = max(R1, R2)
-             CI     = max( CS - PSNSHA*PressureAirRefHeight*1.65*RSSHA, 0.0 )
+             CI     = max( CS - PhotosynLeafShade*PressureAirRefHeight*1.65*RSSHA, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m

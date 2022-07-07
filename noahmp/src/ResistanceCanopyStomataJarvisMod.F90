@@ -53,8 +53,8 @@ contains
               PARSHA          => noahmp%energy%flux%PARSHA           ,& ! in,    average absorbed par for shaded leaves (w/m2)
               RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
               RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
-              PSNSUN          => noahmp%biochem%flux%PSNSUN          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
-              PSNSHA          => noahmp%biochem%flux%PSNSHA           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
+              PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
              )
 ! ----------------------------------------------------------------------
 
@@ -87,12 +87,12 @@ contains
 
        ! determine canopy resistance due to all factors
        RSSUN  = RSMIN / (RCS * RCT * RCQ * BTRAN)
-       PSNSUN = -999.99       ! PSN not applied for dynamic carbon
+       PhotosynLeafSunlit = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 0
 
     ! Shaded case
-    ! same as Sunlit case but using different input (PARSHA) and output (RSSHA,PSNSHA)
+    ! same as Sunlit case but using shaded input and output
     if ( IndexShade == 1 ) then
        RSSHA  = 0.0
        
@@ -116,7 +116,7 @@ contains
 
        ! determine canopy resistance due to all factors
        RSSHA  = RSMIN / (RCS * RCT * RCQ * BTRAN)
-       PSNSHA = -999.99       ! PSN not applied for dynamic carbon
+       PhotosynLeafShade = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 1
 

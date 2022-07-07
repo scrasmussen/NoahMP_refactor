@@ -18,7 +18,6 @@ module BiochemVarOutMod
 contains
 
 !=== Transfer model states to output=====
-
   subroutine BiochemVarOutTransfer(noahmp, NoahmpIO)
 
     implicit none
@@ -31,16 +30,16 @@ contains
               J    => noahmp%config%domain%GridIndexJ  &
              )
 
-    NoahmpIO%LFMASSXY (I,J)  =  noahmp%biochem%state%LeafMass
-    NoahmpIO%RTMASSXY (I,J)  =  noahmp%biochem%state%RootMass
-    NoahmpIO%STMASSXY (I,J)  =  noahmp%biochem%state%StemMass
-    NoahmpIO%WOODXY   (I,J)  =  noahmp%biochem%state%WoodMass
-    NoahmpIO%STBLCPXY (I,J)  =  noahmp%biochem%state%CarbonMassDeepSoil
-    NoahmpIO%FASTCPXY (I,J)  =  noahmp%biochem%state%CarbonMassShallowSoil
-    NoahmpIO%NEEXY    (I,J)  =  noahmp%biochem%flux%NEE
-    NoahmpIO%GPPXY    (I,J)  =  noahmp%biochem%flux%GPP
-    NoahmpIO%NPPXY    (I,J)  =  noahmp%biochem%flux%NPP
-    NoahmpIO%PSNXY    (I,J)  =  noahmp%biochem%flux%PSN
+    NoahmpIO%LFMASSXY(I,J) = noahmp%biochem%state%LeafMass
+    NoahmpIO%RTMASSXY(I,J) = noahmp%biochem%state%RootMass
+    NoahmpIO%STMASSXY(I,J) = noahmp%biochem%state%StemMass
+    NoahmpIO%WOODXY  (I,J) = noahmp%biochem%state%WoodMass
+    NoahmpIO%STBLCPXY(I,J) = noahmp%biochem%state%CarbonMassDeepSoil
+    NoahmpIO%FASTCPXY(I,J) = noahmp%biochem%state%CarbonMassShallowSoil
+    NoahmpIO%NEEXY   (I,J) = noahmp%biochem%flux%NetEcoExchange
+    NoahmpIO%GPPXY   (I,J) = noahmp%biochem%flux%GrossPriProduction
+    NoahmpIO%NPPXY   (I,J) = noahmp%biochem%flux%NetPriProductionTot
+    NoahmpIO%PSNXY   (I,J) = noahmp%biochem%flux%PhotosynTotal
 
     end associate
 
