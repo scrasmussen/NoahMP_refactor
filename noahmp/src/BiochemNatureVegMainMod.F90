@@ -41,7 +41,7 @@ contains
               SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
               SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
               BTRAN            => noahmp%water%state%BTRAN           ,& ! in,    soil water transpiration factor (0 to 1)
-              SLA              => noahmp%biochem%param%SLA           ,& ! in,    single-side leaf area per Kg [m2/kg]
+              LeafAreaPerMass1side              => noahmp%biochem%param%LeafAreaPerMass1side           ,& ! in,    single-side leaf area per Kg [m2/kg]
               LeafMass           => noahmp%biochem%state%LeafMass        ,& ! inout, leaf mass [g/m2]
               RootMass           => noahmp%biochem%state%RootMass        ,& ! inout, mass of fine roots [g/m2]
               StemMass           => noahmp%biochem%state%StemMass        ,& ! inout, stem mass [g/m2]
@@ -90,7 +90,7 @@ contains
     endif
 
     ! start biogeochemistry process
-    LeafAreaPerMass = SLA / 1000.0   ! m2/kg -> m2/g
+    LeafAreaPerMass = LeafAreaPerMass1side / 1000.0   ! m2/kg -> m2/g
 
     ! water stress
     WSTRES = 1.0 - BTRAN

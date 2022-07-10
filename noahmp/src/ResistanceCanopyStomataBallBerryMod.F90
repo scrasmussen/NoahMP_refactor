@@ -62,12 +62,12 @@ contains
               BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
               IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason            ,& ! in,    growing season index (0=off, 1=on)
               NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage  ,& ! in,    foliage nitrogen concentration (%)
-              FOLNMX          => noahmp%biochem%param%FOLNMX         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
-              QE25            => noahmp%biochem%param%QE25           ,& ! in,    quantum efficiency at 25c (umol co2 / umol photon)
-              VCMX25          => noahmp%biochem%param%VCMX25         ,& ! in,    maximum rate of carboxylation at 25c (umol co2/m**2/s)
-              AVCMX           => noahmp%biochem%param%AVCMX          ,& ! in,    q10 for vcmx25
-              C3PSN           => noahmp%biochem%param%C3PSN          ,& ! in,    photosynthetic pathway: 0. = c4, 1. = c3
-              MP              => noahmp%biochem%param%MP             ,& ! in,    slope of conductance-to-photosynthesis relationship
+              NitrogenConcFoliageMax          => noahmp%biochem%param%NitrogenConcFoliageMax         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
+              QuantumEfficiency25C            => noahmp%biochem%param%QuantumEfficiency25C           ,& ! in,    quantum efficiency at 25c (umol co2 / umol photon)
+              CarboxylRateMax25C          => noahmp%biochem%param%CarboxylRateMax25C         ,& ! in,    maximum rate of carboxylation at 25c (umol co2/m**2/s)
+              CarboxylRateMaxQ10           => noahmp%biochem%param%CarboxylRateMaxQ10          ,& ! in,    change in maximum rate of carboxylation for every 10C temperature change
+              PhotosynPathC3           => noahmp%biochem%param%PhotosynPathC3          ,& ! in,    C3 photosynthetic pathway indicator: 0. = c4, 1. = c3
+              SlopeConductToPhotosyn => noahmp%biochem%param%SlopeConductToPhotosyn,& ! in,    slope of conductance-to-photosynthesis relationship
               KC25            => noahmp%energy%param%KC25            ,& ! in,    co2 michaelis-menten constant at 25c (pa)
               KO25            => noahmp%energy%param%KO25            ,& ! in,    o2 michaelis-menten constant at 25c (pa)
               AKC             => noahmp%energy%param%AKC             ,& ! in,    q10 for kc25
@@ -101,31 +101,31 @@ contains
        PhotosynLeafSunlit = 0.0           
 
        if ( PARSUN > 0.0 ) then
-          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
+          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSUN
-          J    = PPF * QE25
+          J    = PPF * QuantumEfficiency25C
           KC   = KC25 * F1(AKC, TC)
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = VCMX25 / F2(TC) * NitrogenFoliageFac * BTRAN * F1(AVCMX, TC)
+          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * BTRAN * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
-          CI = 0.7 * CO2 * C3PSN + 0.4 * CO2 * (1.0 - C3PSN)
+          CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol
           RLB = RB / CF
           ! constrain EAH
-          CEA = max( 0.25*ESTV*C3PSN + 0.40*ESTV*(1.0-C3PSN), min(EAH,ESTV) )
+          CEA = max( 0.25*ESTV*PhotosynPathC3 + 0.40*ESTV*(1.0-PhotosynPathC3), min(EAH,ESTV) )
 
           ! ci iteration
           do ITER = 1, NITER
-             WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
-             WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
-             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
+             WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * PhotosynPathC3 + J * (1.0 - PhotosynPathC3)
+             WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * PhotosynPathC3 + VCMX * (1.0 - PhotosynPathC3)
+             WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafSunlit = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafSunlit, MPE )
-             A      = MP * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = ( MP * PhotosynLeafSunlit * PressureAirRefHeight / CS + BP ) * RLB - 1.0
+             A      = SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = (SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight / CS + BP) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -155,31 +155,31 @@ contains
        PhotosynLeafShade = 0.0
 
        if ( PARSHA > 0.0 ) then
-          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, FOLNMX), 1.0 )
+          NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * PARSHA
-          J    = PPF * QE25
+          J    = PPF * QuantumEfficiency25C
           KC   = KC25 * F1(AKC, TC)
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = VCMX25 / F2(TC) * NitrogenFoliageFac * BTRAN * F1(AVCMX, TC)
+          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * BTRAN * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
-          CI = 0.7 * CO2 * C3PSN + 0.4 * CO2 * (1.0 - C3PSN)
+          CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol
           RLB = RB / CF
           ! constrain EAH
-          CEA = max( 0.25*ESTV*C3PSN + 0.40*ESTV*(1.0-C3PSN), min(EAH,ESTV) )
+          CEA = max( 0.25*ESTV*PhotosynPathC3 + 0.40*ESTV*(1.0-PhotosynPathC3), min(EAH,ESTV) )
 
           ! ci iteration
           do ITER = 1, NITER
-             WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * C3PSN + J * (1.0 - C3PSN)
-             WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * C3PSN + VCMX * (1.0 - C3PSN)
-             WE     = 0.5 * VCMX * C3PSN + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - C3PSN)
+             WJ     = max(CI-CP, 0.0) * J / (CI + 2.0*CP) * PhotosynPathC3 + J * (1.0 - PhotosynPathC3)
+             WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * PhotosynPathC3 + VCMX * (1.0 - PhotosynPathC3)
+             WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafShade = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafShade, MPE )
-             A      = MP * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = ( MP * PhotosynLeafShade * PressureAirRefHeight / CS + BP ) * RLB - 1.0
+             A      = SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + BP
+             B      = (SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight / CS + BP) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )

@@ -105,7 +105,7 @@ contains
     ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
-    if ( FlagDynamicVeg .eqv. .true. ) call BiochemNatureVegMain(noahmp)                     ! for natural vegetation
+    if ( FlagDynamicVeg .eqv. .true. ) call BiochemNatureVegMain(noahmp)                          ! for generic vegetation
     if ( (OptCropModel == 1) .and. (FlagDynamicCrop .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
 
     !---------------------------------------------------------------------

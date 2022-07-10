@@ -755,7 +755,6 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: TOPT_TABLE        ! Optimum transpiration air temperature [K]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: RSMAX_TABLE       ! Maximal stomatal resistance [s m-1]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: RTOVRC_TABLE      ! root turnover coefficient [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: RSDRYC_TABLE      ! degree of drying that reduces soil respiration [-]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: RSWOODC_TABLE     ! wood respiration coeficient [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BF_TABLE          ! parameter for present wood allocation [-]
     real(kind=kind_noahmp), allocatable, dimension(:)   :: WSTRC_TABLE       ! water stress coeficient [-]
@@ -885,7 +884,6 @@ module NoahmpIOVarType
     integer                                             :: DEFAULT_CROP_TABLE        ! Default crop index
     integer               , allocatable, dimension(:)   :: PLTDAY_TABLE              ! Planting date
     integer               , allocatable, dimension(:)   :: HSDAY_TABLE               ! Harvest date
-    integer               , allocatable, dimension(:)   :: C3C4_TABLE                ! photosynthetic pathway:  1. = c3 2. = c4
     real(kind=kind_noahmp), allocatable, dimension(:)   :: PLANTPOP_TABLE            ! Plant density [per ha] - used?
     real(kind=kind_noahmp), allocatable, dimension(:)   :: IRRI_TABLE                ! Irrigation strategy 0= non-irrigation 1=irrigation (no water-stress)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: GDDTBASE_TABLE            ! Base temperature for GDD accumulation [C]
@@ -915,7 +913,6 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:)   :: K_TABLE                   ! light extinction coefficient
     real(kind=kind_noahmp), allocatable, dimension(:)   :: EPSI_TABLE                ! initial light use efficiency
     real(kind=kind_noahmp), allocatable, dimension(:)   :: Q10MR_TABLE               ! q10 for maintainance respiration
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: FOLN_MX_TABLE             ! foliage nitrogen concentration when f(n)=1 (%)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: LEFREEZ_TABLE             ! characteristic T for leaf freezing [K]
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: DILE_FC_TABLE             ! coeficient for temperature leaf stress death [1/s]
     real(kind=kind_noahmp), allocatable, dimension(:,:) :: DILE_FW_TABLE             ! coeficient for water leaf stress death [1/s]

@@ -54,7 +54,7 @@ contains
               SAIM            => noahmp%energy%param%SAIM         ,& ! in,    monthly stem area index, one-sided
               SHDMAX          => noahmp%energy%param%SHDMAX       ,& ! in,    yearly maximum vegetation fraction
               SHDFAC          => noahmp%energy%param%SHDFAC       ,& ! in,    green vegetation fraction
-              TMIN            => noahmp%biochem%param%TMIN        ,& ! in,    minimum temperature for photosynthesis (k)
+              TemperatureMinPhotosyn            => noahmp%biochem%param%TemperatureMinPhotosyn        ,& ! in,    minimum temperature for photosynthesis (k)
               PlantGrowStage             => noahmp%biochem%state%PlantGrowStage         ,& ! in,    plant growing stage
               SNOWH           => noahmp%water%state%SNOWH         ,& ! in,    snow height [m]
               TV              => noahmp%energy%state%TV           ,& ! in,    vegetation temperature (k)
@@ -124,7 +124,7 @@ contains
     if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CropType == 0) ) ELAI = 0.0  ! MB: LAI CHECK
 
     ! set growing season flag
-    if ( ((TV > TMIN) .and. (CropType == 0)) .or. &
+    if ( ((TV > TemperatureMinPhotosyn) .and. (CropType == 0)) .or. &
          ((PlantGrowStage > 2) .and. (PlantGrowStage < 7) .and. (CropType > 0))) then
        IndexGrowSeason = 1.0
     else

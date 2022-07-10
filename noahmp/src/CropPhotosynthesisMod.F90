@@ -42,13 +42,13 @@ contains
               RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation (W/m2) at reference height
               T2M              => noahmp%energy%state%T2M            ,& ! in,    2-m air temperature (K)
               XLAI             => noahmp%energy%state%LAI            ,& ! in,    leaf area index, unadjusted for burying by snow
-              I2PAR            => noahmp%biochem%param%I2PAR         ,& ! in,    Fraction of incoming solar radiation to photosynthetically active radiation
-              TASSIM0          => noahmp%biochem%param%TASSIM0       ,& ! in,    Minimum temperature for CO2 assimulation [C]
-              TASSIM1          => noahmp%biochem%param%TASSIM1       ,& ! in,    CO2 assimulation linearly increasing until temperature reaches T1 [C]
-              TASSIM2          => noahmp%biochem%param%TASSIM2       ,& ! in,    CO2 assmilation rate remain at CarbonAssimRefMax until temperature reaches T2 [C]
+              PhotosynRadFrac            => noahmp%biochem%param%PhotosynRadFrac         ,& ! in,    Fraction of incoming solar radiation to photosynthetically active radiation
+              TempMinCarbonAssim          => noahmp%biochem%param%TempMinCarbonAssim       ,& ! in,    Minimum temperature for CO2 assimulation [C]
+              TempMaxCarbonAssim          => noahmp%biochem%param%TempMaxCarbonAssim       ,& ! in,    CO2 assimulation linearly increasing until reaching this temperature [C]
+              TempMaxCarbonAssimMax          => noahmp%biochem%param%TempMaxCarbonAssimMax       ,& ! in,    CO2 assmilation rate remain at CarbonAssimRefMax until reaching this temperature [C]
               CarbonAssimRefMax             => noahmp%biochem%param%CarbonAssimRefMax          ,& ! in,    reference maximum CO2 assimulation rate
-              k                => noahmp%biochem%param%K             ,& ! in,    light extinction coefficient
-              epsi             => noahmp%biochem%param%EPSI          ,& ! in,    initial light use efficiency
+              LightExtCoeff    => noahmp%biochem%param%LightExtCoeff  ,& ! in,    light extinction coefficient
+              LighUseEfficiency             => noahmp%biochem%param%LighUseEfficiency          ,& ! in,    initial light use efficiency
               CarbonAssimReducFac            => noahmp%biochem%param%CarbonAssimReducFac         ,& ! in,    CO2 assimulation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
               PhotosynCrop          => noahmp%biochem%flux%PhotosynCrop         & ! out,   crop photosynthesis [umol co2/m2/s]
              )
@@ -56,17 +56,17 @@ contains
 
     ! initialize
     TC  = T2M - 273.15
-    PAR = I2PAR * RadSWDownRefHeight * 0.0036  !w to MJ m-2
+    PAR = PhotosynRadFrac * RadSWDownRefHeight * 0.0036  !w to MJ m-2
 
     ! compute Maximum CO2 assimulation rate g/co2/s
-    if ( TC < TASSIM0 ) then
+    if ( TC < TempMinCarbonAssim ) then
        Amax = 1.0e-10
-    elseif ( (TC >= TASSIM0) .and. (TC < TASSIM1) ) then
-       Amax = (TC - TASSIM0) * CarbonAssimRefMax / (TASSIM1 - TASSIM0)
-    elseif ( (TC >= TASSIM1) .and. (TC < TASSIM2) ) then
+    elseif ( (TC >= TempMinCarbonAssim) .and. (TC < TempMaxCarbonAssim) ) then
+       Amax = (TC - TempMinCarbonAssim) * CarbonAssimRefMax / (TempMaxCarbonAssim - TempMinCarbonAssim)
+    elseif ( (TC >= TempMaxCarbonAssim) .and. (TC < TempMaxCarbonAssimMax) ) then
        Amax = CarbonAssimRefMax
     else
-       Amax= CarbonAssimRefMax - 0.2 * (T2M - TASSIM2)
+       Amax= CarbonAssimRefMax - 0.2 * (T2M - TempMaxCarbonAssimMax)
     endif              
     Amax = max(Amax, 0.01)
 
@@ -81,16 +81,16 @@ contains
        L3 = 0.8873 * XLAI
     endif
 
-    I1 = k * PAR * exp(-k * L1)
-    I2 = k * PAR * exp(-k * L2)
-    I3 = k * PAR * exp(-k * L3)
+    I1 = LightExtCoeff * PAR * exp(-LightExtCoeff * L1)
+    I2 = LightExtCoeff * PAR * exp(-LightExtCoeff * L2)
+    I3 = LightExtCoeff * PAR * exp(-LightExtCoeff * L3)
     I1 = max(I1, 1.0e-10)
     I2 = max(I2, 1.0e-10)
     I3 = max(I3, 1.0e-10)
 
-    A1 = Amax * (1 - exp(-epsi * I1 / Amax))
-    A2 = Amax * (1 - exp(-epsi * I2 / Amax)) * 1.6
-    A3 = Amax * (1 - exp(-epsi * I3 / Amax))
+    A1 = Amax * (1 - exp(-LighUseEfficiency * I1 / Amax))
+    A2 = Amax * (1 - exp(-LighUseEfficiency * I2 / Amax)) * 1.6
+    A3 = Amax * (1 - exp(-LighUseEfficiency * I3 / Amax))
 
     ! compute photosynthesis rate
     if ( XLAI <= 0.05 ) then

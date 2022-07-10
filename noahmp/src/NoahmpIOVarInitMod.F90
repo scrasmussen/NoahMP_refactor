@@ -51,32 +51,32 @@ contains
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
-                                              XSAMIN, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSWOODC, BF, WSTRC, LAIMIN,           &
+                                              XSAMIN, EPS1, EPS2, EPS3, EPS4, EPS5
     namelist / noahmp_usgs_veg_categories /   VEG_DATASET_DESCRIPTION, NVEG
     namelist / noahmp_usgs_parameters     /   ISURBAN, ISWATER, ISBARREN, ISICE, ISCROP, EBLFOREST, NATURAL,                 &
                                               LCZ_1, LCZ_2, LCZ_3, LCZ_4, LCZ_5, LCZ_6, LCZ_7, LCZ_8, LCZ_9, LCZ_10, LCZ_11, &
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSWOODC, BF, WSTRC, LAIMIN,           &
                                               XSAMIN, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,                           &
                                               SAI_JUN, SAI_JUL, SAI_AUG, SAI_SEP, SAI_OCT, SAI_NOV, SAI_DEC, LAI_JAN,        &
                                               LAI_FEB, LAI_MAR, LAI_APR, LAI_MAY, LAI_JUN, LAI_JUL, LAI_AUG, LAI_SEP,        &
                                               LAI_OCT, LAI_NOV, LAI_DEC, RHOL_VIS, RHOL_NIR, RHOS_VIS, RHOS_NIR, TAUL_VIS,   &
-                                              TAUL_NIR, TAUS_VIS, TAUS_NIR, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
+                                              TAUL_NIR, TAUS_VIS, TAUS_NIR, EPS1, EPS2, EPS3, EPS4, EPS5
     namelist / noahmp_modis_veg_categories /  VEG_DATASET_DESCRIPTION, NVEG
     namelist / noahmp_modis_parameters     /  ISURBAN, ISWATER, ISBARREN, ISICE, ISCROP, EBLFOREST, NATURAL,                 &
                                               LCZ_1, LCZ_2, LCZ_3, LCZ_4, LCZ_5, LCZ_6, LCZ_7, LCZ_8, LCZ_9, LCZ_10, LCZ_11, &
                                               CH2OP, DLEAF, Z0MVT, HVT, HVB, DEN, RC, MFSNO, SCFFAC, XL, CWPVT, C3PSN, KC25, &
                                               AKC, KO25, AKO, AVCMX, AQE, LTOVRC, DILEFC, DILEFW, RMF25, SLA, FRAGR, TMIN,   &
                                               VCMX25, TDLEF, BP, MP, QE25, RMS25, RMR25, ARM, FOLNMX, WDPOOL, WRRAT, MRP,    &
-                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSDRYC, RSWOODC, BF, WSTRC, LAIMIN,   &
+                                              NROOT, RGL, RS, HS, TOPT, RSMAX, RTOVRC, RSWOODC, BF, WSTRC, LAIMIN,           &
                                               XSAMIN, SAI_JAN, SAI_FEB, SAI_MAR, SAI_APR, SAI_MAY,                           &
                                               SAI_JUN, SAI_JUL, SAI_AUG, SAI_SEP, SAI_OCT, SAI_NOV, SAI_DEC, LAI_JAN,        &
                                               LAI_FEB, LAI_MAR, LAI_APR, LAI_MAY, LAI_JUN, LAI_JUL, LAI_AUG, LAI_SEP,        &
                                               LAI_OCT, LAI_NOV, LAI_DEC, RHOL_VIS, RHOL_NIR, RHOS_VIS, RHOS_NIR, TAUL_VIS,   &
-                                              TAUL_NIR, TAUS_VIS, TAUS_NIR, SLAREA, EPS1, EPS2, EPS3, EPS4, EPS5
+                                              TAUL_NIR, TAUS_VIS, TAUS_NIR, EPS1, EPS2, EPS3, EPS4, EPS5
 
     ! soil parameters
     character(len=256)                             :: message
@@ -128,10 +128,10 @@ contains
 
     ! crop parameters
     integer                                  :: DEFAULT_CROP
-    integer               , dimension(NCROP) :: PLTDAY, HSDAY, C3C4
+    integer               , dimension(NCROP) :: PLTDAY, HSDAY
     real(kind=kind_noahmp), dimension(NCROP) :: PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2, GDDS3, GDDS4, GDDS5, C3PSNI,&
                                                 KC25I, AKCI, KO25I, AKOI, AVCMXI, VCMX25I, BPI, MPI, FOLNMXI, QE25I, AREF,   &
-                                                PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI, Q10MR, FOLN_MX, LEFREEZ,   &
+                                                PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, EPSI, Q10MR, LEFREEZ,            &
                                                 DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4, DILE_FC_S5, DILE_FC_S6,      &
                                                 DILE_FC_S7, DILE_FC_S8, DILE_FW_S1, DILE_FW_S2, DILE_FW_S3, DILE_FW_S4,      &
                                                 DILE_FW_S5, DILE_FW_S6, DILE_FW_S7, DILE_FW_S8, FRA_GR, LF_OVRC_S1,          &
@@ -149,8 +149,8 @@ contains
                                                 RTCT_S5, RTCT_S6, RTCT_S7, RTCT_S8, BIO2LAI
     namelist / noahmp_crop_parameters /         DEFAULT_CROP, PLTDAY, HSDAY, PLANTPOP, IRRI, GDDTBASE, GDDTCUT, GDDS1, GDDS2,&
                                                 GDDS3, GDDS4, GDDS5, C3PSNI, KC25I, AKCI, KO25I, AKOI, AVCMXI, VCMX25I, BPI, &
-                                                MPI, FOLNMXI, QE25I, C3C4, AREF, PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K, &
-                                                EPSI,Q10MR, FOLN_MX, LEFREEZ, DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4,&
+                                                MPI, FOLNMXI, QE25I, AREF, PSNRF, I2PAR, TASSIM0, TASSIM1, TASSIM2, K,       &
+                                                EPSI,Q10MR, LEFREEZ, DILE_FC_S1, DILE_FC_S2, DILE_FC_S3, DILE_FC_S4,         &
                                                 DILE_FC_S5, DILE_FC_S6, DILE_FC_S7, DILE_FC_S8, DILE_FW_S1, DILE_FW_S2,      &
                                                 DILE_FW_S3, DILE_FW_S4, DILE_FW_S5, DILE_FW_S6, DILE_FW_S7, DILE_FW_S8,      &
                                                 FRA_GR, LF_OVRC_S1, LF_OVRC_S2, LF_OVRC_S3, LF_OVRC_S4, LF_OVRC_S5,          &
@@ -258,7 +258,6 @@ contains
     allocate( NoahmpIO%TOPT_TABLE(MVT) )
     allocate( NoahmpIO%RSMAX_TABLE(MVT) )
     allocate( NoahmpIO%RTOVRC_TABLE(MVT) )
-    allocate( NoahmpIO%RSDRYC_TABLE(MVT) )
     allocate( NoahmpIO%RSWOODC_TABLE(MVT) )
     allocate( NoahmpIO%BF_TABLE(MVT) )
     allocate( NoahmpIO%WSTRC_TABLE(MVT) )
@@ -310,7 +309,6 @@ contains
     ! crop parameters
     allocate( NoahmpIO%PLTDAY_TABLE(NCROP) )
     allocate( NoahmpIO%HSDAY_TABLE(NCROP) )
-    allocate( NoahmpIO%C3C4_TABLE(NCROP) )
     allocate( NoahmpIO%PLANTPOP_TABLE(NCROP) )
     allocate( NoahmpIO%IRRI_TABLE(NCROP) )
     allocate( NoahmpIO%GDDTBASE_TABLE(NCROP) )
@@ -340,7 +338,6 @@ contains
     allocate( NoahmpIO%K_TABLE(NCROP) )
     allocate( NoahmpIO%EPSI_TABLE(NCROP) )
     allocate( NoahmpIO%Q10MR_TABLE(NCROP) )
-    allocate( NoahmpIO%FOLN_MX_TABLE(NCROP) )
     allocate( NoahmpIO%LEFREEZ_TABLE(NCROP) )
     allocate( NoahmpIO%DILE_FC_TABLE(NCROP,NSTAGE) )
     allocate( NoahmpIO%DILE_FW_TABLE(NCROP,NSTAGE) )
@@ -435,7 +432,6 @@ contains
     NoahmpIO%TOPT_TABLE         = -1.0e36
     NoahmpIO%RSMAX_TABLE        = -1.0e36
     NoahmpIO%RTOVRC_TABLE       = -1.0e36
-    NoahmpIO%RSDRYC_TABLE       = -1.0e36
     NoahmpIO%RSWOODC_TABLE      = -1.0e36
     NoahmpIO%BF_TABLE           = -1.0e36
     NoahmpIO%WSTRC_TABLE        = -1.0e36
@@ -559,7 +555,6 @@ contains
     NoahmpIO%MPI_TABLE              = -1.0e36
     NoahmpIO%FOLNMXI_TABLE          = -1.0e36
     NoahmpIO%QE25I_TABLE            = -1.0e36
-    NoahmpIO%C3C4_TABLE             = -99999
     NoahmpIO%AREF_TABLE             = -1.0e36
     NoahmpIO%PSNRF_TABLE            = -1.0e36
     NoahmpIO%I2PAR_TABLE            = -1.0e36
@@ -569,7 +564,6 @@ contains
     NoahmpIO%K_TABLE                = -1.0e36
     NoahmpIO%EPSI_TABLE             = -1.0e36
     NoahmpIO%Q10MR_TABLE            = -1.0e36
-    NoahmpIO%FOLN_MX_TABLE          = -1.0e36
     NoahmpIO%LEFREEZ_TABLE          = -1.0e36
     NoahmpIO%DILE_FC_TABLE          = -1.0e36
     NoahmpIO%DILE_FW_TABLE          = -1.0e36
@@ -738,7 +732,6 @@ contains
     NoahmpIO%TOPT_TABLE(1:NVEG)    = TOPT(1:NVEG)
     NoahmpIO%RSMAX_TABLE(1:NVEG)   = RSMAX(1:NVEG)
     NoahmpIO%RTOVRC_TABLE(1:NVEG)  = RTOVRC(1:NVEG)
-    NoahmpIO%RSDRYC_TABLE(1:NVEG)  = RSDRYC(1:NVEG)
     NoahmpIO%RSWOODC_TABLE(1:NVEG) = RSWOODC(1:NVEG)
     NoahmpIO%BF_TABLE(1:NVEG)      = BF(1:NVEG)
     NoahmpIO%WSTRC_TABLE(1:NVEG)   = WSTRC(1:NVEG)
@@ -983,7 +976,6 @@ contains
     NoahmpIO%MPI_TABLE(1:5)         = MPI(1:5)
     NoahmpIO%FOLNMXI_TABLE(1:5)     = FOLNMXI(1:5)
     NoahmpIO%QE25I_TABLE(1:5)       = QE25I(1:5)
-    NoahmpIO%C3C4_TABLE             = C3C4
     NoahmpIO%AREF_TABLE             = AREF
     NoahmpIO%PSNRF_TABLE            = PSNRF
     NoahmpIO%I2PAR_TABLE            = I2PAR
@@ -993,7 +985,6 @@ contains
     NoahmpIO%K_TABLE                = K
     NoahmpIO%EPSI_TABLE             = EPSI
     NoahmpIO%Q10MR_TABLE            = Q10MR
-    NoahmpIO%FOLN_MX_TABLE          = FOLN_MX
     NoahmpIO%LEFREEZ_TABLE          = LEFREEZ
     NoahmpIO%DILE_FC_TABLE(:,1)     = DILE_FC_S1
     NoahmpIO%DILE_FC_TABLE(:,2)     = DILE_FC_S2

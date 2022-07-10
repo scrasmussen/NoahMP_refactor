@@ -37,27 +37,26 @@ contains
               VegType         => noahmp%config%domain%VegType        ,& ! in,    vegetation type
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               IndexEBLForest       => noahmp%config%domain%IndexEBLForest      ,& ! in,    flag for Evergreen Broadleaf Forest
-              WRRAT           => noahmp%biochem%param%WRRAT          ,& ! in,    wood to non-wood ratio
-              LTOVRC          => noahmp%biochem%param%LTOVRC         ,& ! in,    leaf turnover coefficient [1/s]
-              TDLEF           => noahmp%biochem%param%TDLEF          ,& ! in,    characteristic T for leaf freezing [K]
-              DILEFW          => noahmp%biochem%param%DILEFW         ,& ! in,    coeficient for leaf water stress death [1/s]
-              DILEFC          => noahmp%biochem%param%DILEFC         ,& ! in,    coeficient for leaf temperature stress death [1/s]
-              FRAGR           => noahmp%biochem%param%FRAGR          ,& ! in,    fraction of growth respiration  !original was 0.3
-              TMIN            => noahmp%biochem%param%TMIN           ,& ! in,    minimum temperature for photosynthesis (k)
-              MRP             => noahmp%biochem%param%MRP            ,& ! in,    microbial respiration parameter (umol co2/kg c/s)
-              FOLNMX          => noahmp%biochem%param%FOLNMX         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
-              ARM             => noahmp%biochem%param%ARM            ,& ! in,    q10 for maintenance respiration
-              RMF25           => noahmp%biochem%param%RMF25          ,& ! in,    leaf maintenance respiration at 25c (umol co2/m**2/s)
-              RMR25           => noahmp%biochem%param%RMR25          ,& ! in,    root maintenance respiration at 25c (umol co2/kg bio/s)
-              RMS25           => noahmp%biochem%param%RMS25          ,& ! in,    stem maintenance respiration at 25c (umol co2/kg bio/s)
-              WDPOOL          => noahmp%biochem%param%WDPOOL         ,& ! in,    wood pool (switch 1 or 0) depending on woody or not
-              RTOVRC          => noahmp%biochem%param%RTOVRC         ,& ! in,    root turnover coefficient [1/s]
-              RSDRYC          => noahmp%biochem%param%RSDRYC         ,& ! in,    degree of drying that reduces soil respiration [-]
-              RSWOODC         => noahmp%biochem%param%RSWOODC        ,& ! in,    wood respiration coeficient [1/s]
-              BF              => noahmp%biochem%param%BF             ,& ! in,    parameter for present wood allocation [-]
-              WSTRC           => noahmp%biochem%param%WSTRC          ,& ! in,    water stress coeficient [-]
-              LAIMIN          => noahmp%biochem%param%LAIMIN         ,& ! in,    minimum leaf area index [m2/m2]
-              XSAMIN          => noahmp%biochem%param%XSAMIN         ,& ! in,    minimum stem area index [m2/m2]
+              WoodToRootRatio           => noahmp%biochem%param%WoodToRootRatio          ,& ! in,    wood to root ratio
+              TurnoverCoeffLeafVeg          => noahmp%biochem%param%TurnoverCoeffLeafVeg         ,& ! in,    leaf turnover coefficient [1/s] for generic vegetation
+              TemperaureLeafFreeze           => noahmp%biochem%param%TemperaureLeafFreeze          ,& ! in,    characteristic temperature for leaf freezing [K]
+              LeafDeathWaterCoeffVeg          => noahmp%biochem%param%LeafDeathWaterCoeffVeg         ,& ! in,    coeficient for leaf water stress death [1/s] for generic veg
+              LeafDeathTempCoeffVeg          => noahmp%biochem%param%LeafDeathTempCoeffVeg         ,& ! in,    coeficient for leaf temperature stress death [1/s] for generic veg
+              GrowthRespFrac           => noahmp%biochem%param%GrowthRespFrac          ,& ! in,    fraction of growth respiration  !original was 0.3
+              TemperatureMinPhotosyn            => noahmp%biochem%param%TemperatureMinPhotosyn           ,& ! in,    minimum temperature for photosynthesis (k)
+              MicroRespCoeff             => noahmp%biochem%param%MicroRespCoeff            ,& ! in,    microbial respiration parameter (umol co2/kg c/s)
+              NitrogenConcFoliageMax          => noahmp%biochem%param%NitrogenConcFoliageMax         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
+              RespMaintQ10             => noahmp%biochem%param%RespMaintQ10            ,& ! in,    q10 for maintenance respiration
+              RespMaintLeaf25C           => noahmp%biochem%param%RespMaintLeaf25C          ,& ! in,    leaf maintenance respiration at 25c (umol co2/m**2/s)
+              RespMaintRoot25C           => noahmp%biochem%param%RespMaintRoot25C          ,& ! in,    root maintenance respiration at 25c (umol co2/kg bio/s)
+              RespMaintStem25C           => noahmp%biochem%param%RespMaintStem25C          ,& ! in,    stem maintenance respiration at 25c (umol co2/kg bio/s)
+              WoodPoolIndex          => noahmp%biochem%param%WoodPoolIndex         ,& ! in,    wood pool index (0~1) depending on woody or not
+              TurnoverCoeffRootVeg          => noahmp%biochem%param%TurnoverCoeffRootVeg         ,& ! in,    root turnover coefficient [1/s] for generic vegetation
+              WoodRespCoeff         => noahmp%biochem%param%WoodRespCoeff        ,& ! in,    wood respiration coeficient [1/s]
+              WoodAllocFac              => noahmp%biochem%param%WoodAllocFac             ,& ! in,    parameter for present wood allocation [-]
+              WaterStressCoeff           => noahmp%biochem%param%WaterStressCoeff          ,& ! in,    water stress coeficient [-]
+              LeafAreaIndexMin          => noahmp%biochem%param%LeafAreaIndexMin         ,& ! in,    minimum leaf area index [m2/m2]
+              StemAreaIndexMin          => noahmp%biochem%param%StemAreaIndexMin         ,& ! in,    minimum stem area index [m2/m2]
               IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason            ,& ! in,    growing season index (0=off, 1=on)
               NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage ,& ! in,    foliage nitrogen concentration (%)
               LeafAreaPerMass            => noahmp%biochem%state%LeafAreaPerMass           ,& ! in,    leaf area per unit mass [m2/g]
@@ -109,7 +108,7 @@ contains
               GrowthRespStem          => noahmp%biochem%flux%GrowthRespStem          ,& ! out,   growth respiration rate for stem [g/m2/s]
               LeafMassMaxChg           => noahmp%biochem%flux%LeafMassMaxChg           ,& ! out,   maximum leaf mass available to change [g/m2/s]
               CarbonDecayToStable          => noahmp%biochem%flux%CarbonDecayToStable          ,& ! out,   decay rate of fast carbon to slow carbon [g/m2/s]
-              RespirationLeaf            => noahmp%biochem%flux%RespirationLeaf            ,& ! out,   leaf respiration rate [g/m2/s]
+              RespirationLeaf            => noahmp%biochem%flux%RespirationLeaf            ,& ! out,   leaf respiration rate [umol CO2/m2/s]
               RespirationStem          => noahmp%biochem%flux%RespirationStem          ,& ! out,   stem respiration rate [g/m2/s]
               RespirationWood => noahmp%biochem%flux%RespirationWood ,& ! out,   wood respiration rate [g/m2/s]
               RespirationLeafMaint          => noahmp%biochem%flux%RespirationLeafMaint          ,& ! out,   leaf maintenance respiration rate [g/m2/s]
@@ -127,8 +126,8 @@ contains
 
     ! initialization
     StemAreaPerMass    = 3.0 * 0.001      ! m2/kg -->m2/g
-    LeafMassMin  = LAIMIN / LeafAreaPerMass
-    StemMassMin  = XSAMIN / StemAreaPerMass
+    LeafMassMin  = LeafAreaIndexMin / LeafAreaPerMass
+    StemMassMin  = StemAreaIndexMin / StemAreaPerMass
         
     ! respiration
     if ( IndexGrowSeason == 0.0 ) then
@@ -136,15 +135,15 @@ contains
     else
        RespReductionFac = 1.0
     endif             
-    RespFacNitrogenFoliage    = min( NitrogenConcFoliage / max(1.0e-06,FOLNMX), 1.0 )
-    RespFacTemperature     = ARM**((TV - 298.16) / 10.0)
-    RespirationLeaf   = RMF25 * RespFacTemperature * RespFacNitrogenFoliage * &
-                        XLAI * RespReductionFac * (1.0 - WSTRES)           ! umol/m2/s
+    RespFacNitrogenFoliage    = min( NitrogenConcFoliage / max(1.0e-06,NitrogenConcFoliageMax), 1.0 )
+    RespFacTemperature     = RespMaintQ10**((TV - 298.16) / 10.0)
+    RespirationLeaf   = RespMaintLeaf25C * RespFacTemperature * RespFacNitrogenFoliage * &
+                        XLAI * RespReductionFac * (1.0 - WSTRES)           ! umol CO2/m2/s
     RespirationLeafMaint = min( (LeafMass-LeafMassMin)/MainTimeStep, RespirationLeaf*12.0e-6 )                 ! g/m2/s
-    RespirationRoot = RMR25 * (RootMass*1.0e-3) * RespFacTemperature * RespReductionFac * 12.0e-6             ! g/m2/s
-    RespirationStem = RMS25 * ((StemMass-StemMassMin) * 1.0e-3) * &
+    RespirationRoot = RespMaintRoot25C * (RootMass*1.0e-3) * RespFacTemperature * RespReductionFac * 12.0e-6             ! g/m2/s
+    RespirationStem = RespMaintStem25C * ((StemMass-StemMassMin) * 1.0e-3) * &
                       RespFacTemperature * RespReductionFac * 12.0e-6  ! g/m2/s
-    RespirationWood = RSWOODC * r(TV) * WoodMass * WDPOOL
+    RespirationWood = WoodRespCoeff * r(TV) * WoodMass * WoodPoolIndex
     
     !!! carbon assimilation start
     ! 1 mole -> 12 g carbon or 44 g CO2; 1 umol -> 12.e-6 g carbon;   
@@ -159,39 +158,39 @@ contains
       
     !  fraction of carbon into wood versus root 
     if ( WoodMass > 1.0e-6 ) then
-       WoodCarbonFrac = (1.0 - exp(-BF * (WRRAT*RootMass/WoodMass)) / BF) * WDPOOL
+       WoodCarbonFrac = (1.0 - exp(-WoodAllocFac * (WoodToRootRatio*RootMass/WoodMass)) / WoodAllocFac) * WoodPoolIndex
     else
-       WoodCarbonFrac = WDPOOL
+       WoodCarbonFrac = WoodPoolIndex
     endif   
     CarbonFracToRoot = CarbonFracToWoodRoot * (1.0 - WoodCarbonFrac)
     CarbonFracToWood = CarbonFracToWoodRoot * WoodCarbonFrac
 
     ! leaf and root turnover per time step  
-    TurnoverLeaf = LTOVRC * 5.0e-7 * LeafMass
-    TurnoverStem = LTOVRC * 5.0e-7 * StemMass
-    TurnoverRoot = RTOVRC * RootMass
+    TurnoverLeaf = TurnoverCoeffLeafVeg * 5.0e-7 * LeafMass
+    TurnoverStem = TurnoverCoeffLeafVeg * 5.0e-7 * StemMass
+    TurnoverRoot = TurnoverCoeffRootVeg * RootMass
     TurnoverWood = 9.5e-10 * WoodMass
        
     ! seasonal leaf die rate dependent on temp and water stress
     ! water stress is set to 1 at permanent wilting point      
-    SC    = exp(-0.3 * max(0.0, TV-TDLEF)) * (LeafMass / 120.0) 
-    SD    = exp((WSTRES - 1.0) * WSTRC)
-    DeathLeaf = LeafMass * 1.0e-6 * (DILEFW * SD + DILEFC * SC)
-    DeathStem = StemMass * 1.0e-6 * (DILEFW * SD + DILEFC * SC)
+    SC    = exp(-0.3 * max(0.0, TV-TemperaureLeafFreeze)) * (LeafMass / 120.0) 
+    SD    = exp((WSTRES - 1.0) * WaterStressCoeff)
+    DeathLeaf = LeafMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
+    DeathStem = StemMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
      
     ! calculate growth respiration for leaf, root and wood 
-    GrowthRespLeaf = max( 0.0, FRAGR * (CarbonFracToLeaf*CarbonAssim - RespirationLeafMaint) )
-    GrowthRespStem = max( 0.0, FRAGR * (CarbonFracToStem*CarbonAssim - RespirationStem) )
-    GrowthRespRoot = max( 0.0, FRAGR * (CarbonFracToRoot*CarbonAssim - RespirationRoot) )
-    GrowthRespWood = max( 0.0, FRAGR * (CarbonFracToWood*CarbonAssim - RespirationWood) )
+    GrowthRespLeaf = max( 0.0, GrowthRespFrac * (CarbonFracToLeaf*CarbonAssim - RespirationLeafMaint) )
+    GrowthRespStem = max( 0.0, GrowthRespFrac * (CarbonFracToStem*CarbonAssim - RespirationStem) )
+    GrowthRespRoot = max( 0.0, GrowthRespFrac * (CarbonFracToRoot*CarbonAssim - RespirationRoot) )
+    GrowthRespWood = max( 0.0, GrowthRespFrac * (CarbonFracToWood*CarbonAssim - RespirationWood) )
         
     ! Impose lower T limit for photosynthesis
     ADDNPPLF = max( 0.0, CarbonFracToLeaf*CarbonAssim - GrowthRespLeaf - RespirationLeafMaint )
     ADDNPPST = max( 0.0, CarbonFracToStem*CarbonAssim - GrowthRespStem - RespirationStem )
     !ADDNPPLF = CarbonFracToLeaf*CarbonAssim - GrowthRespLeaf - RespirationLeafMaint  ! MB: test Kjetil 
     !ADDNPPST = CarbonFracToStem*CarbonAssim - GrowthRespStem - RespirationStem  ! MB: test Kjetil 
-    if ( TV < TMIN ) ADDNPPLF = 0.0
-    if ( TV < TMIN ) ADDNPPST = 0.0
+    if ( TV < TemperatureMinPhotosyn ) ADDNPPLF = 0.0
+    if ( TV < TemperatureMinPhotosyn ) ADDNPPST = 0.0
      
     ! update leaf, root, and wood carbon
     ! avoid reducing leaf mass below its minimum value but conserve mass
@@ -214,7 +213,7 @@ contains
        TurnoverRoot = NetPriProductionRoot
        RootMass = 0.0
     endif 
-    WoodMass = (WoodMass + (NetPriProductionWood - TurnoverWood) * MainTimeStep ) * WDPOOL
+    WoodMass = (WoodMass + (NetPriProductionWood - TurnoverWood) * MainTimeStep ) * WoodPoolIndex
 
     ! soil carbon budgets 
     CarbonMassShallowSoil = CarbonMassShallowSoil + &
@@ -222,7 +221,7 @@ contains
     MicroRespFactorSoilTemp    = 2.0**( (STC(1) - 283.16) / 10.0 )
     MicroRespFactorSoilWater    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
     RespirationSoil = MicroRespFactorSoilWater * MicroRespFactorSoilTemp * &
-                      MRP * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
+                      MicroRespCoeff * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
     CarbonDecayToStable = 0.1 * RespirationSoil
     CarbonMassShallowSoil = CarbonMassShallowSoil - (RespirationSoil + CarbonDecayToStable) * MainTimeStep
     CarbonMassDeepSoil = CarbonMassDeepSoil + CarbonDecayToStable * MainTimeStep
@@ -242,8 +241,8 @@ contains
     CarbonMassLiveTot  = LeafMass + RootMass + StemMass + WoodMass      !g/m2   C  MB: add StemMass v3.7
     
     ! leaf area index and stem area index
-    XLAI   = max( LeafMass*LeafAreaPerMass, LAIMIN )
-    XSAI   = max( StemMass*StemAreaPerMass, XSAMIN )
+    XLAI   = max( LeafMass*LeafAreaPerMass, LeafAreaIndexMin )
+    XSAI   = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
 
     end associate
 

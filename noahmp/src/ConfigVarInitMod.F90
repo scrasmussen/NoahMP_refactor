@@ -166,11 +166,11 @@ contains
     if ( .not. allocated(noahmp%config%domain%DepthSnowSoilLayer) )      &
        allocate( noahmp%config%domain%DepthSnowSoilLayer(-NumSnowLayerMax+1:NumSoilLayer) )
     
-    noahmp%config%domain%SoilType              (                 1:NumSoilLayer) = undefined_int
-    noahmp%config%domain%DepthSoilLayer        (                 1:NumSoilLayer) = undefined_real
-    noahmp%config%domain%ThicknessSoilLayer    (                 1:NumSoilLayer) = undefined_real
-    noahmp%config%domain%ThicknessSnowSoilLayer(-NumSnowLayerMax+1:NumSoilLayer) = undefined_real
-    noahmp%config%domain%DepthSnowSoilLayer    (-NumSnowLayerMax+1:NumSoilLayer) = undefined_real
+    noahmp%config%domain%SoilType              (:)   = undefined_int
+    noahmp%config%domain%DepthSoilLayer        (:)   = undefined_real
+    noahmp%config%domain%ThicknessSoilLayer    (:)   = undefined_real
+    noahmp%config%domain%ThicknessSnowSoilLayer(:)   = undefined_real
+    noahmp%config%domain%DepthSnowSoilLayer    (:)   = undefined_real
 
     if ( noahmp%config%nmlist%OptSoilProperty == 1 ) then
        noahmp%config%domain%SoilType(1:NumSoilLayer) = NoahmpIO%ISLTYP(I,J)  ! soil type same in all layers
