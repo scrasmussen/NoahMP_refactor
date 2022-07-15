@@ -44,7 +44,7 @@ contains
     real(kind=kind_noahmp), allocatable, dimension(:) :: TD_SATZ ! thickness of saturated zone
     real(kind=kind_noahmp), allocatable, dimension(:) :: KLATK   ! lateral hydraulic ocnductivity kth layer
     real(kind=kind_noahmp), allocatable, dimension(:) :: OVRFC   ! layer-wise amount of water over field capacity
-    real(kind=kind_noahmp), allocatable, dimension(:) :: RMSH2O  ! remaining water after tile drain
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilLiqWaterAftDrain  ! remaining water after tile drain
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -60,12 +60,12 @@ contains
               TD_DDRAIN       => noahmp%water%param%TD_DDRAIN        ,& ! in,    Depth of drain (m)
               TD_SPAC         => noahmp%water%param%TD_SPAC          ,& ! in,    distance between two drain tubes or tiles (m)
               TD_RADI         => noahmp%water%param%TD_RADI          ,& ! in,    effective radius of drains (m)
-              WCND            => noahmp%water%state%WCND             ,& ! in,    soil hydraulic conductivity (m/s)
-              SICE            => noahmp%water%state%SICE             ,& ! in,    soil ice content [m3/m3]
-              WATBLED         => noahmp%water%state%WATBLED          ,& ! in,    water table depth estimated in WRF-Hydro fine grids (m)
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout, soil water content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout, total soil moisture [m3/m3]
-              ZWT             => noahmp%water%state%ZWT              ,& ! inout, water table depth [m]
+              SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! in,    soil hydraulic conductivity [m/s]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,    soil ice content [m3/m3]
+              WaterTableHydro         => noahmp%water%state%WaterTableHydro          ,& ! in,    water table depth estimated in WRF-Hydro fine grids (m)
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
+              SoilMoisture    => noahmp%water%state%SoilMoisture    ,& ! inout, total soil moisture [m3/m3]
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout, water table depth [m]
               QTLDRN          => noahmp%water%flux%QTLDRN             & ! inout, tile drainage (mm/s)
              )
 ! ----------------------------------------------------------------------
@@ -74,11 +74,11 @@ contains
     allocate( TD_SATZ(1:NumSoilLayer) )
     allocate( KLATK  (1:NumSoilLayer) )
     allocate( OVRFC  (1:NumSoilLayer) )
-    allocate( RMSH2O (1:NumSoilLayer) )
+    allocate( SoilLiqWaterAftDrain (1:NumSoilLayer) )
     TD_SATZ = 0.0
     KLATK   = 0.0
     OVRFC   = 0.0
-    RMSH2O  = 0.0
+    SoilLiqWaterAftDrain  = 0.0
     DTOPL   = 0.0
     TD_LQ   = 0.0
     TD_TTSZ = 0.0
@@ -95,11 +95,11 @@ contains
 
 #ifdef WRF_HYDRO
     ! Depth to water table from WRF-HYDRO, m
-    YY = WATBLED
+    YY = WaterTableHydro
 #else
     call WaterTableDepthSearch(noahmp)
     !call WaterTableEquilibrium(noahmp)
-    YY = ZWT
+    YY = WaterTableDepth
 #endif
 
     if ( YY > TD_ADEPTH) YY = TD_ADEPTH
@@ -119,14 +119,14 @@ contains
     ! amount of water over field capacity
     OVRFCS = 0.0
     do K = 1, NumSoilLayer
-       OVRFC(K) = (SH2O(K) - (SMCREF(K)-SICE(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
+       OVRFC(K) = (SoilLiqWater(K) - (SMCREF(K)-SoilIce(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
        if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
        OVRFCS   = OVRFCS + OVRFC(K)
     enddo
 
     ! lateral hydraulic conductivity and total lateral flow
     do K = 1, NumSoilLayer
-       KLATK(K) = WCND(K) * KLAT_FAC * MainTimeStep ! m/s to m/timestep
+       KLATK(K) = SoilWatConductivity(K) * KLAT_FAC * MainTimeStep ! m/s to m/timestep
        TD_LQ    = TD_LQ + (TD_SATZ(K) * KLATK(K))
        TD_TTSZ  = TD_TTSZ + TD_SATZ(K)
     enddo
@@ -157,14 +157,14 @@ contains
     do K = 1, NumSoilLayer
        if ( QTLDRN1 > 0.0) then
           if ( (TD_SATZ(K) > 0.0) .and. (OVRFC(K) > 0.0) ) then
-             RMSH2O(K) = OVRFC(K) - QTLDRN1 ! remaining water after tile drain
-             if ( RMSH2O(K) > 0.0 ) then
-                SH2O(K) = (SMCREF(K) - SICE(K)) + RMSH2O(K) / (ThicknessSoilLayer(K) * 1000.0)
-                SMC(K)  = SH2O(K) + SICE(K)
+             SoilLiqWaterAftDrain(K) = OVRFC(K) - QTLDRN1 ! remaining water after tile drain
+             if ( SoilLiqWaterAftDrain(K) > 0.0 ) then
+                SoilLiqWater(K) = (SMCREF(K) - SoilIce(K)) + SoilLiqWaterAftDrain(K) / (ThicknessSoilLayer(K) * 1000.0)
+                SoilMoisture(K)  = SoilLiqWater(K) + SoilIce(K)
                 exit
              else
-                SH2O(K) = SMCREF(K) - SICE(K)
-                SMC(K)  = SH2O(K) + SICE (K)
+                SoilLiqWater(K) = SMCREF(K) - SoilIce(K)
+                SoilMoisture(K)  = SoilLiqWater(K) + SoilIce (K)
                 QTLDRN1 = QTLDRN1 - OVRFC(K)
              endif
           endif

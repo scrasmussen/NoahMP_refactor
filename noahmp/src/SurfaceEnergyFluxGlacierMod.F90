@@ -46,7 +46,7 @@ contains
     real(kind=kind_noahmp)                :: B            ! temporary calculation
     real(kind=kind_noahmp)                :: H            ! temporary sensible heat flux (w/m2)
     real(kind=kind_noahmp)                :: T, TDC       ! Kelvin to degree Celsius with limit -50 to +50
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SICEtemp   ! temporary glacier ice content (m3/m3)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilIceTmp   ! temporary glacier ice content (m3/m3)
 ! local statement function
     TDC(T) = min( 50.0, max(-50.0, (T - ConstFreezePoint)) )
 
@@ -62,9 +62,9 @@ contains
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight ,& ! in,    air pressure [Pa] at reference height
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              SMC             => noahmp%water%state%SMC              ,& ! in,    total glacier/soil water content [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier/soil water content [m3/m3]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,    total glacier/soil water content [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,    glacier/soil water content [m3/m3]
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
@@ -117,8 +117,8 @@ contains
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
     CGH    = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
-    allocate(SICEtemp(1:NumSoilLayer))
-    SICEtemp = 0.0
+    allocate(SoilIceTmp(1:NumSoilLayer))
+    SoilIceTmp = 0.0
 
     ! begin stability iteration for ground temperature and flux
     loop3: do ITER = 1, NITERB
@@ -146,7 +146,7 @@ contains
 
        ! ground fluxes and temperature change
        CSH = RHOAIR * ConstHeatCapacAir / RAHB
-       if ( (SNOWH > 0.0) .or. (OptGlacierTreatment == 1) ) then
+       if ( (SnowDepth > 0.0) .or. (OptGlacierTreatment == 1) ) then
           CEV = RHOAIR * ConstHeatCapacAir / GAMMAG / (RSURF + RAWB)
        else
           CEV = 0.0   ! don't allow any sublimation of glacier in OptGlacierTreatment=2
@@ -181,9 +181,9 @@ contains
     enddo loop3 ! end stability iteration
 
     ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
-    SICEtemp = SMC - SH2O
+    SoilIceTmp = SoilMoisture - SoilLiqWater
     if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
-       if ( (maxval(SICEtemp) > 0.0 .or. SNOWH > 0.05) .and. &
+       if ( (maxval(SoilIceTmp) > 0.0 .or. SnowDepth > 0.05) .and. &
             (TGB > ConstFreezePoint) .and. (OptGlacierTreatment == 1) ) then
           TGB = ConstFreezePoint
           T = TDC(TGB) ! MB: recalculate ESTG

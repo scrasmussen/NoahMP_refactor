@@ -34,7 +34,6 @@ contains
     associate(                                                        &
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
               BATS_COSZ       => noahmp%energy%param%BATS_COSZ       ,& ! in,     zenith angle snow albedo adjustment
               BATS_VIS_NEW    => noahmp%energy%param%BATS_VIS_NEW    ,& ! in,     new snow visible albedo
               BATS_NIR_NEW    => noahmp%energy%param%BATS_NIR_NEW    ,& ! in,     new snow NIR albedo

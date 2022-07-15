@@ -59,7 +59,7 @@ module ConfigVarType
     integer :: OptSnowSoilTempTime         ! options for snow/soil temperature time scheme (only layer 1)
                                               ! 1 -> semi-implicit; flux top boundary condition (default)
                                               ! 2 -> full implicit (original Noah); temperature top boundary condition
-                                              ! 3 -> same as 1, but FSNO for TS calculation (generally improves snow)
+                                              ! 3 -> same as 1, but snow cover for skin temperature calculation (generally improves snow)
     integer :: OptSnowThermConduct         ! options for snow thermal conductivity
                                               ! 1 -> Stieglitz(yen,1965) scheme (default)
                                               ! 2 -> Anderson, 1976 scheme

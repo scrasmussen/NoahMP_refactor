@@ -73,84 +73,82 @@ module WaterVarType
 
   end type flux_type
 
+
 !=== define "state" sub-type of water_type (water%state%variable)
   type :: state_type
 
     ! define specific water state variables
-    integer                :: IRCNTSI     ! irrigation event number, Sprinkler
-    integer                :: IRCNTMI     ! irrigation event number, Micro
-    integer                :: IRCNTFI     ! irrigation event number, Flood
-    real(kind=kind_noahmp) :: CMC         ! total canopy intercepted water (mm)
-    real(kind=kind_noahmp) :: FWET        ! wetted or snowed fraction of the canopy
-    real(kind=kind_noahmp) :: BDFALL      ! bulk density of snowfall (kg/m3)
-    real(kind=kind_noahmp) :: CANLIQ      ! intercepted liquid water (mm)
-    real(kind=kind_noahmp) :: CANICE      ! intercepted ice mass (mm)
-    real(kind=kind_noahmp) :: MAXSNO      ! canopy capacity for snow interception (mm)
-    real(kind=kind_noahmp) :: MAXLIQ      ! canopy capacity for rain interception (mm)
-    real(kind=kind_noahmp) :: SNOWH       ! snow depth [m]
-    real(kind=kind_noahmp) :: SNEQV       ! snow water equivalent [mm]
-    real(kind=kind_noahmp) :: SNEQVO      ! snow mass at last time step(mm) for BATS albedo
-    real(kind=kind_noahmp) :: PONDING     ! surface ponding (mm)
-    real(kind=kind_noahmp) :: PONDING1    ! surface ponding 1 (mm)
-    real(kind=kind_noahmp) :: PONDING2    ! surface ponding 2 (mm)
-    real(kind=kind_noahmp) :: FIFAC       ! fraction of grid under flood irrigation (0 to 1)
-    real(kind=kind_noahmp) :: IRAMTFI     ! flood irrigation water amount [m]
-    real(kind=kind_noahmp) :: MIFAC       ! fraction of grid under micro irrigation (0 to 1)
-    real(kind=kind_noahmp) :: IRAMTMI     ! micro irrigation water amount [m]
-    real(kind=kind_noahmp) :: SIFAC       ! sprinkler irrigation fraction (0 to 1)
-    real(kind=kind_noahmp) :: IRAMTSI     ! sprinkler irrigation water amount [m]
-    real(kind=kind_noahmp) :: ZWT         ! water table depth [m]
-    real(kind=kind_noahmp) :: SICEMAX     ! maximum soil ice content (m3/m3)
-    real(kind=kind_noahmp) :: SH2OMIN     ! minimum soil liquid water content (m3/m3)
-    real(kind=kind_noahmp) :: FSAT        ! fractional saturated area for soil moisture
-    real(kind=kind_noahmp) :: FCRMAX      ! maximum fraction of imperviousness (FCR)
-    real(kind=kind_noahmp) :: SMCWTD      ! soil moisture between bottom of the soil and the water table
-    real(kind=kind_noahmp) :: DEEPRECH    ! recharge to or from the water table when deep [m]
-    real(kind=kind_noahmp) :: RECH        ! groundwater recharge (net vertical flux across the water table), positive up
-    real(kind=kind_noahmp) :: WPLUS       ! saturation excess of the total soil [m]
-    real(kind=kind_noahmp) :: WATBLED     ! water table depth estimated in WRF-Hydro fine grids
-    real(kind=kind_noahmp) :: TDFRACMP    ! tile drainage map(fraction)
-    real(kind=kind_noahmp) :: WA          ! water storage in aquifer [mm]
-    real(kind=kind_noahmp) :: WT          ! water storage in aquifer + saturated soil [mm]
-    real(kind=kind_noahmp) :: WSLAKE      ! water storage in lake (can be -) (mm) 
-    real(kind=kind_noahmp) :: sfcheadrt   ! surface water head (mm)
-    real(kind=kind_noahmp) :: IRRFRA      ! irrigation fraction
-    real(kind=kind_noahmp) :: SIFRA       ! sprinkler irrigation fraction from input
-    real(kind=kind_noahmp) :: MIFRA       ! micro irrigation fraction from input
-    real(kind=kind_noahmp) :: FIFRA       ! flood irrigation fraction from input
-    real(kind=kind_noahmp) :: FP          ! fraction of the gridcell that receives precipitation
-    real(kind=kind_noahmp) :: FSNO        ! snow cover fraction (-)
-    real(kind=kind_noahmp) :: BTRAN       ! soil water transpiration factor (0 to 1)
-    real(kind=kind_noahmp) :: FPICE       ! fraction of snowfall in total precipitation
-    real(kind=kind_noahmp) :: WROOT       ! root zone soil water
-    real(kind=kind_noahmp) :: WSTRES      ! soil water stress
-    real(kind=kind_noahmp) :: BEG_WB      ! total water storage (mm) at the begining before NoahMP process
-    real(kind=kind_noahmp) :: ERRWAT      ! water balance error (mm)
-    real(kind=kind_noahmp) :: END_WB      ! total water storage (mm) at the end of NoahMP process
+    integer                :: IrrigationCntSprinkler     ! irrigation event number, Sprinkler
+    integer                :: IrrigationCntMicro         ! irrigation event number, Micro
+    integer                :: IrrigationCntFlood         ! irrigation event number, Flood
+    real(kind=kind_noahmp) :: CanopyTotalWater           ! total (liquid+ice) canopy intercepted water [mm]
+    real(kind=kind_noahmp) :: CanopyWetFrac              ! wetted or snowed fraction of the canopy
+    real(kind=kind_noahmp) :: SnowfallDensity            ! bulk density of snowfall (kg/m3)
+    real(kind=kind_noahmp) :: CanopyLiqWater             ! intercepted canopy liquid water [mm]
+    real(kind=kind_noahmp) :: CanopyIce                  ! intercepted canopy ice [mm]
+    real(kind=kind_noahmp) :: CanopyIceMax               ! canopy capacity for snow interception [mm]
+    real(kind=kind_noahmp) :: CanopyLiqWaterMax          ! canopy capacity for rain interception [mm]
+    real(kind=kind_noahmp) :: SnowDepth                  ! snow depth [m]
+    real(kind=kind_noahmp) :: SnowWaterEquiv             ! snow water equivalent (ice+liquid) [mm]
+    real(kind=kind_noahmp) :: SnowWaterEquivPrev         ! snow water equivalent at previous time step (mm)
+    real(kind=kind_noahmp) :: PondSfcThinSnwMelt         ! surface ponding [mm] from snowmelt when snow has no layer
+    real(kind=kind_noahmp) :: PondSfcThinSnwComb         ! surface ponding [mm] from liquid in thin snow layer combination
+    real(kind=kind_noahmp) :: PondSfcThinSnwTrans        ! surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
+    real(kind=kind_noahmp) :: IrrigationFracFlood        ! fraction of grid under flood irrigation (0 to 1)
+    real(kind=kind_noahmp) :: IrrigationAmtFlood         ! flood irrigation water amount [m]
+    real(kind=kind_noahmp) :: IrrigationFracMicro        ! fraction of grid under micro irrigation (0 to 1)
+    real(kind=kind_noahmp) :: IrrigationAmtMicro         ! micro irrigation water amount [m]
+    real(kind=kind_noahmp) :: IrrigationFracSprinkler    ! fraction of grid under sprinkler irrigation (0 to 1)
+    real(kind=kind_noahmp) :: IrrigationAmtSprinkler     ! sprinkler irrigation water amount [m]
+    real(kind=kind_noahmp) :: WaterTableDepth            ! water table depth [m]
+    real(kind=kind_noahmp) :: SoilIceMax                 ! maximum soil ice content [m3/m3]
+    real(kind=kind_noahmp) :: SoilLiqWaterMin            ! minimum soil liquid water content [m3/m3]
+    real(kind=kind_noahmp) :: SoilSaturateFrac           ! fractional saturated area for soil moisture
+    real(kind=kind_noahmp) :: SoilImpervFracMax          ! maximum soil imperviousness fraction
+    real(kind=kind_noahmp) :: SoilMoistureToWT           ! soil moisture between bottom of the soil and the water table
+    real(kind=kind_noahmp) :: RechargeGwDeepWT           ! groundwater recharge to or from the water table when deep [m]
+    real(kind=kind_noahmp) :: RechargeGwShallowWT        ! groundwater recharge to or from shallow water table
+    real(kind=kind_noahmp) :: SoilSaturationExcess       ! saturation excess of the total soil [m]
+    real(kind=kind_noahmp) :: WaterTableHydro            ! water table depth estimated in WRF-Hydro fine grids [m]
+    real(kind=kind_noahmp) :: TileDrainFrac              ! tile drainage map(fraction)
+    real(kind=kind_noahmp) :: WaterStorageAquifer        ! water storage in aquifer [mm]
+    real(kind=kind_noahmp) :: WaterStorageSoilAqf        ! water storage in aquifer + saturated soil [mm]
+    real(kind=kind_noahmp) :: WaterStorageLake           ! water storage in lake (can be negative) [mm] 
+    real(kind=kind_noahmp) :: WaterHeadSfc               ! surface water head [mm]
+    real(kind=kind_noahmp) :: IrrigationFracGrid         ! total irrigation fraction from input for a grid
+    real(kind=kind_noahmp) :: PrecipAreaFrac             ! fraction of the gridcell that receives precipitation
+    real(kind=kind_noahmp) :: SnowCoverFrac              ! snow cover fraction (-)
+    real(kind=kind_noahmp) :: SoilTranspFacAcc           ! accumulated soil water transpiration factor (0 to 1)
+    real(kind=kind_noahmp) :: FrozenPrecipFrac           ! fraction of frozen precip in total precipitation
+    real(kind=kind_noahmp) :: SoilWaterRootZone          ! root zone soil water
+    real(kind=kind_noahmp) :: SoilWaterStress            ! soil water stress
+    real(kind=kind_noahmp) :: WaterStorageTotBeg         ! total water storage [mm] at the begining before NoahMP process
+    real(kind=kind_noahmp) :: WaterBalanceError          ! water balance error [mm]
+    real(kind=kind_noahmp) :: WaterStorageTotEnd         ! total water storage [mm] at the end of NoahMP process
 
-    integer               , allocatable, dimension(:) :: IMELT         ! phase change index [0-none;1-melt;2-refreeze]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SNICE         ! snow layer ice [mm]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SNLIQ         ! snow layer liquid water [mm]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FICEOLD_SNOW  ! ice fraction in snow layers at last timestep
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FICE_SNOW     ! ice fraction in snow layers at current timestep
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FICE_SOIL     ! ice fraction in soil layers at current timestep
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SNOW    ! snow effective porosity (m3/m3) used in snow hydrology 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SNOW2   ! snow effective porosity (m3/m3) used in snow heat capacity
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SH2O          ! soil liquid moisture (m3/m3)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SICE          ! soil ice moisture (m3/m3)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMC           ! total soil moisture [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FCR           ! fraction of imperviousness due to frozen soil
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WCND          ! soil hydraulic conductivity (m/s)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WDF           ! soil water diffusivity (m2/s)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EPORE_SOIL    ! soil effective porosity (m3/m3) 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCEQ         ! equilibrium soil water  content [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: BTRANI        ! soil water transpiration factor (0 to 1)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SNICEV        ! partial volume of ice [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SNLIQV        ! partial volume of liquid water [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SUPERCOOL     ! supercooled water in soil (kg/m2)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: PSI           ! surface layer soil matrix potential (m)
+    integer               , allocatable, dimension(:) :: IndexPhaseChange      ! phase change index [0-none;1-melt;2-refreeze]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIce               ! snow layer ice [mm]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowLiqWater          ! snow layer liquid water [mm]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceFracPrev       ! ice fraction in snow layers at previous timestep
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceFrac           ! ice fraction in snow layers at current timestep
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilIceFrac           ! ice fraction in soil layers at current timestep
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowEffPorosity       ! snow effective porosity [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilLiqWater          ! soil liquid moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilIce               ! soil ice moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoisture          ! total soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilImpervFrac        ! fraction of imperviousness due to frozen soil
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatConductivity   ! soil hydraulic/water conductivity [m/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatDiffusivity    ! soil water diffusivity [m2/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilEffPorosity       ! soil effective porosity (m3/m3) 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureEqui      ! equilibrium soil water  content [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilTranspFac         ! soil water transpiration factor (0 to 1)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceVol            ! partial volume of snow ice [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowLiqWaterVol       ! partial volume of snow liquid water [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilSupercoolWater    ! supercooled water in soil [kg/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMatPotential      ! soil matric potential [m]
 
   end type state_type
+
 
 !=== define "parameter" sub-type of water_type (water%param%variable)
   type :: parameter_type
@@ -226,21 +224,13 @@ module WaterVarType
 
   end type parameter_type
 
-!=== define "diagnose" sub-type of water_type (water%diag%variable)
-  type :: diagnose_type
 
-    ! define specific water diagnose variables
-
-  end type diagnose_type
-
-
-!=== define water type that includes 4 subtypes (flux,state,parameter,diagnose)
+!=== define water type that includes 3 subtypes (flux,state,parameter)
   type, public :: water_type
 
     type(flux_type)      :: flux
     type(state_type)     :: state
     type(parameter_type) :: param
-    type(diagnose_type)  :: diag
 
   end type water_type
 

@@ -168,13 +168,12 @@ module BiochemVarType
   end type parameter_type
 
 
-!=== define biochem type that includes 4 subtypes (flux,state,parameter,diagnose)
+!=== define biochem type that includes 3 subtypes (flux,state,parameter)
   type, public :: biochem_type
 
     type(flux_type)      :: flux
     type(state_type)     :: state
     type(parameter_type) :: param
-    type(diagnose_type)  :: diag
 
   end type biochem_type
 

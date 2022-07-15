@@ -32,16 +32,16 @@ contains
 
 ! local variable
     integer                :: ISOIL      ! soil layer index
-    real(kind=kind_noahmp) :: WDF        ! soil water diffusivity (m2/s)
-    real(kind=kind_noahmp) :: WCND       ! soil water conductivity[m/s]
+    real(kind=kind_noahmp) :: SoilWatDiffusivity        ! soil water diffusivity [m2/s]
+    real(kind=kind_noahmp) :: SoilWatConductivity       ! soil water conductivity[m/s]
     real(kind=kind_noahmp) :: SP         ! sorptivity (LT^-1/2)
     real(kind=kind_noahmp) :: AP         ! intial hydraulic conductivity (m/s,L/T)
     real(kind=kind_noahmp) :: FMAX       ! Maximum infiltration (m/s)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3] 
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
@@ -54,30 +54,31 @@ contains
     if ( INFLMAX == 1) then
 
        ! estimate initial soil hydraulic conductivty and diffusivity (Ki, D(theta) in the equation)
-       call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMCWLT(ISOIL), 0.0, ISOIL)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SMCWLT(ISOIL), 0.0, ISOIL)
 
        ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986)
        ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-       SP = sqrt(2.0 * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (DWSAT(ISOIL) - WDF))
+       SP = sqrt(2.0 * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (DWSAT(ISOIL) - SoilWatDiffusivity))
 
        ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-       AP = min( WCND, (2.0/3.0)*DKSAT(ISOIL) )
+       AP = min( SoilWatConductivity, (2.0/3.0)*DKSAT(ISOIL) )
        AP = max( AP,   (1.0/3.0)*DKSAT(ISOIL) )
 
        ! Maximun infiltration rate, m
        FSUR = (1.0/2.0) * SP * (DT**(-1.0/2.0)) + AP ! m/s
-       if ( FSUR < 0.0) FSUR = WCND
+       if ( FSUR < 0.0) FSUR = SoilWatConductivity
 
     else
 
        ! estimate initial soil hydraulic conductivty and diffusivity (Ki, D(theta) in the equation)
-       call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMC(ISOIL), SICE(ISOIL), ISOIL)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
+                                            SoilMoisture(ISOIL), SoilIce(ISOIL), ISOIL)
 
        ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986) 
        ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-       SP = sqrt( 2.0 * max(0.0, (SMCMAX(ISOIL)-SMC(ISOIL))) * (DWSAT(ISOIL) - WDF) )
+       SP = sqrt( 2.0 * max(0.0, (SMCMAX(ISOIL)-SoilMoisture(ISOIL))) * (DWSAT(ISOIL) - SoilWatDiffusivity) )
        ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-       AP = min( WCND, (2.0/3.0)*DKSAT(ISOIL) )
+       AP = min( SoilWatConductivity, (2.0/3.0)*DKSAT(ISOIL) )
        AP = max( AP,   (1.0/3.0)*DKSAT(ISOIL) )
 
        ! Maximun infiltration rate, m

@@ -53,16 +53,16 @@ contains
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
               FACT            => noahmp%energy%state%FACT            ,& ! in,    energy factor for soil & snow phase change
               STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [K]
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout, soil water content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout, total soil moisture [m3/m3]
-              SNICE           => noahmp%water%state%SNICE            ,& ! inout, snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout, snow layer liquid water [mm]
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout, snow depth [m]
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout, snow water equivalent [mm]
-              IMELT           => noahmp%water%state%IMELT            ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
-              SUPERCOOL       => noahmp%water%state%SUPERCOOL        ,& ! out,   supercooled water in soil (kg/m2)
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout, total soil moisture [m3/m3]
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
+              IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
+              SoilSupercoolWater       => noahmp%water%state%SoilSupercoolWater        ,& ! out,   supercooled water in soil (kg/m2)
               QMELT           => noahmp%water%flux%QMELT             ,& ! out,   snowmelt rate [mm/s]
-              PONDING         => noahmp%water%state%PONDING           & ! out,   melting water from snow when there is no layer (mm)
+              PondSfcThinSnwMelt         => noahmp%water%state%PondSfcThinSnwMelt           & ! out,  surface ponding [mm] from snowmelt when thin snow has no layer
              )
 ! ----------------------------------------------------------------------
 
@@ -75,25 +75,25 @@ contains
     allocate( MICE   (-NumSnowLayerMax+1:NumSoilLayer) )
     allocate( MLIQ   (-NumSnowLayerMax+1:NumSoilLayer) )
     QMELT   = 0.0
-    PONDING = 0.0
+    PondSfcThinSnwMelt = 0.0
     XMF     = 0.0
     ! supercooled water content
     do J = -NumSnowLayerMax+1, NumSoilLayer 
-         SUPERCOOL(J) = 0.0
+         SoilSupercoolWater(J) = 0.0
     enddo
     ! snow layer water mass
     do J = NumSnowLayerNeg+1, 0
-       MICE(J) = SNICE(J)
-       MLIQ(J) = SNLIQ(J)
+       MICE(J) = SnowIce(J)
+       MLIQ(J) = SnowLiqWater(J)
     enddo
     ! soil layer water mass
     do J = 1, NumSoilLayer
-       MLIQ(J) = SH2O(J) * ThicknessSnowSoilLayer(J) * 1000.0
-       MICE(J) = (SMC(J) - SH2O(J)) * ThicknessSnowSoilLayer(J) * 1000.0
+       MLIQ(J) = SoilLiqWater(J) * ThicknessSnowSoilLayer(J) * 1000.0
+       MICE(J) = (SoilMoisture(J) - SoilLiqWater(J)) * ThicknessSnowSoilLayer(J) * 1000.0
     enddo
     ! other required variables
     do J = NumSnowLayerNeg+1, NumSoilLayer
-       IMELT(J)  = 0
+       IndexPhaseChange(J)  = 0
        HM(J)     = 0.0
        XM(J)     = 0.0
        WICE0(J)  = MICE(J)
@@ -107,13 +107,13 @@ contains
           if ( OptSoilSupercoolWater == 1 ) then
              if ( STC(J) < ConstFreezePoint ) then
                 SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
-                SUPERCOOL(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
-                SUPERCOOL(J) = SUPERCOOL(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
+                SoilSupercoolWater(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
+                SoilSupercoolWater(J) = SoilSupercoolWater(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
              endif
           endif
           if ( OptSoilSupercoolWater == 2 ) then
-               call SoilWaterSupercoolLiquid(noahmp, J, SUPERCOOL(J), STC(J), SMC(J), SH2O(J))
-               SUPERCOOL(J) = SUPERCOOL(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
+               call SoilWaterSupercoolLiquid(noahmp, J, SoilSupercoolWater(J), STC(J), SoilMoisture(J), SoilLiqWater(J))
+               SoilSupercoolWater(J) = SoilSupercoolWater(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
           endif
        enddo
     endif
@@ -121,44 +121,44 @@ contains
     !--- determine melting or freezing state
     do J = NumSnowLayerNeg+1, NumSoilLayer
        if ( (MICE(J) > 0.0) .and. (STC(J) >= ConstFreezePoint) ) then
-          IMELT(J) = 1  ! melting
+          IndexPhaseChange(J) = 1  ! melting
        endif
-       if ( (MLIQ(J) > SUPERCOOL(J)) .and. (STC(J) < ConstFreezePoint) ) then
-          IMELT(J) = 2  ! freezing
+       if ( (MLIQ(J) > SoilSupercoolWater(J)) .and. (STC(J) < ConstFreezePoint) ) then
+          IndexPhaseChange(J) = 2  ! freezing
        endif
        ! If snow exists, but its thickness is not enough to create a layer
-       if ( (NumSnowLayerNeg == 0) .and. (SNEQV > 0.0) .and. (J == 1) ) then
+       if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (J == 1) ) then
           if ( STC(J) >= ConstFreezePoint ) then
-             IMELT(J) = 1
+             IndexPhaseChange(J) = 1
           endif
        endif
     enddo
 
     !--- Calculate the energy surplus and loss for melting and freezing
     do J = NumSnowLayerNeg+1, NumSoilLayer
-       if ( IMELT(J) > 0 ) then
+       if ( IndexPhaseChange(J) > 0 ) then
           HM(J)  = (STC(J) - ConstFreezePoint) / FACT(J)
           STC(J) = ConstFreezePoint
        endif
-       if ( (IMELT(J) == 1) .and. (HM(J) < 0.0) ) then
+       if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
           HM(J)    = 0.0
-          IMELT(J) = 0
+          IndexPhaseChange(J) = 0
        endif
-       if ( (IMELT(J) == 2) .and. (HM(J) > 0.0) ) then
+       if ( (IndexPhaseChange(J) == 2) .and. (HM(J) > 0.0) ) then
           HM(J)    = 0.0
-          IMELT(J) = 0
+          IndexPhaseChange(J) = 0
        endif
        XM(J) = HM(J) * MainTimeStep / ConstLatHeatFusion
     enddo
 
     !--- The rate of melting and freezing for snow without a layer, needs more work.
-    if ( (NumSnowLayerNeg == 0) .and. (SNEQV > 0.0) .and. (XM(1) > 0.0) ) then
-       TEMP1  = SNEQV
-       SNEQV  = max( 0.0, TEMP1-XM(1) )
-       PROPOR = SNEQV / TEMP1
-       SNOWH  = max( 0.0, PROPOR*SNOWH )
-       SNOWH  = min( max(SNOWH,SNEQV/500.0), SNEQV/50.0 )  ! limit adjustment to a reasonable density
-       HEATR  = HM(1) - ConstLatHeatFusion * (TEMP1 - SNEQV) / MainTimeStep
+    if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (XM(1) > 0.0) ) then
+       TEMP1  = SnowWaterEquiv
+       SnowWaterEquiv  = max( 0.0, TEMP1-XM(1) )
+       PROPOR = SnowWaterEquiv / TEMP1
+       SnowDepth  = max( 0.0, PROPOR*SnowDepth )
+       SnowDepth  = min( max(SnowDepth,SnowWaterEquiv/500.0), SnowWaterEquiv/50.0 )  ! limit adjustment to a reasonable density
+       HEATR  = HM(1) - ConstLatHeatFusion * (TEMP1 - SnowWaterEquiv) / MainTimeStep
        if ( HEATR > 0.0 ) then
           XM(1) = HEATR * MainTimeStep / ConstLatHeatFusion
           HM(1) = HEATR
@@ -166,14 +166,14 @@ contains
           XM(1) = 0.0
           HM(1) = 0.0
        endif
-       QMELT   = max( 0.0, (TEMP1-SNEQV) ) / MainTimeStep
+       QMELT   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
        XMF     = ConstLatHeatFusion * QMELT
-       PONDING = TEMP1 - SNEQV
+       PondSfcThinSnwMelt = TEMP1 - SnowWaterEquiv
     endif
 
     ! The rate of melting and freezing for multi-layer snow and soil
     do J = NumSnowLayerNeg+1, NumSoilLayer
-       if ( (IMELT(J) > 0) .and. (abs(HM(J)) > 0.0) ) then
+       if ( (IndexPhaseChange(J) > 0) .and. (abs(HM(J)) > 0.0) ) then
           HEATR = 0.0
           if ( XM(J) > 0.0 ) then
              MICE(J) = max( 0.0, WICE0(J)-XM(J) )
@@ -182,10 +182,10 @@ contains
              if ( J <= 0 ) then  ! snow layer
                 MICE(J) = min( WMASS0(J), WICE0(J)-XM(J) )
              else    ! soil layer
-                if ( WMASS0(J) < SUPERCOOL(J) ) then
+                if ( WMASS0(J) < SoilSupercoolWater(J) ) then
                    MICE(J) = 0.0
                 else
-                   MICE(J) = min( WMASS0(J)-SUPERCOOL(J), WICE0(J)-XM(J) )
+                   MICE(J) = min( WMASS0(J)-SoilSupercoolWater(J), WICE0(J)-XM(J) )
                    MICE(J) = max( MICE(J), 0.0 )
                 endif
              endif
@@ -215,12 +215,12 @@ contains
 
     !--- update snow and soil ice and liquid content
     do J = NumSnowLayerNeg+1, 0     ! snow
-       SNLIQ(J) = MLIQ(J)
-       SNICE(J) = MICE(J)
+       SnowLiqWater(J) = MLIQ(J)
+       SnowIce(J) = MICE(J)
     enddo
     do J = 1, NumSoilLayer       ! soil
-       SH2O(J) = MLIQ(J) / (1000.0 * ThicknessSnowSoilLayer(J))
-       SMC(J)  = (MLIQ(J) + MICE(J)) / (1000.0 * ThicknessSnowSoilLayer(J))
+       SoilLiqWater(J) = MLIQ(J) / (1000.0 * ThicknessSnowSoilLayer(J))
+       SoilMoisture(J)  = (MLIQ(J) + MICE(J)) / (1000.0 * ThicknessSnowSoilLayer(J))
     enddo
 
     end associate

@@ -30,18 +30,18 @@ contains
     associate(                                                        &
               MFSNO           => noahmp%water%param%MFSNO            ,& ! in,    snowmelt m parameter
               SCFFAC          => noahmp%water%param%SCFFAC           ,& ! in,    snow cover factor (m) (originally hard-coded 2.5*z0)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              FSNO            => noahmp%water%state%FSNO              & ! out,   snow cover fraction (-)
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac              & ! out,   snow cover fraction [-]
              )
 ! ----------------------------------------------------------------------
 
-    FSNO = 0.0
-    if ( SNOWH > 0.0 ) then
-         BDSNO = SNEQV / SNOWH
+    SnowCoverFrac = 0.0
+    if ( SnowDepth > 0.0 ) then
+         BDSNO = SnowWaterEquiv / SnowDepth
          FMELT = (BDSNO / 100.0)**MFSNO
-         !FSNO = tanh( SNOWH /(2.5 * Z0 * FMELT))
-         FSNO  = tanh( SNOWH /(SCFFAC * FMELT)) ! C.He: bring hard-coded 2.5*z0 to MPTABLE tunable parameter SCFFAC
+         !SnowCoverFrac = tanh( SnowDepth /(2.5 * Z0 * FMELT))
+         SnowCoverFrac  = tanh( SnowDepth /(SCFFAC * FMELT)) ! C.He: bring hard-coded 2.5*z0 to MPTABLE tunable parameter SCFFAC
     endif
 
     end associate

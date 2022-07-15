@@ -148,10 +148,10 @@ contains
                 if(SOLAR_TIME < 0.) SOLAR_TIME = SOLAR_TIME + 24.
                 call CAL_MON_DAY(INT(NoahmpIO%JULIAN),NoahmpIO%YR,JMONTH,JDAY)
                 if (SOLAR_TIME >= 21. .AND. SOLAR_TIME <= 23. .AND. JMONTH >= 5 .AND. JMONTH <= 9) then
-                    noahmp%water%state%SMC(1) = &
-                      max(noahmp%water%state%SMC(1),noahmp%water%param%SMCREF(1))
-                    noahmp%water%state%SMC(2) = &
-                      max(noahmp%water%state%SMC(2),noahmp%water%param%SMCREF(2))
+                    noahmp%water%state%SoilMoisture(1) = &
+                      max(noahmp%water%state%SoilMoisture(1),noahmp%water%param%SMCREF(1))
+                    noahmp%water%state%SoilMoisture(2) = &
+                      max(noahmp%water%state%SoilMoisture(2),noahmp%water%param%SMCREF(2))
                 endif
              endif
           endif
@@ -181,7 +181,7 @@ contains
               !  Transfer Noah-MP glacial states for output  (this can be moved to transferout module using ICE as if-statement) 
               !---------------------------------------------------------------------
               
-              noahmp%water%state%FSNO   = 1.0  
+              noahmp%water%state%SnowCoverFrac   = 1.0  
               noahmp%energy%state%FVEG  = 0.0
               noahmp%energy%state%Z0WRF = 0.002 
               noahmp%energy%state%TGB   = noahmp%energy%state%TG   

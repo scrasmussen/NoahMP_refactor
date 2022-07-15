@@ -36,7 +36,7 @@ contains
     real(kind=kind_noahmp) :: SATRATIO      ! saturation ratio
     real(kind=kind_noahmp) :: XU            ! soil water fraction
     real(kind=kind_noahmp) :: XUNFROZ       ! soil water fraction
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SICE_TMP   ! temporal soil ice
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilIceTmp   ! temporal soil ice
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -44,16 +44,16 @@ contains
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               CSOIL           => noahmp%energy%param%CSOIL           ,& ! in,     soil volumetric specific heat (j/m3/k)
               QUARTZ          => noahmp%energy%param%QUARTZ          ,& ! in,     soil quartz content
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3] 
+              SoilMoisture            => noahmp%water%state%SoilMoisture       ,& ! in,     total soil moisture [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3] 
               CVSOIL          => noahmp%energy%state%CVSOIL          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
               TKSOIL          => noahmp%energy%state%TKSOIL           & ! out,    soil layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
     ! initiazliation
-    allocate( SICE_TMP(1:NumSoilLayer) )
-    SICE_TMP(:) = 0.0
+    allocate( SoilIceTmp(1:NumSoilLayer) )
+    SoilIceTmp(:) = 0.0
     THKW = 0.57              ! water thermal conductivity
     THKO = 2.0               ! thermal conductivity for other soil components
     THKQTZ = 7.7             ! thermal conductivity for quartz
@@ -62,18 +62,18 @@ contains
 
        ! ==== soil heat capacity
 
-       SICE_TMP(ISOIL) = SMC(ISOIL) - SH2O(ISOIL)
-       CVSOIL(ISOIL)   = SH2O(ISOIL) * ConstHeatCapacWater + (1.0 - SMCMAX(ISOIL)) * CSOIL &
-                         + (SMCMAX(ISOIL) - SMC(ISOIL)) * ConstHeatCapacAir + SICE_TMP(ISOIL) * ConstHeatCapacIce
+       SoilIceTmp(ISOIL) = SoilMoisture(ISOIL) - SoilLiqWater(ISOIL)
+       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SMCMAX(ISOIL)) * CSOIL &
+                         + (SMCMAX(ISOIL) - SoilMoisture(ISOIL)) * ConstHeatCapacAir + SoilIceTmp(ISOIL) * ConstHeatCapacIce
 
        ! ==== soil thermal conductivity
 
-       SATRATIO = SMC(ISOIL) / SMCMAX(ISOIL) ! SATURATION RATIO
+       SATRATIO = SoilMoisture(ISOIL) / SMCMAX(ISOIL) ! SATURATION RATIO
        ! UNFROZEN FRACTION (FROM 1., i.e., 100%LIQUID, TO 0. (100% FROZEN))
        THKS = (THKQTZ ** QUARTZ(ISOIL)) * (THKO ** (1.0 - QUARTZ(ISOIL)))
        ! UNFROZEN VOLUME FOR SATURATION (POROSITY*XUNFROZ)
        XUNFROZ = 1.0    ! Prevent divide by zero (suggested by D. Mocko)
-       if ( SMC(ISOIL) > 0.0 ) XUNFROZ = SH2O(ISOIL) / SMC(ISOIL)
+       if ( SoilMoisture(ISOIL) > 0.0 ) XUNFROZ = SoilLiqWater(ISOIL) / SoilMoisture(ISOIL)
        XU = XUNFROZ * SMCMAX(ISOIL)
        ! SATURATED THERMAL CONDUCTIVITY
        THKSAT = THKS ** (1.0-SMCMAX(ISOIL)) * ConstThermConductIce ** (SMCMAX(ISOIL)-XU) * THKW ** (XU)
@@ -81,7 +81,7 @@ contains
        GAMMD  = (1.0 - SMCMAX(ISOIL)) * 2700.0
        THKDRY = (0.135 * GAMMD + 64.7) / (2700.0 - 0.947 * GAMMD)
        ! THE KERSTEN NUMBER AKE
-       if ( (SH2O(ISOIL)+0.0005) < SMC(ISOIL) ) then ! FROZEN 
+       if ( (SoilLiqWater(ISOIL)+0.0005) < SoilMoisture(ISOIL) ) then ! FROZEN 
           AKE = SATRATIO
        else  ! UNFROZEN
           ! KERSTEN NUMBER (USING "FINE" FORMULA, VALID FOR SOILS CONTAINING AT

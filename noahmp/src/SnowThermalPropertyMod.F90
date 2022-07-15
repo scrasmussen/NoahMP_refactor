@@ -32,11 +32,11 @@ contains
               NumSnowLayerMax     => noahmp%config%domain%NumSnowLayerMax     ,& ! in,  maximum number of snow layers
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               OptSnowThermConduct => noahmp%config%nmlist%OptSnowThermConduct ,& ! in,  options for snow thermal conductivity schemes
-              SNICE           => noahmp%water%state%SNICE            ,& ! in,     snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! in,     snow layer liquid water [mm]
-              SNICEV          => noahmp%water%state%SNICEV           ,& ! out,    partial volume of ice [m3/m3]
-              SNLIQV          => noahmp%water%state%SNLIQV           ,& ! out,    partial volume of liquid water [m3/m3]
-              EPORE           => noahmp%water%state%EPORE_SNOW2      ,& ! out,    snow effective porosity (m3/m3) used in snow heat capacity
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! in,     snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! in,     snow layer liquid water [mm]
+              SnowIceVol          => noahmp%water%state%SnowIceVol           ,& ! out,    partial volume of snow ice [m3/m3]
+              SnowLiqWaterVol          => noahmp%water%state%SnowLiqWaterVol           ,& ! out,    partial volume of snow liquid water [m3/m3]
+              SnowEffPorosity           => noahmp%water%state%SnowEffPorosity       ,& ! out,    snow effective porosity [m3/m3]
               CVSNO           => noahmp%energy%state%CVSNO           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
               TKSNO           => noahmp%energy%state%TKSNO            & ! out,    snow layer thermal conductivity (w/m/k)
              )
@@ -48,15 +48,15 @@ contains
 
     !  effective porosity of snow
     do IZ = NumSnowLayerNeg+1, 0
-       SNICEV(IZ) = min( 1.0, SNICE(IZ)/(ThicknessSnowSoilLayer(IZ)*ConstDensityIce) )
-       EPORE(IZ)  = 1.0 - SNICEV(IZ)
-       SNLIQV(IZ) = min( EPORE(IZ), SNLIQ(IZ)/(ThicknessSnowSoilLayer(IZ)*ConstDensityWater) )
+       SnowIceVol(IZ) = min( 1.0, SnowIce(IZ)/(ThicknessSnowSoilLayer(IZ)*ConstDensityIce) )
+       SnowEffPorosity(IZ)  = 1.0 - SnowIceVol(IZ)
+       SnowLiqWaterVol(IZ) = min( SnowEffPorosity(IZ), SnowLiqWater(IZ)/(ThicknessSnowSoilLayer(IZ)*ConstDensityWater) )
     enddo
 
     ! thermal capacity of snow
     do IZ = NumSnowLayerNeg+1, 0
-       BDSNOI(IZ) = (SNICE(IZ) + SNLIQ(IZ)) / ThicknessSnowSoilLayer(IZ)
-       CVSNO(IZ)  = ConstHeatCapacIce * SNICEV(IZ) + ConstHeatCapacWater * SNLIQV(IZ)
+       BDSNOI(IZ) = (SnowIce(IZ) + SnowLiqWater(IZ)) / ThicknessSnowSoilLayer(IZ)
+       CVSNO(IZ)  = ConstHeatCapacIce * SnowIceVol(IZ) + ConstHeatCapacWater * SnowLiqWaterVol(IZ)
       ! CVSNO(IZ) = 0.525e06  ! constant
     enddo
 

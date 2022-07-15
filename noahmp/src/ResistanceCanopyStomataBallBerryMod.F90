@@ -59,7 +59,7 @@ contains
     associate(                                                        &
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight   ,& ! in,    air pressure [Pa] at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
-              BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
+              SoilTranspFacAcc           => noahmp%water%state%SoilTranspFacAcc            ,& ! in,    accumulated soil water transpiration factor (0 to 1)
               IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason            ,& ! in,    growing season index (0=off, 1=on)
               NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage  ,& ! in,    foliage nitrogen concentration (%)
               NitrogenConcFoliageMax          => noahmp%biochem%param%NitrogenConcFoliageMax         ,& ! in,    foliage nitrogen concentration when f(n)=1 (%)
@@ -109,7 +109,7 @@ contains
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * BTRAN * F1(CarboxylRateMaxQ10, TC)
+          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
           CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol
@@ -163,7 +163,7 @@ contains
           KO   = KO25 * F1(AKO, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
-          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * BTRAN * F1(CarboxylRateMaxQ10, TC)
+          VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
           CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol

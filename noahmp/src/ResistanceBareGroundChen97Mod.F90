@@ -74,7 +74,7 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               CZIL            => noahmp%energy%param%CZIL            ,& ! in,    Calculate roughness length of heat
               RefHeightAboveGround => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
               THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
@@ -198,7 +198,7 @@ contains
     ! Undo the multiplication by windspeed that applies to drag coeff CH & CM
     AKHS = AKHS / SFCSPD
     AKMS = AKMS / SFCSPD
-    if ( SNOWH > 0.0 ) then
+    if ( SnowDepth > 0.0 ) then
        AKMS = min( 0.01, AKMS )   ! CM & CH are too large, causing
        AKHS = min( 0.01, AKHS )   ! computational instability
     endif

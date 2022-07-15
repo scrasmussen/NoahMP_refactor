@@ -39,8 +39,8 @@ contains
               FlagUrban       => noahmp%config%domain%FlagUrban    ,& ! in,    urban point flag
               NROOT            => noahmp%water%param%NROOT           ,& ! in,    number of soil layers with root present
               SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
-              SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
-              BTRAN            => noahmp%water%state%BTRAN           ,& ! in,    soil water transpiration factor (0 to 1)
+              SoilMoisture              => noahmp%water%state%SoilMoisture             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
+              SoilTranspFacAcc            => noahmp%water%state%SoilTranspFacAcc           ,& ! in,    accumulated soil water transpiration factor (0 to 1)
               LeafAreaPerMass1side              => noahmp%biochem%param%LeafAreaPerMass1side           ,& ! in,    single-side leaf area per Kg [m2/kg]
               LeafMass           => noahmp%biochem%state%LeafMass        ,& ! inout, leaf mass [g/m2]
               RootMass           => noahmp%biochem%state%RootMass        ,& ! inout, mass of fine roots [g/m2]
@@ -57,8 +57,8 @@ contains
               CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
               XLAI             => noahmp%energy%state%LAI            ,& ! out,   leaf area index [-]
               XSAI             => noahmp%energy%state%SAI            ,& ! out,   stem area index [-]
-              WROOT            => noahmp%water%state%WROOT           ,& ! out,   root zone soil water [-]
-              WSTRES           => noahmp%water%state%WSTRES          ,& ! out,   water stress coeficient [-]  (1. for wilting)
+              SoilWaterRootZone            => noahmp%water%state%SoilWaterRootZone           ,& ! out,   root zone soil water [-]
+              SoilWaterStress           => noahmp%water%state%SoilWaterStress          ,& ! out,   water stress coeficient [-]  (1. for wilting)
               LeafAreaPerMass             => noahmp%biochem%state%LeafAreaPerMass           & ! out,   leaf area per unit mass [m2/g]
              )
 !-----------------------------------------------------------------------
@@ -93,10 +93,10 @@ contains
     LeafAreaPerMass = LeafAreaPerMass1side / 1000.0   ! m2/kg -> m2/g
 
     ! water stress
-    WSTRES = 1.0 - BTRAN
-    WROOT  = 0.0
+    SoilWaterStress = 1.0 - SoilTranspFacAcc
+    SoilWaterRootZone  = 0.0
     do J = 1, NROOT
-       WROOT = WROOT + SMC(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
+       SoilWaterRootZone = SoilWaterRootZone + SoilMoisture(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
     enddo
 
     ! start carbon process

@@ -31,20 +31,20 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
               SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
-              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
-              CANICE          => noahmp%water%state%CANICE           ,& ! in,    canopy intercepted ice mass (mm)
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              SMC             => noahmp%water%state%SMC              ,& ! in,    total soil moisture [m3/m3]
-              WA              => noahmp%water%state%WA               ,& ! in,    water storage in aquifer [mm]
-              BEG_WB          => noahmp%water%state%BEG_WB            & ! out,   total water storage at the beginning
+              CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water [mm]
+              CanopyIce          => noahmp%water%state%CanopyIce           ,& ! in,    canopy intercepted ice [mm]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,    total soil moisture [m3/m3]
+              WaterStorageAquifer    => noahmp%water%state%WaterStorageAquifer  ,& ! in,    water storage in aquifer [mm]
+              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg            & ! out,   total water storage at the beginning
              )
 ! ----------------------------------------------------------------------
 
     ! compute total water storage before NoahMP processes
     if ( SurfaceType == 1 ) then  ! soil
-       BEG_WB = CANLIQ + CANICE + SNEQV + WA
+       WaterStorageTotBeg = CanopyLiqWater + CanopyIce + SnowWaterEquiv + WaterStorageAquifer
        do IZ = 1, NumSoilLayer
-          BEG_WB = BEG_WB + SMC(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
+          WaterStorageTotBeg = WaterStorageTotBeg + SoilMoisture(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
     endif
 
@@ -79,14 +79,14 @@ contains
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
-              IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
-              ZWT             => noahmp%water%state%ZWT              ,& ! in,    water table depth [m]
-              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
-              CANICE          => noahmp%water%state%CANICE           ,& ! in,    canopy intercepted ice mass (mm)
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              SMC             => noahmp%water%state%SMC              ,& ! in,    total soil moisture [m3/m3]
-              WA              => noahmp%water%state%WA               ,& ! in,    water storage in aquifer [mm]
-              BEG_WB          => noahmp%water%state%BEG_WB           ,& ! in,    total water storage at the beginning
+              IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,    total input irrigation fraction
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,    water table depth [m]
+              CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water [mm]
+              CanopyIce          => noahmp%water%state%CanopyIce           ,& ! in,    canopy intercepted ice [mm]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,    total soil moisture [m3/m3]
+              WaterStorageAquifer  => noahmp%water%state%WaterStorageAquifer  ,& ! in,    water storage in aquifer [mm]
+              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg           ,& ! in,    total water storage at the beginning
               PRCP            => noahmp%water%flux%PRCP              ,& ! in,    total precipitation [mm/s]
               ECAN            => noahmp%water%flux%ECAN              ,& ! in,    evaporation of intercepted water (mm/s) [+]
               ETRAN           => noahmp%water%flux%ETRAN             ,& ! in,    transpiration rate (mm/s) [+]
@@ -97,46 +97,46 @@ contains
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! in,    rate of irrigation by sprinkler [m/timestep]
               IRMIRATE        => noahmp%water%flux%IRMIRATE          ,& ! in,    micro irrigation water rate [m/timestep]
               IRFIRATE        => noahmp%water%flux%IRFIRATE          ,& ! in,    flood irrigation water rate [m/timestep]
-              END_WB          => noahmp%water%state%END_WB           ,& ! out,   total water storage at the end
-              ERRWAT          => noahmp%water%state%ERRWAT            & ! out,   water balance error (mm) per time step
+              WaterStorageTotEnd          => noahmp%water%state%WaterStorageTotEnd           ,& ! out,   total water storage at the end
+              WaterBalanceError          => noahmp%water%state%WaterBalanceError            & ! out,   water balance error (mm) per time step
              )
 ! ----------------------------------------------------------------------
 
     ! before water balance check add irrigation water to precipitation
-    if ( (FlagCropland .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) then
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) ) then
        PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / MainTimeStep  ! irrigation
     endif
 
     ! Error in water balance should be < 0.1 mm
     if ( SurfaceType == 1 ) then        !soil
-       END_WB = CANLIQ + CANICE + SNEQV + WA
+       WaterStorageTotEnd = CanopyLiqWater + CanopyIce + SnowWaterEquiv + WaterStorageAquifer
        do IZ = 1, NumSoilLayer
-          END_WB = END_WB + SMC(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
+          WaterStorageTotEnd = WaterStorageTotEnd + SoilMoisture(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
-       ERRWAT = END_WB - BEG_WB - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * MainTimeStep
+       WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * MainTimeStep
 #ifndef WRF_HYDRO
-       if ( abs(ERRWAT) > 0.1 ) then
-          if ( ERRWAT > 0) then
-             !call wrf_message ('The model is gaining water (ERRWAT is positive)')
-             write(*,*) "The model is gaining water (ERRWAT is positive)"
+       if ( abs(WaterBalanceError) > 0.1 ) then
+          if ( WaterBalanceError > 0) then
+             !call wrf_message ('The model is gaining water (WaterBalanceError is positive)')
+             write(*,*) "The model is gaining water (WaterBalanceError is positive)"
           else
-             !call wrf_message('The model is losing water (ERRWAT is negative)')
-             write(*,*) "The model is losing water (ERRWAT is negative)"
+             !call wrf_message('The model is losing water (WaterBalanceError is negative)')
+             write(*,*) "The model is losing water (WaterBalanceError is negative)"
           endif
-          write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
+          write(*,*) 'WaterBalanceError =',WaterBalanceError, "kg m{-2} timestep{-1}"
           !call wrf_message(trim(message))
           write(*, &
-               '("  GridIndexI    GridIndexJ   END_WB   BEG_WB     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   ZWT   QTLDRN")')
+               '("  GridIndexI    GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   WaterTableDepth   QTLDRN")')
           !call wrf_message(trim(message))
-          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,END_WB,BEG_WB,PRCP*MainTimeStep,ECAN*MainTimeStep,&
-                EDIR*MainTimeStep,ETRAN*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep,ZWT,QTLDRN*MainTimeStep
+          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,PRCP*MainTimeStep,ECAN*MainTimeStep,&
+                EDIR*MainTimeStep,ETRAN*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep,WaterTableDepth,QTLDRN*MainTimeStep
           !call wrf_message(trim(message))
           !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
           stop "Error"
        endif
 #endif
     else                 !KWM
-       ERRWAT = 0.0      !KWM
+       WaterBalanceError = 0.0      !KWM
     endif
 
     end associate

@@ -42,21 +42,21 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout, thickness of snow/soil layers (m)
               DepthSnowSoilLayer           => noahmp%config%domain%DepthSnowSoilLayer          ,& ! inout, depth of snow/soil layer-bottom (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! inout, actual number of snow layers (negative)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout, snow depth [m]
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout, snow water equivalent [mm]
-              SNICE           => noahmp%water%state%SNICE            ,& ! inout, snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout, snow layer liquid water [mm]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
               STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [k]
               SNOFLOW         => noahmp%water%flux%SNOFLOW           ,& ! out,   glacier flow [mm/s]
-              PONDING1        => noahmp%water%state%PONDING1         ,& ! out,   surface ponding 1 (mm)
-              PONDING2        => noahmp%water%state%PONDING2          & ! out,   surface ponding 2 (mm)
+              PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,   surface ponding [mm] from liquid in thin snow layer combination
+              PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,  surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
              )
 ! ----------------------------------------------------------------------
 
     ! initialize out-only variables
     SNOFLOW  = 0.0
-    PONDING1 = 0.0
-    PONDING2 = 0.0
+    PondSfcThinSnwComb = 0.0
+    PondSfcThinSnwTrans = 0.0
 
     ! snowfall
     call SnowfallGlacier(noahmp)
@@ -77,27 +77,27 @@ contains
 
     ! set empty snow layer properties to zero
     do IZ = -NumSnowLayerMax+1, NumSnowLayerNeg
-       SNICE(IZ)  = 0.0
-       SNLIQ(IZ)  = 0.0
+       SnowIce(IZ)  = 0.0
+       SnowLiqWater(IZ)  = 0.0
        STC(IZ)    = 0.0
        ThicknessSnowSoilLayer(IZ) = 0.0
        DepthSnowSoilLayer(IZ)  = 0.0
     enddo
 
     ! to obtain equilibrium state of snow in glacier region
-    if ( SNEQV > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
-       BDSNOW      = SNICE(0) / ThicknessSnowSoilLayer(0)
-       SNOFLOW     = SNEQV - SWEMAXGLA
-       SNICE(0)    = SNICE(0)  - SNOFLOW
+    if ( SnowWaterEquiv > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
+       BDSNOW      = SnowIce(0) / ThicknessSnowSoilLayer(0)
+       SNOFLOW     = SnowWaterEquiv - SWEMAXGLA
+       SnowIce(0)    = SnowIce(0)  - SNOFLOW
        ThicknessSnowSoilLayer(0)   = ThicknessSnowSoilLayer(0) - SNOFLOW / BDSNOW
        SNOFLOW     = SNOFLOW / MainTimeStep
     endif
 
     ! sum up snow mass for layered snow
     if ( NumSnowLayerNeg < 0 ) then  ! MB: only do for multi-layer
-       SNEQV = 0.0
+       SnowWaterEquiv = 0.0
        do IZ = NumSnowLayerNeg+1, 0
-          SNEQV = SNEQV + SNICE(IZ) + SNLIQ(IZ)
+          SnowWaterEquiv = SnowWaterEquiv + SnowIce(IZ) + SnowLiqWater(IZ)
        enddo
     endif
 
@@ -118,9 +118,9 @@ contains
     enddo
 
     ! update snow quantity
-    if ( (SNOWH <= 1.0e-6) .or. (SNEQV <= 1.0e-3) ) then
-       SNOWH = 0.0
-       SNEQV = 0.0
+    if ( (SnowDepth <= 1.0e-6) .or. (SnowWaterEquiv <= 1.0e-3) ) then
+       SnowDepth = 0.0
+       SnowWaterEquiv = 0.0
     endif
 
     end associate

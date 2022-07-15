@@ -43,28 +43,28 @@ contains
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
               SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
-              SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
+              IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! in,     sprinkler irrigation fraction (0 to 1)
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
               FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
-              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
+              IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
               RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
               IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
               IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
-              SICE            => noahmp%water%state%SICE              & ! out,    soil ice content [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce              & ! out,    soil ice content [m3/m3]
              )
 ! ----------------------------------------------------------------------
 
     ! initialize
-    SICE(:) = max(0.0, SMC(:)-SH2O(:))
+    SoilIce(:) = max(0.0, SoilMoisture(:)-SoilLiqWater(:))
 
     ! estimate infiltration rate based on Philips Eq.
     call IrrigationInfilPhilip(noahmp, MainTimeStep, FSUR)
 
     ! irrigation rate of sprinkler
     TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * MainTimeStep / 3600.0   ! NRCS rate/time step - calibratable
-    IRSIRATE  = min( FSUR*MainTimeStep, IRAMTSI, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
+    IRSIRATE  = min( FSUR*MainTimeStep, IrrigationAmtSprinkler, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
                                                           ! and to the NRCS recommended rate, (m)
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
     ! losses from sprinkler irrigation systems under various operating 
@@ -83,12 +83,12 @@ contains
     if ( (IRRLOSS > 100.0) .or. (IRRLOSS < 0.0) ) IRRLOSS = 4.0 ! In case if IRRLOSS is out of range
 
     ! Sprinkler water (m) for sprinkler fraction 
-    IRSIRATE  = IRSIRATE * SIFAC
-    if ( IRSIRATE >= IRAMTSI ) then
-       IRSIRATE = IRAMTSI
-       IRAMTSI  = 0.0
+    IRSIRATE  = IRSIRATE * IrrigationFracSprinkler
+    if ( IRSIRATE >= IrrigationAmtSprinkler ) then
+       IRSIRATE = IrrigationAmtSprinkler
+       IrrigationAmtSprinkler  = 0.0
     else
-       IRAMTSI = IRAMTSI - IRSIRATE
+       IrrigationAmtSprinkler = IrrigationAmtSprinkler - IRSIRATE
     endif
 
     IREVPLOS = IRSIRATE * IRRLOSS * (1.0/100.0)

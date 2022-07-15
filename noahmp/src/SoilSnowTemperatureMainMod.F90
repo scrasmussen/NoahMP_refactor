@@ -42,7 +42,7 @@ contains
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,   main noahmp timestep (s)
               DepthSoilTempBottom => noahmp%config%domain%DepthSoilTempBottom ,& ! in,   depth [m] from soil surface for soil temperature lower boundary forcing
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,   snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,   snow depth [m]
               ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,  depth of lower boundary condition (m) from snow surface
               PHI             => noahmp%energy%flux%PHI               & ! out,  light penetrating through soil/snow water (W/m2)
              )
@@ -62,7 +62,7 @@ contains
     PHI(NumSnowLayerNeg+1:NumSoilLayer) = 0.0
 
     ! adjust DepthSoilTempBottom from soil surface to ZBOTSNO from snow surface
-    ZBOTSNO = DepthSoilTempBottom - SNOWH
+    ZBOTSNO = DepthSoilTempBottom - SnowDepth
 
     ! compute soil temperatures
     call SoilSnowThermalDiffusion(noahmp, AI, BI, CI, RHSTS)

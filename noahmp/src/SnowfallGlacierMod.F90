@@ -33,10 +33,10 @@ contains
               SNOWHIN         => noahmp%water%flux%SNOWHIN           ,& ! in,     snow depth increasing rate (m/s)
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,     air temperature [K] at reference height
               NumSnowLayerNeg         => noahmp%config%domain%NumSnowLayerNeg  ,& ! inout,  actual number of snow layers (negative)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
-              SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout,  snow depth [m]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout,  snow water equivalent [mm]
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout,  snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout,  snow layer liquid water [mm]
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout,  thickness of snow/soil layers (m)
              ) 
@@ -46,25 +46,25 @@ contains
 
 ! shallow snow / no layer
     if ( (NumSnowLayerNeg == 0) .and. (QSNOW > 0.0) ) then
-       SNOWH = SNOWH + SNOWHIN * MainTimeStep
-       SNEQV = SNEQV + QSNOW * MainTimeStep
+       SnowDepth = SnowDepth + SNOWHIN * MainTimeStep
+       SnowWaterEquiv = SnowWaterEquiv + QSNOW * MainTimeStep
     endif
 
 ! creating a new layer
-!    if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.025) ) then !MB: change limit
-   if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SNOWH >= 0.05) ) then
+!    if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SnowDepth >= 0.025) ) then !MB: change limit
+   if ( (NumSnowLayerNeg == 0)  .and. (QSNOW > 0.0) .and. (SnowDepth >= 0.05) ) then
        NumSnowLayerNeg     = -1
        NEWNODE   =  1
-       ThicknessSnowSoilLayer(0) = SNOWH
-       SNOWH     = 0.0
+       ThicknessSnowSoilLayer(0) = SnowDepth
+       SnowDepth     = 0.0
        STC(0)    = min(273.16, TemperatureAirRefHeight)   ! temporary setup
-       SNICE(0)  = SNEQV
-       SNLIQ(0)  = 0.0
+       SnowIce(0)  = SnowWaterEquiv
+       SnowLiqWater(0)  = 0.0
     endif
 
 ! snow with layers
     if ( (NumSnowLayerNeg < 0) .and. (NEWNODE == 0) .and. (QSNOW > 0.0) ) then
-       SNICE(NumSnowLayerNeg+1)  = SNICE(NumSnowLayerNeg+1)   + QSNOW   * MainTimeStep
+       SnowIce(NumSnowLayerNeg+1)  = SnowIce(NumSnowLayerNeg+1)   + QSNOW   * MainTimeStep
        ThicknessSnowSoilLayer(NumSnowLayerNeg+1) = ThicknessSnowSoilLayer(NumSnowLayerNeg+1)  + SNOWHIN * MainTimeStep
     endif
 

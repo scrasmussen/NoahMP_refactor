@@ -28,14 +28,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              BEG_WB          => noahmp%water%state%BEG_WB            & ! out,   total water storage at the beginning
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg            & ! out,   total water storage at the beginning
              )
 ! ----------------------------------------------------------------------
 
     ! compute total glacier water storage before NoahMP processes
     ! need more work on including glacier ice mass underneath snow
-    BEG_WB = SNEQV
+    WaterStorageTotBeg = SnowWaterEquiv
 
     end associate
 
@@ -63,40 +63,38 @@ contains
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,    glacier water content [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,    glacier ice moisture (m3/m3)
-              BEG_WB          => noahmp%water%state%BEG_WB           ,& ! in,    total water storage at the beginning
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg           ,& ! in,    total water storage at the beginning
               PRCP            => noahmp%water%flux%PRCP              ,& ! in,    total precipitation [mm/s]
               EDIR            => noahmp%water%flux%EDIR              ,& ! in,    net direct soil evaporation (mm/s)
               RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! in,    surface runoff [mm/s]
               RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! in,    subsurface runoff [mm/s]
-              END_WB          => noahmp%water%state%END_WB           ,& ! out,   total water storage at the end
-              ERRWAT          => noahmp%water%state%ERRWAT            & ! out,   water balance error (mm) per time step
+              WaterStorageTotEnd          => noahmp%water%state%WaterStorageTotEnd           ,& ! out,   total water storage at the end
+              WaterBalanceError          => noahmp%water%state%WaterBalanceError            & ! out,   water balance error (mm) per time step
              )
 ! ----------------------------------------------------------------------
 
     ! Error in water balance should be < 0.1 mm
     ! compute total glacier water storage before NoahMP processes
     ! need more work on including glacier ice mass underneath snow
-    END_WB = SNEQV
-    ERRWAT = END_WB - BEG_WB - (PRCP - EDIR - RUNSRF - RUNSUB) * MainTimeStep
+    WaterStorageTotEnd = SnowWaterEquiv
+    WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PRCP - EDIR - RUNSRF - RUNSUB) * MainTimeStep
 
 #ifndef WRF_HYDRO
-    if ( abs(ERRWAT) > 0.1 ) then
-       if ( ERRWAT > 0) then
-          !call wrf_message ('The model is gaining water (ERRWAT is positive)')
-          write(*,*) "The model is gaining water (ERRWAT is positive)"
+    if ( abs(WaterBalanceError) > 0.1 ) then
+       if ( WaterBalanceError > 0) then
+          !call wrf_message ('The model is gaining water (WaterBalanceError is positive)')
+          write(*,*) "The model is gaining water (WaterBalanceError is positive)"
        else
-          !call wrf_message('The model is losing water (ERRWAT is negative)')
-          write(*,*) "The model is losing water (ERRWAT is negative)"
+          !call wrf_message('The model is losing water (WaterBalanceError is negative)')
+          write(*,*) "The model is losing water (WaterBalanceError is negative)"
        endif
-       write(*,*) 'ERRWAT =',ERRWAT, "kg m{-2} timestep{-1}"
+       write(*,*) 'WaterBalanceError =',WaterBalanceError, "kg m{-2} timestep{-1}"
        !call wrf_message(trim(message))
        write(*, &
-           '("  GridIndexI   GridIndexJ   END_WB   BEG_WB     PRCP     EDIR    RUNSRF   RUNSUB")')
+           '("  GridIndexI   GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PRCP     EDIR    RUNSRF   RUNSUB")')
        !call wrf_message(trim(message))
-       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,END_WB,BEG_WB,PRCP*MainTimeStep,&
+       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,PRCP*MainTimeStep,&
              EDIR*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Water budget problem in NOAHMP LSM")

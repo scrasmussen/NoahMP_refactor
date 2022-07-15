@@ -265,7 +265,7 @@ contains
   end if
   
 !------------------------------------------------------------------------
-! For IOPT_RUN = 5 (MMF groundwater), read in necessary extra fields
+! For IOPT_RUNSUB = 5 (MMF groundwater), read in necessary extra fields
 ! This option is not tested for parallel use in the offline driver
 !------------------------------------------------------------------------
 
@@ -330,8 +330,6 @@ contains
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , NoahmpIO%ZSNSOXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNICE"   , NoahmpIO%SNICEXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , NoahmpIO%SNLIQXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSNOW"   , NoahmpIO%QSNOWXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRAIN"   , NoahmpIO%QRAINXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FWET"    , NoahmpIO%FWETXY   )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQVO"  , NoahmpIO%SNEQVOXY )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EAH"     , NoahmpIO%EAHXY    )
@@ -1423,8 +1421,6 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ZSNSOXY   , "ZSNSO" , layers="SOSN")
   call add_to_restart(NoahmpIO%SNICEXY   , "SNICE" , layers="SNOW")
   call add_to_restart(NoahmpIO%SNLIQXY   , "SNLIQ" , layers="SNOW")
-  call add_to_restart(NoahmpIO%QSNOWXY   , "QSNOW" )
-  call add_to_restart(NoahmpIO%QRAINXY   , "QRAIN" )
   call add_to_restart(NoahmpIO%FWETXY    , "FWET"  )
   call add_to_restart(NoahmpIO%SNEQVOXY  , "SNEQVO")
   call add_to_restart(NoahmpIO%EAHXY     , "EAH"   )

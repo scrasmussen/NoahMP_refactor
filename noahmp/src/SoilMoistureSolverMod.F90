@@ -43,15 +43,15 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              ZWT             => noahmp%water%state%ZWT              ,& ! in,     water table depth [m]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil moisture [m3/m3]
-              SMCWTD          => noahmp%water%state%SMCWTD           ,& ! inout,  soil moisture between bottom of the soil and the water table
-              DEEPRECH        => noahmp%water%state%DEEPRECH         ,& ! inout,  recharge to or from the water table when deep [m]
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
+              SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! inout,  soil moisture between bottom of the soil and the water table
+              RechargeGwDeepWT        => noahmp%water%state%RechargeGwDeepWT         ,& ! inout,  recharge to or from the water table when deep [m]
               QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! inout,  soil bottom drainage (m/s)
-              EPORE           => noahmp%water%state%EPORE_SOIL       ,& ! out,    soil effective porosity (m3/m3)
-              WPLUS           => noahmp%water%state%WPLUS             & ! out,    saturation excess of the total soil [m]
+              SoilEffPorosity           => noahmp%water%state%SoilEffPorosity       ,& ! out,    soil effective porosity (m3/m3)
+              SoilSaturationExcess           => noahmp%water%state%SoilSaturationExcess             & ! out,    saturation excess of the total soil [m]
              )
 ! ----------------------------------------------------------------------
 
@@ -60,8 +60,8 @@ contains
     allocate( CIIN   (1:NumSoilLayer) )
     RHSTTIN  = 0.0
     CIIN     = 0.0
-    WPLUS    = 0.0
-    EPORE(:) = 0.0
+    SoilSaturationExcess    = 0.0
+    SoilEffPorosity(:) = 0.0
 
     ! update tri-diagonal matrix elements
     do K = 1, NumSoilLayer
@@ -81,7 +81,7 @@ contains
     call MatrixSolverTriDiagonal(CI,AI,BI,CIIN,RHSTTIN,RHSTT,1,NumSoilLayer,0)
 
     do K = 1, NumSoilLayer
-        SH2O(K) = SH2O(K) + CI(K)
+        SoilLiqWater(K) = SoilLiqWater(K) + CI(K)
     enddo
 
     !  excessive water above saturation in a layer is moved to
@@ -89,47 +89,48 @@ contains
 
     ! for MMF scheme, there is soil moisture below NumSoilLayer, to the water table
     if ( OptRunoffSubsurface == 5 ) then
-       ! update smcwtd
-       if ( ZWT < DepthSoilLayer(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer) ) then
+       ! update SoilMoistureToWT
+       if ( WaterTableDepth < (DepthSoilLayer(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) then
           ! accumulate qdrain to update deep water table and soil moisture later
-          DEEPRECH =  DEEPRECH + DT * QDRAIN
+          RechargeGwDeepWT =  RechargeGwDeepWT + DT * QDRAIN
        else
-          SMCWTD      = SMCWTD + DT * QDRAIN  / ThicknessSnowSoilLayer(NumSoilLayer)
-          WPLUS       = max( (SMCWTD - SMCMAX(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
-          WMINUS      = max( (1.0e-4 - SMCWTD), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
-          SMCWTD      = max( min(SMCWTD, SMCMAX(NumSoilLayer)), 1.0e-4 )
-          SH2O(NumSoilLayer) = SH2O(NumSoilLayer) + WPLUS / ThicknessSnowSoilLayer(NumSoilLayer)
+          SoilMoistureToWT = SoilMoistureToWT + DT * QDRAIN  / ThicknessSnowSoilLayer(NumSoilLayer)
+          SoilSaturationExcess = max( (SoilMoistureToWT - SMCMAX(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
+          WMINUS = max( (1.0e-4 - SoilMoistureToWT), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
+          SoilMoistureToWT      = max( min(SoilMoistureToWT, SMCMAX(NumSoilLayer)), 1.0e-4 )
+          SoilLiqWater(NumSoilLayer) = SoilLiqWater(NumSoilLayer) + SoilSaturationExcess / ThicknessSnowSoilLayer(NumSoilLayer)
           ! reduce fluxes at the bottom boundaries accordingly
-          QDRAIN   = QDRAIN - WPLUS/DT
-          DEEPRECH = DEEPRECH - WMINUS
+          QDRAIN   = QDRAIN - SoilSaturationExcess/DT
+          RechargeGwDeepWT = RechargeGwDeepWT - WMINUS
        endif
     endif
 
     do K = NumSoilLayer, 2, -1
-       EPORE(K)  = max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-       WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
-       SH2O(K)   = min( EPORE(K), SH2O(K) )
-       SH2O(K-1) = SH2O(K-1) + WPLUS / ThicknessSnowSoilLayer(K-1)
+       SoilEffPorosity(K)  = max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+       SoilSaturationExcess     = max( (SoilLiqWater(K)-SoilEffPorosity(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
+       SoilLiqWater(K)   = min( SoilEffPorosity(K), SoilLiqWater(K) )
+       SoilLiqWater(K-1) = SoilLiqWater(K-1) + SoilSaturationExcess / ThicknessSnowSoilLayer(K-1)
     enddo
 
-    EPORE(1) = max( 1.0e-4, (SMCMAX(1) - SICE(1)) )
-    WPLUS    = max( (SH2O(1)-EPORE(1)), 0.0 ) * ThicknessSnowSoilLayer(1)
-    SH2O(1)  = min( EPORE(1), SH2O(1) )
+    SoilEffPorosity(1) = max( 1.0e-4, (SMCMAX(1) - SoilIce(1)) )
+    SoilSaturationExcess    = max( (SoilLiqWater(1)-SoilEffPorosity(1)), 0.0 ) * ThicknessSnowSoilLayer(1)
+    SoilLiqWater(1)  = min( SoilEffPorosity(1), SoilLiqWater(1) )
 
-    if ( WPLUS > 0.0 ) then
-       SH2O(2) = SH2O(2) + WPLUS / ThicknessSnowSoilLayer(2)
+    if ( SoilSaturationExcess > 0.0 ) then
+       SoilLiqWater(2) = SoilLiqWater(2) + SoilSaturationExcess / ThicknessSnowSoilLayer(2)
        do K = 2, NumSoilLayer-1
-          EPORE(K)  = max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-          WPLUS     = max( (SH2O(K)-EPORE(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
-          SH2O(K)   = min( EPORE(K), SH2O(K) )
-          SH2O(K+1) = SH2O(K+1) + WPLUS / ThicknessSnowSoilLayer(K+1)
+          SoilEffPorosity(K)  = max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+          SoilSaturationExcess     = max( (SoilLiqWater(K)-SoilEffPorosity(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
+          SoilLiqWater(K)   = min( SoilEffPorosity(K), SoilLiqWater(K) )
+          SoilLiqWater(K+1) = SoilLiqWater(K+1) + SoilSaturationExcess / ThicknessSnowSoilLayer(K+1)
        enddo
-       EPORE(NumSoilLayer) = max( 1.0e-4, (SMCMAX(NumSoilLayer) - SICE(NumSoilLayer)) )
-       WPLUS        = max( (SH2O(NumSoilLayer)-EPORE(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
-       SH2O(NumSoilLayer)  = min( EPORE(NumSoilLayer), SH2O(NumSoilLayer) )
+       SoilEffPorosity(NumSoilLayer) = max( 1.0e-4, (SMCMAX(NumSoilLayer) - SoilIce(NumSoilLayer)) )
+       SoilSaturationExcess = max( (SoilLiqWater(NumSoilLayer)-SoilEffPorosity(NumSoilLayer)), 0.0 ) * &
+                              ThicknessSnowSoilLayer(NumSoilLayer)
+       SoilLiqWater(NumSoilLayer)  = min( SoilEffPorosity(NumSoilLayer), SoilLiqWater(NumSoilLayer) )
     endif
 
-    SMC = SH2O + SICE
+    SoilMoisture = SoilLiqWater + SoilIce
 
     end associate
 

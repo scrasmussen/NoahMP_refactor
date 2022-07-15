@@ -62,8 +62,8 @@ contains
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               PressureAirSurface      => noahmp%forcing%PressureAirSurface ,& ! in,    air pressure [Pa] at surface-atmosphere interface
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
               PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
@@ -180,9 +180,9 @@ contains
 
     ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
     if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
-       if ( (SNOWH > 0.05) .and. (TGB > ConstFreezePoint) ) then
+       if ( (SnowDepth > 0.05) .and. (TGB > ConstFreezePoint) ) then
           if ( OptSnowSoilTempTime == 1 ) TGB = ConstFreezePoint
-          if ( OptSnowSoilTempTime == 3 ) TGB = (1.0 - FSNO) * TGB + FSNO * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
+          if ( OptSnowSoilTempTime == 3 ) TGB = (1.0 - SnowCoverFrac) * TGB + SnowCoverFrac * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
           IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
           SHB = CSH * (TGB        - TemperatureAirRefHeight)
           EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?

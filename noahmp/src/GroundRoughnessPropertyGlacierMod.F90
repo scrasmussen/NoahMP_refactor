@@ -26,7 +26,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               RefHeightAboveSfc => noahmp%config%domain%RefHeightAboveSfc ,& ! in,    reference height [m] above surface zero plane
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! in,    snow surface roughness length (m)
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
@@ -41,7 +41,7 @@ contains
     Z0M = Z0MG
 
     ! surface roughness length and displacement height
-    ZPDG = SNOWH
+    ZPDG = SnowDepth
     ZPD = ZPDG
 
     ! reference height above ground

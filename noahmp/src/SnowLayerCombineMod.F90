@@ -38,16 +38,16 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout,  snow depth [m]
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! inout,  snow water equivalent [mm]
-              SNICE           => noahmp%water%state%SNICE            ,& ! inout,  snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! inout,  snow layer liquid water [mm]
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil liquid moisture (m3/m3)
-              SICE            => noahmp%water%state%SICE             ,& ! inout,  soil ice moisture (m3/m3)
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout,  snow depth [m]
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout,  snow water equivalent [mm]
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout,  snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout,  snow layer liquid water [mm]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil liquid moisture (m3/m3)
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! inout,  soil ice moisture (m3/m3)
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
-              PONDING1        => noahmp%water%state%PONDING1         ,& ! out,    surface ponding 1 (mm)
-              PONDING2        => noahmp%water%state%PONDING2          & ! out,    surface ponding 2 (mm)
+              PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,   surface ponding [mm] from liquid in thin snow layer combination
+              PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,   surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
              )
 ! ----------------------------------------------------------------------
 
@@ -55,80 +55,80 @@ contains
     ISNOW_OLD = NumSnowLayerNeg
 
     do J = ISNOW_OLD+1,0
-       if ( SNICE(J) <= 0.1 ) then
+       if ( SnowIce(J) <= 0.1 ) then
           if ( J /= 0 ) then
-             SNLIQ(J+1)  = SNLIQ(J+1)  + SNLIQ(J)
-             SNICE(J+1)  = SNICE(J+1)  + SNICE(J)
+             SnowLiqWater(J+1)  = SnowLiqWater(J+1)  + SnowLiqWater(J)
+             SnowIce(J+1)  = SnowIce(J+1)  + SnowIce(J)
              ThicknessSnowSoilLayer(J+1) = ThicknessSnowSoilLayer(J+1) + ThicknessSnowSoilLayer(J)
           else
              if ( ISNOW_OLD < -1 ) then    ! MB/KM: change to NumSnowLayerNeg
-                SNLIQ(J-1)  = SNLIQ(J-1)  + SNLIQ(J)
-                SNICE(J-1)  = SNICE(J-1)  + SNICE(J)
+                SnowLiqWater(J-1)  = SnowLiqWater(J-1)  + SnowLiqWater(J)
+                SnowIce(J-1)  = SnowIce(J-1)  + SnowIce(J)
                 ThicknessSnowSoilLayer(J-1) = ThicknessSnowSoilLayer(J-1) + ThicknessSnowSoilLayer(J)
              else
-                if ( SNICE(J) >= 0.0 ) then
-                   PONDING1 = SNLIQ(J)       ! NumSnowLayerNeg WILL GET SET TO ZERO BELOW; PONDING1 WILL GET 
-                   SNEQV    = SNICE(J)       ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
-                   SNOWH    = ThicknessSnowSoilLayer(J)      ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
-                else  ! SNICE OVER-SUBLIMATED EARLIER
-                   PONDING1 = SNLIQ(J) + SNICE(J)
-                   if ( PONDING1 < 0.0 ) then  ! IF SNICE AND SNLIQ SUBLIMATES REMOVE FROM SOIL
-                      SICE(1)  = max( 0.0, SICE(1)+PONDING1/(ThicknessSnowSoilLayer(1)*1000.0) )
-                      PONDING1 = 0.0
+                if ( SnowIce(J) >= 0.0 ) then
+                   PondSfcThinSnwComb = SnowLiqWater(J)       ! NumSnowLayerNeg WILL GET SET TO ZERO BELOW; PondSfcThinSnwComb WILL GET 
+                   SnowWaterEquiv    = SnowIce(J)       ! ADDED TO PONDING FROM PHASECHANGE PONDING SHOULD BE
+                   SnowDepth    = ThicknessSnowSoilLayer(J)      ! ZERO HERE BECAUSE IT WAS CALCULATED FOR THIN SNOW
+                else  ! SnowIce OVER-SUBLIMATED EARLIER
+                   PondSfcThinSnwComb = SnowLiqWater(J) + SnowIce(J)
+                   if ( PondSfcThinSnwComb < 0.0 ) then  ! IF SnowIce AND SnowLiqWater SUBLIMATES REMOVE FROM SOIL
+                      SoilIce(1)  = max( 0.0, SoilIce(1)+PondSfcThinSnwComb/(ThicknessSnowSoilLayer(1)*1000.0) )
+                      PondSfcThinSnwComb = 0.0
                    endif
-                   SNEQV = 0.0
-                   SNOWH = 0.0
-                endif ! if(SNICE(J) >= 0.0)
-                SNLIQ(J)  = 0.0
-                SNICE(J)  = 0.0
+                   SnowWaterEquiv = 0.0
+                   SnowDepth = 0.0
+                endif ! if(SnowIce(J) >= 0.0)
+                SnowLiqWater(J)  = 0.0
+                SnowIce(J)  = 0.0
                 ThicknessSnowSoilLayer(J) = 0.0
              endif ! if(ISNOW_OLD < -1)
 
-             !SH2O(1) = SH2O(1) + SNLIQ(J)/(ThicknessSnowSoilLayer(1)*1000.0)
-             !SICE(1) = SICE(1) + SNICE(J)/(ThicknessSnowSoilLayer(1)*1000.0)
+             !SoilLiqWater(1) = SoilLiqWater(1) + SnowLiqWater(J)/(ThicknessSnowSoilLayer(1)*1000.0)
+             !SoilIce(1) = SoilIce(1) + SnowIce(J)/(ThicknessSnowSoilLayer(1)*1000.0)
           endif ! if(J /= 0)
 
           ! shift all elements above this down by one.
           if ( (J > NumSnowLayerNeg+1) .and. (NumSnowLayerNeg < -1) ) then
              do I = J, NumSnowLayerNeg+2, -1
                 STC(I)    = STC(I-1)
-                SNLIQ(I)  = SNLIQ(I-1)
-                SNICE(I)  = SNICE(I-1)
+                SnowLiqWater(I)  = SnowLiqWater(I-1)
+                SnowIce(I)  = SnowIce(I-1)
                 ThicknessSnowSoilLayer(I) = ThicknessSnowSoilLayer(I-1)
              enddo
           endif
           NumSnowLayerNeg = NumSnowLayerNeg + 1
 
-       endif ! if(SNICE(J) <= 0.1)
+       endif ! if(SnowIce(J) <= 0.1)
     enddo ! do J
 
 ! to conserve water in case of too large surface sublimation
-    if ( SICE(1) < 0.0) then
-       SH2O(1) = SH2O(1) + SICE(1)
-       SICE(1) = 0.0
+    if ( SoilIce(1) < 0.0) then
+       SoilLiqWater(1) = SoilLiqWater(1) + SoilIce(1)
+       SoilIce(1) = 0.0
     endif
 
     if ( NumSnowLayerNeg ==0 ) return   ! MB: get out if no longer multi-layer
 
-    SNEQV  = 0.0
-    SNOWH  = 0.0
+    SnowWaterEquiv  = 0.0
+    SnowDepth  = 0.0
     ZWICE  = 0.0
     ZWLIQ  = 0.0
 
     do J = NumSnowLayerNeg+1, 0
-       SNEQV = SNEQV + SNICE(J) + SNLIQ(J)
-       SNOWH = SNOWH + ThicknessSnowSoilLayer(J)
-       ZWICE = ZWICE + SNICE(J)
-       ZWLIQ = ZWLIQ + SNLIQ(J)
+       SnowWaterEquiv = SnowWaterEquiv + SnowIce(J) + SnowLiqWater(J)
+       SnowDepth = SnowDepth + ThicknessSnowSoilLayer(J)
+       ZWICE = ZWICE + SnowIce(J)
+       ZWLIQ = ZWLIQ + SnowLiqWater(J)
     enddo
 
 ! check the snow depth - all snow gone, the liquid water assumes ponding on soil surface.
-    !if ( (SNOWH < 0.05) .and. (NumSnowLayerNeg < 0) ) then
-    if ( (SNOWH < 0.025) .and. (NumSnowLayerNeg < 0) ) then ! MB: change limit
+    !if ( (SnowDepth < 0.05) .and. (NumSnowLayerNeg < 0) ) then
+    if ( (SnowDepth < 0.025) .and. (NumSnowLayerNeg < 0) ) then ! MB: change limit
        NumSnowLayerNeg    = 0
-       SNEQV    = ZWICE
-       PONDING2 = ZWLIQ                ! LIMIT OF NumSnowLayerNeg < 0 MEANS INPUT PONDING
-       if ( SNEQV <= 0.0 ) SNOWH = 0.0 ! SHOULD BE ZERO; SEE ABOVE
+       SnowWaterEquiv    = ZWICE
+       PondSfcThinSnwTrans = ZWLIQ                ! LIMIT OF NumSnowLayerNeg < 0 MEANS INPUT PONDING
+       if ( SnowWaterEquiv <= 0.0 ) SnowDepth = 0.0 ! SHOULD BE ZERO; SEE ABOVE
     endif
 
 ! check the snow depth - snow layers combined
@@ -155,15 +155,15 @@ contains
              endif
 
              ! update combined snow water & temperature
-             call SnowLayerWaterCombo(ThicknessSnowSoilLayer(J), SNLIQ(J), SNICE(J), STC(J), &
-                                      ThicknessSnowSoilLayer(L), SNLIQ(L), SNICE(L), STC(L) )
+             call SnowLayerWaterCombo(ThicknessSnowSoilLayer(J), SnowLiqWater(J), SnowIce(J), STC(J), &
+                                      ThicknessSnowSoilLayer(L), SnowLiqWater(L), SnowIce(L), STC(L) )
 
              ! Now shift all elements above this down one.
              if ( (J-1) > (NumSnowLayerNeg+1) ) then
                 do K = J-1, NumSnowLayerNeg+2, -1
                    STC(K)    = STC(K-1)
-                   SNICE(K)  = SNICE(K-1)
-                   SNLIQ(K)  = SNLIQ(K-1)
+                   SnowIce(K)  = SnowIce(K-1)
+                   SnowLiqWater(K)  = SnowLiqWater(K-1)
                    ThicknessSnowSoilLayer(K) = ThicknessSnowSoilLayer(K-1)
                 enddo
              endif

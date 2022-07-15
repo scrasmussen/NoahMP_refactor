@@ -35,7 +35,7 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,     logical flag for urban grid
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,     snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,     snow depth [m]
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
               DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
               HCPCT           => noahmp%energy%state%HCPCT           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
@@ -92,7 +92,7 @@ contains
 
     ! snow/soil interface
     if ( NumSnowLayerNeg == 0 ) then
-       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SNOWH) / (SNOWH + ThicknessSnowSoilLayer(1))
+       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SnowDepth) / (SnowDepth + ThicknessSnowSoilLayer(1))
     else
        DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + DF(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
     endif

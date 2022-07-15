@@ -29,8 +29,8 @@ contains
               SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               RefHeightAboveSfc => noahmp%config%domain%RefHeightAboveSfc ,& ! in,  reference height [m] above surface zero plane
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
               Z0MVT           => noahmp%energy%param%Z0MVT           ,& ! in,    momentum roughness length vegetated (m)
               Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! in,    snow surface roughness length (m)
@@ -48,20 +48,20 @@ contains
     ! ground roughness length
     if ( SurfaceType == 2 ) then ! Lake 
        if ( TG <= ConstFreezePoint ) then
-          Z0MG = Z0LAKE * (1.0 - FSNO) + FSNO * Z0SNO
+          Z0MG = Z0LAKE * (1.0 - SnowCoverFrac) + SnowCoverFrac * Z0SNO
        else
           Z0MG = Z0LAKE
        endif
     else  ! soil
-       Z0MG = Z0SOIL * (1.0 - FSNO) + FSNO * Z0SNO
+       Z0MG = Z0SOIL * (1.0 - SnowCoverFrac) + SnowCoverFrac * Z0SNO
     endif
 
     ! surface roughness length and displacement height
-    ZPDG = SNOWH
+    ZPDG = SnowDepth
     if ( VEG .eqv. .true. ) then
        Z0M = Z0MVT
        ZPD = 0.65 * HVT
-       if ( SNOWH > ZPD ) ZPD = SNOWH
+       if ( SnowDepth > ZPD ) ZPD = SnowDepth
     else
        Z0M = Z0MG
        ZPD = ZPDG

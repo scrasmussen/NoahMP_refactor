@@ -28,7 +28,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,     snow cover fraction [-]
               ALBICE          => noahmp%energy%param%ALBICE          ,& ! in,     albedo land ice: 1=vis, 2=nir
               ALBSND          => noahmp%energy%state%ALBSND          ,& ! in,     snow albedo for direct(1=vis, 2=nir)
               ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! in,     snow albedo for diffuse(1=vis, 2=nir)
@@ -38,8 +38,8 @@ contains
 ! ----------------------------------------------------------------------
 
     do IB = 1, NumSWRadBand
-       ALBGRD(IB) = ALBICE(IB) * (1.0 - FSNO) + ALBSND(IB) * FSNO
-       ALBGRI(IB) = ALBICE(IB) * (1.0 - FSNO) + ALBSNI(IB) * FSNO
+       ALBGRD(IB) = ALBICE(IB) * (1.0 - SnowCoverFrac) + ALBSND(IB) * SnowCoverFrac
+       ALBGRI(IB) = ALBICE(IB) * (1.0 - SnowCoverFrac) + ALBSNI(IB) * SnowCoverFrac
     enddo
 
     end associate

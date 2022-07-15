@@ -26,13 +26,13 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SNEQV           => noahmp%water%state%SNEQV            ,& ! in,    snow water equivalent [mm]
-              FSNO            => noahmp%water%state%FSNO              & ! out,   snow cover fraction (-)
+              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac              & ! out,   snow cover fraction [-]
              )
 ! ----------------------------------------------------------------------
 
-    FSNO = 0.0
-    if ( SNEQV > 0.0 ) FSNO = 1.0
+    SnowCoverFrac = 0.0
+    if ( SnowWaterEquiv > 0.0 ) SnowCoverFrac = 1.0
 
     end associate
 

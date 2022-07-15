@@ -31,15 +31,15 @@ contains
 
 ! local variable
     integer                :: ISOIL      ! soil layer index
-    real(kind=kind_noahmp) :: WDF        ! soil water diffusivity (m2/s)
-    real(kind=kind_noahmp) :: WCND       ! soil water conductivity[m/s]
+    real(kind=kind_noahmp) :: SoilWatDiffusivity        ! soil water diffusivity [m2/s]
+    real(kind=kind_noahmp) :: SoilWatConductivity       ! soil water conductivity[m/s]
     real(kind=kind_noahmp) :: JJ         ! dummy variable
 
 ! --------------------------------------------------------------------
     associate(                                                        &
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
+              SoilMoisture             => noahmp%water%state%SoilMoisture             ,& ! in,     total soil moisture [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3] 
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
@@ -51,24 +51,25 @@ contains
     ISOIL = 1
     if ( INFLMAX == 1 ) then
 
-       ! estimate initial soil hydraulic conductivty (Ki in the equation), WCND (m/s)
-       call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMCWLT(ISOIL), 0.0, ISOIL)
+       ! estimate initial soil hydraulic conductivty (Ki in the equation) (m/s)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SMCWLT(ISOIL), 0.0, ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
        JJ   = GDVIC * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (-1.0) * DepthSoilLayer(ISOIL)
-       FSUR = DKSAT(ISOIL) + ( (JJ/1.0e-05) * (DKSAT(ISOIL) - WCND) )
+       FSUR = DKSAT(ISOIL) + ( (JJ/1.0e-05) * (DKSAT(ISOIL) - SoilWatConductivity) )
 
        !maximum infiltration rate at surface
-       if ( FSUR < 0.0 ) FSUR = WCND
+       if ( FSUR < 0.0 ) FSUR = SoilWatConductivity
 
     else
 
-       ! estimate initial soil hydraulic conductivty (Ki in the equation), WCND (m/s)
-       call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SMC(ISOIL), SICE(ISOIL), ISOIL)
+       ! estimate initial soil hydraulic conductivty (Ki in the equation) (m/s)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
+                                            SoilMoisture(ISOIL), SoilIce(ISOIL), ISOIL)
 
        ! Maximum infiltrability based on the Eq. 6.25. (m/s)
-       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * (-1.0) * DepthSoilLayer(ISOIL)
-       FSUR = DKSAT(ISOIL) + ( (JJ/FACC) * (DKSAT(ISOIL) - WCND) )
+       JJ   = GDVIC * max(0.0, (SMCMAX(ISOIL) - SoilMoisture(ISOIL))) * (-1.0) * DepthSoilLayer(ISOIL)
+       FSUR = DKSAT(ISOIL) + ( (JJ/FACC) * (DKSAT(ISOIL) - SoilWatConductivity) )
 
        ! infiltration rate at surface
        if ( DKSAT(ISOIL) < QINSUR ) then

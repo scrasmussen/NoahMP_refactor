@@ -27,7 +27,7 @@ contains
     integer                :: K, i, j        ! loop index 
     integer                :: SATLYRCHK      ! check saturated layer
     real(kind=kind_noahmp) :: CWATAVAIL      ! temporary available water
-    real(kind=kind_noahmp) :: WATBLED        ! water table depth (m)
+    real(kind=kind_noahmp) :: WaterTableDepthTmp        ! temporary water table depth (m)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -36,10 +36,8 @@ contains
               ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
-              ZWT             => noahmp%water%state%ZWT               & ! out,    water table depth [m]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth               & ! out,    water table depth [m]
              )
 ! ----------------------------------------------------------------------
 
@@ -49,26 +47,26 @@ contains
 
     ! calculate/search for water table depth
     do K = NumSoilLayer, 1, -1
-       if ( (SMC(K) >= SMCREF(K)) .and. (SMCREF(K) > SMCWLT(K)) ) then
+       if ( (SoilMoisture(K) >= SMCREF(K)) .and. (SMCREF(K) > SMCWLT(K)) ) then
           if ( (SATLYRCHK == (K+1)) .or. (K == NumSoilLayer) ) SATLYRCHK = K
        endif
     enddo
 
     if ( SATLYRCHK /= 0 ) then
        if ( SATLYRCHK /= 1 ) then  ! soil column is partially sat.
-          WATBLED = -DepthSoilLayer(SATLYRCHK-1)
+          WaterTableDepthTmp = -DepthSoilLayer(SATLYRCHK-1)
        else  ! soil column is fully saturated to sfc.
-          WATBLED = 0.0
+          WaterTableDepthTmp = 0.0
        endif
        do K = SATLYRCHK, NumSoilLayer
-          CWATAVAIL = CWATAVAIL + (SMC(K) - SMCREF(K)) * ThicknessSoilLayer(K)
+          CWATAVAIL = CWATAVAIL + (SoilMoisture(K) - SMCREF(K)) * ThicknessSoilLayer(K)
        enddo
     else  ! no saturated layers...
-       WATBLED   = -DepthSoilLayer(NumSoilLayer)
+       WaterTableDepthTmp   = -DepthSoilLayer(NumSoilLayer)
        SATLYRCHK = NumSoilLayer + 1
     endif
 
-    ZWT = WATBLED
+    WaterTableDepth = WaterTableDepthTmp
 
     end associate
 

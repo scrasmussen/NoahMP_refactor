@@ -43,8 +43,8 @@ contains
     integer                :: K, IZ, ITER   ! do-loop index
     integer                :: NITER         ! iteration times soil moisture (-)
     real(kind=kind_noahmp) :: DTFINE        ! fine time step (s)
-    real(kind=kind_noahmp) :: RSAT          ! accumulation of WPLUS (saturation excess) [m]
-    real(kind=kind_noahmp) :: WTSUB         ! sum of WCND(K)*ThicknessSnowSoilLayer(K)
+    real(kind=kind_noahmp) :: RSAT          ! accumulation of soil saturation excess [m]
+    real(kind=kind_noahmp) :: WTSUB         ! sum of SoilWatConductivity(K)*ThicknessSnowSoilLayer(K)
     real(kind=kind_noahmp) :: MH2O          ! water mass removal (mm)
     real(kind=kind_noahmp) :: XS            ! temporary
     real(kind=kind_noahmp) :: WATMIN        ! minimum soil water
@@ -67,26 +67,25 @@ contains
               OptRunoffSurface => noahmp%config%nmlist%OptRunoffSurface ,& ! in,     options for surface runoff
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface,& ! in,     options for subsurface runoff
               OptTileDrainage => noahmp%config%nmlist%OptTileDrainage,& ! in,     options for tile drainage
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
-              TDFRACMP        => noahmp%water%state%TDFRACMP         ,& ! in,     tile drainage map(fraction)
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
+              TileDrainFrac        => noahmp%water%state%TileDrainFrac         ,& ! in,     tile drainage map(fraction)
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil water content [m3/m3]
-              ZWT             => noahmp%water%state%ZWT              ,& ! inout,  water table depth [m]
-              DEEPRECH        => noahmp%water%state%DEEPRECH         ,& ! inout,  recharge to or from the water table when deep [m]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
+              SoilMoisture             => noahmp%water%state%SoilMoisture          ,& ! inout,  total soil water content [m3/m3]
+              RechargeGwDeepWT        => noahmp%water%state%RechargeGwDeepWT         ,& ! inout,  recharge to or from the water table when deep [m]
               QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! out,    soil bottom drainage (m/s)
               RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
               RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! out,    subsurface runoff [mm/s] 
               PDDUM           => noahmp%water%flux%PDDUM             ,& ! out,    infiltration rate at surface (mm/s)
-              FCRMAX          => noahmp%water%state%FCRMAX           ,& ! out,    maximum fraction of imperviousness (FCR)
-              WCND            => noahmp%water%state%WCND             ,& ! out,    soil hydraulic conductivity (m/s)
-              EPORE           => noahmp%water%state%EPORE_SOIL       ,& ! out,    soil effective porosity (m3/m3)
-              FCR             => noahmp%water%state%FCR              ,& ! out,    impermeable fraction due to frozen soil
-              FICE            => noahmp%water%state%FICE_SOIL        ,& ! out,    ice fraction in frozen soil
-              WPLUS           => noahmp%water%state%WPLUS            ,& ! out,    saturation excess of the total soil [m]
-              SICEMAX         => noahmp%water%state%SICEMAX          ,& ! out,    maximum soil ice content (m3/m3)
-              SH2OMIN         => noahmp%water%state%SH2OMIN           & ! out,    minimum soil liquid water content (m3/m3)
+              SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! out,    maximum soil imperviousness fraction
+              SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! out,    soil hydraulic conductivity [m/s]
+              SoilEffPorosity           => noahmp%water%state%SoilEffPorosity       ,& ! out,    soil effective porosity (m3/m3)
+              SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! out,    impervious fraction due to frozen soil
+              SoilIceFrac            => noahmp%water%state%SoilIceFrac        ,& ! out,    ice fraction in frozen soil
+              SoilSaturationExcess           => noahmp%water%state%SoilSaturationExcess            ,& ! out,    saturation excess of the total soil [m]
+              SoilIceMax         => noahmp%water%state%SoilIceMax          ,& ! out,    maximum soil ice content (m3/m3)
+              SoilLiqWaterMin         => noahmp%water%state%SoilLiqWaterMin           & ! out,    minimum soil liquid water content (m3/m3)
              )
 ! ----------------------------------------------------------------------
 
@@ -109,25 +108,25 @@ contains
 
     ! for the case when snowmelt water is too large
     do K = 1, NumSoilLayer
-       EPORE(K)= max( 1.0e-4, (SMCMAX(K) - SICE(K)) )
-       RSAT    = RSAT + max( 0.0, SH2O(K) - EPORE(K) ) * ThicknessSnowSoilLayer(K)
-       SH2O(K) = min( EPORE(K), SH2O(K) )
+       SoilEffPorosity(K)= max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+       RSAT    = RSAT + max( 0.0, SoilLiqWater(K) - SoilEffPorosity(K) ) * ThicknessSnowSoilLayer(K)
+       SoilLiqWater(K) = min( SoilEffPorosity(K), SoilLiqWater(K) )
     enddo
 
     ! impermeable fraction due to frozen soil
     do K = 1, NumSoilLayer
-       FICE(K) = min( 1.0, SICE(K) / SMCMAX(K) )
-       FCR(K)  = max( 0.0, exp(-A*(1.0-FICE(K))) - exp(-A) ) / (1.0 - exp(-A))
+       SoilIceFrac(K) = min( 1.0, SoilIce(K) / SMCMAX(K) )
+       SoilImpervFrac(K)  = max( 0.0, exp(-A*(1.0-SoilIceFrac(K))) - exp(-A) ) / (1.0 - exp(-A))
     enddo
 
     ! maximum soil ice content and minimum liquid water of all layers
-    SICEMAX = 0.0
-    FCRMAX  = 0.0
-    SH2OMIN = SMCMAX(1)
+    SoilIceMax = 0.0
+    SoilImpervFracMax  = 0.0
+    SoilLiqWaterMin = SMCMAX(1)
     do K = 1, NumSoilLayer
-       if ( SICE(K) > SICEMAX ) SICEMAX = SICE(K)
-       if ( FCR(K)  > FCRMAX  ) FCRMAX  = FCR(K)
-       if ( SH2O(K) < SH2OMIN ) SH2OMIN = SH2O(K)
+       if ( SoilIce(K) > SoilIceMax ) SoilIceMax = SoilIce(K)
+       if ( SoilImpervFrac(K)  > SoilImpervFracMax  ) SoilImpervFracMax  = SoilImpervFrac(K)
+       if ( SoilLiqWater(K) < SoilLiqWaterMin ) SoilLiqWaterMin = SoilLiqWater(K)
     enddo
 
     ! subsurface runoff for runoff scheme option 2
@@ -135,7 +134,7 @@ contains
 
     !!! surface runoff and infiltration rate using different schemes
     ! jref impermable surface at urban
-    if ( FlagUrban .eqv. .true. ) FCR(1) = 0.95
+    if ( FlagUrban .eqv. .true. ) SoilImpervFrac(1) = 0.95
 
     if ( OptRunoffSurface == 1 ) call RunoffSurfaceTopModelGrd(noahmp)
     if ( OptRunoffSurface == 2 ) call RunoffSurfaceTopModelEqui(noahmp)
@@ -167,7 +166,7 @@ contains
        endif
        call SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
        call SoilMoistureSolver(noahmp, DTFINE, AI, BI, CI, RHSTT)
-       RSAT        = RSAT + WPLUS
+       RSAT        = RSAT + SoilSaturationExcess
        QDRAIN_SAVE = QDRAIN_SAVE + QDRAIN
        RUNSRF_SAVE = RUNSRF_SAVE + RUNSRF
     enddo
@@ -178,10 +177,10 @@ contains
     QDRAIN = QDRAIN * 1000.0
 
     ! compute tile drainage ! pvk
-    if ( (OptTileDrainage == 1) .and. (TDFRACMP > 0.3) .and. (OptRunoffSurface == 3) ) then
+    if ( (OptTileDrainage == 1) .and. (TileDrainFrac > 0.3) .and. (OptRunoffSurface == 3) ) then
        call TileDrainageSimple(noahmp)  ! simple tile drainage
     endif
-    if ( (OptTileDrainage == 2) .and. (TDFRACMP > 0.1) .and. (OptRunoffSurface == 3) ) then
+    if ( (OptTileDrainage == 2) .and. (TileDrainFrac > 0.1) .and. (OptRunoffSurface == 3) ) then
        call TileDrainageHooghoudt(noahmp)  ! Hooghoudt tile drain
     END IF
 
@@ -189,11 +188,11 @@ contains
     if ( OptRunoffSubsurface == 2 ) then
        WTSUB = 0.0
        do K = 1, NumSoilLayer
-          WTSUB = WTSUB + WCND(K) * ThicknessSnowSoilLayer(K)
+          WTSUB = WTSUB + SoilWatConductivity(K) * ThicknessSnowSoilLayer(K)
        enddo
        do K = 1, NumSoilLayer
-          MH2O    = RUNSUB * MainTimeStep * (WCND(K)*ThicknessSnowSoilLayer(K)) / WTSUB  ! mm
-          SH2O(K) = SH2O(K) - MH2O / (ThicknessSnowSoilLayer(K)*1000.0)
+          MH2O    = RUNSUB * MainTimeStep * (SoilWatConductivity(K)*ThicknessSnowSoilLayer(K)) / WTSUB  ! mm
+          SoilLiqWater(K) = SoilLiqWater(K) - MH2O / (ThicknessSnowSoilLayer(K)*1000.0)
        enddo
     endif
 
@@ -201,7 +200,7 @@ contains
     ! Get water needed to bring MLIQ equal WATMIN from lower layer.
     if ( OptRunoffSubsurface /= 1 ) then
        do IZ = 1, NumSoilLayer
-          MLIQ(IZ) = SH2O(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
+          MLIQ(IZ) = SoilLiqWater(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
 
        WATMIN = 0.01   ! mm
@@ -223,10 +222,10 @@ contains
        MLIQ(IZ) = MLIQ(IZ) + XS
        RUNSUB   = RUNSUB - XS/MainTimeStep
 
-       if ( OptRunoffSubsurface == 5 ) DEEPRECH = DEEPRECH - XS * 1.0e-3
+       if ( OptRunoffSubsurface == 5 ) RechargeGwDeepWT = RechargeGwDeepWT - XS * 1.0e-3
 
        do IZ = 1, NumSoilLayer
-          SH2O(IZ) = MLIQ(IZ) / (ThicknessSnowSoilLayer(IZ)*1000.0)
+          SoilLiqWater(IZ) = MLIQ(IZ) / (ThicknessSnowSoilLayer(IZ)*1000.0)
        enddo
     endif ! OptRunoffSubsurface /= 1
 
@@ -241,7 +240,7 @@ contains
 
     ! update soil moisture
     do IZ = 1, NumSoilLayer
-        SMC(IZ) = SH2O(IZ) + SICE(IZ)
+        SoilMoisture(IZ) = SoilLiqWater(IZ) + SoilIce(IZ)
     enddo
 
     ! compute subsurface runoff and shallow water table for MMF scheme

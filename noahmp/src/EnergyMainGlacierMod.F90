@@ -50,7 +50,7 @@ contains
               Q1              => noahmp%energy%state%Q1              ,& ! inout, surface layer water vapor mixing ratio
               CM              => noahmp%energy%state%CM              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
               CH              => noahmp%energy%state%CH              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout, snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
               Z0WRF           => noahmp%energy%state%Z0WRF           ,& ! out,   roughness length, momentum, surface, sent to coupled model
               TAUX            => noahmp%energy%state%TAUX            ,& ! out,   wind stress: east-west (n/m2) grid mean
               TAUY            => noahmp%energy%state%TAUY            ,& ! out,   wind stress: north-south (n/m2) grid mean
@@ -139,7 +139,7 @@ contains
     FIRE = RadLWDownRefHeight + FIRA
     if ( FIRE <= 0.0 ) then
        write(*,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
-       write(*,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SNOWH=',SNOWH
+       write(*,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SnowDepth=',SnowDepth
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
@@ -156,7 +156,7 @@ contains
 
     ! adjusting suface temperature based on snow condition
     if ( OptSnowSoilTempTime == 2 ) then
-       if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
+       if ( (SnowDepth > 0.05) .and. (TG > ConstFreezePoint) ) then
           TGB = ConstFreezePoint
           TG = TGB
           TS = TGB

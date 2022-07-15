@@ -56,7 +56,7 @@ contains
               SHDFAC          => noahmp%energy%param%SHDFAC       ,& ! in,    green vegetation fraction
               TemperatureMinPhotosyn            => noahmp%biochem%param%TemperatureMinPhotosyn        ,& ! in,    minimum temperature for photosynthesis (k)
               PlantGrowStage             => noahmp%biochem%state%PlantGrowStage         ,& ! in,    plant growing stage
-              SNOWH           => noahmp%water%state%SNOWH         ,& ! in,    snow height [m]
+              SnowDepth           => noahmp%water%state%SnowDepth         ,& ! in,    snow depth [m]
               TV              => noahmp%energy%state%TV           ,& ! in,    vegetation temperature (k)
               TROOT           => noahmp%energy%state%TROOT        ,& ! in,    root-zone averaged temperature (k)
               LAI             => noahmp%energy%state%LAI          ,& ! inout, LAI, unadjusted for burying by snow
@@ -110,11 +110,11 @@ contains
     endif   ! CropType == 0
 
     ! vegetation fraction buried by snow
-    DB = min( max(SNOWH-HVB,0.0), (HVT-HVB) )
+    DB = min( max(SnowDepth-HVB,0.0), (HVT-HVB) )
     FB = DB / max( 1.0e-06, (HVT-HVB) )   ! snow buried fraction
     if ( (HVT > 0.0) .and. (HVT <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect changes to HVT in MPTABLE
-       SNOWHC = HVT * exp(-SNOWH / 0.2)
-       FB     = min(SNOWH, SNOWHC) / SNOWHC
+       SNOWHC = HVT * exp(-SnowDepth / 0.2)
+       FB     = min(SnowDepth, SNOWHC) / SNOWHC
     endif
 
     ! adjust LAI and SAI bused on snow bury

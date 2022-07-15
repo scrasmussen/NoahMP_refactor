@@ -41,7 +41,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight,& ! in,  air pressure [Pa] at reference height
-              BTRAN           => noahmp%water%state%BTRAN            ,& ! in,    soil water transpiration factor (0 to 1)
+              SoilTranspFacAcc           => noahmp%water%state%SoilTranspFacAcc            ,& ! in,    accumulated soil water transpiration factor (0 to 1)
               RGL             => noahmp%energy%param%RGL             ,& ! in,    Parameter used in radiation stress function
               RSMIN           => noahmp%energy%param%RSMIN           ,& ! in,    Minimum stomatal resistance [s m-1]
               RSMAX           => noahmp%energy%param%RSMAX           ,& ! in,    Maximal stomatal resistance [s m-1]
@@ -86,7 +86,7 @@ contains
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSUN  = RSMIN / (RCS * RCT * RCQ * BTRAN)
+       RSSUN  = RSMIN / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafSunlit = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 0
@@ -115,7 +115,7 @@ contains
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSHA  = RSMIN / (RCS * RCT * RCQ * BTRAN)
+       RSSHA  = RSMIN / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafShade = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 1

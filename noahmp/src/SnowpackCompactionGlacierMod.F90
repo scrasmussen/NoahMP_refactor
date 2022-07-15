@@ -28,7 +28,7 @@ contains
     real(kind=kind_noahmp) :: BURDEN  ! pressure of overlying snow [kg/m2]
     real(kind=kind_noahmp) :: DEXPF   ! EXPF=exp(-c4*(273.15-STC))
     real(kind=kind_noahmp) :: TD      ! STC - ConstFreezePoint [K]
-    real(kind=kind_noahmp) :: VOID    ! void (1 - SNICE - SNLIQ)
+    real(kind=kind_noahmp) :: VOID    ! void (1 - SnowIce - SnowLiqWater)
     real(kind=kind_noahmp) :: WX      ! water mass (ice + liquid) [kg/m2]
     real(kind=kind_noahmp) :: BI      ! partial density of ice [kg/m3]
 
@@ -36,10 +36,10 @@ contains
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
-              SNICE           => noahmp%water%state%SNICE            ,& ! in,     snow layer ice [mm]
-              SNLIQ           => noahmp%water%state%SNLIQ            ,& ! in,     snow layer liquid water [mm]
-              IMELT           => noahmp%water%state%IMELT            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
-              FICEOLD         => noahmp%water%state%FICEOLD_SNOW     ,& ! in,     ice fraction in snow layers at last timestep
+              SnowIce           => noahmp%water%state%SnowIce            ,& ! in,     snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! in,     snow layer liquid water [mm]
+              IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
+              SnowIceFracPrev         => noahmp%water%state%SnowIceFracPrev     ,& ! in,     ice fraction in snow layers at previous timestep
               C2              => noahmp%water%param%C2_SnowCompact   ,& ! in,     snow overburden compaction parameter (m3/kg)
               C3              => noahmp%water%param%C3_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter1 [1/s]
               C4              => noahmp%water%param%C4_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter2 [1/k]
@@ -52,7 +52,7 @@ contains
               DDZ2            => noahmp%water%flux%DDZ2              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
               DDZ3            => noahmp%water%flux%DDZ3              ,& ! out,    rate of compaction of snowpack due to melt [1/s]
               PDZDTC          => noahmp%water%flux%PDZDTC            ,& ! out,    rate of change in fractional-thickness due to compaction [fraction/s]
-              FICE            => noahmp%water%state%FICE_SNOW         & ! out,    fraction of ice in snow layers at current time step 
+              SnowIceFrac            => noahmp%water%state%SnowIceFrac         & ! out,    fraction of ice in snow layers at current time step 
              )
 ! ----------------------------------------------------------------------
 
@@ -61,32 +61,32 @@ contains
     DDZ2(:)   = 0.0
     DDZ3(:)   = 0.0
     PDZDTC(:) = 0.0
-    FICE(:)   = 0.0
+    SnowIceFrac(:)   = 0.0
 
 ! start snow compaction
     BURDEN = 0.0
     do J = NumSnowLayerNeg+1, 0
-       WX      = SNICE(J) + SNLIQ(J)
-       FICE(J) = SNICE(J) / WX
-       VOID    = 1.0 - ( SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater ) / ThicknessSnowSoilLayer(J)
+       WX      = SnowIce(J) + SnowLiqWater(J)
+       SnowIceFrac(J) = SnowIce(J) / WX
+       VOID    = 1.0 - ( SnowIce(J)/ConstDensityIce + SnowLiqWater(J)/ConstDensityWater ) / ThicknessSnowSoilLayer(J)
 
        ! Allow compaction only for non-saturated node and higher ice lens node.
-       if ( (VOID > 0.001) .and. (SNICE(J) > 0.1) ) then
-          BI    = SNICE(J) / ThicknessSnowSoilLayer(J)
+       if ( (VOID > 0.001) .and. (SnowIce(J) > 0.1) ) then
+          BI    = SnowIce(J) / ThicknessSnowSoilLayer(J)
           TD    = max( 0.0, ConstFreezePoint-STC(J) )
 
           ! Settling/compaction as a result of destructive metamorphism
           DEXPF   = exp( -C4 * TD )
           DDZ1(J) = -C3 * DEXPF
           if ( BI > DM ) DDZ1(J) = DDZ1(J) * exp( -46.0e-3 * (BI-DM) )
-          if ( SNLIQ(J) > (0.01*ThicknessSnowSoilLayer(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
+          if ( SnowLiqWater(J) > (0.01*ThicknessSnowSoilLayer(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
 
           ! Compaction due to overburden
           DDZ2(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden
 
           ! Compaction occurring during melt
-          if ( IMELT(J) == 1 ) then
-             DDZ3(J) = max( 0.0, (FICEOLD(J)-FICE(J)) / max(1.0e-6,FICEOLD(J)) )
+          if ( IndexPhaseChange(J) == 1 ) then
+             DDZ3(J) = max( 0.0, (SnowIceFracPrev(J)-SnowIceFrac(J)) / max(1.0e-6,SnowIceFracPrev(J)) )
              DDZ3(J) = -DDZ3(J) / MainTimeStep   ! sometimes too large
           else
              DDZ3(J) = 0.0
@@ -98,7 +98,7 @@ contains
 
           ! The change in DZ due to compaction
           ThicknessSnowSoilLayer(J) = ThicknessSnowSoilLayer(J) * ( 1.0 + PDZDTC(J) )
-          ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SNICE(J)/ConstDensityIce + SNLIQ(J)/ConstDensityWater )
+          ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SnowIce(J)/ConstDensityIce + SnowLiqWater(J)/ConstDensityWater )
 
        endif
 

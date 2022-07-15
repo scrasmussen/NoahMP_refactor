@@ -59,9 +59,9 @@ contains
               PRCP                  => noahmp%water%flux%PRCP           ,& ! out,  total precipitation [mm/s]
               QPRECC                => noahmp%water%flux%QPRECC         ,& ! out,  convective precipitation (mm/s)
               QPRECL                => noahmp%water%flux%QPRECL         ,& ! out,  large-scale precipitation (mm/s)
-              FP                    => noahmp%water%state%FP            ,& ! out,  fraction of area receiving precipitation
-              FPICE                 => noahmp%water%state%FPICE         ,& ! out,  snowfall fraction
-              BDFALL                => noahmp%water%state%BDFALL         & ! out,  !bulk density of snowfall (kg/m3)
+              PrecipAreaFrac                    => noahmp%water%state%PrecipAreaFrac ,& ! out,  fraction of area receiving precipitation
+              FrozenPrecipFrac                 => noahmp%water%state%FrozenPrecipFrac         ,& ! out,  frozen precipitation fraction
+              SnowfallDensity                => noahmp%water%state%SnowfallDensity         & ! out,  bulk density of snowfall (kg/m3)
              )
 ! ------------------------------------------------------------------------
 
@@ -91,9 +91,9 @@ contains
     endif
 
     ! fractional area that receives precipitation (see, Niu et al. 2005)
-    FP = 0.0
+    PrecipAreaFrac = 0.0
     if ( (QPRECC+QPRECL) > 0.0 ) then
-       FP = (QPRECC + QPRECL) / (10.0*QPRECC + QPRECL)
+       PrecipAreaFrac = (QPRECC + QPRECL) / (10.0*QPRECC + QPRECL)
     endif
 
     ! partition precipitation into rain and snow. Moved from CANWAT MB/AN: v3.7
@@ -101,14 +101,14 @@ contains
     ! Jordan (1991)
     if ( OptRainSnowPartition == 1 ) then
        if ( TemperatureAirRefHeight > (ConstFreezePoint+2.5) ) then
-          FPICE = 0.0
+          FrozenPrecipFrac = 0.0
        else
           if ( TemperatureAirRefHeight <= (ConstFreezePoint+0.5) ) then
-             FPICE = 1.0
+             FrozenPrecipFrac = 1.0
           elseif ( TemperatureAirRefHeight <= (ConstFreezePoint+2.0) ) then
-             FPICE = 1.0 - (-54.632 + 0.2*TemperatureAirRefHeight)
+             FrozenPrecipFrac = 1.0 - (-54.632 + 0.2*TemperatureAirRefHeight)
           else
-             FPICE = 0.6
+             FrozenPrecipFrac = 0.6
           endif
        endif
     endif
@@ -116,33 +116,34 @@ contains
     ! BATS scheme
     if ( OptRainSnowPartition == 2 ) then
        if ( TemperatureAirRefHeight >= (ConstFreezePoint+2.2) ) then
-          FPICE = 0.0
+          FrozenPrecipFrac = 0.0
        else
-          FPICE = 1.0
+          FrozenPrecipFrac = 1.0
        endif
     endif
 
     ! Simple temperature scheme
     if ( OptRainSnowPartition == 3 ) then
        if ( TemperatureAirRefHeight >= ConstFreezePoint ) then
-          FPICE = 0.0
+          FrozenPrecipFrac = 0.0
        else
-          FPICE = 1.0
+          FrozenPrecipFrac = 1.0
        endif
     endif
 
     ! Use WRF microphysics output
     ! Hedstrom NR and JW Pomeroy (1998), Hydrol. Processes, 12, 1611-1625
-    BDFALL = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
+    SnowfallDensity = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
     if ( OptRainSnowPartition == 4 ) then
        PRCP_FROZEN = PrecipSnowRefHeight + PrecipGraupelRefHeight + PrecipHailRefHeight
        if ( (PrecipNonConvRefHeight > 0.0) .and. (PRCP_FROZEN > 0.0) ) then
-          FPICE  = min( 1.0, PRCP_FROZEN/PrecipNonConvRefHeight )
-          FPICE  = max( 0.0, FPICE )
-          BDFALL = BDFALL * (PrecipSnowRefHeight/PRCP_FROZEN) + ConstDensityGraupel * (PrecipGraupelRefHeight/PRCP_FROZEN) + &
-                   ConstDensityHail * (PrecipHailRefHeight/PRCP_FROZEN)
+          FrozenPrecipFrac  = min( 1.0, PRCP_FROZEN/PrecipNonConvRefHeight )
+          FrozenPrecipFrac  = max( 0.0, FrozenPrecipFrac )
+          SnowfallDensity = SnowfallDensity * (PrecipSnowRefHeight/PRCP_FROZEN) + &
+                            ConstDensityGraupel * (PrecipGraupelRefHeight/PRCP_FROZEN) + &
+                            ConstDensityHail * (PrecipHailRefHeight/PRCP_FROZEN)
        else
-          FPICE = 0.0
+          FrozenPrecipFrac = 0.0
        endif
     endif
 
@@ -160,12 +161,12 @@ contains
           ESATAIR = 610.8 * exp( (17.27*TWET) / (237.3+TWET) )
           TWET    = TWET - (ESATAIR - EAIR) / GAMMA_b          ! Wang et al., 2019 GRL Eq.2
        enddo
-       FPICE = 1.0 / (1.0 + 6.99e-5 * exp(2.0*(TWET+3.97)))    ! Wang et al., 2019 GRL Eq. 1
+       FrozenPrecipFrac = 1.0 / (1.0 + 6.99e-5 * exp(2.0*(TWET+3.97)))    ! Wang et al., 2019 GRL Eq. 1
     endif
 
     ! rain-snow partitioning
-    RAIN = PRCP * (1.0 - FPICE)
-    SNOW = PRCP * FPICE
+    RAIN = PRCP * (1.0 - FrozenPrecipFrac)
+    SNOW = PRCP * FrozenPrecipFrac
 
     end associate
 

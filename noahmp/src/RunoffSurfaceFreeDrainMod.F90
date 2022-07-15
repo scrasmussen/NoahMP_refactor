@@ -34,11 +34,11 @@ contains
     real(kind=kind_noahmp) :: DT1                     ! time indices
     real(kind=kind_noahmp) :: DD                      ! accumulated maximum holdable soil water (m)
     real(kind=kind_noahmp) :: DICE                    ! maximum soil ice water (m)
-    real(kind=kind_noahmp) :: FCR                     ! impermeable fraction due to frozen soil
+    real(kind=kind_noahmp) :: SoilImpervFrac                     ! impervious fraction due to frozen soil
     real(kind=kind_noahmp) :: SUM1                    ! accumulation index
     real(kind=kind_noahmp) :: ACRT                    ! soil ice coefficient
-    real(kind=kind_noahmp) :: WDF                     ! soil water diffusivity (m2/s)
-    real(kind=kind_noahmp) :: WCND                    ! soil water conductivity [m/s]
+    real(kind=kind_noahmp) :: SoilWatDiffusivity                     ! soil water diffusivity [m2/s]
+    real(kind=kind_noahmp) :: SoilWatConductivity                    ! soil water conductivity [m/s]
     real(kind=kind_noahmp) :: SMCAV                   ! soil moisture holding capacity (m3/m3)
     real(kind=kind_noahmp) :: INFMAX                  ! maximum infiltration rate (m/s)
     real(kind=kind_noahmp), allocatable, dimension(:) :: DMAX    ! maximum soil water that can hold (m)
@@ -48,9 +48,9 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,   logical flag for urban grid
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,   soil ice content [m3/m3]
-              SICEMAX         => noahmp%water%state%SICEMAX          ,& ! in,   maximum soil ice content (m3/m3)
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,   soil water content [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,   soil ice content [m3/m3]
+              SoilIceMax         => noahmp%water%state%SoilIceMax          ,& ! in,   maximum soil ice content (m3/m3)
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,   wilting point soil moisture [m3/m3]
@@ -73,13 +73,13 @@ contains
 
        ! compute maximum infiltration rate
        DMAX(1) = -DepthSoilLayer(1) * SMCAV
-       DICE    = -DepthSoilLayer(1) * SICE(1)
-       DMAX(1) =  DMAX(1)  * ( 1.0 - (SH2O(1) + SICE(1) - SMCWLT(1)) / SMCAV )
+       DICE    = -DepthSoilLayer(1) * SoilIce(1)
+       DMAX(1) =  DMAX(1)  * ( 1.0 - (SoilLiqWater(1) + SoilIce(1) - SMCWLT(1)) / SMCAV )
        DD      =  DMAX(1)
        do K = 2, NumSoilLayer
-          DICE    = DICE + ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SICE(K)
+          DICE    = DICE + ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SoilIce(K)
           DMAX(K) = ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SMCAV
-          DMAX(K) = DMAX(K) * ( 1.0 - (SH2O(K) + SICE(K) - SMCWLT(K)) / SMCAV )
+          DMAX(K) = DMAX(K) * ( 1.0 - (SoilLiqWater(K) + SoilIce(K) - SMCWLT(K)) / SMCAV )
           DD      = DD + DMAX(K)
        enddo
        VAL    = 1.0 - exp(-1.0 * KDT * DT1)
@@ -88,7 +88,7 @@ contains
        INFMAX = ( PX * (DDT / (PX + DDT)) ) / DT
 
        ! impermeable fraction due to frozen soil
-       FCR = 1.0
+       SoilImpervFrac = 1.0
        if ( DICE > 1.0e-2 ) then
           ACRT  = CVFRZ * FRZX / DICE
           SUM1  = 1.0
@@ -100,18 +100,18 @@ contains
              enddo
              SUM1 = SUM1 + ( ACRT ** (CVFRZ - J) ) / float(K)
           enddo
-          FCR = 1.0 - exp(-ACRT) * SUM1
+          SoilImpervFrac = 1.0 - exp(-ACRT) * SUM1
        endif
 
        ! correction of infiltration limitation
-       INFMAX = INFMAX * FCR
+       INFMAX = INFMAX * SoilImpervFrac
        ! jref for urban areas
        ! if ( FlagUrban .eqv. .true. ) INFMAX == INFMAX * 0.05
 
        ! soil hydraulic conductivity and diffusivity
-       call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SH2O(1), SICEMAX, 1)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SoilLiqWater(1), SoilIceMax, 1)
 
-       INFMAX = max( INFMAX, WCND )
+       INFMAX = max( INFMAX, SoilWatConductivity )
        INFMAX = min( INFMAX, PX   )
 
        ! compute surface runoff and infiltration rate

@@ -31,8 +31,8 @@ contains
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,     surface type 1-soil; 2-lake
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,     snow cover fraction (-)
-              SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,     snow cover fraction [-]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               ALBSAT          => noahmp%energy%param%ALBSAT          ,& ! in,     saturated soil albedos: 1=vis, 2=nir
               ALBDRY          => noahmp%energy%param%ALBDRY          ,& ! in,     dry soil albedos: 1=vis, 2=nir
               ALBLAK          => noahmp%energy%param%ALBLAK          ,& ! in,     albedo frozen lakes: 1=vis, 2=nir
@@ -48,7 +48,7 @@ contains
 
     do IB = 1, NumSWRadBand
 
-       INC = max( 0.11 - 0.40*SMC(1), 0.0 )
+       INC = max( 0.11 - 0.40*SoilMoisture(1), 0.0 )
 
        if ( SurfaceType == 1 )  then  ! soil
           ALBSOD(IB) = min( ALBSAT(IB)+INC, ALBDRY(IB) )
@@ -61,8 +61,8 @@ contains
           ALBSOI(IB) = ALBSOD(IB)
        endif
 
-       ALBGRD(IB) = ALBSOD(IB) * (1.0 - FSNO) + ALBSND(IB) * FSNO
-       ALBGRI(IB) = ALBSOI(IB) * (1.0 - FSNO) + ALBSNI(IB) * FSNO
+       ALBGRD(IB) = ALBSOD(IB) * (1.0 - SnowCoverFrac) + ALBSND(IB) * SnowCoverFrac
+       ALBGRI(IB) = ALBSOI(IB) * (1.0 - SnowCoverFrac) + ALBSNI(IB) * SnowCoverFrac
 
     enddo
 

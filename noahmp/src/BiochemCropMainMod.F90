@@ -42,8 +42,8 @@ contains
               FlagUrban       => noahmp%config%domain%FlagUrban    ,& ! in,    urban point flag
               NROOT            => noahmp%water%param%NROOT           ,& ! in,    number of soil layers with root present
               SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
-              SMC              => noahmp%water%state%SMC             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
-              BTRAN            => noahmp%water%state%BTRAN           ,& ! in,    soil water transpiration factor (0 to 1)
+              SoilMoisture      => noahmp%water%state%SoilMoisture   ,& ! in,    soil moisture (ice + liq.) [m3/m3]
+              SoilTranspFacAcc            => noahmp%water%state%SoilTranspFacAcc           ,& ! in,    accumulated soil water transpiration factor (0 to 1)
               LeafMass           => noahmp%biochem%state%LeafMass        ,& ! inout, leaf mass [g/m2]
               RootMass           => noahmp%biochem%state%RootMass        ,& ! inout, mass of fine roots [g/m2]
               StemMass           => noahmp%biochem%state%StemMass        ,& ! inout, stem mass [g/m2]
@@ -60,8 +60,8 @@ contains
               CarbonMassSoilTot            => noahmp%biochem%state%CarbonMassSoilTot         ,& ! out,   total soil carbon [g/m2 C]
               CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
               GrainMass            => noahmp%biochem%state%GrainMass         ,& ! out,   mass of grain [g/m2] 
-              WROOT            => noahmp%water%state%WROOT           ,& ! out,   root zone soil water [-]
-              WSTRES           => noahmp%water%state%WSTRES           & ! out,   water stress coeficient [-]  (1. for wilting)
+              SoilWaterRootZone            => noahmp%water%state%SoilWaterRootZone           ,& ! out,   root zone soil water [-]
+              SoilWaterStress           => noahmp%water%state%SoilWaterStress           & ! out,   water stress coeficient [-]  (1. for wilting)
              ) 
 !------------------------------------------------------------------------
 
@@ -95,10 +95,10 @@ contains
     ! start biogeochemistry process
 
     ! water stress
-    WSTRES = 1.0 - BTRAN
-    WROOT  = 0.0
+    SoilWaterStress = 1.0 - SoilTranspFacAcc
+    SoilWaterRootZone  = 0.0
     do J = 1, NROOT
-       WROOT = WROOT + SMC(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
+       SoilWaterRootZone = SoilWaterRootZone + SoilMoisture(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
     enddo
 
     ! start crop carbon process

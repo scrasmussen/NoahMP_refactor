@@ -26,11 +26,11 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,     soil bottom drainage (m/s)
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
-              SMC             => noahmp%water%state%SMC              ,& ! inout,  total soil water content [m3/m3]
-              WA              => noahmp%water%state%WA               ,& ! inout,  water storage in aquifer [mm]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil water content [m3/m3]
+              WaterStorageAquifer => noahmp%water%state%WaterStorageAquifer   ,& ! inout,  water storage in aquifer [mm]
               RUNSUB          => noahmp%water%flux%RUNSUB             & ! out,   subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
@@ -39,12 +39,12 @@ contains
     call ShallowWaterTableMMF(noahmp)
 
     ! update moisture
-    SH2O(NumSoilLayer) = SMC(NumSoilLayer) - SICE(NumSoilLayer)
+    SoilLiqWater(NumSoilLayer) = SoilMoisture(NumSoilLayer) - SoilIce(NumSoilLayer)
 
     ! compute subsurface runoff
     ! it really comes from subroutine watertable, which is not called with the same frequency as the soil routines here
     RUNSUB = RUNSUB + QDRAIN 
-    WA = 0.0
+    WaterStorageAquifer = 0.0
 
     end associate
 

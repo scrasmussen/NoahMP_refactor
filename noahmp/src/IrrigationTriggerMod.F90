@@ -52,17 +52,17 @@ contains
               FILOSS          => noahmp%water%param%FILOSS           ,& ! in,     factor of flood irrigation loss
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
               LAI             => noahmp%energy%state%LAI             ,& ! in,     leaf area index (m2/m2)
-              IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,     irrigated area fraction
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
-              MIFAC           => noahmp%water%state%MIFAC            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
-              FIFAC           => noahmp%water%state%FIFAC            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
-              SIFAC           => noahmp%water%state%SIFAC            ,& ! in,     sprinkler irrigation fraction (0 to 1)
-              IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  irrigation water amount [m] to be applied, Micro
-              IRAMTFI         => noahmp%water%state%IRAMTFI          ,& ! inout,  irrigation water amount [m] to be applied, Flood
-              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
-              IRCNTSI         => noahmp%water%state%IRCNTSI          ,& ! inout,  irrigation event number, Sprinkler
-              IRCNTMI         => noahmp%water%state%IRCNTMI          ,& ! inout,  irrigation event number, Micro
-              IRCNTFI         => noahmp%water%state%IRCNTFI           & ! inout,  irrigation event number, Flood
+              IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,     irrigated area fraction of a grid
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
+              IrrigationFracMicro           => noahmp%water%state%IrrigationFracMicro            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
+              IrrigationFracFlood           => noahmp%water%state%IrrigationFracFlood            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
+              IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! in,     sprinkler irrigation fraction (0 to 1)
+              IrrigationAmtMicro         => noahmp%water%state%IrrigationAmtMicro          ,& ! inout,  irrigation water amount [m] to be applied, Micro
+              IrrigationAmtFlood         => noahmp%water%state%IrrigationAmtFlood          ,& ! inout,  irrigation water amount [m] to be applied, Flood
+              IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
+              IrrigationCntSprinkler         => noahmp%water%state%IrrigationCntSprinkler          ,& ! inout,  irrigation event number, Sprinkler
+              IrrigationCntMicro         => noahmp%water%state%IrrigationCntMicro          ,& ! inout,  irrigation event number, Micro
+              IrrigationCntFlood         => noahmp%water%state%IrrigationCntFlood           & ! inout,  irrigation event number, Flood
              )
 ! ----------------------------------------------------------------------
 
@@ -81,10 +81,10 @@ contains
        ! estimate available water and field capacity for the root zone
        SMCAVL = 0.0
        SMCLIM = 0.0
-       SMCAVL = ( SH2O(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)    ! current soil water (m) 
+       SMCAVL = ( SoilLiqWater(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)    ! current soil water (m) 
        SMCLIM = ( SMCREF(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)  ! available water (m)
        do K = 2, NROOT
-         SMCAVL = SMCAVL + ( SH2O(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
+         SMCAVL = SMCAVL + ( SoilLiqWater(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
          SMCLIM = SMCLIM + ( SMCREF(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
        enddo
 
@@ -92,45 +92,45 @@ contains
       if ( (SMCAVL/SMCLIM) <= IRR_MAD ) then
          ! amount of water need to be added to bring soil moisture back to 
          ! field capacity, i.e., irrigation water amount (m)
-         IRRWATAMT = ( SMCLIM - SMCAVL ) * IRRFRA * FVEG
+         IRRWATAMT = ( SMCLIM - SMCAVL ) * IrrigationFracGrid * FVEG
 
-         ! sprinkler irrigation amount (m) based on 2D SIFAC
-         if ( (IRAMTSI == 0.0) .and. (SIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
-            IRAMTSI = SIFAC * IRRWATAMT
-            IRCNTSI = IRCNTSI + 1
+         ! sprinkler irrigation amount (m) based on 2D IrrigationFracSprinkler
+         if ( (IrrigationAmtSprinkler == 0.0) .and. (IrrigationFracSprinkler > 0.0) .and. (OptIrrigationMethod == 0) ) then
+            IrrigationAmtSprinkler = IrrigationFracSprinkler * IRRWATAMT
+            IrrigationCntSprinkler = IrrigationCntSprinkler + 1
          ! sprinkler irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTSI == 0.0) .and. (OptIrrigationMethod == 1) ) then
-            IRAMTSI = IRRWATAMT
-            IRCNTSI = IRCNTSI + 1
+         elseif ( (IrrigationAmtSprinkler == 0.0) .and. (OptIrrigationMethod == 1) ) then
+            IrrigationAmtSprinkler = IRRWATAMT
+            IrrigationCntSprinkler = IrrigationCntSprinkler + 1
          endif
 
-         ! micro irrigation amount (m) based on 2D MIFAC
-         if ( (IRAMTMI == 0.0) .and. (MIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
-            IRAMTMI = MIFAC * IRRWATAMT
-            IRCNTMI = IRCNTMI + 1
+         ! micro irrigation amount (m) based on 2D IrrigationFracMicro
+         if ( (IrrigationAmtMicro == 0.0) .and. (IrrigationFracMicro > 0.0) .and. (OptIrrigationMethod == 0) ) then
+            IrrigationAmtMicro = IrrigationFracMicro * IRRWATAMT
+            IrrigationCntMicro = IrrigationCntMicro + 1
          ! micro irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTMI == 0.0) .and. (OptIrrigationMethod == 2) ) then
-            IRAMTMI = IRRWATAMT
-            IRCNTMI = IRCNTMI + 1
+         elseif ( (IrrigationAmtMicro == 0.0) .and. (OptIrrigationMethod == 2) ) then
+            IrrigationAmtMicro = IRRWATAMT
+            IrrigationCntMicro = IrrigationCntMicro + 1
          endif
 
          ! flood irrigation amount (m): Assumed to saturate top two layers and 
          ! third layer to FC. As water moves from one end of the field to
          ! another, surface layers will be saturated. 
-         ! flood irrigation amount (m) based on 2D FIFAC
-         if ( (IRAMTFI == 0.0) .and. (FIFAC > 0.0) .and. (OptIrrigationMethod == 0) ) then
-            IRAMTFI = FIFAC * IRRWATAMT * (FILOSS + 1)
-            IRCNTFI = IRCNTFI + 1
+         ! flood irrigation amount (m) based on 2D IrrigationFracFlood
+         if ( (IrrigationAmtFlood == 0.0) .and. (IrrigationFracFlood > 0.0) .and. (OptIrrigationMethod == 0) ) then
+            IrrigationAmtFlood = IrrigationFracFlood * IRRWATAMT * (FILOSS + 1)
+            IrrigationCntFlood = IrrigationCntFlood + 1
          !flood irrigation amount (m) based on namelist choice
-         elseif ( (IRAMTFI == 0.0) .and. (OptIrrigationMethod == 3) ) then
-            IRAMTFI = IRRWATAMT * (FILOSS + 1)
-            IRCNTFI = IRCNTFI + 1
+         elseif ( (IrrigationAmtFlood == 0.0) .and. (OptIrrigationMethod == 3) ) then
+            IrrigationAmtFlood = IRRWATAMT * (FILOSS + 1)
+            IrrigationCntFlood = IrrigationCntFlood + 1
          endif
       else
          IRRWATAMT = 0.0
-         IRAMTSI   = 0.0
-         IRAMTMI   = 0.0
-         IRAMTFI   = 0.0
+         IrrigationAmtSprinkler   = 0.0
+         IrrigationAmtMicro   = 0.0
+         IrrigationAmtFlood   = 0.0
       endif
 
     endif

@@ -34,10 +34,10 @@ contains
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              MIFAC           => noahmp%water%state%MIFAC            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
+              IrrigationFracMicro           => noahmp%water%state%IrrigationFracMicro            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
               MICIR_RATE      => noahmp%water%param%MICIR_RATE       ,& ! in,     micro irrigation rate (mm/hr)
-              SH2O            => noahmp%water%state%SH2O             ,& ! inout,  soil water content [m3/m3]
-              IRAMTMI         => noahmp%water%state%IRAMTMI          ,& ! inout,  micro irrigation water amount [m]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
+              IrrigationAmtMicro         => noahmp%water%state%IrrigationAmtMicro          ,& ! inout,  micro irrigation water amount [m]
               IRMIRATE        => noahmp%water%flux%IRMIRATE           & ! inout,  micro irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
@@ -51,20 +51,20 @@ contains
 
     ! irrigation rate of micro irrigation
     TEMP_RATE = MICIR_RATE * (1.0/1000.0) * MainTimeStep/ 3600.0   ! NRCS rate/time step - calibratable
-    IRMIRATE  = min( 0.5*FSUR*MainTimeStep, IRAMTMI, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
+    IRMIRATE  = min( 0.5*FSUR*MainTimeStep, IrrigationAmtMicro, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
                                                          ! and to the NRCS recommended rate, (m)
-    IRMIRATE  = IRMIRATE * MIFAC
+    IRMIRATE  = IRMIRATE * IrrigationFracMicro
 
-    if ( IRMIRATE >= IRAMTMI ) then
-       IRMIRATE  = IRAMTMI
-       IRAMTMI   = 0.0
+    if ( IRMIRATE >= IrrigationAmtMicro ) then
+       IRMIRATE  = IrrigationAmtMicro
+       IrrigationAmtMicro   = 0.0
     else
-       IRAMTMI = IRAMTMI - IRMIRATE
+       IrrigationAmtMicro = IrrigationAmtMicro - IRMIRATE
     endif
 
     ! update soil moisture
     ! we implement drip in first layer of the Noah-MP. Change layer 1 moisture wrt to MI rate
-    SH2O(1) = SH2O(1) + ( IRMIRATE / (-1.0*DepthSoilLayer(1)) )
+    SoilLiqWater(1) = SoilLiqWater(1) + ( IRMIRATE / (-1.0*DepthSoilLayer(1)) )
 
     end associate
 

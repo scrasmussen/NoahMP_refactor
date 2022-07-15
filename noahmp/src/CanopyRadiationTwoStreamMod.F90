@@ -61,7 +61,7 @@ contains
     associate(                                                        &
               OptCanopyRadiationTransfer => noahmp%config%nmlist%OptCanopyRadiationTransfer,& ! in,    options for canopy radiation transfer
               CosSolarZenithAngle        => noahmp%config%domain%CosSolarZenithAngle ,& ! in,    cosine solar zenith angle
-              FWET            => noahmp%water%state%FWET             ,& ! in,    wetted or snowed fraction of the canopy
+              CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! in,    wetted or snowed fraction of the canopy
               RC              => noahmp%energy%param%RC              ,& ! in,    tree crown radius (m)
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
               HVB             => noahmp%energy%param%HVB             ,& ! in,    bottom of canopy (m)
@@ -154,9 +154,9 @@ contains
        TMP1 = BETADL
        TMP2 = BETAIL
     else
-       TMP0 =   (1.0 - FWET) * OMEGAL          + FWET * OMEGAS(IB)
-       TMP1 = ( (1.0 - FWET) * OMEGAL * BETADL + FWET * OMEGAS(IB) * BETADS ) / TMP0 ! direct
-       TMP2 = ( (1.0 - FWET) * OMEGAL * BETAIL + FWET * OMEGAS(IB) * BETAIS ) / TMP0 ! diffuse
+       TMP0 =   (1.0 - CanopyWetFrac) * OMEGAL          + CanopyWetFrac * OMEGAS(IB)
+       TMP1 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETADL + CanopyWetFrac * OMEGAS(IB) * BETADS ) / TMP0 ! direct
+       TMP2 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETAIL + CanopyWetFrac * OMEGAS(IB) * BETAIS ) / TMP0 ! diffuse
     endif
     OMEGA = TMP0
     BETAD = TMP1

@@ -1,11 +1,11 @@
 module WaterVarInitMod
 
 !!! Initialize column (1-D) Noah-MP water variables
-!!! Water variables should be first defined in WaterType.f90
+!!! Water variables should be first defined in WaterVarType.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
   use Machine
@@ -24,106 +24,121 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    associate(                                                         &
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer     &
+    associate(                                                          &
+              NumSnowLayerMax  => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer     => noahmp%config%domain%NumSoilLayer     &
              )
 
     ! water state variable
-    noahmp%water%state%IRCNTSI        = undefined_int
-    noahmp%water%state%IRCNTMI        = undefined_int
-    noahmp%water%state%IRCNTFI        = undefined_int
-    noahmp%water%state%BDFALL         = undefined_real
-    noahmp%water%state%CANLIQ         = undefined_real
-    noahmp%water%state%CANICE         = undefined_real
-    noahmp%water%state%CMC            = undefined_real
-    noahmp%water%state%FWET           = undefined_real
-    noahmp%water%state%MAXSNO         = undefined_real
-    noahmp%water%state%MAXLIQ         = undefined_real
-    noahmp%water%state%SNOWH          = undefined_real
-    noahmp%water%state%SNEQV          = undefined_real
-    noahmp%water%state%SNEQVO         = undefined_real
-    noahmp%water%state%PONDING        = undefined_real
-    noahmp%water%state%PONDING1       = undefined_real
-    noahmp%water%state%PONDING2       = undefined_real
-    noahmp%water%state%FIFAC          = undefined_real
-    noahmp%water%state%IRAMTFI        = undefined_real
-    noahmp%water%state%MIFAC          = undefined_real
-    noahmp%water%state%IRAMTMI        = undefined_real
-    noahmp%water%state%SIFAC          = undefined_real
-    noahmp%water%state%IRAMTSI        = undefined_real
-    noahmp%water%state%ZWT            = undefined_real
-    noahmp%water%state%SICEMAX        = undefined_real
-    noahmp%water%state%SH2OMIN        = undefined_real
-    noahmp%water%state%FSAT           = undefined_real
-    noahmp%water%state%FCRMAX         = undefined_real
-    noahmp%water%state%SMCWTD         = undefined_real
-    noahmp%water%state%DEEPRECH       = undefined_real
-    noahmp%water%state%RECH           = undefined_real
-    noahmp%water%state%WPLUS          = undefined_real
-    noahmp%water%state%WATBLED        = undefined_real
-    noahmp%water%state%TDFRACMP       = undefined_real
-    noahmp%water%state%WA             = undefined_real
-    noahmp%water%state%WT             = undefined_real
-    noahmp%water%state%WSLAKE         = undefined_real
-    noahmp%water%state%sfcheadrt      = undefined_real
-    noahmp%water%state%IRRFRA         = undefined_real
-    noahmp%water%state%SIFRA          = undefined_real
-    noahmp%water%state%MIFRA          = undefined_real
-    noahmp%water%state%FIFRA          = undefined_real
-    noahmp%water%state%FP             = undefined_real
-    noahmp%water%state%FSNO           = undefined_real
-    noahmp%water%state%BTRAN          = undefined_real
-    noahmp%water%state%FPICE          = undefined_real
-    noahmp%water%state%WROOT          = undefined_real
-    noahmp%water%state%WSTRES         = undefined_real
-    noahmp%water%state%BEG_WB         = undefined_real
-    noahmp%water%state%ERRWAT         = undefined_real
-    noahmp%water%state%END_WB         = undefined_real
+    noahmp%water%state%IrrigationCntSprinkler      = undefined_int
+    noahmp%water%state%IrrigationCntMicro          = undefined_int
+    noahmp%water%state%IrrigationCntFlood          = undefined_int
+    noahmp%water%state%IrrigationFracFlood         = undefined_real
+    noahmp%water%state%IrrigationAmtFlood          = undefined_real
+    noahmp%water%state%IrrigationFracMicro         = undefined_real
+    noahmp%water%state%IrrigationAmtMicro          = undefined_real
+    noahmp%water%state%IrrigationFracSprinkler     = undefined_real
+    noahmp%water%state%IrrigationAmtSprinkler      = undefined_real
+    noahmp%water%state%IrrigationFracGrid          = undefined_real
+    noahmp%water%state%CanopyLiqWater              = undefined_real
+    noahmp%water%state%CanopyIce                   = undefined_real
+    noahmp%water%state%CanopyTotalWater            = undefined_real
+    noahmp%water%state%CanopyWetFrac               = undefined_real
+    noahmp%water%state%CanopyIceMax                = undefined_real
+    noahmp%water%state%CanopyLiqWaterMax           = undefined_real
+    noahmp%water%state%SnowfallDensity             = undefined_real
+    noahmp%water%state%SnowDepth                   = undefined_real
+    noahmp%water%state%SnowWaterEquiv              = undefined_real
+    noahmp%water%state%SnowWaterEquivPrev          = undefined_real
+    noahmp%water%state%SnowCoverFrac               = undefined_real
+    noahmp%water%state%PondSfcThinSnwMelt          = undefined_real
+    noahmp%water%state%PondSfcThinSnwComb          = undefined_real
+    noahmp%water%state%PondSfcThinSnwTrans         = undefined_real
+    noahmp%water%state%SoilIceMax                  = undefined_real
+    noahmp%water%state%SoilLiqWaterMin             = undefined_real
+    noahmp%water%state%SoilSaturateFrac            = undefined_real
+    noahmp%water%state%SoilImpervFracMax           = undefined_real
+    noahmp%water%state%SoilMoistureToWT            = undefined_real
+    noahmp%water%state%SoilTranspFacAcc            = undefined_real
+    noahmp%water%state%SoilWaterRootZone           = undefined_real
+    noahmp%water%state%SoilWaterStress             = undefined_real
+    noahmp%water%state%SoilSaturationExcess        = undefined_real
+    noahmp%water%state%RechargeGwDeepWT            = undefined_real
+    noahmp%water%state%RechargeGwShallowWT         = undefined_real
+    noahmp%water%state%WaterTableHydro             = undefined_real
+    noahmp%water%state%WaterTableDepth             = undefined_real
+    noahmp%water%state%WaterStorageAquifer         = undefined_real
+    noahmp%water%state%WaterStorageSoilAqf         = undefined_real
+    noahmp%water%state%WaterStorageLake            = undefined_real
+    noahmp%water%state%WaterStorageTotBeg          = undefined_real
+    noahmp%water%state%WaterBalanceError           = undefined_real
+    noahmp%water%state%WaterStorageTotEnd          = undefined_real
+    noahmp%water%state%WaterHeadSfc                = undefined_real
+    noahmp%water%state%PrecipAreaFrac              = undefined_real
+    noahmp%water%state%TileDrainFrac               = undefined_real
+    noahmp%water%state%FrozenPrecipFrac            = undefined_real
 
-    if( .not. allocated( noahmp%water%state%IMELT        ) ) allocate( noahmp%water%state%IMELT(-NumSnowLayerMax+1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%SUPERCOOL    ) ) allocate( noahmp%water%state%SUPERCOOL(-NumSnowLayerMax+1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%SNICE        ) ) allocate( noahmp%water%state%SNICE(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%SNLIQ        ) ) allocate( noahmp%water%state%SNLIQ(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%SNICEV       ) ) allocate( noahmp%water%state%SNICEV(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%SNLIQV       ) ) allocate( noahmp%water%state%SNLIQV(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%FICEOLD_SNOW ) ) allocate( noahmp%water%state%FICEOLD_SNOW(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%FICE_SNOW    ) ) allocate( noahmp%water%state%FICE_SNOW(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%EPORE_SNOW   ) ) allocate( noahmp%water%state%EPORE_SNOW(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%EPORE_SNOW2  ) ) allocate( noahmp%water%state%EPORE_SNOW2(-NumSnowLayerMax+1:0)     )
-    if( .not. allocated( noahmp%water%state%SH2O         ) ) allocate( noahmp%water%state%SH2O         (1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%SICE         ) ) allocate( noahmp%water%state%SICE         (1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%SMC          ) ) allocate( noahmp%water%state%SMC          (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%FCR          ) ) allocate( noahmp%water%state%FCR          (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%WCND         ) ) allocate( noahmp%water%state%WCND         (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%WDF          ) ) allocate( noahmp%water%state%WDF          (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%EPORE_SOIL   ) ) allocate( noahmp%water%state%EPORE_SOIL   (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%FICE_SOIL    ) ) allocate( noahmp%water%state%FICE_SOIL    (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%SMCEQ        ) ) allocate( noahmp%water%state%SMCEQ        (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%BTRANI       ) ) allocate( noahmp%water%state%BTRANI       (       1:NumSoilLayer) )
-    if( .not. allocated( noahmp%water%state%PSI          ) ) allocate( noahmp%water%state%PSI          (       1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%IndexPhaseChange) )     &
+       allocate( noahmp%water%state%IndexPhaseChange(-NumSnowLayerMax+1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilSupercoolWater) )   &
+       allocate( noahmp%water%state%SoilSupercoolWater(-NumSnowLayerMax+1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SnowIce) )              &
+       allocate( noahmp%water%state%SnowIce(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowLiqWater) )         &
+       allocate( noahmp%water%state%SnowLiqWater(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowIceVol) )           &
+       allocate( noahmp%water%state%SnowIceVol(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowLiqWaterVol) )      &
+       allocate( noahmp%water%state%SnowLiqWaterVol(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowIceFracPrev) )      &
+       allocate( noahmp%water%state%SnowIceFracPrev(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowIceFrac) )          &
+       allocate( noahmp%water%state%SnowIceFrac(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SnowEffPorosity) )      &
+       allocate( noahmp%water%state%SnowEffPorosity(-NumSnowLayerMax+1:0) )
+    if ( .not. allocated(noahmp%water%state%SoilLiqWater) )         &
+       allocate( noahmp%water%state%SoilLiqWater(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilIce) )              &
+       allocate( noahmp%water%state%SoilIce(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilMoisture) )         &
+       allocate( noahmp%water%state%SoilMoisture(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilImpervFrac) )       &
+       allocate( noahmp%water%state%SoilImpervFrac(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilWatConductivity) )  &
+       allocate( noahmp%water%state%SoilWatConductivity(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilWatDiffusivity) )   &
+       allocate( noahmp%water%state%SoilWatDiffusivity(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilEffPorosity) )      &
+       allocate( noahmp%water%state%SoilEffPorosity(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilIceFrac) )          &
+       allocate( noahmp%water%state%SoilIceFrac(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilMoistureEqui) )     &
+       allocate( noahmp%water%state%SoilMoistureEqui(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilTranspFac) )        &
+       allocate( noahmp%water%state%SoilTranspFac(1:NumSoilLayer) )
+    if ( .not. allocated(noahmp%water%state%SoilMatPotential) )     &
+       allocate( noahmp%water%state%SoilMatPotential(1:NumSoilLayer) )
 
-    noahmp%water%state%IMELT(:)       = undefined_int
-    noahmp%water%state%SUPERCOOL(:)   = undefined_real
-    noahmp%water%state%SNICE(:)       = undefined_real
-    noahmp%water%state%SNLIQ(:)       = undefined_real
-    noahmp%water%state%SNICEV(:)      = undefined_real
-    noahmp%water%state%SNLIQV(:)      = undefined_real
-    noahmp%water%state%FICEOLD_SNOW(:)= undefined_real
-    noahmp%water%state%FICE_SNOW(:)   = undefined_real
-    noahmp%water%state%FICE_SOIL(:)   = undefined_real
-    noahmp%water%state%EPORE_SNOW(:)  = undefined_real
-    noahmp%water%state%EPORE_SNOW2(:) = undefined_real
-    noahmp%water%state%SH2O(:)        = undefined_real
-    noahmp%water%state%SICE(:)        = undefined_real
-    noahmp%water%state%SMC(:)         = undefined_real
-    noahmp%water%state%FCR(:)         = undefined_real
-    noahmp%water%state%WCND(:)        = undefined_real
-    noahmp%water%state%WDF(:)         = undefined_real
-    noahmp%water%state%EPORE_SOIL(:)  = undefined_real
-    noahmp%water%state%SMCEQ(:)       = undefined_real
-    noahmp%water%state%BTRANI(:)      = undefined_real
-    noahmp%water%state%PSI(:)         = undefined_real
+    noahmp%water%state%IndexPhaseChange   (:) = undefined_int
+    noahmp%water%state%SoilSupercoolWater (:) = undefined_real
+    noahmp%water%state%SnowIce            (:) = undefined_real
+    noahmp%water%state%SnowLiqWater       (:) = undefined_real
+    noahmp%water%state%SnowIceVol         (:) = undefined_real
+    noahmp%water%state%SnowLiqWaterVol    (:) = undefined_real
+    noahmp%water%state%SnowIceFracPrev    (:) = undefined_real
+    noahmp%water%state%SnowIceFrac        (:) = undefined_real
+    noahmp%water%state%SoilIceFrac        (:) = undefined_real
+    noahmp%water%state%SnowEffPorosity    (:) = undefined_real
+    noahmp%water%state%SoilLiqWater       (:) = undefined_real
+    noahmp%water%state%SoilIce            (:) = undefined_real
+    noahmp%water%state%SoilMoisture       (:) = undefined_real
+    noahmp%water%state%SoilImpervFrac     (:) = undefined_real
+    noahmp%water%state%SoilWatConductivity(:) = undefined_real
+    noahmp%water%state%SoilWatDiffusivity (:) = undefined_real
+    noahmp%water%state%SoilEffPorosity    (:) = undefined_real
+    noahmp%water%state%SoilMoistureEqui   (:) = undefined_real
+    noahmp%water%state%SoilTranspFac      (:) = undefined_real
+    noahmp%water%state%SoilMatPotential   (:) = undefined_real
 
     ! water flux variable
     noahmp%water%flux%PRCP            = undefined_real
@@ -146,23 +161,17 @@ contains
     noahmp%water%flux%QRAIN           = undefined_real
     noahmp%water%flux%QSNBOT          = undefined_real
     noahmp%water%flux%SNOFLOW         = undefined_real
-    noahmp%water%flux%IRFIRATE        = 0.0
-    noahmp%water%flux%IRMIRATE        = 0.0
-    noahmp%water%flux%IRSIRATE        = 0.0
-    noahmp%water%flux%IREVPLOS        = 0.0
     noahmp%water%flux%QINSUR          = undefined_real
     noahmp%water%flux%RUNSRF          = undefined_real
     noahmp%water%flux%RUNSUB          = undefined_real
     noahmp%water%flux%PDDUM           = undefined_real
     noahmp%water%flux%QSEVA           = undefined_real
     noahmp%water%flux%QDRAIN          = undefined_real
-    noahmp%water%flux%QTLDRN          = undefined_real
     noahmp%water%flux%QIN             = undefined_real
     noahmp%water%flux%QDIS            = undefined_real
     noahmp%water%flux%QVAP            = undefined_real
     noahmp%water%flux%QDEW            = undefined_real
     noahmp%water%flux%QSDEW           = undefined_real
-    noahmp%water%flux%EIRR            = 0.0
     noahmp%water%flux%QINTR           = undefined_real
     noahmp%water%flux%QDRIPR          = undefined_real
     noahmp%water%flux%QTHROR          = undefined_real
@@ -172,6 +181,12 @@ contains
     noahmp%water%flux%EDIR            = undefined_real
     noahmp%water%flux%QMELT           = undefined_real
     noahmp%water%flux%QFX             = undefined_real
+    noahmp%water%flux%IRFIRATE        = 0.0
+    noahmp%water%flux%IRMIRATE        = 0.0
+    noahmp%water%flux%IRSIRATE        = 0.0
+    noahmp%water%flux%IREVPLOS        = 0.0
+    noahmp%water%flux%EIRR            = 0.0
+    noahmp%water%flux%QTLDRN          = 0.0
 
     if( .not. allocated( noahmp%water%flux%DDZ1   ) ) allocate( noahmp%water%flux%DDZ1   (-NumSnowLayerMax+1:0) )
     if( .not. allocated( noahmp%water%flux%DDZ2   ) ) allocate( noahmp%water%flux%DDZ2   (-NumSnowLayerMax+1:0) )
@@ -263,15 +278,13 @@ contains
     noahmp%water%param%BEXP  (:)        = undefined_real
     noahmp%water%param%PSISAT(:)        = undefined_real
     noahmp%water%param%QUARTZ(:)        = undefined_real
-    ! water diagnostic variable
-
 
     end associate
 
   end subroutine WaterVarInitDefault
 
-!=== initialize with input data or table values
 
+!=== initialize with input data or table values
   subroutine WaterVarInitTransfer(noahmp, NoahmpIO)
 
     implicit none
@@ -280,63 +293,58 @@ contains
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
 
     ! local variables 
-    integer                            :: ISOIL
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SAND
-    real(kind=kind_noahmp), allocatable, dimension(:) :: CLAY
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ORGM
+    integer                            :: IndexSoilLayer
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilSand
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilClay
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilOrg
 
-    associate(                                                         &
-              I               => noahmp%config%domain%GridIndexI      ,&
-              J               => noahmp%config%domain%GridIndexJ      ,&
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              VegType         => noahmp%config%domain%VegType         ,&
-              SoilType     => noahmp%config%domain%SoilType      ,&
-              FlagUrban  => noahmp%config%domain%FlagUrban   ,&
-              RunoffSlopeType => noahmp%config%domain%RunoffSlopeType ,&
-              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg  &
+    associate(                                                           &
+              I                => noahmp%config%domain%GridIndexI       ,&
+              J                => noahmp%config%domain%GridIndexJ       ,&
+              NumSnowLayerMax  => noahmp%config%domain%NumSnowLayerMax  ,&
+              NumSoilLayer     => noahmp%config%domain%NumSoilLayer     ,&
+              VegType          => noahmp%config%domain%VegType          ,&
+              SoilType         => noahmp%config%domain%SoilType         ,&
+              FlagUrban        => noahmp%config%domain%FlagUrban        ,&
+              RunoffSlopeType  => noahmp%config%domain%RunoffSlopeType  ,&
+              NumSnowLayerNeg  => noahmp%config%domain%NumSnowLayerNeg   &
              )
 
     ! water state variable
-    noahmp%water%state%CANLIQ                   = NoahmpIO%CANLIQXY(I,J)
-    noahmp%water%state%CANICE                   = NoahmpIO%CANICEXY(I,J)
-    noahmp%water%state%FWET                     = NoahmpIO%FWETXY(I,J)
-    noahmp%water%state%SNEQV                    = NoahmpIO%SNOW(I,J)
-    noahmp%water%state%SNEQVO                   = NoahmpIO%SNEQVOXY(I,J) 
-    noahmp%water%state%SNOWH                    = NoahmpIO%SNOWH(I,J)
-    noahmp%water%state%SNICE(-NumSnowLayerMax+1:0) = NoahmpIO%SNICEXY(I,-NumSnowLayerMax+1:0,J)
-    noahmp%water%state%SNLIQ(-NumSnowLayerMax+1:0) = NoahmpIO%SNLIQXY(I,-NumSnowLayerMax+1:0,J)
-    noahmp%water%state%SH2O (1:NumSoilLayer)           = NoahmpIO%SH2O(I,1:NumSoilLayer,J)
-    noahmp%water%state%SMC  (1:NumSoilLayer)           = NoahmpIO%SMOIS(I,1:NumSoilLayer,J) 
-    noahmp%water%state%SMCEQ(1:NumSoilLayer)           = NoahmpIO%SMOISEQ(I,1:NumSoilLayer,J)
-    noahmp%water%state%FIFRA                    = NoahmpIO%FIFRACT(I,J)
-    noahmp%water%state%IRAMTFI                  = NoahmpIO%IRWATFI(I,J)
-    noahmp%water%state%MIFRA                    = NoahmpIO%MIFRACT(I,J)
-    noahmp%water%state%IRAMTMI                  = NoahmpIO%IRWATMI(I,J) 
-    noahmp%water%state%SIFRA                    = NoahmpIO%SIFRACT(I,J)
-    noahmp%water%state%IRAMTSI                  = NoahmpIO%IRWATSI(I,J)  
-    noahmp%water%state%ZWT                      = NoahmpIO%ZWTXY(I,J) 
-    noahmp%water%state%SMCWTD                   = NoahmpIO%SMCWTDXY(I,J)
-    noahmp%water%state%DEEPRECH                 = 0.0
-    noahmp%water%state%RECH                     = 0.0
+    noahmp%water%state%CanopyLiqWater                     = NoahmpIO%CANLIQXY   (I,J)
+    noahmp%water%state%CanopyIce                          = NoahmpIO%CANICEXY   (I,J)
+    noahmp%water%state%CanopyWetFrac                      = NoahmpIO%FWETXY     (I,J)
+    noahmp%water%state%SnowWaterEquiv                     = NoahmpIO%SNOW       (I,J)
+    noahmp%water%state%SnowWaterEquivPrev                 = NoahmpIO%SNEQVOXY   (I,J) 
+    noahmp%water%state%SnowDepth                          = NoahmpIO%SNOWH      (I,J)
+    noahmp%water%state%IrrigationFracFlood                = NoahmpIO%FIFRACT    (I,J)
+    noahmp%water%state%IrrigationAmtFlood                 = NoahmpIO%IRWATFI    (I,J)
+    noahmp%water%state%IrrigationFracMicro                = NoahmpIO%MIFRACT    (I,J)
+    noahmp%water%state%IrrigationAmtMicro                 = NoahmpIO%IRWATMI    (I,J) 
+    noahmp%water%state%IrrigationFracSprinkler            = NoahmpIO%SIFRACT    (I,J)
+    noahmp%water%state%IrrigationAmtSprinkler             = NoahmpIO%IRWATSI    (I,J)  
+    noahmp%water%state%WaterTableDepth                    = NoahmpIO%ZWTXY      (I,J) 
+    noahmp%water%state%SoilMoistureToWT                   = NoahmpIO%SMCWTDXY   (I,J)
+    noahmp%water%state%TileDrainFrac                      = NoahmpIO%TD_FRACTION(I,J)
+    noahmp%water%state%WaterStorageAquifer                = NoahmpIO%WAXY       (I,J)
+    noahmp%water%state%WaterStorageSoilAqf                = NoahmpIO%WTXY       (I,J)
+    noahmp%water%state%WaterStorageLake                   = NoahmpIO%WSLAKEXY   (I,J)
+    noahmp%water%state%IrrigationFracGrid                 = NoahmpIO%IRFRACT    (I,J)
+    noahmp%water%state%IrrigationCntSprinkler             = NoahmpIO%IRNUMSI    (I,J)     
+    noahmp%water%state%IrrigationCntMicro                 = NoahmpIO%IRNUMMI    (I,J)
+    noahmp%water%state%IrrigationCntFlood                 = NoahmpIO%IRNUMFI    (I,J)
+    noahmp%water%state%SnowIce     (-NumSnowLayerMax+1:0) = NoahmpIO%SNICEXY    (I,-NumSnowLayerMax+1:0,J)
+    noahmp%water%state%SnowLiqWater(-NumSnowLayerMax+1:0) = NoahmpIO%SNLIQXY    (I,-NumSnowLayerMax+1:0,J)
+    noahmp%water%state%SoilLiqWater      (1:NumSoilLayer) = NoahmpIO%SH2O       (I,1:NumSoilLayer,J)
+    noahmp%water%state%SoilMoisture      (1:NumSoilLayer) = NoahmpIO%SMOIS      (I,1:NumSoilLayer,J)    
+    noahmp%water%state%SoilMoistureEqui  (1:NumSoilLayer) = NoahmpIO%SMOISEQ    (I,1:NumSoilLayer,J)
+    noahmp%water%state%RechargeGwDeepWT                   = 0.0
+    noahmp%water%state%RechargeGwShallowWT                = 0.0
 #ifdef WRF_HYDRO
-    noahmp%water%state%WATBLED                  = NoahmpIO%ZWATBLE2D (I,J)
-    noahmp%water%state%sfcheadrt                = NoahmpIO%sfcheadrt (I,J)
+    noahmp%water%state%WaterTableHydro                    = NoahmpIO%ZWATBLE2D  (I,J)
+    noahmp%water%state%WaterHeadSfc                       = NoahmpIO%sfcheadrt  (I,J)
 #endif
-    noahmp%water%state%TDFRACMP                 = NoahmpIO%TD_FRACTION (I,J)
-    noahmp%water%state%WA                       = NoahmpIO%WAXY    (I,J)
-    noahmp%water%state%WT                       = NoahmpIO%WTXY    (I,J)
-    noahmp%water%state%WSLAKE                   = NoahmpIO%WSLAKEXY(I,J) 
-    noahmp%water%state%IRRFRA                   = NoahmpIO%IRFRACT (I,J)
-    noahmp%water%state%IRCNTSI                  = NoahmpIO%IRNUMSI (I,J)  
-    noahmp%water%state%IRCNTMI                  = NoahmpIO%IRNUMMI (I,J)
-    noahmp%water%state%IRCNTFI                  = NoahmpIO%IRNUMFI (I,J)
 
-    ! water state variable
-    noahmp%water%flux%QSNOW                     = NoahmpIO%QSNOWXY (I,J) 
-    noahmp%water%flux%QRAIN                     = NoahmpIO%QRAINXY (I,J)
-    noahmp%water%flux%QTLDRN                    = 0.0                     
-    
     ! water parameter variable
     noahmp%water%param%DRAIN_LAYER_OPT   = NoahmpIO%DRAIN_LAYER_OPT_TABLE
     noahmp%water%param%CH2OP             = NoahmpIO%CH2OP_TABLE(VegType)
@@ -372,7 +380,6 @@ contains
     noahmp%water%param%PSIWLT            = NoahmpIO%PSIWLT_TABLE
     noahmp%water%param%MFSNO             = NoahmpIO%MFSNO_TABLE(VegType)
     noahmp%water%param%SCFFAC            = NoahmpIO%SCFFAC_TABLE(VegType)
-
     noahmp%water%param%BVIC              = NoahmpIO%BVIC_TABLE(SoilType(1))
     noahmp%water%param%AXAJ              = NoahmpIO%AXAJ_TABLE(SoilType(1))
     noahmp%water%param%BXAJ              = NoahmpIO%BXAJ_TABLE(SoilType(1))
@@ -393,19 +400,19 @@ contains
     noahmp%water%param%NROOT             = NoahmpIO%NROOT_TABLE(VegType)
     noahmp%water%param%SLOPE             = NoahmpIO%SLOPE_TABLE(RunoffSlopeType)
 
-    do ISOIL = 1, size(SoilType)
-       noahmp%water%param%SMCMAX(ISOIL)   = NoahmpIO%SMCMAX_TABLE(SoilType(ISOIL))
-       noahmp%water%param%SMCWLT(ISOIL)   = NoahmpIO%SMCWLT_TABLE(SoilType(ISOIL))
-       noahmp%water%param%SMCREF(ISOIL)   = NoahmpIO%SMCREF_TABLE(SoilType(ISOIL))
-       noahmp%water%param%SMCDRY(ISOIL)   = NoahmpIO%SMCDRY_TABLE(SoilType(ISOIL))
-       noahmp%water%param%DWSAT(ISOIL)    = NoahmpIO%DWSAT_TABLE(SoilType(ISOIL))
-       noahmp%water%param%DKSAT(ISOIL)    = NoahmpIO%DKSAT_TABLE(SoilType(ISOIL))
-       noahmp%water%param%BEXP(ISOIL)     = NoahmpIO%BEXP_TABLE(SoilType(ISOIL))
-       noahmp%water%param%PSISAT(ISOIL)   = NoahmpIO%PSISAT_TABLE(SoilType(ISOIL))
-       noahmp%water%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SoilType(ISOIL))
+    do IndexSoilLayer = 1, size(SoilType)
+       noahmp%water%param%SMCMAX(IndexSoilLayer)   = NoahmpIO%SMCMAX_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SMCWLT(IndexSoilLayer)   = NoahmpIO%SMCWLT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SMCREF(IndexSoilLayer)   = NoahmpIO%SMCREF_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SMCDRY(IndexSoilLayer)   = NoahmpIO%SMCDRY_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%DWSAT(IndexSoilLayer)    = NoahmpIO%DWSAT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%DKSAT(IndexSoilLayer)    = NoahmpIO%DKSAT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%BEXP(IndexSoilLayer)     = NoahmpIO%BEXP_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%PSISAT(IndexSoilLayer)   = NoahmpIO%PSISAT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%QUARTZ(IndexSoilLayer)   = NoahmpIO%QUARTZ_TABLE(SoilType(IndexSoilLayer))
     enddo
 
-    ! derived parameters
+    ! derived water parameters
     noahmp%water%param%KDT  = noahmp%water%param%REFKDT * noahmp%water%param%DKSAT(1) / &
                               noahmp%water%param%REFDK
     if ( FlagUrban .eqv. .true. ) then
@@ -419,18 +426,18 @@ contains
             ((noahmp%water%param%SMCMAX(1) / noahmp%water%param%SMCREF(1)) * (0.412/0.468))
     endif
 
-    noahmp%water%state%FICEOLD_SNOW            = 0.0
-    noahmp%water%state%FICEOLD_SNOW(NumSnowLayerNeg+1:0) = NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J)   &  ! snow ice fraction  
+    noahmp%water%state%SnowIceFracPrev            = 0.0
+    noahmp%water%state%SnowIceFracPrev(NumSnowLayerNeg+1:0) = NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J)   &  ! snow ice fraction  
                                                           / (NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) &
                                                              + NoahmpIO%SNLIQXY(I,NumSnowLayerNeg+1:0,J))
     if ( (noahmp%config%nmlist%OptSoilProperty == 3) .and. (.not. noahmp%config%domain%FlagUrban) ) then
-       allocate( SAND(1:NumSoilLayer) )
-       allocate( CLAY(1:NumSoilLayer) )
-       allocate( ORGM(1:NumSoilLayer) )
-       SAND(1:4) = 0.01 * NoahmpIO%soilcomp(I,1:4,J)
-       CLAY(1:4) = 0.01 * NoahmpIO%soilcomp(I,5:8,J)
-       ORGM(1:4) = 0.0
-       if (noahmp%config%nmlist%OptPedotransfer == 1) call pedotransfer_sr2006(NoahmpIO,noahmp,SAND,CLAY,ORGM)
+       allocate( SoilSand(1:NumSoilLayer) )
+       allocate( SoilClay(1:NumSoilLayer) )
+       allocate( SoilOrg(1:NumSoilLayer) )
+       SoilSand(1:4) = 0.01 * NoahmpIO%soilcomp(I,1:4,J)
+       SoilClay(1:4) = 0.01 * NoahmpIO%soilcomp(I,5:8,J)
+       SoilOrg(1:4) = 0.0
+       if (noahmp%config%nmlist%OptPedotransfer == 1) call PedoTransfer_SR2006(NoahmpIO,noahmp,SoilSand,SoilClay,SoilOrg)
     endif
 
     end associate

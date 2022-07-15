@@ -25,11 +25,11 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              FCRMAX          => noahmp%water%state%FCRMAX           ,& ! in,     maximum fraction of imperviousness (FCR)
+              SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! in,    maximum soil imperviousness fraction
               TIMEAN          => noahmp%water%param%TIMEAN           ,& ! in,     gridcell mean topgraphic index (global mean)
               FFF             => noahmp%water%param%FFF              ,& ! in,     runoff decay factor (m-1)
               RSBMX           => noahmp%water%param%RSBMX            ,& ! in,     baseflow coefficient [mm/s]
-              ZWT             => noahmp%water%state%ZWT              ,& ! out,    water table depth [m]
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! out,    water table depth [m]
               RUNSUB          => noahmp%water%flux%RUNSUB             & ! out,    subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
@@ -42,7 +42,7 @@ contains
     call WaterTableEquilibrium(noahmp)
 
     ! compuate subsurface runoff mm/s
-    RUNSUB = (1.0 - FCRMAX) * RSBMX * exp(-TIMEAN) * exp(-FFF * ZWT)
+    RUNSUB = (1.0 - SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * WaterTableDepth)
 
     end associate
 

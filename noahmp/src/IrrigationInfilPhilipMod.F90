@@ -33,16 +33,16 @@ contains
     integer                :: ISOIL     ! soil layer index
     real(kind=kind_noahmp) :: SP        ! sorptivity (LT^-1/2)
     real(kind=kind_noahmp) :: AP        ! intial hydraulic conductivity (m/s,L/T)
-    real(kind=kind_noahmp) :: WCND      ! soil water conductivity [m/s]
-    real(kind=kind_noahmp) :: WDF       ! soil water diffusivity (m2/s)
-    real(kind=kind_noahmp) :: SICEMAX   ! maximum soil ice content (m3/m3)
+    real(kind=kind_noahmp) :: SoilWatConductivity      ! soil water conductivity [m/s]
+    real(kind=kind_noahmp) :: SoilWatDiffusivity       ! soil water diffusivity (m2/s)
+    real(kind=kind_noahmp) :: SoilIceMaxTmp   ! maximum soil ice content (m3/m3)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,  number of soil layers
-              SMC             => noahmp%water%state%SMC              ,& ! in,  total soil moisture [m3/m3]
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,  soil water content [m3/m3]
-              SICE            => noahmp%water%state%SICE             ,& ! in,  soil ice content [m3/m3]
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,  total soil moisture [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,  soil water content [m3/m3]
+              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,  soil ice content [m3/m3]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,  saturated value of soil moisture [m3/m3]
               DWSAT           => noahmp%water%param%DWSAT            ,& ! in,  saturated soil hydraulic diffusivity (m2/s)
               DKSAT           => noahmp%water%param%DKSAT             & ! in,  saturated soil hydraulic conductivity [m/s]
@@ -50,27 +50,27 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialize out-only and local variables
-    WCND    = 0.0
-    WDF     = 0.0
-    SICEMAX = 0.0
+    SoilWatConductivity    = 0.0
+    SoilWatDiffusivity     = 0.0
+    SoilIceMaxTmp = 0.0
     SP      = 0.0
     AP      = 0.0
 
     ! maximum ice fraction
     do K = 1, NumSoilLayer
-       if ( SICE(K) > SICEMAX ) SICEMAX = SICE(K)
+       if ( SoilIce(K) > SoilIceMaxTmp ) SoilIceMaxTmp = SoilIce(K)
     enddo
 
     ! estimate initial soil hydraulic conductivty and diffusivity (Ki, D(theta) in the equation)
     ISOIL = 1
-    call SoilDiffusivityConductivityOpt2(noahmp, WDF, WCND, SH2O(ISOIL), SICEMAX, ISOIL)
+    call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SoilLiqWater(ISOIL), SoilIceMaxTmp, ISOIL)
 
     ! sorptivity based on Eq. 10b from Kutilek, Miroslav, and Jana Valentova (1986) 
     ! sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-    SP = sqrt(2.0 * max(0.0, (SMCMAX(ISOIL) - SMC(ISOIL))) * (DWSAT(ISOIL) - WDF) )
+    SP = sqrt(2.0 * max(0.0, (SMCMAX(ISOIL) - SoilMoisture(ISOIL))) * (DWSAT(ISOIL) - SoilWatDiffusivity) )
 
     ! parameter A in Eq. 9 of Valiantzas (2010) is given by
-    AP = min( WCND, (2.0/3.0) * DKSAT(ISOIL) )
+    AP = min( SoilWatConductivity, (2.0/3.0) * DKSAT(ISOIL) )
     AP = max( AP  , (1.0/3.0) * DKSAT(ISOIL) )
 
     ! maximun infiltration rate, m/s

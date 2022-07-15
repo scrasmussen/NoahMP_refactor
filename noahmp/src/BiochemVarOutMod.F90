@@ -6,7 +6,7 @@ module BiochemVarOutMod
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: P. Valayamkunnath, C. He, & refactor team (Oct 27, 2021)
+! Refactered code: P. Valayamkunnath, C. He, & refactor team (July, 2022)
 ! -------------------------------------------------------------------------
 
   use Machine

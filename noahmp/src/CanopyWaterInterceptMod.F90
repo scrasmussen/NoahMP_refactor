@@ -27,7 +27,7 @@ contains
 ! local variable
     real(kind=kind_noahmp)           :: FT         ! temperature factor for unloading rate
     real(kind=kind_noahmp)           :: FV         ! wind factor for unloading rate
-    real(kind=kind_noahmp)           :: ICEDRIP    ! canice unloading 
+    real(kind=kind_noahmp)           :: ICEDRIP    ! canopy ice unloading 
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -43,14 +43,14 @@ contains
               CH2OP           => noahmp%water%param%CH2OP            ,& ! in,    maximum intercepted water per unit lai+sai (mm)
               RAIN            => noahmp%water%flux%RAIN              ,& ! in,    total liquid rainfall (mm/s) before interception
               SNOW            => noahmp%water%flux%SNOW              ,& ! in,    total liquid snowfall (mm/s) before interception
-              BDFALL          => noahmp%water%state%BDFALL           ,& ! in,    bulk density of snowfall (kg/m3)
-              FP              => noahmp%water%state%FP               ,& ! in,    fraction of the gridcell that receives precipitation
-              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! inout, intercepted liquid water (mm)
-              CANICE          => noahmp%water%state%CANICE           ,& ! inout, intercepted ice mass (mm)
-              FWET            => noahmp%water%state%FWET             ,& ! out,   wetted or snowed fraction of the canopy
-              CMC             => noahmp%water%state%CMC              ,& ! out,   total canopy intercepted water (mm)
-              MAXSNO          => noahmp%water%state%MAXSNO           ,& ! out,   canopy capacity for snow interception (mm)
-              MAXLIQ          => noahmp%water%state%MAXLIQ           ,& ! out,   canopy capacity for rain interception (mm)
+              SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
+              PrecipAreaFrac              => noahmp%water%state%PrecipAreaFrac               ,& ! in,    fraction of the gridcell that receives precipitation
+              CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! inout, intercepted canopy liquid water [mm]
+              CanopyIce          => noahmp%water%state%CanopyIce           ,& ! inout, intercepted canopy ice [mm]
+              CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! out,   wetted or snowed fraction of the canopy
+              CanopyTotalWater             => noahmp%water%state%CanopyTotalWater              ,& ! out,   total canopy intercepted water [mm]
+              CanopyIceMax          => noahmp%water%state%CanopyIceMax           ,& ! out,   canopy capacity for snow interception [mm]
+              CanopyLiqWaterMax          => noahmp%water%state%CanopyLiqWaterMax           ,& ! out,   canopy capacity for rain interception [mm]
               QINTR           => noahmp%water%flux%QINTR             ,& ! out,   interception rate for rain (mm/s)
               QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! out,   drip rate for rain (mm/s)
               QTHROR          => noahmp%water%flux%QTHROR            ,& ! out,   throughfall for rain (mm/s)
@@ -79,67 +79,68 @@ contains
 
     ! ----------------------- canopy liquid water ------------------------------
     ! maximum canopy water
-    MAXLIQ =  CH2OP * (ELAI + ESAI)
+    CanopyLiqWaterMax =  CH2OP * (ELAI + ESAI)
 
     ! average rain interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
-       QINTR  = FVEG * RAIN * FP  ! interception capability
-       QINTR  = min( QINTR, (MAXLIQ-CANLIQ)/MainTimeStep * (1.0-exp(-RAIN*MainTimeStep/MAXLIQ)) )
+       QINTR  = FVEG * RAIN * PrecipAreaFrac  ! interception capability
+       QINTR  = min( QINTR, (CanopyLiqWaterMax-CanopyLiqWater)/MainTimeStep * &
+                            (1.0-exp(-RAIN*MainTimeStep/CanopyLiqWaterMax)) )
        QINTR  = max( QINTR, 0.0 )
        QDRIPR = FVEG * RAIN - QINTR
        QTHROR = (1.0 - FVEG) * RAIN
-       CANLIQ = max( 0.0, CANLIQ + QINTR*MainTimeStep )
+       CanopyLiqWater = max( 0.0, CanopyLiqWater + QINTR*MainTimeStep )
     else
        QINTR  = 0.0
        QDRIPR = 0.0
        QTHROR = RAIN
-       if ( CANLIQ > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPR = QDRIPR + CANLIQ / MainTimeStep
-          CANLIQ = 0.0
+       if ( CanopyLiqWater > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
+          QDRIPR = QDRIPR + CanopyLiqWater / MainTimeStep
+          CanopyLiqWater = 0.0
        endif
     endif
 
     ! ----------------------- canopy ice ------------------------------
     ! maximum canopy ice
-    MAXSNO = 6.6 * (0.27 + 46.0/BDFALL) * (ELAI + ESAI)
+    CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (ELAI + ESAI)
 
     ! average snow interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
-       QINTS = FVEG * SNOW * FP
-       QINTS = min( QINTS, (MAXSNO-CANICE)/MainTimeStep * (1.0-exp(-SNOW*MainTimeStep/MAXSNO)) )
+       QINTS = FVEG * SNOW * PrecipAreaFrac
+       QINTS = min( QINTS, (CanopyIceMax-CanopyIce)/MainTimeStep * (1.0-exp(-SNOW*MainTimeStep/CanopyIceMax)) )
        QINTS = max( QINTS, 0.0 )
        FT    = max( 0.0, (TV - 270.15) / 1.87e5 )
        FV    = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
-       ICEDRIP = max( 0.0, CANICE ) * (FV + FT)
+       ICEDRIP = max( 0.0, CanopyIce ) * (FV + FT)
        QDRIPS  = (FVEG * SNOW - QINTS) + ICEDRIP
        QTHROS  = (1.0 - FVEG) * SNOW
-       CANICE  = max( 0.0, CANICE + (QINTS-ICEDRIP)*MainTimeStep )
+       CanopyIce  = max( 0.0, CanopyIce + (QINTS-ICEDRIP)*MainTimeStep )
     else
        QINTS  = 0.0
        QDRIPS = 0.0
        QTHROS = SNOW
-       if ( CANICE > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPS = QDRIPS + CANICE / MainTimeStep
-          CANICE = 0.0
+       if ( CanopyIce > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
+          QDRIPS = QDRIPS + CanopyIce / MainTimeStep
+          CanopyIce = 0.0
        endif
     endif
 
     ! wetted fraction of canopy
-    if ( CANICE > 0.0 ) then
-       FWET = max( 0.0, CANICE ) / max( MAXSNO, 1.0e-06 )
+    if ( CanopyIce > 0.0 ) then
+       CanopyWetFrac = max( 0.0, CanopyIce ) / max( CanopyIceMax, 1.0e-06 )
     else
-       FWET = max( 0.0, CANLIQ ) / max( MAXLIQ, 1.0e-06 )
+       CanopyWetFrac = max( 0.0, CanopyLiqWater ) / max( CanopyLiqWaterMax, 1.0e-06 )
     endif
-    FWET    = min( FWET, 1.0 ) ** 0.667
+    CanopyWetFrac    = min( CanopyWetFrac, 1.0 ) ** 0.667
 
     ! total canopy water
-    CMC = CANLIQ + CANICE
+    CanopyTotalWater = CanopyLiqWater + CanopyIce
 
     ! rain or snow on the ground
     QRAIN   = QDRIPR + QTHROR
     QSNOW   = QDRIPS + QTHROS
-    SNOWHIN = QSNOW / BDFALL
+    SNOWHIN = QSNOW / SnowfallDensity
     if ( (SurfaceType == 2) .and. (TG > ConstFreezePoint) ) then
        QSNOW   = 0.0
        SNOWHIN = 0.0

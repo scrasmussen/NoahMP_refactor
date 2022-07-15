@@ -36,18 +36,18 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,   depth [m] of layer-bottom from soil surface
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,   soil water content [m3/m3]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,   soil water content [m3/m3]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,   saturated soil matric potential (m)
               BEXP            => noahmp%water%param%BEXP             ,& ! in,   soil B parameter
-              ZWT             => noahmp%water%state%ZWT               & ! out,  water table depth [m]
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth               & ! out,  water table depth [m]
              )
 ! ----------------------------------------------------------------------
 
     ZFINE(1:NFINE) = 0.0
     WD1 = 0.0
     do K = 1, NumSoilLayer
-       WD1 = WD1 + (SMCMAX(1) - SH2O(K)) * ThicknessSnowSoilLayer(K) ! [m]
+       WD1 = WD1 + (SMCMAX(1) - SoilLiqWater(K)) * ThicknessSnowSoilLayer(K) ! [m]
     enddo
 
     DZFINE = 3.0 * ( -DepthSoilLayer(NumSoilLayer) ) / NFINE
@@ -55,14 +55,14 @@ contains
        ZFINE(K) = float(K) * DZFINE
     enddo
 
-    ZWT = -3.0 * DepthSoilLayer(NumSoilLayer) - 0.001   ! initial value [m]
+    WaterTableDepth = -3.0 * DepthSoilLayer(NumSoilLayer) - 0.001   ! initial value [m]
 
     WD2 = 0.0
     do K = 1, NFINE
-       TEMP  = 1.0 + ( ZWT - ZFINE(K) ) / PSISAT(1)
+       TEMP  = 1.0 + ( WaterTableDepth - ZFINE(K) ) / PSISAT(1)
        WD2   = WD2 + SMCMAX(1) * ( 1.0 - TEMP ** (-1.0/BEXP(1)) ) * DZFINE
        if ( abs(WD2-WD1) <= 0.01 ) then
-          ZWT = ZFINE(K)
+          WaterTableDepth = ZFINE(K)
           exit
        endif
     enddo

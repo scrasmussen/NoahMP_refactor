@@ -30,7 +30,7 @@ contains
               SNOW_EMIS       => noahmp%energy%param%SNOW_EMIS       ,& ! in,    snow emissivity
               EG              => noahmp%energy%param%EG              ,& ! in,    emissivity soil surface
               EICE            => noahmp%energy%param%EICE            ,& ! in,    emissivity ice surface
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
@@ -45,9 +45,9 @@ contains
 
     ! ground emissivity
     if ( IndicatorIceSfc == 1 ) then
-       EMG = EICE * (1.0 - FSNO) + SNOW_EMIS * FSNO  ! move hard-coded snow emissivity as a global parameter to MPTABLE
+       EMG = EICE * (1.0 - SnowCoverFrac) + SNOW_EMIS * SnowCoverFrac  ! move hard-coded snow emissivity as a global parameter to MPTABLE
     else
-       EMG = EG(SurfaceType) * (1.0 - FSNO) + SNOW_EMIS * FSNO
+       EMG = EG(SurfaceType) * (1.0 - SnowCoverFrac) + SNOW_EMIS * SnowCoverFrac
     endif
 
     ! net surface emissivity

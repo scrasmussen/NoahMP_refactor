@@ -82,7 +82,7 @@ contains
               OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
               FlagCropland           => noahmp%config%domain%FlagCropland        ,& ! in,    flag to identify croplands
               IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
-              IRRFRA          => noahmp%water%state%IRRFRA           ,& ! in,    total input irrigation fraction
+              IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,    total input irrigation fraction
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
@@ -98,7 +98,7 @@ contains
               EAH             => noahmp%energy%state%EAH             ,& ! inout, canopy air vapor pressure (pa)
               CM              => noahmp%energy%state%CM              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
               CH              => noahmp%energy%state%CH              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! inout, snow depth [m]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
               Z0WRF           => noahmp%energy%state%Z0WRF           ,& ! out,   roughness length, momentum, surface, sent to coupled model
               TAUX            => noahmp%energy%state%TAUX            ,& ! out,   wind stress: east-west (n/m2) grid mean
               TAUY            => noahmp%energy%state%TAUY            ,& ! out,   wind stress: north-south (n/m2) grid mean
@@ -284,7 +284,7 @@ contains
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
        write(6,*) 'input of SHDFAC with LAI'
        write(6,*) 'SHDFAC=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG
-       write(6,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SNOWH=',SNOWH
+       write(6,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SnowDepth=',SnowDepth
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
@@ -304,7 +304,7 @@ contains
 
     ! adjusting suface temperature based on snow condition
     if ( OptSnowSoilTempTime == 2 ) then
-       if ( (SNOWH > 0.05) .and. (TG > ConstFreezePoint) ) then
+       if ( (SnowDepth > 0.05) .and. (TG > ConstFreezePoint) ) then
           TGV = ConstFreezePoint
           TGB = ConstFreezePoint
           if ( (VEG .eqv. .true.) .and. (FVEG > 0) ) then
@@ -321,7 +321,7 @@ contains
     call SoilSnowWaterPhaseChange(noahmp)
 
     ! update sensible heat flux due to sprinkler irrigation evaporation
-    if ( (FlagCropland .eqv. .true.) .and. (IRRFRA >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
 
     ! update total surface albedo
     if ( RadSWDownRefHeight > 0.0 ) then

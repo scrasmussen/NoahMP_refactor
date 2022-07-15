@@ -58,10 +58,7 @@ contains
                NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
                DepthSoilLayer        => noahmp%config%domain%DepthSoilLayer        ,& ! in,  depth [m] of layer-bottom from soil surface
                OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration ,& ! in,  options for infiltration in dynamic VIC runoff scheme
-               SMC             => noahmp%water%state%SMC              ,& ! in,     total soil moisture [m3/m3]
-               SH2O            => noahmp%water%state%SH2O             ,& ! in,     soil water content [m3/m3]
-               SICE            => noahmp%water%state%SICE             ,& ! in,     soil ice content [m3/m3] 
-               SICEMAX         => noahmp%water%state%SICEMAX          ,& ! in,     maximum soil ice content (m3/m3)
+               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
                QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
                SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
                BBVIC           => noahmp%water%param%BBVIC            ,& ! in,     DVIC heterogeniety parameter for infiltration
@@ -89,7 +86,7 @@ contains
      BB            = BBVIC
 
      do IZ = 1, NumSoilLayer-2
-        TOP_MOIST     = TOP_MOIST + (SMC(IZ) * (-1.0) * DepthSoilLayer(IZ))            ! actual moisture in top layers, [m]
+        TOP_MOIST     = TOP_MOIST + (SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ))            ! actual moisture in top layers, [m]
         TOP_MAX_MOIST = TOP_MAX_MOIST + (SMCMAX(IZ) * (-1.0) * DepthSoilLayer(IZ))     ! maximum moisture in top layers, [m]  
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST

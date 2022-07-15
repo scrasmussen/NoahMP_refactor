@@ -26,10 +26,10 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variables
-    real(kind=kind_noahmp)           :: BEVAP        ! soil water evaporation factor (0- 1)
+    real(kind=kind_noahmp)           :: SoilEvapFac        ! soil water evaporation factor (0- 1)
     real(kind=kind_noahmp)           :: L_RSURF      ! Dry-layer thickness for computing RSURF (Sakaguchi and Zeng, 2009)
     real(kind=kind_noahmp)           :: D_RSURF      ! Reduced vapor diffusivity in soil for computing RSURF (SZ09)
-    real(kind=kind_noahmp)           :: PSI          ! surface layer soil matrix potential (m)
+    real(kind=kind_noahmp)           :: SoilMatPotentialSfc          ! surface layer soil matric potential [m]
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -43,9 +43,9 @@ contains
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,    wilting point soil moisture [m3/m3]
               BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,    soil water content [m3/m3]
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,    soil water content [m3/m3]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
               RSURF           => noahmp%energy%state%RSURF           ,& ! out,   ground surface resistance (s/m)
               RHSUR           => noahmp%energy%state%RHSUR            & ! out,   raltive humidity in surface soil/snow air space (-)
@@ -53,7 +53,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! initialization
-    BEVAP = max( 0.0, SH2O(1)/SMCMAX(1) )
+    SoilEvapFac = max( 0.0, SoilLiqWater(1)/SMCMAX(1) )
     if ( SurfaceType == 2 ) then  ! lake point
        RSURF = 1.0        ! avoid being divided by 0
        RHSUR = 1.0
@@ -62,25 +62,25 @@ contains
        if ( (OptGroundResistanceEvap == 1) .or. (OptGroundResistanceEvap == 4) ) then   ! Sakaguchi and Zeng, 2009
           ! taking the "residual water content" to be the wilting point, 
           ! and correcting the exponent on the D term (typo in SZ09 ?)
-          L_RSURF = (-DepthSoilLayer(1)) * (exp( (1.0 - min(1.0,SH2O(1)/SMCMAX(1))) ** RSURF_EXP ) - 1.0) / (2.71828 - 1.0)
+          L_RSURF = (-DepthSoilLayer(1)) * (exp((1.0 - min(1.0,SoilLiqWater(1)/SMCMAX(1))) ** RSURF_EXP)-1.0) / (2.71828-1.0)
           D_RSURF = 2.2e-5 * SMCMAX(1) * SMCMAX(1) * (1.0 - SMCWLT(1)/SMCMAX(1)) ** (2.0 + 3.0/BEXP(1))
           RSURF = L_RSURF / D_RSURF
        elseif ( OptGroundResistanceEvap == 2 ) then  ! Sellers (1992) original
-          RSURF = FSNO * 1.0 + (1.0 - FSNO) * exp(8.25 - 4.225*BEVAP)
+          RSURF = SnowCoverFrac * 1.0 + (1.0 - SnowCoverFrac) * exp(8.25 - 4.225*SoilEvapFac)
        elseif ( OptGroundResistanceEvap == 3 ) then  ! Sellers (1992) adjusted to decrease RSURF for wet soil
-          RSURF = FSNO * 1.0 + (1.0 - FSNO) * exp(8.25 - 6.0*BEVAP) 
+          RSURF = SnowCoverFrac * 1.0 + (1.0 - SnowCoverFrac) * exp(8.25 - 6.0*SoilEvapFac) 
        endif
-       if ( OptGroundResistanceEvap == 4 ) then ! FSNO weighted; snow RSURF set in MPTABLE v3.8
-          RSURF = 1.0 / ( FSNO * (1.0/RSURF_SNOW) + (1.0 - FSNO) * (1.0/max(RSURF,0.001)) )
+       if ( OptGroundResistanceEvap == 4 ) then ! SnowCoverFrac weighted; snow RSURF set in MPTABLE v3.8
+          RSURF = 1.0 / ( SnowCoverFrac * (1.0/RSURF_SNOW) + (1.0 - SnowCoverFrac) * (1.0/max(RSURF,0.001)) )
        endif
-       if ( (SH2O(1) < 0.01) .and. (SNOWH == 0.0) ) RSURF = 1.0e6
+       if ( (SoilLiqWater(1) < 0.01) .and. (SnowDepth == 0.0) ) RSURF = 1.0e6
 
-       PSI   = -PSISAT(1) * (max(0.01,SH2O(1)) / SMCMAX(1)) ** (-BEXP(1))
-       RHSUR = FSNO + (1.0 - FSNO) * exp(PSI * ConstGravityAcc / (ConstGasWaterVapor * TG))
+       SoilMatPotentialSfc = -PSISAT(1) * (max(0.01,SoilLiqWater(1)) / SMCMAX(1)) ** (-BEXP(1))
+       RHSUR = SnowCoverFrac + (1.0 - SnowCoverFrac) * exp(SoilMatPotentialSfc * ConstGravityAcc / (ConstGasWaterVapor * TG))
     endif
 
     ! urban
-    if ( (FlagUrban .eqv. .true.) .and. (SNOWH == 0.0) ) then
+    if ( (FlagUrban .eqv. .true.) .and. (SnowDepth == 0.0) ) then
        RSURF = 1.0e6
     endif
 

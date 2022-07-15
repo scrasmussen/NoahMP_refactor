@@ -42,39 +42,39 @@ contains
               PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
               BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter              
-              SH2O            => noahmp%water%state%SH2O             ,& ! in,    soil water content [m3/m3]
-              BTRANI          => noahmp%water%state%BTRANI           ,& ! out,   soil water transpiration factor (0 to 1)
-              BTRAN           => noahmp%water%state%BTRAN            ,& ! out,   soil water transpiration factor (0 to 1)
-              PSI             => noahmp%water%state%PSI               & ! out,   surface layer soil matrix potential (m)
+              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,    soil water content [m3/m3]
+              SoilTranspFac          => noahmp%water%state%SoilTranspFac           ,& ! out,   soil water transpiration factor (0 to 1)
+              SoilTranspFacAcc           => noahmp%water%state%SoilTranspFacAcc            ,& ! out,   accumulated soil water transpiration factor (0 to 1)
+              SoilMatPotential       => noahmp%water%state%SoilMatPotential  & ! out,   soil matrix potential [m]
              )
 ! ----------------------------------------------------------------------
 
     ! soil moisture factor controlling stomatal resistance and evapotranspiration
     MPE   = 1.0e-6
-    BTRAN = 0.0
+    SoilTranspFacAcc = 0.0
 
     ! only for soil point
     if ( SurfaceType ==1 ) then
        do IZ = 1, NROOT
           if ( OptSoilWaterTranspiration == 1 ) then  ! Noah
-             GX = (SH2O(IZ) - SMCWLT(IZ)) / (SMCREF(IZ) - SMCWLT(IZ))
+             GX = (SoilLiqWater(IZ) - SMCWLT(IZ)) / (SMCREF(IZ) - SMCWLT(IZ))
           endif
           if ( OptSoilWaterTranspiration == 2 ) then  ! CLM
-             PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
-             GX      = (1.0 - PSI(IZ)/PSIWLT) / (1.0 + PSISAT(IZ)/PSIWLT)
+             SoilMatPotential(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SoilLiqWater(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
+             GX      = (1.0 - SoilMatPotential(IZ)/PSIWLT) / (1.0 + PSISAT(IZ)/PSIWLT)
           endif
           if ( OptSoilWaterTranspiration == 3 ) then  ! SSiB
-             PSI(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SH2O(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
-             GX      = 1.0 - exp( -5.8 * (log(PSIWLT/PSI(IZ))) )
+             SoilMatPotential(IZ) = max( PSIWLT, -PSISAT(IZ) * (max(0.01,SoilLiqWater(IZ))/SMCMAX(IZ)) ** (-BEXP(IZ)) )
+             GX      = 1.0 - exp( -5.8 * (log(PSIWLT/SoilMatPotential(IZ))) )
           endif
           GX = min( 1.0, max(0.0,GX) )
 
-          BTRANI(IZ) = max( MPE, ThicknessSnowSoilLayer(IZ) / (-DepthSoilLayer(NROOT)) * GX )
-          BTRAN      = BTRAN + BTRANI(IZ)
+          SoilTranspFac(IZ) = max( MPE, ThicknessSnowSoilLayer(IZ) / (-DepthSoilLayer(NROOT)) * GX )
+          SoilTranspFacAcc      = SoilTranspFacAcc + SoilTranspFac(IZ)
        enddo
 
-       BTRAN = max( MPE, BTRAN )
-       BTRANI(1:NROOT) = BTRANI(1:NROOT) / BTRAN
+       SoilTranspFacAcc = max( MPE, SoilTranspFacAcc )
+       SoilTranspFac(1:NROOT) = SoilTranspFac(1:NROOT) / SoilTranspFacAcc
     endif
 
     end associate

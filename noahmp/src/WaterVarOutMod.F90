@@ -40,45 +40,45 @@ contains
     NoahmpIO%SFCRUNOFF(I,J)            = NoahmpIO%SFCRUNOFF(I,J) + (noahmp%water%flux%RUNSRF * NoahmpIO%DTBL)
     NoahmpIO%UDRUNOFF (I,J)            = NoahmpIO%UDRUNOFF (I,J) + (noahmp%water%flux%RUNSUB * NoahmpIO%DTBL)
     NoahmpIO%QTDRAIN  (I,J)            = NoahmpIO%QTDRAIN  (I,J) + (noahmp%water%flux%QTLDRN * NoahmpIO%DTBL)
-    NoahmpIO%SNOWC    (I,J)            = noahmp%water%state%FSNO
-    NoahmpIO%SMOIS    (I,1:NumSoilLayer,J)    = noahmp%water%state%SMC (1:NumSoilLayer)
-    NoahmpIO%SH2O     (I,1:NumSoilLayer,J)    = noahmp%water%state%SH2O(1:NumSoilLayer)
-    NoahmpIO%SNOW     (I,J)            = noahmp%water%state%SNEQV
-    NoahmpIO%SNOWH    (I,J)            = noahmp%water%state%SNOWH
-    NoahmpIO%CANWAT   (I,J)            = noahmp%water%state%CANLIQ + noahmp%water%state%CANICE
-    NoahmpIO%ACSNOW   (I,J)            = NoahmpIO%ACSNOW(I,J) + (NoahmpIO%RAINBL (I,J) * noahmp%water%state%FPICE)
+    NoahmpIO%SNOWC    (I,J)            = noahmp%water%state%SnowCoverFrac
+    NoahmpIO%SMOIS    (I,1:NumSoilLayer,J)    = noahmp%water%state%SoilMoisture(1:NumSoilLayer)
+    NoahmpIO%SH2O     (I,1:NumSoilLayer,J)    = noahmp%water%state%SoilLiqWater(1:NumSoilLayer)
+    NoahmpIO%SNOW     (I,J)            = noahmp%water%state%SnowWaterEquiv
+    NoahmpIO%SNOWH    (I,J)            = noahmp%water%state%SnowDepth
+    NoahmpIO%CANWAT   (I,J)            = noahmp%water%state%CanopyLiqWater + noahmp%water%state%CanopyIce
+    NoahmpIO%ACSNOW   (I,J)            = NoahmpIO%ACSNOW(I,J) + (NoahmpIO%RAINBL (I,J) * noahmp%water%state%FrozenPrecipFrac)
     NoahmpIO%ACSNOM   (I,J)            = NoahmpIO%ACSNOM(I,J) + (noahmp%water%flux%QSNBOT * NoahmpIO%DTBL) + &
-                                         noahmp%water%state%PONDING + noahmp%water%state%PONDING1 +          &
-                                         noahmp%water%state%PONDING2
+                                         noahmp%water%state%PondSfcThinSnwMelt + noahmp%water%state%PondSfcThinSnwComb + &
+                                         noahmp%water%state%PondSfcThinSnwTrans
 
-    NoahmpIO%CANLIQXY (I,J)            = noahmp%water%state%CANLIQ
-    NoahmpIO%CANICEXY (I,J)            = noahmp%water%state%CANICE
-    NoahmpIO%FWETXY   (I,J)            = noahmp%water%state%FWET
-    NoahmpIO%SNEQVOXY (I,J)            = noahmp%water%state%SNEQVO
+    NoahmpIO%CANLIQXY (I,J)            = noahmp%water%state%CanopyLiqWater
+    NoahmpIO%CANICEXY (I,J)            = noahmp%water%state%CanopyIce
+    NoahmpIO%FWETXY   (I,J)            = noahmp%water%state%CanopyWetFrac
+    NoahmpIO%SNEQVOXY (I,J)            = noahmp%water%state%SnowWaterEquivPrev
     NoahmpIO%QSNOWXY  (I,J)            = noahmp%water%flux%QSNOW
     NoahmpIO%QRAINXY  (I,J)            = noahmp%water%flux%QRAIN
-    NoahmpIO%WSLAKEXY (I,J)            = noahmp%water%state%WSLAKE
-    NoahmpIO%ZWTXY    (I,J)            = noahmp%water%state%ZWT
-    NoahmpIO%WAXY     (I,J)            = noahmp%water%state%WA
-    NoahmpIO%WTXY     (I,J)            = noahmp%water%state%WT
-    NoahmpIO%SNICEXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SNICE (-NumSnowLayerMax+1:0)
-    NoahmpIO%SNLIQXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SNLIQ (-NumSnowLayerMax+1:0)
+    NoahmpIO%WSLAKEXY (I,J)            = noahmp%water%state%WaterStorageLake
+    NoahmpIO%ZWTXY    (I,J)            = noahmp%water%state%WaterTableDepth
+    NoahmpIO%WAXY     (I,J)            = noahmp%water%state%WaterStorageAquifer
+    NoahmpIO%WTXY     (I,J)            = noahmp%water%state%WaterStorageSoilAqf
+    NoahmpIO%SNICEXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SnowIce(-NumSnowLayerMax+1:0)
+    NoahmpIO%SNLIQXY  (I,-NumSnowLayerMax+1:0,J) = noahmp%water%state%SnowLiqWater(-NumSnowLayerMax+1:0)
     NoahmpIO%RUNSFXY  (I,J)            = noahmp%water%flux%RUNSRF
     NoahmpIO%RUNSBXY  (I,J)            = noahmp%water%flux%RUNSUB
     NoahmpIO%ECANXY   (I,J)            = noahmp%water%flux%ECAN
     NoahmpIO%EDIRXY   (I,J)            = noahmp%water%flux%EDIR
     NoahmpIO%ETRANXY  (I,J)            = noahmp%water%flux%ETRAN
-    NoahmpIO%RECHXY   (I,J)            = NoahmpIO%RECHXY(I,J) + (noahmp%water%state%RECH*1.E3)      !RECHARGE TO THE WATER TABLE
-    NoahmpIO%DEEPRECHXY(I,J)           = NoahmpIO%DEEPRECHXY(I,J) + noahmp%water%state%DEEPRECH
-    NoahmpIO%SMCWTDXY (I,J)            = noahmp%water%state%SMCWTD
+    NoahmpIO%RECHXY   (I,J)            = NoahmpIO%RECHXY(I,J) + (noahmp%water%state%RechargeGwShallowWT*1.0e3)      !RECHARGE TO THE WATER TABLE
+    NoahmpIO%DEEPRECHXY(I,J)           = NoahmpIO%DEEPRECHXY(I,J) + noahmp%water%state%RechargeGwDeepWT
+    NoahmpIO%SMCWTDXY (I,J)            = noahmp%water%state%SoilMoistureToWT
 
 ! irrigation
-    NoahmpIO%IRNUMSI  (I,J)            = noahmp%water%state%IRCNTSI
-    NoahmpIO%IRNUMMI  (I,J)            = noahmp%water%state%IRCNTMI
-    NoahmpIO%IRNUMFI  (I,J)            = noahmp%water%state%IRCNTFI
-    NoahmpIO%IRWATSI  (I,J)            = noahmp%water%state%IRAMTSI
-    NoahmpIO%IRWATMI  (I,J)            = noahmp%water%state%IRAMTMI
-    NoahmpIO%IRWATFI  (I,J)            = noahmp%water%state%IRAMTFI
+    NoahmpIO%IRNUMSI  (I,J)            = noahmp%water%state%IrrigationCntSprinkler
+    NoahmpIO%IRNUMMI  (I,J)            = noahmp%water%state%IrrigationCntMicro
+    NoahmpIO%IRNUMFI  (I,J)            = noahmp%water%state%IrrigationCntFlood
+    NoahmpIO%IRWATSI  (I,J)            = noahmp%water%state%IrrigationAmtSprinkler
+    NoahmpIO%IRWATMI  (I,J)            = noahmp%water%state%IrrigationAmtMicro
+    NoahmpIO%IRWATFI  (I,J)            = noahmp%water%state%IrrigationAmtFlood
     NoahmpIO%IRSIVOL  (I,J)            = NoahmpIO%IRSIVOL(I,J)+(noahmp%water%flux%IRSIRATE*1000.0)
     NoahmpIO%IRMIVOL  (I,J)            = NoahmpIO%IRMIVOL(I,J)+(noahmp%water%flux%IRMIRATE*1000.0)
     NoahmpIO%IRFIVOL  (I,J)            = NoahmpIO%IRFIVOL(I,J)+(noahmp%water%flux%IRFIRATE*1000.0)

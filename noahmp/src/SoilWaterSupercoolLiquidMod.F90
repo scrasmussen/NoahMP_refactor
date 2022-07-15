@@ -17,7 +17,7 @@ module SoilWaterSupercoolLiquidMod
 
 contains
 
-  subroutine SoilWaterSupercoolLiquid(noahmp, ISOIL, FREE, TKELV, SMC, SH2O)
+  subroutine SoilWaterSupercoolLiquid(noahmp, ISOIL, FREE, TKELV, SoilMoisture, SoilLiqWater)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: FRH2O
@@ -30,8 +30,8 @@ contains
 ! in & out variables
     type(noahmp_type)     , intent(inout) :: noahmp
     integer               , intent(in   ) :: ISOIL          ! soil layer index
-    real(kind=kind_noahmp), intent(in   ) :: SH2O           ! soil liquid water content (m3/m3)
-    real(kind=kind_noahmp), intent(in   ) :: SMC            ! total soil moisture content (m3/m3)
+    real(kind=kind_noahmp), intent(in   ) :: SoilLiqWater           ! soil liquid water content (m3/m3)
+    real(kind=kind_noahmp), intent(in   ) :: SoilMoisture            ! total soil moisture content (m3/m3)
     real(kind=kind_noahmp), intent(in   ) :: TKELV          ! soil temperature (K)
     real(kind=kind_noahmp), intent(out  ) :: FREE           ! soil supercooled liquid water content (m3/m3)
 
@@ -63,29 +63,29 @@ contains
     if ( BEXP(ISOIL) >  BLIM ) BX = BLIM
     NLOG = 0
 
-    ! if soil temperature not largely below freezing point, SH2O = SMC
+    ! if soil temperature not largely below freezing point, SoilLiqWater = SoilMoisture
     KCOUNT = 0
     if ( TKELV > (ConstFreezePoint-1.0e-3) ) then
-       FREE = SMC
+       FREE = SoilMoisture
     else  ! frozen soil case
 
        !--- Option 1: iterated solution in Koren et al. 1999 JGR Eqn.17
        ! initial guess for SWL (frozen content) 
        if ( CK /= 0.0 ) then
-          SWL = SMC - SH2O
-          if ( SWL > (SMC-0.02) ) SWL = SMC - 0.02   ! keep within bounds
+          SWL = SoilMoisture - SoilLiqWater
+          if ( SWL > (SoilMoisture-0.02) ) SWL = SoilMoisture - 0.02   ! keep within bounds
           ! start the iterations
           if ( SWL < 0.0 ) SWL = 0.0
 1001      Continue
           if ( .not. ((NLOG < 10) .and. (KCOUNT == 0)) ) goto 1002
           NLOG  = NLOG +1
           DF    = alog ( (PSISAT(ISOIL)*ConstGravityAcc/ConstLatHeatFusion) * &
-                         ((1.0 + CK*SWL)**2.0) * (SMCMAX(ISOIL)/(SMC - SWL))**BX ) - &
+                         ((1.0 + CK*SWL)**2.0) * (SMCMAX(ISOIL)/(SoilMoisture - SWL))**BX ) - &
                          alog ( -(TKELV - ConstFreezePoint) / TKELV )
-          DENOM = 2.0 * CK / (1.0 + CK * SWL) + BX / (SMC - SWL)
+          DENOM = 2.0 * CK / (1.0 + CK * SWL) + BX / (SoilMoisture - SWL)
           SWLK  = SWL - DF / DENOM
           ! bounds useful for mathematical solution
-          if ( SWLK > (SMC-0.02) ) SWLK = SMC - 0.02
+          if ( SWLK > (SoilMoisture-0.02) ) SWLK = SoilMoisture - 0.02
           if ( SWLK < 0.0 ) SWLK = 0.0
           DSWL = abs(SWLK - SWL)    ! mathematical solution bounds applied
           ! if more than 10 iterations, use explicit method (CK=0 approx.)
@@ -98,7 +98,7 @@ contains
           ! bounds applied within do-block are valid for physical solution 
           goto 1001
 1002      continue
-          FREE = SMC - SWL
+          FREE = SoilMoisture - SWL
        endif
        !--- End Option 1
 
@@ -112,7 +112,7 @@ contains
           FK = ( ( (ConstLatHeatFusion / (ConstGravityAcc * (-PSISAT(ISOIL)))) * &
                    ((TKELV-ConstFreezePoint) / TKELV) )**(-1.0/BX) ) * SMCMAX(ISOIL)
           if ( FK < 0.02 ) FK = 0.02
-          FREE = min( FK, SMC )
+          FREE = min( FK, SoilMoisture )
        endif
        !--- End Option 2
 

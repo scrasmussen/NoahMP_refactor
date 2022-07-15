@@ -27,9 +27,9 @@ contains
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
               FFF             => noahmp%water%param%FFF              ,& ! in,     runoff decay factor (m-1)
               FSATMX          => noahmp%water%param%FSATMX           ,& ! in,     maximum surface saturated fraction (global mean)
-              FCR             => noahmp%water%state%FCR              ,& ! in,     impermeable fraction due to frozen soil
-              ZWT             => noahmp%water%state%ZWT              ,& ! in,     water table depth [m]
-              FSAT            => noahmp%water%state%FSAT             ,& ! out,    fractional saturated area for soil moisture
+              SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,     impervious fraction due to frozen soil
+              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
+              SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac             ,& ! out,    fractional saturated area for soil moisture
               RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
               PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
              )
@@ -39,11 +39,11 @@ contains
     FFF = 6.0
 
     ! compute saturated area fraction
-    FSAT = FSATMX * exp( -0.5 * FFF * max(-2.0-ZWT,0.0) )
+    SoilSaturateFrac = FSATMX * exp( -0.5 * FFF * max(-2.0-WaterTableDepth,0.0) )
 
     ! compute surface runoff and infiltration  m/s
     if ( QINSUR > 0.0 ) then
-       RUNSRF = QINSUR * ( (1.0-FCR(1)) * FSAT + FCR(1) )
+       RUNSRF = QINSUR * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
        PDDUM  = QINSUR - RUNSRF 
     endif
 

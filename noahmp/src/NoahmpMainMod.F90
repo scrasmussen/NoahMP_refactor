@@ -40,7 +40,7 @@ contains
               FlagDynamicVeg     => noahmp%config%domain%FlagDynamicVeg    ,& ! in,     flag to activate dynamic vegetation model
               FlagDynamicCrop     => noahmp%config%domain%FlagDynamicCrop    ,& ! in,     flag to activate dynamic crop model
               OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,     option for crop model
-              IRAMTSI         => noahmp%water%state%IRAMTSI          ,& ! inout,  irrigation water amount [m] for sprinkler
+              IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] for sprinkler
               FlagCropland    => noahmp%config%domain%FlagCropland          & ! out,    flag to identify croplands
              )
 ! ----------------------------------------------------------------------
@@ -80,7 +80,7 @@ contains
     !--------------------------------------------------------------------- 
 
     ! call sprinkler irrigation before canopy process to have canopy interception
-    if ( (FlagCropland .eqv. .true.) .and. (IRAMTSI > 0.0) ) call IrrigationSprinkler(noahmp)
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationAmtSprinkler > 0.0) ) call IrrigationSprinkler(noahmp)
 
     !---------------------------------------------------------------------
     ! Canopy water interception and precip heat advection

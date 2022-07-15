@@ -85,11 +85,11 @@ contains
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight ,& ! in,    air temperature [K] at reference height
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight    ,& ! in,    air pressure [Pa] at reference height
               PressureAirSurface      => noahmp%forcing%PressureAirSurface      ,& ! in,    air pressure [Pa] at surface-atmos interface
-              SNOWH           => noahmp%water%state%SNOWH            ,& ! in,    snow depth [m]
-              FSNO            => noahmp%water%state%FSNO             ,& ! in,    snow cover fraction (-)
-              FWET            => noahmp%water%state%FWET             ,& ! in,    wetted or snowed fraction of the canopy
-              CANLIQ          => noahmp%water%state%CANLIQ           ,& ! in,    canopy intercepted liquid water (mm)
-              CANICE          => noahmp%water%state%CANICE           ,& ! in,    canopy intercepted ice mass (mm)
+              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
+              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
+              CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! in,    wetted or snowed fraction of the canopy
+              CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water (mm)
+              CanopyIce          => noahmp%water%state%CanopyIce           ,& ! in,    canopy intercepted ice [mm]
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
               SAV             => noahmp%energy%flux%SAV              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
               SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
@@ -202,7 +202,7 @@ contains
        print*, 'GridIndexI,GridIndexJ =',GridIndexI, GridIndexJ
        print*, 'HCAN  =',HCAN
        print*, 'ZPD   =',ZPD
-       print*, 'SNOWH =',SNOWH
+       print*, 'SnowDepth =',SnowDepth
        stop 'error'
     endif
 
@@ -268,8 +268,8 @@ contains
 
        ! latent heat conductance and coeff above veg.
        CAW  = 1.0 / RAWC
-       CEW  = FWET * VAIE / RB
-       CTW  = (1.0 - FWET) * ( LAISUNE/(RB+RSSUN) + LAISHAE/(RB+RSSHA) )
+       CEW  = CanopyWetFrac * VAIE / RB
+       CTW  = (1.0 - CanopyWetFrac) * ( LAISUNE/(RB+RSSUN) + LAISHAE/(RB+RSSHA) )
        CGW  = 1.0 / (RAWG + RSURF)
        COND = CAW + CEW + CTW + CGW
        AEA  = ( EAIR*CAW + ESTG*CGW ) / COND
@@ -285,9 +285,9 @@ contains
        EVC  = FVEG * RHOAIR * ConstHeatCapacAir * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
        TR   = FVEG * RHOAIR * ConstHeatCapacAir * CTW * (ESTV - EAH) / GAMMAV
        if ( TV > ConstFreezePoint ) then
-          EVC = min( CANLIQ*LATHEAV/MainTimeStep, EVC )    ! Barlage: add if block for canice in v3.6
+          EVC = min( CanopyLiqWater*LATHEAV/MainTimeStep, EVC )    ! Barlage: add if block for canopy ice in v3.6
        else
-          EVC = min( CANICE*LATHEAV/MainTimeStep, EVC )
+          EVC = min( CanopyIce*LATHEAV/MainTimeStep, EVC )
        endif
        B    = SAV - IRC - SHC - EVC - TR + PAHV  ! additional w/m2
        A    = FVEG * ( 4.0*CIR*TV**3 + CSH + (CEV+CTR)*DESTV ) !volumetric heat capacity
@@ -347,9 +347,9 @@ contains
 
     ! if snow on ground and TGV > freezing point: reset TGV = freezing point. reevaluate ground fluxes.
     if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
-       if ( (SNOWH > 0.05) .and. (TGV > ConstFreezePoint) ) then
+       if ( (SnowDepth > 0.05) .and. (TGV > ConstFreezePoint) ) then
           if ( OptSnowSoilTempTime == 1 ) TGV = ConstFreezePoint
-          if ( OptSnowSoilTempTime == 3 ) TGV = (1.0 - FSNO) * TGV + FSNO * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
+          if ( OptSnowSoilTempTime == 3 ) TGV = (1.0 - SnowCoverFrac) * TGV + SnowCoverFrac * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
           IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
           SHG = CSH * (TGV        - TAH)
           EVG = CEV * (ESTG*RHSUR - EAH)

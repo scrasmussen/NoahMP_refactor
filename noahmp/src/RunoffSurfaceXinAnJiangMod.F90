@@ -36,8 +36,8 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
-              SMC             => noahmp%water%state%SMC              ,& ! in,   total soil moisture [m3/m3]
-              FCR             => noahmp%water%state%FCR              ,& ! in,   fraction of imperviousness due to frozen soil
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,   total soil moisture [m3/m3]
+              SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,   fraction of imperviousness due to frozen soil
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               SMCREF          => noahmp%water%param%SMCREF           ,& ! in,   reference soil moisture (field capacity) (m3/m3)
@@ -60,11 +60,11 @@ contains
     PDDUM   = 0.0
 
     do IZ = 1, NumSoilLayer-2
-       if ( (SMC(IZ) - SMCREF(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
-          SM  = SM + ( SMC(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)   !m
+       if ( (SoilMoisture(IZ) - SMCREF(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
+          SM  = SM + ( SoilMoisture(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)   !m
           WM  = WM + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)                 !m  
        else
-          WM  = WM + SMC(IZ) * (-1.0) * DepthSoilLayer(IZ)
+          WM  = WM + SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ)
        endif
        WM_MAX = WM_MAX + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)
        SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)
@@ -73,13 +73,13 @@ contains
     SM = min( SM, SM_MAX ) ! free water (m)
 
     ! impervious surface runoff R_IMP    
-    IRUNOFF = FCR(1) * QINSUR * DT
+    IRUNOFF = SoilImpervFrac(1) * QINSUR * DT
 
     ! solve pervious surface runoff (m) based on Eq. (310)
     if ( (WM/WM_MAX) <= (0.5-AXAJ) ) then
-       PRUNOFF = (1.0-FCR(1)) * QINSUR * DT * ( (0.5-AXAJ)**(1.0-BXAJ) ) * ( (WM/WM_MAX)**BXAJ )
+       PRUNOFF = (1.0-SoilImpervFrac(1)) * QINSUR * DT * ( (0.5-AXAJ)**(1.0-BXAJ) ) * ( (WM/WM_MAX)**BXAJ )
     else
-       PRUNOFF = (1.0-FCR(1)) * QINSUR * DT * (1.0 - (( (0.5+AXAJ)**(1.0-BXAJ) ) * ( (1.0-(WM/WM_MAX))**BXAJ )))
+       PRUNOFF = (1.0-SoilImpervFrac(1)) * QINSUR * DT * (1.0 - (( (0.5+AXAJ)**(1.0-BXAJ) ) * ( (1.0-(WM/WM_MAX))**BXAJ )))
     endif
 
     ! estimate surface runoff based on Eq. (313)

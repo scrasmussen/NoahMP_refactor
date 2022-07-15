@@ -31,11 +31,11 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
-              SMC             => noahmp%water%state%SMC              ,& ! in,   total soil water content [m3/m3]
-              FCR             => noahmp%water%state%FCR              ,& ! in,   impermeable fraction due to frozen soil
+              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,   total soil water content [m3/m3]
+              SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,   impervious fraction due to frozen soil
               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
-              FSAT            => noahmp%water%state%FSAT             ,& ! out,  fractional saturated area for soil moisture
+              SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac             ,& ! out,  fractional saturated area for soil moisture
               RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
               PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
              )
@@ -48,15 +48,15 @@ contains
     ! compute mean soil moisture, depth and saturation fraction
     do K = 1, NumSoilLayer
        DZTOT   = DZTOT  + ThicknessSnowSoilLayer(K)
-       SMCTOT  = SMCTOT + SMC(K) / SMCMAX(K) * ThicknessSnowSoilLayer(K)
+       SMCTOT  = SMCTOT + SoilMoisture(K) / SMCMAX(K) * ThicknessSnowSoilLayer(K)
        if ( DZTOT >= 2.0 ) exit
     enddo
     SMCTOT = SMCTOT / DZTOT
-    FSAT   = max( 0.01, SMCTOT ) ** 4.0  ! BATS
+    SoilSaturateFrac   = max( 0.01, SMCTOT ) ** 4.0  ! BATS
 
     ! compute surface runoff and infiltration m/s
     if ( QINSUR > 0.0 ) then
-       RUNSRF = QINSUR * ( (1.0-FCR(1)) * FSAT + FCR(1) )
+       RUNSRF = QINSUR * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
        PDDUM  = QINSUR - RUNSRF 
     endif
 

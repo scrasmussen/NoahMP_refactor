@@ -61,8 +61,8 @@ contains
               NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage ,& ! in,    foliage nitrogen concentration (%)
               LeafAreaPerMass            => noahmp%biochem%state%LeafAreaPerMass           ,& ! in,    leaf area per unit mass [m2/g]
               PhotosynTotal             => noahmp%biochem%flux%PhotosynTotal             ,& ! in,    total leaf photosynthesis (umol co2 /m2 /s)
-              WROOT           => noahmp%water%state%WROOT            ,& ! in,    root zone soil water [-]
-              WSTRES          => noahmp%water%state%WSTRES           ,& ! in,    water stress coeficient [-]  (1. for wilting)
+              SoilWaterRootZone           => noahmp%water%state%SoilWaterRootZone            ,& ! in,    root zone soil water [-]
+              SoilWaterStress          => noahmp%water%state%SoilWaterStress           ,& ! in,    water stress coeficient [-]  (1. for wilting)
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
               TROOT           => noahmp%energy%state%TROOT           ,& ! in,    root-zone averaged temperature (k)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
@@ -138,7 +138,7 @@ contains
     RespFacNitrogenFoliage    = min( NitrogenConcFoliage / max(1.0e-06,NitrogenConcFoliageMax), 1.0 )
     RespFacTemperature     = RespMaintQ10**((TV - 298.16) / 10.0)
     RespirationLeaf   = RespMaintLeaf25C * RespFacTemperature * RespFacNitrogenFoliage * &
-                        XLAI * RespReductionFac * (1.0 - WSTRES)           ! umol CO2/m2/s
+                        XLAI * RespReductionFac * (1.0 - SoilWaterStress)           ! umol CO2/m2/s
     RespirationLeafMaint = min( (LeafMass-LeafMassMin)/MainTimeStep, RespirationLeaf*12.0e-6 )                 ! g/m2/s
     RespirationRoot = RespMaintRoot25C * (RootMass*1.0e-3) * RespFacTemperature * RespReductionFac * 12.0e-6             ! g/m2/s
     RespirationStem = RespMaintStem25C * ((StemMass-StemMassMin) * 1.0e-3) * &
@@ -174,7 +174,7 @@ contains
     ! seasonal leaf die rate dependent on temp and water stress
     ! water stress is set to 1 at permanent wilting point      
     SC    = exp(-0.3 * max(0.0, TV-TemperaureLeafFreeze)) * (LeafMass / 120.0) 
-    SD    = exp((WSTRES - 1.0) * WaterStressCoeff)
+    SD    = exp((SoilWaterStress - 1.0) * WaterStressCoeff)
     DeathLeaf = LeafMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
     DeathStem = StemMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
      
@@ -219,7 +219,7 @@ contains
     CarbonMassShallowSoil = CarbonMassShallowSoil + &
           (TurnoverRoot+TurnoverLeaf+TurnoverStem+TurnoverWood+DeathLeaf+DeathStem) * MainTimeStep  ! MB: add DeathStem v3.7
     MicroRespFactorSoilTemp    = 2.0**( (STC(1) - 283.16) / 10.0 )
-    MicroRespFactorSoilWater    = WROOT / (0.20 + WROOT) * 0.23 / (0.23 + WROOT)
+    MicroRespFactorSoilWater    = SoilWaterRootZone / (0.20 + SoilWaterRootZone) * 0.23 / (0.23 + SoilWaterRootZone)
     RespirationSoil = MicroRespFactorSoilWater * MicroRespFactorSoilTemp * &
                       MicroRespCoeff * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
     CarbonDecayToStable = 0.1 * RespirationSoil
