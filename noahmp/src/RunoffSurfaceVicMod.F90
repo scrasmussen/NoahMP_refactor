@@ -35,11 +35,11 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,     depth [m] of layer-bottom from soil surface
               SoilMoisture            => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               BVIC            => noahmp%water%param%BVIC             ,& ! in,     VIC model infiltration parameter
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM             ,& ! out,    infiltration rate at surface (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! out,    infiltration rate at surface (mm/s)
               SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac              & ! out,    fractional saturated area for soil moisture
              )
 ! ----------------------------------------------------------------------
@@ -52,8 +52,8 @@ contains
     BASIS         = 0.0
     TOP_MOIST     = 0.0
     TOP_MAX_MOIST = 0.0
-    RUNSRF        = 0.0
-    PDDUM         = 0.0
+    RunoffSurface        = 0.0
+    InfilRateSfc         = 0.0
 
     do IZ = 1, NumSoilLayer-2
        TOP_MOIST     = TOP_MOIST + SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ)  ! m
@@ -71,23 +71,23 @@ contains
     I_0   = I_MAX * ( 1.0 - (1.0 - SoilSaturateFrac)**(1.0/BVIC) ) !m
 
     ! Solve for surface runoff
-    if ( QINSUR == 0.0 ) then
-       RUNSRF = 0.0
+    if ( SoilSfcInflow == 0.0 ) then
+       RunoffSurface = 0.0
     else if ( I_MAX == 0.0 ) then
-       RUNSRF = QINSUR*DT
-    else if ( (I_0 + (QINSUR*DT)) > I_MAX ) then
-       RUNSRF = QINSUR * DT - TOP_MAX_MOIST + TOP_MOIST
+       RunoffSurface = SoilSfcInflow*DT
+    else if ( (I_0 + (SoilSfcInflow*DT)) > I_MAX ) then
+       RunoffSurface = SoilSfcInflow * DT - TOP_MAX_MOIST + TOP_MOIST
     else
-       BASIS  = 1.0 - ( ( I_0 + (QINSUR * DT) ) / I_MAX )
-       RUNSRF = QINSUR * DT - TOP_MAX_MOIST + TOP_MOIST + &
+       BASIS  = 1.0 - ( ( I_0 + (SoilSfcInflow * DT) ) / I_MAX )
+       RunoffSurface = SoilSfcInflow * DT - TOP_MAX_MOIST + TOP_MOIST + &
                 TOP_MAX_MOIST * ( BASIS**(1.0+BVIC) )
     endif
 
-    RUNSRF = RUNSRF / DT ! m/s
-    if ( RUNSRF < 0.0 ) RUNSRF = 0.0
-    if ( RUNSRF > QINSUR) RUNSRF = QINSUR
+    RunoffSurface = RunoffSurface / DT ! m/s
+    if ( RunoffSurface < 0.0 ) RunoffSurface = 0.0
+    if ( RunoffSurface > SoilSfcInflow) RunoffSurface = SoilSfcInflow
 
-    PDDUM = QINSUR - RUNSRF    ! m/s
+    InfilRateSfc = SoilSfcInflow - RunoffSurface    ! m/s
 
     end associate
 

@@ -59,13 +59,13 @@ contains
                DepthSoilLayer        => noahmp%config%domain%DepthSoilLayer        ,& ! in,  depth [m] of layer-bottom from soil surface
                OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration ,& ! in,  options for infiltration in dynamic VIC runoff scheme
                SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
-               QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
+               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
                SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
                BBVIC           => noahmp%water%param%BBVIC            ,& ! in,     DVIC heterogeniety parameter for infiltration
                GDVIC           => noahmp%water%param%GDVIC            ,& ! in,     DVIC Mean Capillary Drive (m) for infiltration models
                BDVIC           => noahmp%water%param%BDVIC            ,& ! in,     DVIC model infiltration parameter
-               RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-               PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
+               RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
+               InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,    infiltration rate at surface (mm/s)
               )
 ! ----------------------------------------------------------------------
 
@@ -79,8 +79,8 @@ contains
      RUNOFFSAT     = 0.0
      RUNOFFINF     = 0.0
      INFILTRTN     = 0.0
-     RUNSRF        = 0.0
-     PDDUM         = 0.0
+     RunoffSurface        = 0.0
+     InfilRateSfc         = 0.0
      IZMAX         = 20
      ERROR         = 1.388889E-07 * DT ! 0.5 mm per hour time step
      BB            = BBVIC
@@ -91,7 +91,7 @@ contains
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
 
-     DP     = QINSUR * DT                      ! precipitation depth, [m]
+     DP     = SoilSfcInflow * DT                      ! precipitation depth, [m]
      I_MAX  = TOP_MAX_MOIST * (BDVIC + 1.0)    ! maximum infiltration capacity, im, [m], Eq. 14
      I_0    = I_MAX * (1.0 - (1.0 - (TOP_MOIST/TOP_MAX_MOIST)**(1.0 / (1.0+BDVIC)) ) )  ! infiltration capacity, i [m] in the Eq. 1
      ! I_MAX = CAP_minf ; I_0 = A  
@@ -282,10 +282,10 @@ contains
         endif
      endif
 
-2001 RUNSRF = (RUNOFFSAT + RUNOFFINF) / DT
-     RUNSRF = min( RUNSRF, QINSUR )
-     RUNSRF = max( RUNSRF, 0.0    )
-     PDDUM  = QINSUR - RUNSRF
+2001 RunoffSurface = (RUNOFFSAT + RUNOFFINF) / DT
+     RunoffSurface = min( RunoffSurface, SoilSfcInflow )
+     RunoffSurface = max( RunoffSurface, 0.0    )
+     InfilRateSfc  = SoilSfcInflow - RunoffSurface
 
     end associate
 

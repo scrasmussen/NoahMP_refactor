@@ -61,7 +61,7 @@ contains
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
               IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
               SoilSupercoolWater       => noahmp%water%state%SoilSupercoolWater        ,& ! out,   supercooled water in soil (kg/m2)
-              QMELT           => noahmp%water%flux%QMELT             ,& ! out,   snowmelt rate [mm/s]
+              MeltGroundSnow           => noahmp%water%flux%MeltGroundSnow             ,& ! out,   ground snowmelt rate [mm/s]
               PondSfcThinSnwMelt         => noahmp%water%state%PondSfcThinSnwMelt           & ! out,  surface ponding [mm] from snowmelt when thin snow has no layer
              )
 ! ----------------------------------------------------------------------
@@ -74,7 +74,7 @@ contains
     allocate( WLIQ0  (-NumSnowLayerMax+1:NumSoilLayer) )
     allocate( MICE   (-NumSnowLayerMax+1:NumSoilLayer) )
     allocate( MLIQ   (-NumSnowLayerMax+1:NumSoilLayer) )
-    QMELT   = 0.0
+    MeltGroundSnow   = 0.0
     PondSfcThinSnwMelt = 0.0
     XMF     = 0.0
     ! supercooled water content
@@ -166,8 +166,8 @@ contains
           XM(1) = 0.0
           HM(1) = 0.0
        endif
-       QMELT   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
-       XMF     = ConstLatHeatFusion * QMELT
+       MeltGroundSnow   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
+       XMF     = ConstLatHeatFusion * MeltGroundSnow
        PondSfcThinSnwMelt = TEMP1 - SnowWaterEquiv
     endif
 
@@ -208,7 +208,7 @@ contains
           XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
           ! snow melting rate
           if ( J < 1 ) then
-             QMELT = QMELT + max( 0.0, (WICE0(J)-MICE(J)) ) / MainTimeStep
+             MeltGroundSnow = MeltGroundSnow + max( 0.0, (WICE0(J)-MICE(J)) ) / MainTimeStep
           endif
        endif
     enddo

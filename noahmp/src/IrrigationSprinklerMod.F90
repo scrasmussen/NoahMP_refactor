@@ -48,10 +48,10 @@ contains
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
               FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
-              EIRR            => noahmp%water%flux%EIRR              ,& ! inout,  evaporation of irrigation water to evaporation,sprink
-              RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
-              IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
-              IREVPLOS        => noahmp%water%flux%IREVPLOS          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
+              EvapIrriSprinkler            => noahmp%water%flux%EvapIrriSprinkler              ,& ! inout,  evaporation of irrigation water, sprinkler [mm/s]
+              RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! inout,  rainfall [mm/s] at reference height
+              IrrigationRateSprinkler        => noahmp%water%flux%IrrigationRateSprinkler          ,& ! inout,  rate of irrigation by sprinkler [m/timestep]
+              IrriEvapLossSprinkler        => noahmp%water%flux%IrriEvapLossSprinkler          ,& ! inout,  loss of irrigation water to evaporation,sprinkler [m/timestep]
               SoilIce            => noahmp%water%state%SoilIce              & ! out,    soil ice content [m3/m3]
              )
 ! ----------------------------------------------------------------------
@@ -64,7 +64,7 @@ contains
 
     ! irrigation rate of sprinkler
     TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * MainTimeStep / 3600.0   ! NRCS rate/time step - calibratable
-    IRSIRATE  = min( FSUR*MainTimeStep, IrrigationAmtSprinkler, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
+    IrrigationRateSprinkler  = min( FSUR*MainTimeStep, IrrigationAmtSprinkler, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
                                                           ! and to the NRCS recommended rate, (m)
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 
     ! losses from sprinkler irrigation systems under various operating 
@@ -83,23 +83,23 @@ contains
     if ( (IRRLOSS > 100.0) .or. (IRRLOSS < 0.0) ) IRRLOSS = 4.0 ! In case if IRRLOSS is out of range
 
     ! Sprinkler water (m) for sprinkler fraction 
-    IRSIRATE  = IRSIRATE * IrrigationFracSprinkler
-    if ( IRSIRATE >= IrrigationAmtSprinkler ) then
-       IRSIRATE = IrrigationAmtSprinkler
+    IrrigationRateSprinkler  = IrrigationRateSprinkler * IrrigationFracSprinkler
+    if ( IrrigationRateSprinkler >= IrrigationAmtSprinkler ) then
+       IrrigationRateSprinkler = IrrigationAmtSprinkler
        IrrigationAmtSprinkler  = 0.0
     else
-       IrrigationAmtSprinkler = IrrigationAmtSprinkler - IRSIRATE
+       IrrigationAmtSprinkler = IrrigationAmtSprinkler - IrrigationRateSprinkler
     endif
 
-    IREVPLOS = IRSIRATE * IRRLOSS * (1.0/100.0)
-    IRSIRATE = IRSIRATE - IREVPLOS
+    IrriEvapLossSprinkler = IrrigationRateSprinkler * IRRLOSS * (1.0/100.0)
+    IrrigationRateSprinkler = IrrigationRateSprinkler - IrriEvapLossSprinkler
 
     ! include sprinkler water to total rain for canopy process later
-    RAIN = RAIN + (IRSIRATE * 1000.0 / MainTimeStep) ![mm/s]
+    RainfallRefHeight = RainfallRefHeight + (IrrigationRateSprinkler * 1000.0 / MainTimeStep) ![mm/s]
 
     ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-    FIRR = IREVPLOS * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
-    EIRR = IREVPLOS * 1000.0 / MainTimeStep          ! sprinkler evaporation (mm/s)
+    FIRR = IrriEvapLossSprinkler * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
+    EvapIrriSprinkler = IrriEvapLossSprinkler * 1000.0 / MainTimeStep          ! sprinkler evaporation (mm/s)
 
     end associate
 

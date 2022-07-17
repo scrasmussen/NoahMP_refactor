@@ -45,7 +45,7 @@ contains
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
-              QTLDRN          => noahmp%water%flux%QTLDRN             & ! out,    tile drainage (mm/s)
+              TileDrain          => noahmp%water%flux%TileDrain             & ! out,    tile drainage (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ contains
     AVFC   = 0.0
     TDRVOL = 0.0
     OVRFC  = 0.0
-    QTLDRN = 0.0
+    TileDrain = 0.0
     ThicknessSoilLayer = 0.0
     TDSUM  = 0.0
     TDFRAC = 0.0
@@ -193,7 +193,7 @@ contains
        endif
     endif
 
-    QTLDRN = TDRVOL / MainTimeStep
+    TileDrain = TDRVOL / MainTimeStep
 
     end associate
 

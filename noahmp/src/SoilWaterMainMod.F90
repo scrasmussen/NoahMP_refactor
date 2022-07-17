@@ -48,8 +48,8 @@ contains
     real(kind=kind_noahmp) :: MH2O          ! water mass removal (mm)
     real(kind=kind_noahmp) :: XS            ! temporary
     real(kind=kind_noahmp) :: WATMIN        ! minimum soil water
-    real(kind=kind_noahmp) :: QDRAIN_SAVE   ! accumulated drainage water at fine time step
-    real(kind=kind_noahmp) :: RUNSRF_SAVE   ! accumulated surface runoff at fine time step
+    real(kind=kind_noahmp) :: DrainSoilBotAcc   ! accumulated drainage water at fine time step
+    real(kind=kind_noahmp) :: RunoffSurfaceAcc   ! accumulated surface runoff at fine time step
     real(kind=kind_noahmp) :: FACC          ! accumulated infiltration rate (m/s)
     real(kind=kind_noahmp), parameter :: A = 4.0
     real(kind=kind_noahmp), allocatable, dimension(:) :: RHSTT  ! right-hand side term of the matrix
@@ -69,15 +69,15 @@ contains
               OptTileDrainage => noahmp%config%nmlist%OptTileDrainage,& ! in,     options for tile drainage
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               TileDrainFrac        => noahmp%water%state%TileDrainFrac         ,& ! in,     tile drainage map(fraction)
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture          ,& ! inout,  total soil water content [m3/m3]
               RechargeGwDeepWT        => noahmp%water%state%RechargeGwDeepWT         ,& ! inout,  recharge to or from the water table when deep [m]
-              QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! out,    soil bottom drainage (m/s)
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! out,    subsurface runoff [mm/s] 
-              PDDUM           => noahmp%water%flux%PDDUM             ,& ! out,    infiltration rate at surface (mm/s)
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot            ,& ! out,    soil bottom drainage (m/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface            ,& ! out,    subsurface runoff [mm/s] 
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! out,    infiltration rate at surface (mm/s)
               SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! out,    maximum soil imperviousness fraction
               SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! out,    soil hydraulic conductivity [m/s]
               SoilEffPorosity           => noahmp%water%state%SoilEffPorosity       ,& ! out,    soil effective porosity (m3/m3)
@@ -100,9 +100,9 @@ contains
     BI     = 0.0
     CI     = 0.0
     MLIQ   = 0.0
-    RUNSRF = 0.0
-    RUNSUB = 0.0
-    PDDUM  = 0.0
+    RunoffSurface = 0.0
+    RunoffSubsurface = 0.0
+    InfilRateSfc  = 0.0
     RSAT   = 0.0
     FACC   = 1.0e-06
 
@@ -147,18 +147,18 @@ contains
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
-    if ( (PDDUM*MainTimeStep) > (ThicknessSnowSoilLayer(1)*SMCMAX(1)) ) then
+    if ( (InfilRateSfc*MainTimeStep) > (ThicknessSnowSoilLayer(1)*SMCMAX(1)) ) then
        NITER = NITER*2
     endif
     DTFINE  = MainTimeStep / NITER
 
     ! solve soil moisture
     FACC        = 1.0e-06
-    QDRAIN_SAVE = 0.0
-    RUNSRF_SAVE = 0.0
+    DrainSoilBotAcc = 0.0
+    RunoffSurfaceAcc = 0.0
 
     do ITER = 1, NITER
-       if ( QINSUR > 0.0 ) then
+       if ( SoilSfcInflow > 0.0 ) then
           if ( OptRunoffSurface == 3 ) call RunoffSurfaceFreeDrain(noahmp,DTFINE)
           if ( OptRunoffSurface == 6 ) call RunoffSurfaceVIC(noahmp,DTFINE)
           if ( OptRunoffSurface == 7 ) call RunoffSurfaceXinAnJiang(noahmp,DTFINE)
@@ -167,14 +167,14 @@ contains
        call SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
        call SoilMoistureSolver(noahmp, DTFINE, AI, BI, CI, RHSTT)
        RSAT        = RSAT + SoilSaturationExcess
-       QDRAIN_SAVE = QDRAIN_SAVE + QDRAIN
-       RUNSRF_SAVE = RUNSRF_SAVE + RUNSRF
+       DrainSoilBotAcc = DrainSoilBotAcc + DrainSoilBot
+       RunoffSurfaceAcc = RunoffSurfaceAcc + RunoffSurface
     enddo
 
-    QDRAIN = QDRAIN_SAVE / NITER
-    RUNSRF = RUNSRF_SAVE / NITER
-    RUNSRF = RUNSRF * 1000.0 + RSAT * 1000.0 / MainTimeStep  ! m/s -> mm/s
-    QDRAIN = QDRAIN * 1000.0
+    DrainSoilBot = DrainSoilBotAcc / NITER
+    RunoffSurface = RunoffSurfaceAcc / NITER
+    RunoffSurface = RunoffSurface * 1000.0 + RSAT * 1000.0 / MainTimeStep  ! m/s -> mm/s
+    DrainSoilBot = DrainSoilBot * 1000.0
 
     ! compute tile drainage ! pvk
     if ( (OptTileDrainage == 1) .and. (TileDrainFrac > 0.3) .and. (OptRunoffSurface == 3) ) then
@@ -191,7 +191,7 @@ contains
           WTSUB = WTSUB + SoilWatConductivity(K) * ThicknessSnowSoilLayer(K)
        enddo
        do K = 1, NumSoilLayer
-          MH2O    = RUNSUB * MainTimeStep * (SoilWatConductivity(K)*ThicknessSnowSoilLayer(K)) / WTSUB  ! mm
+          MH2O    = RunoffSubsurface * MainTimeStep * (SoilWatConductivity(K)*ThicknessSnowSoilLayer(K)) / WTSUB  ! mm
           SoilLiqWater(K) = SoilLiqWater(K) - MH2O / (ThicknessSnowSoilLayer(K)*1000.0)
        enddo
     endif
@@ -220,7 +220,7 @@ contains
            XS = 0.0
        endif
        MLIQ(IZ) = MLIQ(IZ) + XS
-       RUNSUB   = RUNSUB - XS/MainTimeStep
+       RunoffSubsurface   = RunoffSubsurface - XS/MainTimeStep
 
        if ( OptRunoffSubsurface == 5 ) RechargeGwDeepWT = RechargeGwDeepWT - XS * 1.0e-3
 

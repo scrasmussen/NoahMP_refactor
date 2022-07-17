@@ -62,8 +62,8 @@ contains
               WaterStorageSoilAqf   => noahmp%water%state%WaterStorageSoilAqf ,& ! inout,  water storage in aquifer + saturated soil [mm]
               FFF             => noahmp%water%param%FFF              ,& ! inout,  runoff decay factor (m-1)
               RSBMX           => noahmp%water%param%RSBMX            ,& ! inout,  baseflow coefficient [mm/s]
-              QIN             => noahmp%water%flux%QIN               ,& ! out,    groundwater recharge [mm/s]
-              QDIS            => noahmp%water%flux%QDIS               & ! out,    groundwater discharge [mm/s]
+              RechargeGw             => noahmp%water%flux%RechargeGw               ,& ! out,    groundwater recharge rate [mm/s]
+              DischargeGw            => noahmp%water%flux%DischargeGw               & ! out,    groundwater discharge rate [mm/s]
              )
 ! ----------------------------------------------------------------------
 
@@ -74,8 +74,8 @@ contains
     allocate( SoilEffPorosity (1:NumSoilLayer) )
     allocate( HK    (1:NumSoilLayer) )
     allocate( SoilMoisture   (1:NumSoilLayer) )
-    QDIS = 0.0
-    QIN  = 0.0
+    DischargeGw = 0.0
+    RechargeGw  = 0.0
 
     ! Derive layer-bottom depth in [mm]; KWM:Derive layer thickness in mm
     DZMM(1) = -DepthSoilLayer(1) * 1.0e3
@@ -109,7 +109,7 @@ contains
     ! Groundwater discharge [mm/s]
     FFF   = 6.0
     RSBMX = 5.0
-    QDIS = (1.0-SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * (WaterTableDepth-2.0))
+    DischargeGw = (1.0-SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * (WaterTableDepth-2.0))
 
     ! Matric potential at the layer above the water table
     S_NODE = min( 1.0, SoilMoisture(IWT)/SMCMAX(IWT) )
@@ -121,16 +121,16 @@ contains
     KA      = HK(IWT)
     WH_ZWT  = -WaterTableDepth * 1.0e3                 !(mm)
     WH      = SMPFZ - ZNODE(IWT) * 1.0e3   !(mm)
-    QIN     = -KA * (WH_ZWT - WH) / ( (WaterTableDepth-ZNODE(IWT)) * 1.0e3 )
-    QIN     = max( -10.0/MainTimeStep, min(10.0/MainTimeStep, QIN) )
+    RechargeGw     = -KA * (WH_ZWT - WH) / ( (WaterTableDepth-ZNODE(IWT)) * 1.0e3 )
+    RechargeGw     = max( -10.0/MainTimeStep, min(10.0/MainTimeStep, RechargeGw) )
 
     ! Water storage in the aquifer + saturated soil
-    WaterStorageSoilAqf = WaterStorageSoilAqf + (QIN - QDIS) * MainTimeStep     !(mm)
+    WaterStorageSoilAqf = WaterStorageSoilAqf + (RechargeGw - DischargeGw) * MainTimeStep     !(mm)
     if ( IWT == NumSoilLayer ) then
-       WaterStorageAquifer = WaterStorageAquifer + (QIN - QDIS) * MainTimeStep     !(mm)
+       WaterStorageAquifer = WaterStorageAquifer + (RechargeGw - DischargeGw) * MainTimeStep     !(mm)
        WaterStorageSoilAqf = WaterStorageAquifer
        WaterTableDepth = (-DepthSoilLayer(NumSoilLayer) + 25.0) - WaterStorageAquifer / 1000.0 / ROUS      !(m)
-       MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) - QIN * MainTimeStep        ! [mm]
+       MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) - RechargeGw * MainTimeStep        ! [mm]
        MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) + max( 0.0, (WaterStorageAquifer - 5000.0) )
        WaterStorageAquifer = min( WaterStorageAquifer, 5000.0 )
     else
@@ -150,7 +150,7 @@ contains
           WTSUB = WTSUB + HK(IZ) * DZMM(IZ)
        enddo
        do IZ = 1, NumSoilLayer           ! Removing subsurface runoff
-          MLIQ(IZ) = MLIQ(IZ) - QDIS * MainTimeStep * HK(IZ) * DZMM(IZ) / WTSUB
+          MLIQ(IZ) = MLIQ(IZ) - DischargeGw * MainTimeStep * HK(IZ) * DZMM(IZ) / WTSUB
        enddo
     endif
 

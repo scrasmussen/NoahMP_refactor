@@ -35,8 +35,8 @@ contains
               IrrigationFracFlood           => noahmp%water%state%IrrigationFracFlood            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
               FIRTFAC         => noahmp%water%param%FIRTFAC          ,& ! in,     flood application rate factor
               IrrigationAmtFlood         => noahmp%water%state%IrrigationAmtFlood          ,& ! inout,  flood irrigation water amount [m]
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! inout,  water input on soil surface [mm/s]
-              IRFIRATE        => noahmp%water%flux%IRFIRATE           & ! inout,  flood irrigation water rate [m/timestep]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! inout,  water input on soil surface [mm/s]
+              IrrigationRateFlood        => noahmp%water%flux%IrrigationRateFlood           & ! inout,  flood irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
 
@@ -49,18 +49,18 @@ contains
     ! irrigation rate of flood irrigation. It should be
     ! greater than infiltration rate to get infiltration
     ! excess runoff at the time of application
-    IRFIRATE = FSUR * MainTimeStep * FIRTFAC   ! Limit the application rate to fac*infiltration rate 
-    IRFIRATE = IRFIRATE * IrrigationFracFlood
+    IrrigationRateFlood = FSUR * MainTimeStep * FIRTFAC   ! Limit the application rate to fac*infiltration rate 
+    IrrigationRateFlood = IrrigationRateFlood * IrrigationFracFlood
 
-    if ( IRFIRATE >= IrrigationAmtFlood ) then
-       IRFIRATE = IrrigationAmtFlood
+    if ( IrrigationRateFlood >= IrrigationAmtFlood ) then
+       IrrigationRateFlood = IrrigationAmtFlood
        IrrigationAmtFlood  = 0.0
     else
-       IrrigationAmtFlood  = IrrigationAmtFlood - IRFIRATE
+       IrrigationAmtFlood  = IrrigationAmtFlood - IrrigationRateFlood
     endif
 
     ! update water flux going to surface soil
-    QINSUR = QINSUR + (IRFIRATE / MainTimeStep)  ! [m/s]
+    SoilSfcInflow = SoilSfcInflow + (IrrigationRateFlood / MainTimeStep)  ! [m/s]
 
     end associate
 

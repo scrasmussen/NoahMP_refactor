@@ -38,7 +38,7 @@ contains
               MICIR_RATE      => noahmp%water%param%MICIR_RATE       ,& ! in,     micro irrigation rate (mm/hr)
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               IrrigationAmtMicro         => noahmp%water%state%IrrigationAmtMicro          ,& ! inout,  micro irrigation water amount [m]
-              IRMIRATE        => noahmp%water%flux%IRMIRATE           & ! inout,  micro irrigation water rate [m/timestep]
+              IrrigationRateMicro        => noahmp%water%flux%IrrigationRateMicro           & ! inout,  micro irrigation water rate [m/timestep]
              )
 ! ----------------------------------------------------------------------
     
@@ -51,20 +51,20 @@ contains
 
     ! irrigation rate of micro irrigation
     TEMP_RATE = MICIR_RATE * (1.0/1000.0) * MainTimeStep/ 3600.0   ! NRCS rate/time step - calibratable
-    IRMIRATE  = min( 0.5*FSUR*MainTimeStep, IrrigationAmtMicro, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
+    IrrigationRateMicro  = min( 0.5*FSUR*MainTimeStep, IrrigationAmtMicro, TEMP_RATE )   ! Limit the application rate to minimum of 0.5*infiltration rate
                                                          ! and to the NRCS recommended rate, (m)
-    IRMIRATE  = IRMIRATE * IrrigationFracMicro
+    IrrigationRateMicro  = IrrigationRateMicro * IrrigationFracMicro
 
-    if ( IRMIRATE >= IrrigationAmtMicro ) then
-       IRMIRATE  = IrrigationAmtMicro
+    if ( IrrigationRateMicro >= IrrigationAmtMicro ) then
+       IrrigationRateMicro  = IrrigationAmtMicro
        IrrigationAmtMicro   = 0.0
     else
-       IrrigationAmtMicro = IrrigationAmtMicro - IRMIRATE
+       IrrigationAmtMicro = IrrigationAmtMicro - IrrigationRateMicro
     endif
 
     ! update soil moisture
     ! we implement drip in first layer of the Noah-MP. Change layer 1 moisture wrt to MI rate
-    SoilLiqWater(1) = SoilLiqWater(1) + ( IRMIRATE / (-1.0*DepthSoilLayer(1)) )
+    SoilLiqWater(1) = SoilLiqWater(1) + ( IrrigationRateMicro / (-1.0*DepthSoilLayer(1)) )
 
     end associate
 

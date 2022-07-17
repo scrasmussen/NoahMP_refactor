@@ -190,7 +190,7 @@ contains
               noahmp%energy%flux%SHB    = noahmp%energy%flux%FSH
               noahmp%energy%flux%EVB    = noahmp%energy%flux%FGEV
               noahmp%energy%flux%GHB    = noahmp%energy%flux%SSOIL 
-              NoahmpIO%QFX (I,J)        = noahmp%water%flux%EDIR
+              NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapSoilNet
               NoahmpIO%LH  (I,J)        = noahmp%energy%flux%FGEV         
           else
 
@@ -206,10 +206,10 @@ contains
               !  Transfer QFX and LH for output (this can be moved to transferout module using ICE as if-statement)     
               !---------------------------------------------------------------------
               
-              NoahmpIO%QFX (I,J)        = noahmp%water%flux%ECAN  + &
-                                          noahmp%water%flux%EDIR  + &
-                                          noahmp%water%flux%ETRAN + &
-                                          noahmp%water%flux%EIRR
+              NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapCanopyNet  + &
+                                          noahmp%water%flux%EvapSoilNet  + &
+                                          noahmp%water%flux%Transpiration + &
+                                          noahmp%water%flux%EvapIrriSprinkler
                                      
               NoahmpIO%LH  (I,J)        = noahmp%energy%flux%FGEV + &
                                           noahmp%energy%flux%FCEV + &

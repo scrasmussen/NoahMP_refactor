@@ -54,7 +54,7 @@ contains
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
               IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
-              QMELT           => noahmp%water%flux%QMELT             ,& ! out,   snowmelt rate [mm/s]
+              MeltGroundSnow           => noahmp%water%flux%MeltGroundSnow             ,& ! out,   ground snowmelt rate [mm/s]
               PondSfcThinSnwMelt         => noahmp%water%state%PondSfcThinSnwMelt           & ! out,   surface ponding [mm] from snowmelt when thin snow has no layer
              )
 ! ----------------------------------------------------------------------
@@ -68,7 +68,7 @@ contains
     allocate( MICE   (-NumSnowLayerMax+1:NumSoilLayer) )
     allocate( MLIQ   (-NumSnowLayerMax+1:NumSoilLayer) )
     allocate( HEATR  (-NumSnowLayerMax+1:NumSoilLayer) )
-    QMELT   = 0.0
+    MeltGroundSnow   = 0.0
     PondSfcThinSnwMelt = 0.0
     XMF     = 0.0
 
@@ -137,8 +137,8 @@ contains
              XM(1) = 0.0
              HM(1) = 0.0
           endif
-          QMELT    = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep             ! melted snow rate
-          XMF      = ConstLatHeatFusion * QMELT                               ! melted snow energy
+          MeltGroundSnow    = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep             ! melted snow rate
+          XMF      = ConstLatHeatFusion * MeltGroundSnow                               ! melted snow energy
           PondSfcThinSnwMelt  = TEMP1 - SnowWaterEquiv                              ! melt water
        endif
     endif ! OptGlacierTreatment==2
@@ -164,7 +164,7 @@ contains
           XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
 
           ! snow melting rate
-          QMELT = QMELT + max( 0.0, (WICE0(J)-MICE(J)) ) / MainTimeStep
+          MeltGroundSnow = MeltGroundSnow + max( 0.0, (WICE0(J)-MICE(J)) ) / MainTimeStep
        endif
     enddo
 
@@ -239,8 +239,8 @@ contains
              HM(1)    = 0.0
              IndexPhaseChange(1) = 0
           endif
-          QMELT   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
-          XMF     = ConstLatHeatFusion * QMELT
+          MeltGroundSnow   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
+          XMF     = ConstLatHeatFusion * MeltGroundSnow
           PondSfcThinSnwMelt = TEMP1 - SnowWaterEquiv
        endif
 

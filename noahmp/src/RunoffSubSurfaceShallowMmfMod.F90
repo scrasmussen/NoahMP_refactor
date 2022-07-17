@@ -27,11 +27,11 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
-              QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,     soil bottom drainage (m/s)
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot            ,& ! in,     soil bottom drainage (m/s)
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil water content [m3/m3]
               WaterStorageAquifer => noahmp%water%state%WaterStorageAquifer   ,& ! inout,  water storage in aquifer [mm]
-              RUNSUB          => noahmp%water%flux%RUNSUB             & ! out,   subsurface runoff [mm/s] 
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface             & ! out,   subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ contains
 
     ! compute subsurface runoff
     ! it really comes from subroutine watertable, which is not called with the same frequency as the soil routines here
-    RUNSUB = RUNSUB + QDRAIN 
+    RunoffSubsurface = RunoffSubsurface + DrainSoilBot 
     WaterStorageAquifer = 0.0
 
     end associate

@@ -40,7 +40,7 @@ contains
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               SoilMoisture             => noahmp%water%state%SoilMoisture             ,& ! in,     total soil moisture [m3/m3]
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3] 
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
               DKSAT           => noahmp%water%param%DKSAT            ,& ! in,     saturated soil hydraulic conductivity [m/s]
@@ -72,10 +72,10 @@ contains
        FSUR = DKSAT(ISOIL) + ( (JJ/FACC) * (DKSAT(ISOIL) - SoilWatConductivity) )
 
        ! infiltration rate at surface
-       if ( DKSAT(ISOIL) < QINSUR ) then
-          FSUR = min( QINSUR, FSUR )
+       if ( DKSAT(ISOIL) < SoilSfcInflow ) then
+          FSUR = min( SoilSfcInflow, FSUR )
        else
-          FSUR = QINSUR
+          FSUR = SoilSfcInflow
        endif
        ! accumulated infiltration function
        FACC = FACC + FSUR

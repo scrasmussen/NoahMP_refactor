@@ -65,10 +65,10 @@ contains
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
               WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg           ,& ! in,    total water storage at the beginning
-              PRCP            => noahmp%water%flux%PRCP              ,& ! in,    total precipitation [mm/s]
-              EDIR            => noahmp%water%flux%EDIR              ,& ! in,    net direct soil evaporation (mm/s)
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! in,    surface runoff [mm/s]
-              RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! in,    subsurface runoff [mm/s]
+              PrecipTotRefHeight            => noahmp%water%flux%PrecipTotRefHeight              ,& ! in,    total precipitation [mm/s] at reference height
+              EvapSoilNet            => noahmp%water%flux%EvapSoilNet              ,& ! in,    net direct soil evaporation (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! in,    surface runoff [mm/s]
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface            ,& ! in,    subsurface runoff [mm/s]
               WaterStorageTotEnd          => noahmp%water%state%WaterStorageTotEnd           ,& ! out,   total water storage at the end
               WaterBalanceError          => noahmp%water%state%WaterBalanceError            & ! out,   water balance error (mm) per time step
              )
@@ -78,7 +78,8 @@ contains
     ! compute total glacier water storage before NoahMP processes
     ! need more work on including glacier ice mass underneath snow
     WaterStorageTotEnd = SnowWaterEquiv
-    WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PRCP - EDIR - RUNSRF - RUNSUB) * MainTimeStep
+    WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - &
+                       (PrecipTotRefHeight - EvapSoilNet - RunoffSurface - RunoffSubsurface) * MainTimeStep
 
 #ifndef WRF_HYDRO
     if ( abs(WaterBalanceError) > 0.1 ) then
@@ -92,10 +93,12 @@ contains
        write(*,*) 'WaterBalanceError =',WaterBalanceError, "kg m{-2} timestep{-1}"
        !call wrf_message(trim(message))
        write(*, &
-           '("  GridIndexI   GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PRCP     EDIR    RUNSRF   RUNSUB")')
+           '("  GridIndexI   GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PrecipTotRefHeight  &
+                EvapSoilNet    RunoffSurface   RunoffSubsurface")')
        !call wrf_message(trim(message))
-       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,PRCP*MainTimeStep,&
-             EDIR*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep
+       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,&
+                                              PrecipTotRefHeight*MainTimeStep,EvapSoilNet*MainTimeStep,&
+                                              RunoffSurface*MainTimeStep,RunoffSubsurface*MainTimeStep
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
        stop "Error"

@@ -87,16 +87,16 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,    total soil moisture [m3/m3]
               WaterStorageAquifer  => noahmp%water%state%WaterStorageAquifer  ,& ! in,    water storage in aquifer [mm]
               WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg           ,& ! in,    total water storage at the beginning
-              PRCP            => noahmp%water%flux%PRCP              ,& ! in,    total precipitation [mm/s]
-              ECAN            => noahmp%water%flux%ECAN              ,& ! in,    evaporation of intercepted water (mm/s) [+]
-              ETRAN           => noahmp%water%flux%ETRAN             ,& ! in,    transpiration rate (mm/s) [+]
-              EDIR            => noahmp%water%flux%EDIR              ,& ! in,    net direct soil evaporation (mm/s)
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! in,    surface runoff [mm/s]
-              RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! in,    subsurface runoff [mm/s]
-              QTLDRN          => noahmp%water%flux%QTLDRN            ,& ! in,    tile drainage (mm/s)
-              IRSIRATE        => noahmp%water%flux%IRSIRATE          ,& ! in,    rate of irrigation by sprinkler [m/timestep]
-              IRMIRATE        => noahmp%water%flux%IRMIRATE          ,& ! in,    micro irrigation water rate [m/timestep]
-              IRFIRATE        => noahmp%water%flux%IRFIRATE          ,& ! in,    flood irrigation water rate [m/timestep]
+              PrecipTotRefHeight            => noahmp%water%flux%PrecipTotRefHeight              ,& ! in,    total precipitation [mm/s] at reference height
+              EvapCanopyNet            => noahmp%water%flux%EvapCanopyNet              ,& ! in,    evaporation of intercepted water [mm/s]
+              Transpiration           => noahmp%water%flux%Transpiration             ,& ! in,    transpiration rate [mm/s]
+              EvapSoilNet            => noahmp%water%flux%EvapSoilNet              ,& ! in,    net direct soil evaporation (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! in,    surface runoff [mm/s]
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface            ,& ! in,    subsurface runoff [mm/s]
+              TileDrain          => noahmp%water%flux%TileDrain            ,& ! in,    tile drainage (mm/s)
+              IrrigationRateSprinkler        => noahmp%water%flux%IrrigationRateSprinkler          ,& ! in,    rate of irrigation by sprinkler [m/timestep]
+              IrrigationRateMicro        => noahmp%water%flux%IrrigationRateMicro          ,& ! in,    micro irrigation water rate [m/timestep]
+              IrrigationRateFlood        => noahmp%water%flux%IrrigationRateFlood          ,& ! in,    flood irrigation water rate [m/timestep]
               WaterStorageTotEnd          => noahmp%water%state%WaterStorageTotEnd           ,& ! out,   total water storage at the end
               WaterBalanceError          => noahmp%water%state%WaterBalanceError            & ! out,   water balance error (mm) per time step
              )
@@ -104,7 +104,8 @@ contains
 
     ! before water balance check add irrigation water to precipitation
     if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) ) then
-       PRCP = PRCP + (IRSIRATE + IRMIRATE + IRFIRATE) * 1000.0 / MainTimeStep  ! irrigation
+       PrecipTotRefHeight = PrecipTotRefHeight + &
+                           (IrrigationRateSprinkler + IrrigationRateMicro + IrrigationRateFlood)*1000.0 / MainTimeStep  ! irrigation
     endif
 
     ! Error in water balance should be < 0.1 mm
@@ -113,7 +114,8 @@ contains
        do IZ = 1, NumSoilLayer
           WaterStorageTotEnd = WaterStorageTotEnd + SoilMoisture(IZ) * ThicknessSnowSoilLayer(IZ) * 1000.0
        enddo
-       WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PRCP - ECAN - ETRAN - EDIR - RUNSRF - RUNSUB - QTLDRN) * MainTimeStep
+       WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PrecipTotRefHeight - EvapCanopyNet - &
+                           Transpiration - EvapSoilNet - RunoffSurface - RunoffSubsurface - TileDrain) * MainTimeStep
 #ifndef WRF_HYDRO
        if ( abs(WaterBalanceError) > 0.1 ) then
           if ( WaterBalanceError > 0) then
@@ -126,10 +128,15 @@ contains
           write(*,*) 'WaterBalanceError =',WaterBalanceError, "kg m{-2} timestep{-1}"
           !call wrf_message(trim(message))
           write(*, &
-               '("  GridIndexI    GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PRCP     ECAN     EDIR    ETRAN   RUNSRF   RUNSUB   WaterTableDepth   QTLDRN")')
+               '("  GridIndexI    GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PrecipTotRefHeight &
+                    EvapCanopyNet     EvapSoilNet    Transpiration   RunoffSurface   RunoffSubsurface   &
+                    WaterTableDepth   TileDrain")')
           !call wrf_message(trim(message))
-          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,PRCP*MainTimeStep,ECAN*MainTimeStep,&
-                EDIR*MainTimeStep,ETRAN*MainTimeStep,RUNSRF*MainTimeStep,RUNSUB*MainTimeStep,WaterTableDepth,QTLDRN*MainTimeStep
+          write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,&
+                                                 PrecipTotRefHeight*MainTimeStep,EvapCanopyNet*MainTimeStep,&
+                                                 EvapSoilNet*MainTimeStep,Transpiration*MainTimeStep,&
+                                                 RunoffSurface*MainTimeStep,RunoffSubsurface*MainTimeStep,&
+                                                 WaterTableDepth,TileDrain*MainTimeStep
           !call wrf_message(trim(message))
           !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
           stop "Error"

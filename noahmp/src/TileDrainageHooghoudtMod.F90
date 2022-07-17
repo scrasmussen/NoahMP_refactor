@@ -38,7 +38,7 @@ contains
     real(kind=kind_noahmp) :: TD_DEPTH  ! Effective Depth to impermeable layer from soil surface
     real(kind=kind_noahmp) :: TD_HEMD   ! Effective Height between water level in the drains to the water table MiDpoint
     real(kind=kind_noahmp) :: TDDC      ! Drainage Coefficient
-    real(kind=kind_noahmp) :: QTLDRN1   ! temporary drainage discharge
+    real(kind=kind_noahmp) :: TileDrainTmp   ! temporary drainage discharge
     real(kind=kind_noahmp) :: TD_DD     ! drain depth to impermeable layer
     real(kind=kind_noahmp) :: OVRFCS    ! amount of water over field capacity
     real(kind=kind_noahmp), allocatable, dimension(:) :: TD_SATZ ! thickness of saturated zone
@@ -66,7 +66,7 @@ contains
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
               SoilMoisture    => noahmp%water%state%SoilMoisture    ,& ! inout, total soil moisture [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout, water table depth [m]
-              QTLDRN          => noahmp%water%flux%QTLDRN             & ! inout, tile drainage (mm/s)
+              TileDrain          => noahmp%water%flux%TileDrain             & ! inout, tile drainage (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -140,24 +140,24 @@ contains
     TD_DEPTH = TD_HAIL + TD_DDRAIN
     TD_HEMD  = TD_DDRAIN - YY
     if ( TD_HEMD <= 0.0 ) then
-       QTLDRN = 0.0
+       TileDrain = 0.0
     else
-       QTLDRN = ( (8.0*KLAT*TD_HAIL*TD_HEMD) + (4.0*KLAT*TD_HEMD*TD_HEMD) ) & ! m per timestep
+       TileDrain = ( (8.0*KLAT*TD_HAIL*TD_HEMD) + (4.0*KLAT*TD_HEMD*TD_HEMD) ) & ! m per timestep
                                                         / (TD_SPAC*TD_SPAC)
     endif
-    QTLDRN = QTLDRN * 1000.0 ! m per timestep to mm/timestep /one tile
-    if ( QTLDRN <= 0.0 ) QTLDRN = 0.0
-    if ( QTLDRN > TDDC ) QTLDRN = TDDC
+    TileDrain = TileDrain * 1000.0 ! m per timestep to mm/timestep /one tile
+    if ( TileDrain <= 0.0 ) TileDrain = 0.0
+    if ( TileDrain > TDDC ) TileDrain = TDDC
     NDRAINS = int( GridSize / TD_SPAC )
-    QTLDRN  = QTLDRN * NDRAINS
-    if ( QTLDRN > OVRFCS ) QTLDRN = OVRFCS
+    TileDrain  = TileDrain * NDRAINS
+    if ( TileDrain > OVRFCS ) TileDrain = OVRFCS
 
     ! update soil moisture after drainage: moisture drains from top to bottom
-    QTLDRN1 = QTLDRN
+    TileDrainTmp = TileDrain
     do K = 1, NumSoilLayer
-       if ( QTLDRN1 > 0.0) then
+       if ( TileDrainTmp > 0.0) then
           if ( (TD_SATZ(K) > 0.0) .and. (OVRFC(K) > 0.0) ) then
-             SoilLiqWaterAftDrain(K) = OVRFC(K) - QTLDRN1 ! remaining water after tile drain
+             SoilLiqWaterAftDrain(K) = OVRFC(K) - TileDrainTmp ! remaining water after tile drain
              if ( SoilLiqWaterAftDrain(K) > 0.0 ) then
                 SoilLiqWater(K) = (SMCREF(K) - SoilIce(K)) + SoilLiqWaterAftDrain(K) / (ThicknessSoilLayer(K) * 1000.0)
                 SoilMoisture(K)  = SoilLiqWater(K) + SoilIce(K)
@@ -165,13 +165,13 @@ contains
              else
                 SoilLiqWater(K) = SMCREF(K) - SoilIce(K)
                 SoilMoisture(K)  = SoilLiqWater(K) + SoilIce (K)
-                QTLDRN1 = QTLDRN1 - OVRFC(K)
+                TileDrainTmp = TileDrainTmp - OVRFC(K)
              endif
           endif
        endif
     enddo
 
-    QTLDRN = QTLDRN / MainTimeStep ![mm/s]
+    TileDrain = TileDrain / MainTimeStep ![mm/s]
 
     end associate
 

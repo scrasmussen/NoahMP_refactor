@@ -51,13 +51,13 @@ contains
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,   soil water content [m3/m3]
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,   soil ice content [m3/m3]
               SoilIceMax         => noahmp%water%state%SoilIceMax          ,& ! in,   maximum soil ice content (m3/m3)
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,   water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,   wilting point soil moisture [m3/m3]
               KDT             => noahmp%water%param%KDT              ,& ! in,   parameter to calculate maximum infiltration rate
               FRZX            => noahmp%water%param%FRZX             ,& ! in,   parameter to calculate frozen soil impermeable fraction
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,  surface runoff [mm/s]
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,  infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ contains
     DMAX(1:NumSoilLayer) = 0.0
 
     ! start infiltration for free drainage scheme
-    if ( QINSUR > 0.0 ) then
+    if ( SoilSfcInflow > 0.0 ) then
 
        DT1   = DT / 86400.0
        SMCAV = SMCMAX(1) - SMCWLT(1)
@@ -84,7 +84,7 @@ contains
        enddo
        VAL    = 1.0 - exp(-1.0 * KDT * DT1)
        DDT    = DD * VAL
-       PX     = max( 0.0, QINSUR * DT )
+       PX     = max( 0.0, SoilSfcInflow * DT )
        INFMAX = ( PX * (DDT / (PX + DDT)) ) / DT
 
        ! impermeable fraction due to frozen soil
@@ -115,10 +115,10 @@ contains
        INFMAX = min( INFMAX, PX   )
 
        ! compute surface runoff and infiltration rate
-       RUNSRF = max( 0.0, QINSUR - INFMAX )
-       PDDUM  = QINSUR - RUNSRF
+       RunoffSurface = max( 0.0, SoilSfcInflow - INFMAX )
+       InfilRateSfc  = SoilSfcInflow - RunoffSurface
 
-    endif ! QINSUR > 0.0
+    endif ! SoilSfcInflow > 0.0
 
     end associate
 

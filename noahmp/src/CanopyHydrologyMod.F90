@@ -42,26 +42,26 @@ contains
               CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! out,   wetted or snowed fraction of the canopy
               CanopyIceMax          => noahmp%water%state%CanopyIceMax           ,& ! out,   canopy capacity for snow interception [mm]
               CanopyLiqWaterMax          => noahmp%water%state%CanopyLiqWaterMax           ,& ! out,   canopy capacity for rain interception [mm]
-              ECAN            => noahmp%water%flux%ECAN              ,& ! out,   evaporation of intercepted water (mm/s) [+]
-              ETRAN           => noahmp%water%flux%ETRAN             ,& ! out,   transpiration rate (mm/s) [+]
-              QEVAC           => noahmp%water%flux%QEVAC             ,& ! out,   canopy water evaporation rate (mm/s)
-              QDEWC           => noahmp%water%flux%QDEWC             ,& ! out,   canopy water dew rate (mm/s)
-              QFROC           => noahmp%water%flux%QFROC             ,& ! out,   canopy ice frost rate (mm/s)
-              QSUBC           => noahmp%water%flux%QSUBC             ,& ! out,   canopy ice sublimation rate (mm/s)
-              QMELTC          => noahmp%water%flux%QMELTC            ,& ! out,   canopy ice melting rate (mm/s)
-              QFRZC           => noahmp%water%flux%QFRZC              & ! out,   canopy water refreezing rate (mm/s)
+              EvapCanopyNet            => noahmp%water%flux%EvapCanopyNet              ,& ! out,   evaporation of intercepted total water [mm/s]
+              Transpiration           => noahmp%water%flux%Transpiration             ,& ! out,   transpiration rate [mm/s]
+              EvapCanopyLiq           => noahmp%water%flux%EvapCanopyLiq             ,& ! out,   canopy liquid water evaporation rate [mm/s]
+              DewCanopyLiq           => noahmp%water%flux%DewCanopyLiq             ,& ! out,   canopy liquid water dew rate [mm/s]
+              FrostCanopyIce           => noahmp%water%flux%FrostCanopyIce             ,& ! out,   canopy ice frost rate [mm/s]
+              SublimCanopyIce           => noahmp%water%flux%SublimCanopyIce             ,& ! out,   canopy ice sublimation rate [mm/s]
+              MeltCanopyIce          => noahmp%water%flux%MeltCanopyIce            ,& ! out,   canopy ice melting rate [mm/s]
+              RefrzCanopyLiq           => noahmp%water%flux%RefrzCanopyLiq              & ! out,   canopy water refreezing rate [mm/s]
              )
 ! --------------------------------------------------------------------
 
 ! initialization for out-only variables
-    ECAN    = 0.0
-    ETRAN   = 0.0
-    QEVAC   = 0.0
-    QDEWC   = 0.0
-    QFROC   = 0.0
-    QSUBC   = 0.0
-    QMELTC  = 0.0
-    QFRZC   = 0.0
+    EvapCanopyNet    = 0.0
+    Transpiration   = 0.0
+    EvapCanopyLiq   = 0.0
+    DewCanopyLiq   = 0.0
+    FrostCanopyIce   = 0.0
+    SublimCanopyIce   = 0.0
+    MeltCanopyIce  = 0.0
+    RefrzCanopyLiq   = 0.0
     CanopyLiqWaterMax  = 0.0
     CanopyIceMax  = 0.0
     CanopyWetFrac    = 0.0
@@ -73,23 +73,23 @@ contains
 
     ! canopy evaporation, transpiration, and dew
     if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy
-       ETRAN = max( FCTR/ConstLatHeatVapor, 0.0 )
-       QEVAC = max( FCEV/ConstLatHeatVapor, 0.0 )
-       QDEWC = abs( min( FCEV/ConstLatHeatVapor, 0.0 ) )
-       QSUBC = 0.0
-       QFROC = 0.0
+       Transpiration = max( FCTR/ConstLatHeatVapor, 0.0 )
+       EvapCanopyLiq = max( FCEV/ConstLatHeatVapor, 0.0 )
+       DewCanopyLiq = abs( min( FCEV/ConstLatHeatVapor, 0.0 ) )
+       SublimCanopyIce = 0.0
+       FrostCanopyIce = 0.0
     else
-       ETRAN = max( FCTR/ConstLatHeatSublim, 0.0 )
-       QEVAC = 0.0
-       QDEWC = 0.0
-       QSUBC = max( FCEV/ConstLatHeatSublim, 0.0 )
-       QFROC = abs( min( FCEV/ConstLatHeatSublim, 0.0 ) )
+       Transpiration = max( FCTR/ConstLatHeatSublim, 0.0 )
+       EvapCanopyLiq = 0.0
+       DewCanopyLiq = 0.0
+       SublimCanopyIce = max( FCEV/ConstLatHeatSublim, 0.0 )
+       FrostCanopyIce = abs( min( FCEV/ConstLatHeatSublim, 0.0 ) )
     endif
 
     ! canopy water balance. for convenience allow dew to bring CanopyLiqWater above
     ! maxh2o or else would have to re-adjust drip
-    QEVAC   = min( CanopyLiqWater/MainTimeStep, QEVAC )
-    CanopyLiqWater  = max( 0.0, CanopyLiqWater+(QDEWC-QEVAC)*MainTimeStep )
+    EvapCanopyLiq   = min( CanopyLiqWater/MainTimeStep, EvapCanopyLiq )
+    CanopyLiqWater  = max( 0.0, CanopyLiqWater+(DewCanopyLiq-EvapCanopyLiq)*MainTimeStep )
     if ( CanopyLiqWater <= 1.0e-06 ) CanopyLiqWater = 0.0
 
 !=== canopy ice 
@@ -97,8 +97,8 @@ contains
     CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (ELAI + ESAI)
 
     ! canopy sublimation and frost
-    QSUBC = min( CanopyIce/MainTimeStep, QSUBC )
-    CanopyIce= max( 0.0, CanopyIce+(QFROC-QSUBC)*MainTimeStep )
+    SublimCanopyIce = min( CanopyIce/MainTimeStep, SublimCanopyIce )
+    CanopyIce= max( 0.0, CanopyIce+(FrostCanopyIce-SublimCanopyIce)*MainTimeStep )
     if ( CanopyIce <= 1.0e-6 ) CanopyIce = 0.0
 
 !=== wetted fraction of canopy
@@ -112,27 +112,27 @@ contains
 !=== phase change
     ! canopy ice melting
     if ( (CanopyIce > 1.0e-6) .and. (TV > ConstFreezePoint) ) then
-       QMELTC = min( CanopyIce/MainTimeStep, (TV-ConstFreezePoint) * ConstHeatCapacIce * &
+       MeltCanopyIce = min( CanopyIce/MainTimeStep, (TV-ConstFreezePoint) * ConstHeatCapacIce * &
                      CanopyIce / ConstDensityIce / (MainTimeStep*ConstLatHeatFusion) )
-       CanopyIce = max( 0.0, CanopyIce - QMELTC*MainTimeStep )
-       CanopyLiqWater = max( 0.0, CanopyLiqWater + QMELTC*MainTimeStep )
+       CanopyIce = max( 0.0, CanopyIce - MeltCanopyIce*MainTimeStep )
+       CanopyLiqWater = max( 0.0, CanopyLiqWater + MeltCanopyIce*MainTimeStep )
        TV     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TV
     endif
 
     ! canopy water refreeezing
     if ( (CanopyLiqWater > 1.0e-6) .and. (TV < ConstFreezePoint) ) then
-       QFRZC  = min( CanopyLiqWater/MainTimeStep, (ConstFreezePoint-TV) * ConstHeatCapacWater * &
+       RefrzCanopyLiq  = min( CanopyLiqWater/MainTimeStep, (ConstFreezePoint-TV) * ConstHeatCapacWater * &
                      CanopyLiqWater / ConstDensityWater / (MainTimeStep*ConstLatHeatFusion) )
-       CanopyLiqWater = max( 0.0, CanopyLiqWater - QFRZC*MainTimeStep )
-       CanopyIce = max( 0.0, CanopyIce + QFRZC*MainTimeStep )
+       CanopyLiqWater = max( 0.0, CanopyLiqWater - RefrzCanopyLiq*MainTimeStep )
+       CanopyIce = max( 0.0, CanopyIce + RefrzCanopyLiq*MainTimeStep )
        TV     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TV
     ENDIF
 
 !=== update total canopy water
     CanopyTotalWater = CanopyLiqWater + CanopyIce
 
-!=== total canopy evaporation
-    ECAN = QEVAC + QSUBC - QDEWC - QFROC
+!=== total canopy net evaporation
+    EvapCanopyNet = EvapCanopyLiq + SublimCanopyIce - DewCanopyLiq - FrostCanopyIce
 
     end associate
 

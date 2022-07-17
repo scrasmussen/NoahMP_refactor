@@ -38,7 +38,7 @@ contains
     real(kind=kind_noahmp)                :: CEV          ! coefficients for ev as function of esat[ts]
     real(kind=kind_noahmp)                :: CGH          ! coefficients for st as function of ts
     real(kind=kind_noahmp)                :: CQ2B         ! exchange coefficient for 2m temp. 
-    real(kind=kind_noahmp)                :: QFX          ! moisture flux
+    real(kind=kind_noahmp)                :: MoistureFluxSfc          ! moisture flux
     real(kind=kind_noahmp)                :: ESATW        ! es for water
     real(kind=kind_noahmp)                :: ESATI        ! es for ice
     real(kind=kind_noahmp)                :: DSATW        ! d(es)/dt at tg (pa/k) for water
@@ -112,7 +112,7 @@ contains
     MOZSGN = 0
     FH2    = 0.0
     H      = 0.0
-    QFX    = 0.0
+    MoistureFluxSfc    = 0.0
     FV     = 0.1
     CIR    = EMG * ConstStefanBoltzmann
     CGH    = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
@@ -174,7 +174,7 @@ contains
           ESTG = ESATI
        endif
        QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirSurface - 0.378 * (ESTG*RHSUR))
-       QFX  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
+       MoistureFluxSfc  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
 
     enddo loop3 ! end stability iteration
 

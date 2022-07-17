@@ -48,19 +48,19 @@ contains
               ETA0            => noahmp%water%param%ETA0_SnowCompact ,& ! in,     snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
-              DDZ1            => noahmp%water%flux%DDZ1              ,& ! out,    rate of settling of snowpack due to destructive metamorphism [1/s]
-              DDZ2            => noahmp%water%flux%DDZ2              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
-              DDZ3            => noahmp%water%flux%DDZ3              ,& ! out,    rate of compaction of snowpack due to melt [1/s]
-              PDZDTC          => noahmp%water%flux%PDZDTC            ,& ! out,    rate of change in fractional-thickness due to compaction [fraction/s]
+              CompactionSnowAging            => noahmp%water%flux%CompactionSnowAging              ,& ! out,    rate of settling of snowpack due to destructive metamorphism [1/s]
+              CompactionSnowBurden            => noahmp%water%flux%CompactionSnowBurden              ,& ! out,    rate of compaction of snowpack due to overburden [1/s]
+              CompactionSnowMelt            => noahmp%water%flux%CompactionSnowMelt              ,& ! out,    rate of compaction of snowpack due to melt [1/s]
+              CompactionSnowTot          => noahmp%water%flux%CompactionSnowTot            ,& ! out,    rate of change in fractional-thickness due to compaction [fraction/s]
               SnowIceFrac            => noahmp%water%state%SnowIceFrac         & ! out,    fraction of ice in snow layers at current time step 
              )
 ! ----------------------------------------------------------------------
 
 ! initialization for out-only variables
-    DDZ1(:)   = 0.0
-    DDZ2(:)   = 0.0
-    DDZ3(:)   = 0.0
-    PDZDTC(:) = 0.0
+    CompactionSnowAging(:)   = 0.0
+    CompactionSnowBurden(:)   = 0.0
+    CompactionSnowMelt(:)   = 0.0
+    CompactionSnowTot(:) = 0.0
     SnowIceFrac(:)   = 0.0
 
 ! start snow compaction
@@ -77,28 +77,29 @@ contains
 
           ! Settling/compaction as a result of destructive metamorphism
           DEXPF   = exp( -C4 * TD )
-          DDZ1(J) = -C3 * DEXPF
-          if ( BI > DM ) DDZ1(J) = DDZ1(J) * exp( -46.0e-3 * (BI-DM) )
-          if ( SnowLiqWater(J) > (0.01*ThicknessSnowSoilLayer(J)) ) DDZ1(J) = DDZ1(J) * C5   ! Liquid water term
+          CompactionSnowAging(J) = -C3 * DEXPF
+          if ( BI > DM ) CompactionSnowAging(J) = CompactionSnowAging(J) * exp( -46.0e-3 * (BI-DM) )
+          if ( SnowLiqWater(J) > (0.01*ThicknessSnowSoilLayer(J)) ) CompactionSnowAging(J) = CompactionSnowAging(J) * C5   ! Liquid water term
 
           ! Compaction due to overburden
-          DDZ2(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden
+          CompactionSnowBurden(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden
 
           ! Compaction occurring during melt
           if ( IndexPhaseChange(J) == 1 ) then
-             DDZ3(J) = max( 0.0, (SnowIceFracPrev(J)-SnowIceFrac(J)) / max(1.0e-6,SnowIceFracPrev(J)) )
-             DDZ3(J) = -DDZ3(J) / MainTimeStep   ! sometimes too large
+             CompactionSnowMelt(J) = max( 0.0, (SnowIceFracPrev(J)-SnowIceFrac(J)) / max(1.0e-6,SnowIceFracPrev(J)) )
+             CompactionSnowMelt(J) = -CompactionSnowMelt(J) / MainTimeStep   ! sometimes too large
           else
-             DDZ3(J) = 0.0
+             CompactionSnowMelt(J) = 0.0
           endif
 
           ! Time rate of fractional change in DZ (units of s-1)
-          PDZDTC(J) = ( DDZ1(J) + DDZ2(J) + DDZ3(J) ) * MainTimeStep
-          PDZDTC(J) = max( -0.5, PDZDTC(J) )
+          CompactionSnowTot(J) = ( CompactionSnowAging(J) + CompactionSnowBurden(J) + CompactionSnowMelt(J) ) * MainTimeStep
+          CompactionSnowTot(J) = max( -0.5, CompactionSnowTot(J) )
 
           ! The change in DZ due to compaction
-          ThicknessSnowSoilLayer(J) = ThicknessSnowSoilLayer(J) * ( 1.0 + PDZDTC(J) )
-          ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SnowIce(J)/ConstDensityIce + SnowLiqWater(J)/ConstDensityWater )
+          ThicknessSnowSoilLayer(J) = ThicknessSnowSoilLayer(J) * ( 1.0 + CompactionSnowTot(J) )
+          ThicknessSnowSoilLayer(J) = max( ThicknessSnowSoilLayer(J), SnowIce(J)/ConstDensityIce + &
+                                                                      SnowLiqWater(J)/ConstDensityWater )
 
        endif
 

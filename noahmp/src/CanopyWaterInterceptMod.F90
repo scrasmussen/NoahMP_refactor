@@ -41,8 +41,8 @@ contains
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
               CH2OP           => noahmp%water%param%CH2OP            ,& ! in,    maximum intercepted water per unit lai+sai (mm)
-              RAIN            => noahmp%water%flux%RAIN              ,& ! in,    total liquid rainfall (mm/s) before interception
-              SNOW            => noahmp%water%flux%SNOW              ,& ! in,    total liquid snowfall (mm/s) before interception
+              RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
+              SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
               PrecipAreaFrac              => noahmp%water%state%PrecipAreaFrac               ,& ! in,    fraction of the gridcell that receives precipitation
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! inout, intercepted canopy liquid water [mm]
@@ -51,28 +51,28 @@ contains
               CanopyTotalWater             => noahmp%water%state%CanopyTotalWater              ,& ! out,   total canopy intercepted water [mm]
               CanopyIceMax          => noahmp%water%state%CanopyIceMax           ,& ! out,   canopy capacity for snow interception [mm]
               CanopyLiqWaterMax          => noahmp%water%state%CanopyLiqWaterMax           ,& ! out,   canopy capacity for rain interception [mm]
-              QINTR           => noahmp%water%flux%QINTR             ,& ! out,   interception rate for rain (mm/s)
-              QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! out,   drip rate for rain (mm/s)
-              QTHROR          => noahmp%water%flux%QTHROR            ,& ! out,   throughfall for rain (mm/s)
-              QINTS           => noahmp%water%flux%QINTS             ,& ! out,   interception (loading) rate for snowfall (mm/s)
-              QDRIPS          => noahmp%water%flux%QDRIPS            ,& ! out,   drip (unloading) rate for intercepted snow (mm/s)
-              QTHROS          => noahmp%water%flux%QTHROS            ,& ! out,   throughfall of snowfall (mm/s)
-              QRAIN           => noahmp%water%flux%QRAIN             ,& ! out,   rainfall at ground surface (mm/s)
-              QSNOW           => noahmp%water%flux%QSNOW             ,& ! out,   snowfall at ground surface (mm/s)
-              SNOWHIN         => noahmp%water%flux%SNOWHIN            & ! out,   snow depth increasing rate (m/s)
+              InterceptCanopyRain           => noahmp%water%flux%InterceptCanopyRain             ,& ! out,   interception rate for rain [mm/s]
+              DripCanopyRain          => noahmp%water%flux%DripCanopyRain            ,& ! out,   drip rate for intercepted rain [mm/s]
+              ThroughfallRain          => noahmp%water%flux%ThroughfallRain            ,& ! out,   throughfall for rain [mm/s]
+              InterceptCanopySnow           => noahmp%water%flux%InterceptCanopySnow             ,& ! out,   interception (loading) rate for snowfall [mm/s]
+              DripCanopySnow          => noahmp%water%flux%DripCanopySnow            ,& ! out,   drip (unloading) rate for intercepted snow [mm/s]
+              ThroughfallSnow          => noahmp%water%flux%ThroughfallSnow            ,& ! out,   throughfall of snowfall [mm/s]
+              RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! out,   rainfall at ground surface [mm/s]
+              SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! out,   snowfall at ground surface [mm/s]
+              SnowDepthIncr         => noahmp%water%flux%SnowDepthIncr            & ! out,   snow depth increasing rate (m/s) due to snowfall
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    QINTR   = 0.0
-    QDRIPR  = 0.0
-    QTHROR  = 0.0
-    QINTS   = 0.0
-    QDRIPS  = 0.0
-    QTHROS  = 0.0
-    QRAIN   = 0.0
-    QSNOW   = 0.0
-    SNOWHIN = 0.0
+    InterceptCanopyRain   = 0.0
+    DripCanopyRain  = 0.0
+    ThroughfallRain  = 0.0
+    InterceptCanopySnow   = 0.0
+    DripCanopySnow  = 0.0
+    ThroughfallSnow  = 0.0
+    RainfallGround   = 0.0
+    SnowfallGround   = 0.0
+    SnowDepthIncr = 0.0
     ICEDRIP = 0.0
     FT      = 0.0
     FV      = 0.0
@@ -83,19 +83,19 @@ contains
 
     ! average rain interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
-       QINTR  = FVEG * RAIN * PrecipAreaFrac  ! interception capability
-       QINTR  = min( QINTR, (CanopyLiqWaterMax-CanopyLiqWater)/MainTimeStep * &
-                            (1.0-exp(-RAIN*MainTimeStep/CanopyLiqWaterMax)) )
-       QINTR  = max( QINTR, 0.0 )
-       QDRIPR = FVEG * RAIN - QINTR
-       QTHROR = (1.0 - FVEG) * RAIN
-       CanopyLiqWater = max( 0.0, CanopyLiqWater + QINTR*MainTimeStep )
+       InterceptCanopyRain  = FVEG * RainfallRefHeight * PrecipAreaFrac  ! max interception capability
+       InterceptCanopyRain  = min( InterceptCanopyRain, (CanopyLiqWaterMax-CanopyLiqWater)/MainTimeStep * &
+                                   (1.0-exp(-RainfallRefHeight*MainTimeStep/CanopyLiqWaterMax)) )
+       InterceptCanopyRain  = max( InterceptCanopyRain, 0.0 )
+       DripCanopyRain = FVEG * RainfallRefHeight - InterceptCanopyRain
+       ThroughfallRain = (1.0 - FVEG) * RainfallRefHeight
+       CanopyLiqWater = max( 0.0, CanopyLiqWater + InterceptCanopyRain*MainTimeStep )
     else
-       QINTR  = 0.0
-       QDRIPR = 0.0
-       QTHROR = RAIN
+       InterceptCanopyRain  = 0.0
+       DripCanopyRain = 0.0
+       ThroughfallRain = RainfallRefHeight
        if ( CanopyLiqWater > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPR = QDRIPR + CanopyLiqWater / MainTimeStep
+          DripCanopyRain = DripCanopyRain + CanopyLiqWater / MainTimeStep
           CanopyLiqWater = 0.0
        endif
     endif
@@ -106,22 +106,23 @@ contains
 
     ! average snow interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then
-       QINTS = FVEG * SNOW * PrecipAreaFrac
-       QINTS = min( QINTS, (CanopyIceMax-CanopyIce)/MainTimeStep * (1.0-exp(-SNOW*MainTimeStep/CanopyIceMax)) )
-       QINTS = max( QINTS, 0.0 )
+       InterceptCanopySnow = FVEG * SnowfallRefHeight * PrecipAreaFrac
+       InterceptCanopySnow = min( InterceptCanopySnow, (CanopyIceMax-CanopyIce)/MainTimeStep * &
+                                  (1.0-exp(-SnowfallRefHeight*MainTimeStep/CanopyIceMax)) )
+       InterceptCanopySnow = max( InterceptCanopySnow, 0.0 )
        FT    = max( 0.0, (TV - 270.15) / 1.87e5 )
        FV    = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
        ICEDRIP = max( 0.0, CanopyIce ) * (FV + FT)
-       QDRIPS  = (FVEG * SNOW - QINTS) + ICEDRIP
-       QTHROS  = (1.0 - FVEG) * SNOW
-       CanopyIce  = max( 0.0, CanopyIce + (QINTS-ICEDRIP)*MainTimeStep )
+       DripCanopySnow  = (FVEG * SnowfallRefHeight - InterceptCanopySnow) + ICEDRIP
+       ThroughfallSnow  = (1.0 - FVEG) * SnowfallRefHeight
+       CanopyIce  = max( 0.0, CanopyIce + (InterceptCanopySnow-ICEDRIP)*MainTimeStep )
     else
-       QINTS  = 0.0
-       QDRIPS = 0.0
-       QTHROS = SNOW
+       InterceptCanopySnow  = 0.0
+       DripCanopySnow = 0.0
+       ThroughfallSnow = SnowfallRefHeight
        if ( CanopyIce > 0.0 ) then   ! FOR CASE OF CANOPY GETTING BURIED
-          QDRIPS = QDRIPS + CanopyIce / MainTimeStep
+          DripCanopySnow = DripCanopySnow + CanopyIce / MainTimeStep
           CanopyIce = 0.0
        endif
     endif
@@ -138,12 +139,12 @@ contains
     CanopyTotalWater = CanopyLiqWater + CanopyIce
 
     ! rain or snow on the ground
-    QRAIN   = QDRIPR + QTHROR
-    QSNOW   = QDRIPS + QTHROS
-    SNOWHIN = QSNOW / SnowfallDensity
+    RainfallGround   = DripCanopyRain + ThroughfallRain
+    SnowfallGround   = DripCanopySnow + ThroughfallSnow
+    SnowDepthIncr = SnowfallGround / SnowfallDensity
     if ( (SurfaceType == 2) .and. (TG > ConstFreezePoint) ) then
-       QSNOW   = 0.0
-       SNOWHIN = 0.0
+       SnowfallGround   = 0.0
+       SnowDepthIncr = 0.0
     endif
 
     end associate

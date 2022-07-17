@@ -33,11 +33,11 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,   thickness of snow/soil layers (m)
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,   total soil water content [m3/m3]
               SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,   impervious fraction due to frozen soil
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,   water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,   water input on soil surface [mm/s]
               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
               SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac             ,& ! out,  fractional saturated area for soil moisture
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,  surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,  infiltration rate at surface (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,  surface runoff [mm/s]
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,  infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -55,9 +55,9 @@ contains
     SoilSaturateFrac   = max( 0.01, SMCTOT ) ** 4.0  ! BATS
 
     ! compute surface runoff and infiltration m/s
-    if ( QINSUR > 0.0 ) then
-       RUNSRF = QINSUR * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
-       PDDUM  = QINSUR - RUNSRF 
+    if ( SoilSfcInflow > 0.0 ) then
+       RunoffSurface = SoilSfcInflow * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
+       InfilRateSfc  = SoilSfcInflow - RunoffSurface 
     endif
 
     end associate

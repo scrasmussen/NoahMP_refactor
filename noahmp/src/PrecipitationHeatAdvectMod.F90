@@ -34,12 +34,12 @@ contains
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              RAIN            => noahmp%water%flux%RAIN              ,& ! in,    total liquid rainfall (mm/s) before interception
-              SNOW            => noahmp%water%flux%SNOW              ,& ! in,    total liquid snowfall (mm/s) before interception
-              QDRIPR          => noahmp%water%flux%QDRIPR            ,& ! in,    drip rate for rain (mm/s)
-              QTHROR          => noahmp%water%flux%QTHROR            ,& ! in,    throughfall for rain (mm/s)
-              QDRIPS          => noahmp%water%flux%QDRIPS            ,& ! in,    drip (unloading) rate for intercepted snow (mm/s)
-              QTHROS          => noahmp%water%flux%QTHROS            ,& ! in,    throughfall of snowfall (mm/s)
+              RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
+              SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
+              DripCanopyRain          => noahmp%water%flux%DripCanopyRain            ,& ! in,    drip rate for intercepted rain [mm/s]
+              ThroughfallRain          => noahmp%water%flux%ThroughfallRain            ,& ! in,    throughfall for rain [mm/s]
+              DripCanopySnow          => noahmp%water%flux%DripCanopySnow            ,& ! in,    drip (unloading) rate for intercepted snow [mm/s]
+              ThroughfallSnow          => noahmp%water%flux%ThroughfallSnow            ,& ! in,    throughfall of snowfall [mm/s]
               PAHV            => noahmp%energy%flux%PAHV             ,& ! out,   precipitation advected heat - vegetation net (W/m2)
               PAHG            => noahmp%energy%flux%PAHG             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
               PAHB            => noahmp%energy%flux%PAHB              & ! out,   precipitation advected heat - bare ground net (W/m2)
@@ -55,14 +55,14 @@ contains
     PAHB    = 0.0
 
     ! Heat advection for liquid rainfall
-    PAH_AC = FVEG * RAIN * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = QDRIPR * (ConstHeatCapacWater/1000.0) * (TV - TG)
-    PAH_AG = QTHROR * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = FVEG * RainfallRefHeight * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TV)
+    PAH_CG = DripCanopyRain * (ConstHeatCapacWater/1000.0) * (TV - TG)
+    PAH_AG = ThroughfallRain * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AC = PAH_AC + FVEG * SNOW * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = PAH_CG + QDRIPS * (ConstHeatCapacIce/1000.0) * (TV - TG)
-    PAH_AG = PAH_AG + QTHROS * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = PAH_AC + FVEG * SnowfallRefHeight * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TV)
+    PAH_CG = PAH_CG + DripCanopySnow * (ConstHeatCapacIce/1000.0) * (TV - TG)
+    PAH_AG = PAH_AG + ThroughfallSnow * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHV = PAH_AC - PAH_CG

@@ -61,7 +61,7 @@ contains
     real(kind=kind_noahmp)                :: H            ! temporary sensible heat flux (w/m2)
     real(kind=kind_noahmp)                :: HG           ! temporary sensible heat flux (w/m2)
     real(kind=kind_noahmp)                :: CQ2V         ! exchange coefficient for water vapor, 2m over vegetation.
-    real(kind=kind_noahmp)                :: QFX          ! moisture flux
+    real(kind=kind_noahmp)                :: MoistureFluxSfc          ! moisture flux
     real(kind=kind_noahmp)                :: VAIE         ! total leaf area index + stem area index,effective
     real(kind=kind_noahmp)                :: LAISUNE      ! sunlit leaf area index, one-sided (m2/m2),effective
     real(kind=kind_noahmp)                :: LAISHAE      ! shaded leaf area index, one-sided (m2/m2),effective
@@ -175,7 +175,7 @@ contains
     FH2     = 0.0
     HG      = 0.0
     H       = 0.0
-    QFX     = 0.0
+    MoistureFluxSfc     = 0.0
     ! limit LAI
     VAIE    = min( 6.0, VAI    )
     LAISUNE = min( 6.0, LAISUN )
@@ -365,7 +365,7 @@ contains
     ! TAH = TemperatureAirRefHeight + (SHG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) 
     ! TAH = TemperatureAirRefHeight + (SHG*FVEG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) ! ground flux need fveg
     ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*ConstHeatCapacAir/GAMMAG)
-    ! QFX = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*ConstHeatCapacAir/GAMMAG
+    ! MoistureFluxSfc = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*ConstHeatCapacAir/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
     if ( (OptSurfaceDrag == 1) .or. (OptSurfaceDrag == 2) ) then
@@ -379,7 +379,7 @@ contains
           Q2V  = QSFC
        else
           T2MV = TAH - (SHG + SHC/FVEG) / (RHOAIR * ConstHeatCapacAir) * 1.0 / CAH2
-          !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- QFX/(RHOAIR*FV)* 1./ConstVonKarman * LOG((2.+Z0H)/Z0H)
+          !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- MoistureFluxSfc/(RHOAIR*FV)* 1./ConstVonKarman * LOG((2.+Z0H)/Z0H)
           Q2V  = QSFC - ( (EVC+TR)/FVEG + EVG ) / (LATHEAV * RHOAIR) * 1.0 / CQ2V
        endif
     endif

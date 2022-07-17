@@ -30,7 +30,7 @@ contains
     associate(                                                        &
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
-              QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snow at ground srf (mm/s) [+]
+              SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! in,     snowfall at ground [mm/s]
               SWEMX           => noahmp%water%param%SWEMX            ,& ! in,     new snow mass to fully cover old snow (mm)
               CLASS_ALB_REF   => noahmp%energy%param%CLASS_ALB_REF   ,& ! in,     reference snow albedo in CLASS scheme
               CLASS_SNO_AGE   => noahmp%energy%param%CLASS_SNO_AGE   ,& ! in,     snow aging e-folding time (s)
@@ -50,8 +50,8 @@ contains
 
     ! 1 mm fresh snow(SWE) -- 10mm snow depth, assumed the fresh snow density 100kg/m3
     ! here assume 1cm snow depth will fully cover the old snow
-    if ( QSNOW > 0.0 ) then
-       ALB = ALB + min(QSNOW, SWEMX/MainTimeStep) * (CLASS_ALB_NEW - ALB) / (SWEMX/MainTimeStep)
+    if ( SnowfallGround > 0.0 ) then
+       ALB = ALB + min(SnowfallGround, SWEMX/MainTimeStep) * (CLASS_ALB_NEW - ALB) / (SWEMX/MainTimeStep)
     endif
 
     ALBSNI(1)= ALB         ! vis diffuse

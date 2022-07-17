@@ -49,7 +49,7 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
               SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! inout,  soil moisture between bottom of the soil and the water table
               RechargeGwDeepWT        => noahmp%water%state%RechargeGwDeepWT         ,& ! inout,  recharge to or from the water table when deep [m]
-              QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! inout,  soil bottom drainage (m/s)
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot            ,& ! inout,  soil bottom drainage (m/s)
               SoilEffPorosity           => noahmp%water%state%SoilEffPorosity       ,& ! out,    soil effective porosity (m3/m3)
               SoilSaturationExcess           => noahmp%water%state%SoilSaturationExcess             & ! out,    saturation excess of the total soil [m]
              )
@@ -91,16 +91,16 @@ contains
     if ( OptRunoffSubsurface == 5 ) then
        ! update SoilMoistureToWT
        if ( WaterTableDepth < (DepthSoilLayer(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) then
-          ! accumulate qdrain to update deep water table and soil moisture later
-          RechargeGwDeepWT =  RechargeGwDeepWT + DT * QDRAIN
+          ! accumulate soil drainage to update deep water table and soil moisture later
+          RechargeGwDeepWT =  RechargeGwDeepWT + DT * DrainSoilBot
        else
-          SoilMoistureToWT = SoilMoistureToWT + DT * QDRAIN  / ThicknessSnowSoilLayer(NumSoilLayer)
+          SoilMoistureToWT = SoilMoistureToWT + DT * DrainSoilBot  / ThicknessSnowSoilLayer(NumSoilLayer)
           SoilSaturationExcess = max( (SoilMoistureToWT - SMCMAX(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
           WMINUS = max( (1.0e-4 - SoilMoistureToWT), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
           SoilMoistureToWT      = max( min(SoilMoistureToWT, SMCMAX(NumSoilLayer)), 1.0e-4 )
           SoilLiqWater(NumSoilLayer) = SoilLiqWater(NumSoilLayer) + SoilSaturationExcess / ThicknessSnowSoilLayer(NumSoilLayer)
           ! reduce fluxes at the bottom boundaries accordingly
-          QDRAIN   = QDRAIN - SoilSaturationExcess/DT
+          DrainSoilBot   = DrainSoilBot - SoilSaturationExcess/DT
           RechargeGwDeepWT = RechargeGwDeepWT - WMINUS
        endif
     endif

@@ -54,11 +54,11 @@ contains
               RHOAIR                => noahmp%energy%state%RHOAIR       ,& ! out,  density air (kg/m3)
               SOLAD                 => noahmp%energy%flux%SOLAD         ,& ! out,  incoming direct solar radiation (w/m2)
               SOLAI                 => noahmp%energy%flux%SOLAI         ,& ! out,  incoming diffuse solar radiation (w/m2)
-              RAIN                  => noahmp%water%flux%RAIN           ,& ! out,  rainfall (mm/s)
-              SNOW                  => noahmp%water%flux%SNOW           ,& ! out,  liquid equivalent snowfall (mm/s)
-              PRCP                  => noahmp%water%flux%PRCP           ,& ! out,  total precipitation [mm/s]
-              QPRECC                => noahmp%water%flux%QPRECC         ,& ! out,  convective precipitation (mm/s)
-              QPRECL                => noahmp%water%flux%QPRECL         ,& ! out,  large-scale precipitation (mm/s)
+              RainfallRefHeight                  => noahmp%water%flux%RainfallRefHeight           ,& ! out,  rainfall [mm/s] at reference height
+              SnowfallRefHeight                  => noahmp%water%flux%SnowfallRefHeight           ,& ! out,  liquid equivalent snowfall [mm/s] at reference height
+              PrecipTotRefHeight                  => noahmp%water%flux%PrecipTotRefHeight          ,& ! out,  total precipitation [mm/s] at reference height
+              PrecipConvTotRefHeight                => noahmp%water%flux%PrecipConvTotRefHeight         ,& ! out,  total convective precipitation [mm/s] at reference height
+              PrecipLargeSclRefHeight                => noahmp%water%flux%PrecipLargeSclRefHeight         ,& ! out,  large-scale precipitation (mm/s) at reference height
               PrecipAreaFrac                    => noahmp%water%state%PrecipAreaFrac ,& ! out,  fraction of area receiving precipitation
               FrozenPrecipFrac                 => noahmp%water%state%FrozenPrecipFrac         ,& ! out,  frozen precipitation fraction
               SnowfallDensity                => noahmp%water%state%SnowfallDensity         & ! out,  bulk density of snowfall (kg/m3)
@@ -81,19 +81,19 @@ contains
     SOLAI(2) = RadSWDownRefHeight * (1.0-dir_frac) * (1.0-vis_frac)  ! diffuse nir
 
     ! precipitation
-    PRCP = PrecipConvRefHeight + PrecipNonConvRefHeight + PrecipShConvRefHeight
+    PrecipTotRefHeight = PrecipConvRefHeight + PrecipNonConvRefHeight + PrecipShConvRefHeight
     if ( OptRainSnowPartition == 4 ) then
-       QPRECC = PrecipConvRefHeight + PrecipShConvRefHeight
-       QPRECL = PrecipNonConvRefHeight
+       PrecipConvTotRefHeight = PrecipConvRefHeight + PrecipShConvRefHeight
+       PrecipLargeSclRefHeight = PrecipNonConvRefHeight
     else
-       QPRECC = 0.10 * PRCP    ! should be from the atmospheric model
-       QPRECL = 0.90 * PRCP    ! should be from the atmospheric model
+       PrecipConvTotRefHeight = 0.10 * PrecipTotRefHeight
+       PrecipLargeSclRefHeight = 0.90 * PrecipTotRefHeight
     endif
 
     ! fractional area that receives precipitation (see, Niu et al. 2005)
     PrecipAreaFrac = 0.0
-    if ( (QPRECC+QPRECL) > 0.0 ) then
-       PrecipAreaFrac = (QPRECC + QPRECL) / (10.0*QPRECC + QPRECL)
+    if ( (PrecipConvTotRefHeight+PrecipLargeSclRefHeight) > 0.0 ) then
+       PrecipAreaFrac = (PrecipConvTotRefHeight + PrecipLargeSclRefHeight) / (10.0*PrecipConvTotRefHeight + PrecipLargeSclRefHeight)
     endif
 
     ! partition precipitation into rain and snow. Moved from CANWAT MB/AN: v3.7
@@ -165,8 +165,8 @@ contains
     endif
 
     ! rain-snow partitioning
-    RAIN = PRCP * (1.0 - FrozenPrecipFrac)
-    SNOW = PRCP * FrozenPrecipFrac
+    RainfallRefHeight = PrecipTotRefHeight * (1.0 - FrozenPrecipFrac)
+    SnowfallRefHeight = PrecipTotRefHeight * FrozenPrecipFrac
 
     end associate
 

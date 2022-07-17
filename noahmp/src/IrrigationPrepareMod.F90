@@ -36,7 +36,7 @@ contains
               IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               IrrigationAmtFlood         => noahmp%water%state%IrrigationAmtFlood          ,& ! inout,  flood irrigation water amount [m]
               IrrigationAmtMicro         => noahmp%water%state%IrrigationAmtMicro          ,& ! inout,  micro irrigation water amount [m]
-              RAIN            => noahmp%water%flux%RAIN              ,& ! inout,  rainfall rate
+              RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! inout,  rainfall [mm/s] at reference height
               FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! out,    flag to identify croplands
               IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! out,    sprinkler irrigation fraction (0 to 1)
               IrrigationFracMicro           => noahmp%water%state%IrrigationFracMicro            ,& ! out,    fraction of grid under micro irrigation (0 to 1)
@@ -77,12 +77,12 @@ contains
 
     ! trigger irrigation
     if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) .and. &
-         (RAIN < (IR_RAIN/3600.0)) .and. ((IrrigationAmtSprinkler+IrrigationAmtMicro+IrrigationAmtFlood) == 0.0) ) then
+         (RainfallRefHeight < (IR_RAIN/3600.0)) .and. ((IrrigationAmtSprinkler+IrrigationAmtMicro+IrrigationAmtFlood) == 0.0) ) then
        call IrrigationTrigger(noahmp)
     endif
 
     ! set irrigation off if larger than IR_RAIN mm/h for this time step and irr triggered last time step
-    if ( (RAIN >= (IR_RAIN/3600.0)) .or. (IrrigationFracGrid < IRR_FRAC) ) then
+    if ( (RainfallRefHeight >= (IR_RAIN/3600.0)) .or. (IrrigationFracGrid < IRR_FRAC) ) then
         IrrigationAmtSprinkler = 0.0
         IrrigationAmtMicro = 0.0
         IrrigationAmtFlood = 0.0

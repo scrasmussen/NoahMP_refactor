@@ -24,14 +24,14 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! in,     water input on soil surface [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
               FFF             => noahmp%water%param%FFF              ,& ! in,     runoff decay factor (m-1)
               FSATMX          => noahmp%water%param%FSATMX           ,& ! in,     maximum surface saturated fraction (global mean)
               SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,     impervious fraction due to frozen soil
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
               SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac             ,& ! out,    fractional saturated area for soil moisture
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              PDDUM           => noahmp%water%flux%PDDUM              & ! out,    infiltration rate at surface (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,    infiltration rate at surface (mm/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -42,9 +42,9 @@ contains
     SoilSaturateFrac = FSATMX * exp( -0.5 * FFF * WaterTableDepth )
 
     ! compute surface runoff and infiltration  m/s
-    if ( QINSUR > 0.0 ) then
-       RUNSRF = QINSUR * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
-       PDDUM  = QINSUR - RUNSRF 
+    if ( SoilSfcInflow > 0.0 ) then
+       RunoffSurface = SoilSfcInflow * ( (1.0-SoilImpervFrac(1)) * SoilSaturateFrac + SoilImpervFrac(1) )
+       InfilRateSfc  = SoilSfcInflow - RunoffSurface 
     endif
 
     end associate

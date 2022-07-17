@@ -37,10 +37,10 @@ contains
               MainTimeStep        => noahmp%config%domain%MainTimeStep        ,& ! in,    noahmp main time step [s]
               GridIndexI          => noahmp%config%domain%GridIndexI          ,& ! in,    grid index in x-direction
               GridIndexJ          => noahmp%config%domain%GridIndexJ          ,& ! in,    grid index in y-direction
-              QVAP            => noahmp%water%flux%QVAP              ,& ! in,     soil surface evaporation rate[mm/s]
-              QDEW            => noahmp%water%flux%QDEW              ,& ! in,     soil surface dew rate[mm/s]
-              QRAIN           => noahmp%water%flux%QRAIN             ,& ! in,     snow surface rain rate[mm/s]
-              QSNOW           => noahmp%water%flux%QSNOW             ,& ! in,     snowfall at ground surface (mm/s)
+              VaporizeGrd            => noahmp%water%flux%VaporizeGrd              ,& ! in,     ground vaporize rate total (evap+sublim) [mm/s]
+              CondenseVapGrd            => noahmp%water%flux%CondenseVapGrd              ,& ! in,     ground vapor condense rate total (dew+frost) [mm/s]
+              RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! in,     ground surface rain rate[mm/s]
+              SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! in,     snowfall on the ground [mm/s]
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,     bulk density of snowfall (kg/m3)
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               FGEV            => noahmp%energy%flux%FGEV             ,& ! inout,  glacier evap heat (w/m2) [+ to atm]
@@ -53,15 +53,15 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total glacier water [m3/m3]
               PondSfcThinSnwMelt         => noahmp%water%state%PondSfcThinSnwMelt          ,& ! inout, surface ponding [mm] from snowmelt when thin snow has no layer
               WaterHeadSfc       => noahmp%water%state%WaterHeadSfc        ,& ! inout,  surface water head (mm) 
-              QINSUR          => noahmp%water%flux%QINSUR            ,& ! inout,  water input on glacier/soil surface [mm/s]
-              QSNFRO          => noahmp%water%flux%QSNFRO            ,& ! inout,  snow surface frost rate[mm/s]
-              QSNSUB          => noahmp%water%flux%QSNSUB            ,& ! inout,  snow surface sublimation rate[mm/s]
-              SNOFLOW         => noahmp%water%flux%SNOFLOW           ,& ! inout,  glacier flow [mm/s]
-              SNOWHIN         => noahmp%water%flux%SNOWHIN           ,& ! out,    snow depth increasing rate (m/s)
-              EDIR            => noahmp%water%flux%EDIR              ,& ! out,    net direct glacier evaporation (mm/s)
-              RUNSRF          => noahmp%water%flux%RUNSRF            ,& ! out,    surface runoff [mm/s]
-              RUNSUB          => noahmp%water%flux%RUNSUB            ,& ! out,    subsurface runoff [mm/s]
-              QSNBOT          => noahmp%water%flux%QSNBOT            ,& ! out,    melting water out of snow bottom [mm/s]
+              SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! inout,  water input on glacier/soil surface [mm/s]
+              FrostSnowSfcIce          => noahmp%water%flux%FrostSnowSfcIce            ,& ! inout,  snow surface frost rate[mm/s]
+              SublimSnowSfcIce          => noahmp%water%flux%SublimSnowSfcIce            ,& ! inout,  snow surface sublimation rate[mm/s]
+              GlacierExcessFlow         => noahmp%water%flux%GlacierExcessFlow           ,& ! inout,  glacier snow excess flow [mm/s]
+              SnowDepthIncr         => noahmp%water%flux%SnowDepthIncr           ,& ! out,    snow depth increasing rate (m/s) due to snowfall
+              EvapSoilNet            => noahmp%water%flux%EvapSoilNet              ,& ! out,    net direct glacier evaporation (mm/s)
+              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface            ,& ! out,    subsurface runoff [mm/s]
+              SnowBotOutflow          => noahmp%water%flux%SnowBotOutflow            ,& ! out,   total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
               PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,    surface ponding [mm] from liquid in thin snow layer combination
               PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,   surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
              )
@@ -70,10 +70,10 @@ contains
     ! initialize
     allocate( SoilIceTmp(1:NumSoilLayer) )
     allocate( SoilLiqWaterTmp(1:NumSoilLayer) )
-    SNOFLOW   = 0.0
-    RUNSUB    = 0.0
-    RUNSRF    = 0.0
-    SNOWHIN   = 0.0
+    GlacierExcessFlow   = 0.0
+    RunoffSubsurface    = 0.0
+    RunoffSurface    = 0.0
+    SnowDepthIncr   = 0.0
 
     ! prepare for water process
     SoilIce(:)   = max(0.0, SoilMoisture(:)-SoilLiqWater(:))
@@ -82,35 +82,35 @@ contains
     SnowWaterEquivPrev    = SnowWaterEquiv
 
     ! compute soil/snow surface evap/dew rate based on energy flux
-    QVAP      = max(FGEV/LATHEAG, 0.0)       ! positive part of fgev; Barlage change to ground v3.6
-    QDEW      = abs(min(FGEV/LATHEAG, 0.0))  ! negative part of fgev
-    EDIR      = QVAP - QDEW
+    VaporizeGrd      = max(FGEV/LATHEAG, 0.0)       ! positive part of fgev; Barlage change to ground v3.6
+    CondenseVapGrd      = abs(min(FGEV/LATHEAG, 0.0))  ! negative part of fgev
+    EvapSoilNet      = VaporizeGrd - CondenseVapGrd
 
     ! snow height increase
-    SNOWHIN = QSNOW / SnowfallDensity
+    SnowDepthIncr = SnowfallGround / SnowfallDensity
 
     ! ground sublimation and evaporation
-    QSNSUB = QVAP
+    SublimSnowSfcIce = VaporizeGrd
 
     ! ground frost and dew
-    QSNFRO = QDEW
+    FrostSnowSfcIce = CondenseVapGrd
 
     ! snowpack water processs
     call SnowWaterMainGlacier(noahmp)
 
     ! total surface input water to glacier ice
-    QINSUR = (PondSfcThinSnwMelt + PondSfcThinSnwComb + PondSfcThinSnwTrans) / MainTimeStep * 0.001  ! convert units (mm/s -> m/s)
+    SoilSfcInflow = (PondSfcThinSnwMelt + PondSfcThinSnwComb + PondSfcThinSnwTrans) / MainTimeStep * 0.001  ! convert units (mm/s -> m/s)
     if ( NumSnowLayerNeg == 0 ) then
-       QINSUR = QINSUR + (QSNBOT + QRAIN) * 0.001
+       SoilSfcInflow = SoilSfcInflow + (SnowBotOutflow + RainfallGround) * 0.001
     else
-       QINSUR = QINSUR + QSNBOT * 0.001
+       SoilSfcInflow = SoilSfcInflow + SnowBotOutflow * 0.001
     endif
 #ifdef WRF_HYDRO
-    QINSUR = QINSUR + WaterHeadSfc / MainTimeStep * 0.001
+    SoilSfcInflow = SoilSfcInflow + WaterHeadSfc / MainTimeStep * 0.001
 #endif
 
     ! surface runoff
-    RUNSRF = QINSUR * 1000.0   ! mm/s
+    RunoffSurface = SoilSfcInflow * 1000.0   ! mm/s
 
     ! glacier ice water
     if ( OptGlacierTreatment == 1 ) then
@@ -125,19 +125,19 @@ contains
     endif
     SoilLiqWater = 1.0 - SoilIce
 
-    ! use RUNSUB as a water balancer, SNOFLOW is snow that disappears, REPLACE is
+    ! use RunoffSubsurface as a water balancer, GlacierExcessFlow is snow that disappears, REPLACE is
     ! water from below that replaces glacier loss
     if ( OptGlacierTreatment == 1 ) then
-       RUNSUB = SNOFLOW + REPLACE
+       RunoffSubsurface = GlacierExcessFlow + REPLACE
     elseif ( OptGlacierTreatment == 2 ) then
-       RUNSUB = SNOFLOW
-       QVAP   = QSNSUB
-       QDEW   = QSNFRO
+       RunoffSubsurface = GlacierExcessFlow
+       VaporizeGrd   = SublimSnowSfcIce
+       CondenseVapGrd   = FrostSnowSfcIce
     endif
 
     if ( OptGlacierTreatment == 2 ) then
-       EDIR = QVAP - QDEW
-       FGEV = EDIR * LATHEAG
+       EvapSoilNet = VaporizeGrd - CondenseVapGrd
+       FGEV = EvapSoilNet * LATHEAG
     endif
 
     if ( maxval(SoilIce) < 0.0001 ) then

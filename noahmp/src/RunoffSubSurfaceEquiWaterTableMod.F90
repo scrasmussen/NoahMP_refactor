@@ -30,7 +30,7 @@ contains
               FFF             => noahmp%water%param%FFF              ,& ! in,     runoff decay factor (m-1)
               RSBMX           => noahmp%water%param%RSBMX            ,& ! in,     baseflow coefficient [mm/s]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! out,    water table depth [m]
-              RUNSUB          => noahmp%water%flux%RUNSUB             & ! out,    subsurface runoff [mm/s] 
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface             & ! out,    subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ contains
     call WaterTableEquilibrium(noahmp)
 
     ! compuate subsurface runoff mm/s
-    RUNSUB = (1.0 - SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * WaterTableDepth)
+    RunoffSubsurface = (1.0 - SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * WaterTableDepth)
 
     end associate
 

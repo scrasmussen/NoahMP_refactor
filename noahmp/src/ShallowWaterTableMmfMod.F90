@@ -45,7 +45,7 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture             ,& ! inout,  total soil water content [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout,  water table depth [m]
               SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! inout,  soil moisture between bottom of the soil and the water table
-              QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! inout,  soil bottom drainage (m/s)
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot            ,& ! inout,  soil bottom drainage (m/s)
               RechargeGwShallowWT            => noahmp%water%state%RechargeGwShallowWT              & ! out,    groundwater recharge (net vertical flux across the water table), positive up
              )
 ! ----------------------------------------------------------------------
@@ -102,7 +102,7 @@ contains
              WTDOLD = WaterTableDepth
              ! restore smoi to equilibrium value with water from the ficticious layer below
              ! SoilMoistureToWT=SoilMoistureToWT-(SoilMoistureEqui(NumSoilLayer)-SoilMoisture(NumSoilLayer))
-             ! QDRAIN = QDRAIN - 1000 * (SoilMoistureEqui(NumSoilLayer)-SoilMoisture(NumSoilLayer)) * ThicknessSnowSoilLayer(NumSoilLayer) / MainTimeStep
+             ! DrainSoilBot = DrainSoilBot - 1000 * (SoilMoistureEqui(NumSoilLayer)-SoilMoisture(NumSoilLayer)) * ThicknessSnowSoilLayer(NumSoilLayer) / MainTimeStep
              ! SoilMoisture(NumSoilLayer)=SoilMoistureEqui(NumSoilLayer)
 
              ! adjust wtd in the ficticious layer below

@@ -24,13 +24,13 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              QDRAIN          => noahmp%water%flux%QDRAIN            ,& ! in,    soil bottom drainage (m/s)
-              RUNSUB          => noahmp%water%flux%RUNSUB             & ! inout, subsurface runoff [mm/s] 
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot            ,& ! in,    soil bottom drainage (m/s)
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface             & ! inout, subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
 
     ! compuate subsurface runoff mm/s
-    RUNSUB = RUNSUB + QDRAIN
+    RunoffSubsurface = RunoffSubsurface + DrainSoilBot
 
     end associate
 

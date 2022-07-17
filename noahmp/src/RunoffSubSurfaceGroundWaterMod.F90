@@ -25,8 +25,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              QDIS            => noahmp%water%flux%QDIS              ,& ! out,   groundwater discharge [mm/s]
-              RUNSUB          => noahmp%water%flux%RUNSUB             & ! out,   subsurface runoff [mm/s] 
+              DischargeGw            => noahmp%water%flux%DischargeGw              ,& ! out,   groundwater discharge [mm/s]
+              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface             & ! out,   subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ contains
     call GroundWaterTopModel(noahmp)
 
     ! compute subsurface runoff as groundwater discharge
-    RUNSUB = QDIS          !mm/s
+    RunoffSubsurface = DischargeGw          !mm/s
 
     end associate
 

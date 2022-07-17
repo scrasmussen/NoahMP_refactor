@@ -29,10 +29,10 @@ contains
     associate(                                                        &
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
-              RAIN            => noahmp%water%flux%RAIN              ,& ! in,    total liquid rainfall (mm/s) before interception
-              SNOW            => noahmp%water%flux%SNOW              ,& ! in,    total liquid snowfall (mm/s) before interception
-              QSNOW           => noahmp%water%flux%QSNOW             ,& ! out,   snowfall at ground surface (mm/s)
-              QRAIN           => noahmp%water%flux%QRAIN             ,& ! out,   rainfall at ground surface (mm/s)
+              RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
+              SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
+              SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! out,   snowfall at ground surface [mm/s]
+              RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! out,   rainfall at ground surface (mm/s)
               PAHB            => noahmp%energy%flux%PAHB              & ! out,   precipitation advected heat - bare ground net (W/m2)
              )
 ! ----------------------------------------------------------------------
@@ -40,14 +40,14 @@ contains
     ! initialization
     PAH_AG  = 0.0
     PAHB    = 0.0
-    QRAIN   = RAIN
-    QSNOW   = SNOW
+    RainfallGround   = RainfallRefHeight
+    SnowfallGround   = SnowfallRefHeight
 
     ! Heat advection for liquid rainfall
-    PAH_AG = QRAIN * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = RainfallGround * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! Heat advection for snowfall
-    PAH_AG = PAH_AG + QSNOW * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = PAH_AG + SnowfallGround * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
     PAHB = PAH_AG

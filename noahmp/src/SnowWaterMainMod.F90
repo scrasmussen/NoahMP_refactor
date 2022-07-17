@@ -47,14 +47,14 @@ contains
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout,  snow layer ice [mm]
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout,  snow layer liquid water [mm]
               STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
-              SNOFLOW         => noahmp%water%flux%SNOFLOW           ,& ! out,    glacier flow [mm/s]
+              GlacierExcessFlow         => noahmp%water%flux%GlacierExcessFlow           ,& ! out,    glacier snow excess flow [mm/s]
               PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,   surface ponding [mm] from liquid in thin snow layer combination
               PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,   surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
              )
 ! ----------------------------------------------------------------------
 
     ! initialize out-only variables
-    SNOFLOW  = 0.0
+    GlacierExcessFlow  = 0.0
     PondSfcThinSnwComb = 0.0
     PondSfcThinSnwTrans = 0.0
 
@@ -87,10 +87,10 @@ contains
     ! to obtain equilibrium state of snow in glacier region
     if ( SnowWaterEquiv > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
        BDSNOW      = SnowIce(0) / ThicknessSnowSoilLayer(0)
-       SNOFLOW     = SnowWaterEquiv - SWEMAXGLA
-       SnowIce(0)    = SnowIce(0)  - SNOFLOW
-       ThicknessSnowSoilLayer(0)   = ThicknessSnowSoilLayer(0) - SNOFLOW / BDSNOW
-       SNOFLOW     = SNOFLOW / MainTimeStep
+       GlacierExcessFlow     = SnowWaterEquiv - SWEMAXGLA
+       SnowIce(0)    = SnowIce(0)  - GlacierExcessFlow
+       ThicknessSnowSoilLayer(0)   = ThicknessSnowSoilLayer(0) - GlacierExcessFlow / BDSNOW
+       GlacierExcessFlow     = GlacierExcessFlow / MainTimeStep
     endif
 
     ! sum up snow mass for layered snow

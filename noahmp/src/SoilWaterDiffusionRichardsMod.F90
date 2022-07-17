@@ -49,9 +49,9 @@ contains
               OptSoilPermeabilityFrozen => noahmp%config%nmlist%OptSoilPermeabilityFrozen,& ! in,     options for frozen soil permeability
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
               SLOPE           => noahmp%water%param%SLOPE            ,& ! in,     slope index for soil drainage
-              PDDUM           => noahmp%water%flux%PDDUM             ,& ! in,     infiltration rate at surface (mm/s)
-              QSEVA           => noahmp%water%flux%QSEVA             ,& ! in,     evaporation from soil surface [mm/s]
-              ETRANI          => noahmp%water%flux%ETRANI            ,& ! in,     evapotranspiration from soil layers [mm/s]
+              InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! in,     infiltration rate at surface (mm/s)
+              EvapSoilSfcLiq           => noahmp%water%flux%EvapSoilSfcLiq             ,& ! in,     evaporation from soil surface [mm/s]
+              TranspWatLossSoil          => noahmp%water%flux%TranspWatLossSoil            ,& ! in,    transpiration water loss from soil layers [mm/s]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
@@ -61,7 +61,7 @@ contains
               SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! in,     soil moisture between bottom of the soil and the water table
               SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! out,    soil hydraulic conductivity [m/s]
               SoilWatDiffusivity             => noahmp%water%state%SoilWatDiffusivity              ,& ! out,    soil water diffusivity [m2/s]
-              QDRAIN          => noahmp%water%flux%QDRAIN             & ! out,    soil bottom drainage (m/s)
+              DrainSoilBot          => noahmp%water%flux%DrainSoilBot             & ! out,    soil bottom drainage (m/s)
              )
 ! ----------------------------------------------------------------------
 
@@ -105,25 +105,25 @@ contains
           TEMP1    = - DepthSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
-          WFLUX(K) = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K) - PDDUM + ETRANI(K) + QSEVA
+          WFLUX(K) = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K) - InfilRateSfc + TranspWatLossSoil(K) + EvapSoilSfcLiq
        else if ( K < NumSoilLayer ) then
           DENOM(k) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
           TEMP1    = (DepthSoilLayer(K-1) - DepthSoilLayer(K+1))
           DDZ(K)   = 2.0 / TEMP1
           DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
           WFLUX(K) = SoilWatDiffusivity(K  ) * DSMDZ(K  ) + SoilWatConductivity(K  )         &
-                   - SoilWatDiffusivity(K-1) * DSMDZ(K-1) - SoilWatConductivity(K-1) + ETRANI(K)
+                   - SoilWatDiffusivity(K-1) * DSMDZ(K-1) - SoilWatConductivity(K-1) + TranspWatLossSoil(K)
        else
           DENOM(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
           if ( (OptRunoffSubsurface == 1) .or. (OptRunoffSubsurface == 2) ) then
-             QDRAIN = 0.0
+             DrainSoilBot = 0.0
           endif
           if ( (OptRunoffSubsurface == 3) .or. (OptRunoffSubsurface == 6) .or. &
                (OptRunoffSubsurface == 7) .or. (OptRunoffSubsurface == 8) ) then
-             QDRAIN = SLOPE * SoilWatConductivity(K)
+             DrainSoilBot = SLOPE * SoilWatConductivity(K)
           endif
           if ( OptRunoffSubsurface == 4 ) then
-             QDRAIN = (1.0 - SoilImpervFracMax) * SoilWatConductivity(K)
+             DrainSoilBot = (1.0 - SoilImpervFracMax) * SoilWatConductivity(K)
           endif
           if ( OptRunoffSubsurface == 5 ) then   !gmm new m-m&f water table dynamics formulation
              TEMP1  = 2.0 * DENOM(K)
@@ -135,9 +135,9 @@ contains
                 SMXBOT = SMXWTD
              endif
              DSMDZ(K) = 2.0 * (SMX(K) - SMXBOT) / TEMP1
-             QDRAIN   = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K)
+             DrainSoilBot   = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K)
           endif
-          WFLUX(K) = -(SoilWatDiffusivity(K-1)*DSMDZ(K-1)) - SoilWatConductivity(K-1) + ETRANI(K) + QDRAIN
+          WFLUX(K) = -(SoilWatDiffusivity(K-1)*DSMDZ(K-1)) - SoilWatConductivity(K-1) + TranspWatLossSoil(K) + DrainSoilBot
        endif
     enddo
 

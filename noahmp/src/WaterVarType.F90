@@ -1,14 +1,14 @@
 module WaterVarType
 
 !!! Define column (1-D) Noah-MP Water variables
-!!! Water variable initialization is done in WaterInit.f90
+!!! Water variable initialization is done in WaterVarInitMod.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
 
   implicit none
   save
@@ -18,58 +18,58 @@ module WaterVarType
   type :: flux_type
 
     ! define specific water flux variables
-    real(kind=kind_noahmp) :: RAIN          ! liquid rainfall rate (mm/s)
-    real(kind=kind_noahmp) :: SNOW          ! snowfall rate (mm/s)
-    real(kind=kind_noahmp) :: PRCP          ! total precipitation (mm/s)
-    real(kind=kind_noahmp) :: QPRECC        ! convective precipitation (mm/s)
-    real(kind=kind_noahmp) :: QPRECL        ! large-scale precipitation (mm/s)
-    real(kind=kind_noahmp) :: ECAN          ! evaporation of intercepted water (mm/s) [+]
-    real(kind=kind_noahmp) :: ETRAN         ! transpiration rate (mm/s) [+]
-    real(kind=kind_noahmp) :: QEVAC         ! canopy water evaporation rate (mm/s)
-    real(kind=kind_noahmp) :: QDEWC         ! canopy water dew rate (mm/s)
-    real(kind=kind_noahmp) :: QFROC         ! canopy ice frost rate (mm/s)
-    real(kind=kind_noahmp) :: QSUBC         ! canopy ice sublimation rate (mm/s)
-    real(kind=kind_noahmp) :: QMELTC        ! canopy ice melting rate (mm/s)
-    real(kind=kind_noahmp) :: QFRZC         ! canopy water refreezing rate (mm/s)
-    real(kind=kind_noahmp) :: QSNOW         ! snowfall at ground surface (mm/s) [+]
-    real(kind=kind_noahmp) :: SNOWHIN       ! snow depth increasing rate (m/s)
-    real(kind=kind_noahmp) :: QSNFRO        ! snow surface frost rate[mm/s]
-    real(kind=kind_noahmp) :: QSNSUB        ! snow surface sublimation rate[mm/s]
-    real(kind=kind_noahmp) :: QRAIN         ! ground (soil/snow) surface rain rate[mm/s]
-    real(kind=kind_noahmp) :: QSNBOT        ! melting water out of snow bottom [mm/s]
-    real(kind=kind_noahmp) :: SNOFLOW       ! glacier flow [mm/s]
-    real(kind=kind_noahmp) :: IRFIRATE      ! flood irrigation water rate [m/timestep]
-    real(kind=kind_noahmp) :: IRMIRATE      ! micro irrigation water rate [m/timestep]
-    real(kind=kind_noahmp) :: IRSIRATE      ! rate of irrigation by sprinkler [m/timestep]
-    real(kind=kind_noahmp) :: IREVPLOS      ! loss of irrigation water to evaporation,sprinkler [m/timestep]
-    real(kind=kind_noahmp) :: QINSUR        ! water input on soil surface [mm/s]
-    real(kind=kind_noahmp) :: RUNSRF        ! surface runoff [mm/s]
-    real(kind=kind_noahmp) :: RUNSUB        ! subsurface runoff [mm/s]
-    real(kind=kind_noahmp) :: PDDUM         ! infiltration rate at surface (mm/s)
-    real(kind=kind_noahmp) :: QSEVA         ! evaporation from soil surface [mm/s]
-    real(kind=kind_noahmp) :: QDRAIN        ! soil bottom drainage (m/s)
-    real(kind=kind_noahmp) :: QTLDRN        ! tile drainage (mm/s)
-    real(kind=kind_noahmp) :: QIN           ! groundwater recharge [mm/s]
-    real(kind=kind_noahmp) :: QDIS          ! groundwater discharge [mm/s]
-    real(kind=kind_noahmp) :: QVAP          ! soil surface evaporation rate[mm/s]
-    real(kind=kind_noahmp) :: QDEW          ! soil surface dew rate[mm/s]
-    real(kind=kind_noahmp) :: QSDEW         ! soil surface dew rate [mm/s]
-    real(kind=kind_noahmp) :: EIRR          ! evaporation of irrigation water to evaporation,sprinkler [mm/s]
-    real(kind=kind_noahmp) :: QINTR         ! interception rate for rain (mm/s)
-    real(kind=kind_noahmp) :: QDRIPR        ! drip rate for rain (mm/s)
-    real(kind=kind_noahmp) :: QTHROR        ! throughfall for rain (mm/s)
-    real(kind=kind_noahmp) :: QINTS         ! interception (loading) rate for snowfall (mm/s)
-    real(kind=kind_noahmp) :: QDRIPS        ! drip (unloading) rate for intercepted snow (mm/s)
-    real(kind=kind_noahmp) :: QTHROS        ! throughfall of snowfall (mm/s)
-    real(kind=kind_noahmp) :: EDIR          ! net direct soil evaporation (mm/s)
-    real(kind=kind_noahmp) :: QMELT         ! ground snow melting rate (mm/s)
-    real(kind=kind_noahmp) :: QFX           ! total surface water vapor flux to atmosphere (mm/s)
+    real(kind=kind_noahmp) :: RainfallRefHeight          ! liquid rainfall rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: SnowfallRefHeight          ! snowfall rate [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipTotRefHeight         ! total precipitation [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipConvTotRefHeight     ! total convective precipitation [mm/s] at reference height
+    real(kind=kind_noahmp) :: PrecipLargeSclRefHeight    ! large-scale precipitation [mm/s] at reference height
+    real(kind=kind_noahmp) :: EvapCanopyNet              ! net evaporation of canopy intercepted total water [mm/s]
+    real(kind=kind_noahmp) :: Transpiration              ! transpiration rate [mm/s]
+    real(kind=kind_noahmp) :: EvapCanopyLiq              ! canopy liquid water evaporation rate [mm/s]
+    real(kind=kind_noahmp) :: DewCanopyLiq               ! canopy water dew rate [mm/s]
+    real(kind=kind_noahmp) :: FrostCanopyIce             ! canopy ice frost rate [mm/s]
+    real(kind=kind_noahmp) :: SublimCanopyIce            ! canopy ice sublimation rate [mm/s]
+    real(kind=kind_noahmp) :: MeltCanopyIce              ! canopy ice melting rate [mm/s]
+    real(kind=kind_noahmp) :: RefrzCanopyLiq             ! canopy water refreezing rate [mm/s]
+    real(kind=kind_noahmp) :: SnowfallGround             ! snowfall on the ground (below canopy) [mm/s]
+    real(kind=kind_noahmp) :: SnowDepthIncr              ! snow depth increasing rate [m/s] due to snowfall
+    real(kind=kind_noahmp) :: FrostSnowSfcIce            ! snow surface ice frost rate[mm/s]
+    real(kind=kind_noahmp) :: SublimSnowSfcIce           ! snow surface ice sublimation rate[mm/s]
+    real(kind=kind_noahmp) :: RainfallGround             ! ground surface rain rate [mm/s]
+    real(kind=kind_noahmp) :: SnowBotOutflow             ! total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
+    real(kind=kind_noahmp) :: GlacierExcessFlow          ! glacier excess flow [mm/s]
+    real(kind=kind_noahmp) :: IrrigationRateFlood        ! flood irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: IrrigationRateMicro        ! micro irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: IrrigationRateSprinkler    ! sprinkler irrigation water rate [m/timestep]
+    real(kind=kind_noahmp) :: IrriEvapLossSprinkler      ! loss of irrigation water to evaporation,sprinkler [m/timestep]
+    real(kind=kind_noahmp) :: SoilSfcInflow              ! water input on soil surface [mm/s]
+    real(kind=kind_noahmp) :: RunoffSurface              ! surface runoff [mm/s]
+    real(kind=kind_noahmp) :: RunoffSubsurface           ! subsurface runoff [mm/s]
+    real(kind=kind_noahmp) :: InfilRateSfc               ! infiltration rate at surface [mm/s]
+    real(kind=kind_noahmp) :: EvapSoilSfcLiq             ! soil surface water evaporation [mm/s]
+    real(kind=kind_noahmp) :: DrainSoilBot               ! soil bottom drainage [m/s]
+    real(kind=kind_noahmp) :: TileDrain                  ! tile drainage [mm/s]
+    real(kind=kind_noahmp) :: RechargeGw                 ! groundwater recharge rate [mm/s]
+    real(kind=kind_noahmp) :: DischargeGw                ! groundwater discharge rate [mm/s]
+    real(kind=kind_noahmp) :: VaporizeGrd                ! ground vaporize rate total (evap+sublim) [mm/s]
+    real(kind=kind_noahmp) :: CondenseVapGrd             ! ground vapor condense rate total (dew+frost) [mm/s]
+    real(kind=kind_noahmp) :: DewSoilSfcLiq              ! soil surface water dew rate [mm/s]
+    real(kind=kind_noahmp) :: EvapIrriSprinkler          ! evaporation of irrigation water, sprinkler [mm/s]
+    real(kind=kind_noahmp) :: InterceptCanopyRain        ! interception rate for rain [mm/s]
+    real(kind=kind_noahmp) :: DripCanopyRain             ! drip rate for intercepted rain [mm/s]
+    real(kind=kind_noahmp) :: ThroughfallRain            ! throughfall for rain [mm/s]
+    real(kind=kind_noahmp) :: InterceptCanopySnow        ! interception (loading) rate for snowfall [mm/s]
+    real(kind=kind_noahmp) :: DripCanopySnow             ! drip (unloading) rate for intercepted snow [mm/s]
+    real(kind=kind_noahmp) :: ThroughfallSnow            ! throughfall of snowfall [mm/s]
+    real(kind=kind_noahmp) :: EvapSoilNet                ! net direct soil evaporation [mm/s]
+    real(kind=kind_noahmp) :: MeltGroundSnow             ! ground snow melting rate [mm/s]
+    real(kind=kind_noahmp) :: WaterToAtmosTotal          ! total surface water vapor flux to atmosphere [mm/s]
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ETRANI    ! evapotranspiration from soil layers [mm/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ1      ! rate of settling of snowpack due to destructive metamorphism [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ2      ! rate of compaction of snowpack due to overburden [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ3      ! rate of compaction of snowpack due to melt [1/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: PDZDTC    ! rate of change in fractional-thickness due to compaction [fraction/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TranspWatLossSoil     ! transpiration water loss from soil layers [mm/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CompactionSnowAging   ! rate of snow compaction due to destructive metamorphism/aging [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CompactionSnowBurden  ! rate of snow compaction due to overburden [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CompactionSnowMelt    ! rate of snow compaction due to melt [1/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: CompactionSnowTot     ! rate of total snow compaction [fraction/timestep]
 
   end type flux_type
 
@@ -107,7 +107,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: SoilImpervFracMax          ! maximum soil imperviousness fraction
     real(kind=kind_noahmp) :: SoilMoistureToWT           ! soil moisture between bottom of the soil and the water table
     real(kind=kind_noahmp) :: RechargeGwDeepWT           ! groundwater recharge to or from the water table when deep [m]
-    real(kind=kind_noahmp) :: RechargeGwShallowWT        ! groundwater recharge to or from shallow water table
+    real(kind=kind_noahmp) :: RechargeGwShallowWT        ! groundwater recharge to or from shallow water table [m]
     real(kind=kind_noahmp) :: SoilSaturationExcess       ! saturation excess of the total soil [m]
     real(kind=kind_noahmp) :: WaterTableHydro            ! water table depth estimated in WRF-Hydro fine grids [m]
     real(kind=kind_noahmp) :: TileDrainFrac              ! tile drainage map(fraction)
