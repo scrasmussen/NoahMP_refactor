@@ -34,7 +34,7 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,   total soil water content [m3/m3]
               SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,   impervious fraction due to frozen soil
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,   water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,   saturated value of soil moisture [m3/m3]
               SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac             ,& ! out,  fractional saturated area for soil moisture
               RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,  surface runoff [mm/s]
               InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,  infiltration rate at surface (mm/s)
@@ -48,7 +48,7 @@ contains
     ! compute mean soil moisture, depth and saturation fraction
     do K = 1, NumSoilLayer
        DZTOT   = DZTOT  + ThicknessSnowSoilLayer(K)
-       SMCTOT  = SMCTOT + SoilMoisture(K) / SMCMAX(K) * ThicknessSnowSoilLayer(K)
+       SMCTOT  = SMCTOT + SoilMoisture(K) / SoilMoistureSat(K) * ThicknessSnowSoilLayer(K)
        if ( DZTOT >= 2.0 ) exit
     enddo
     SMCTOT = SMCTOT / DZTOT

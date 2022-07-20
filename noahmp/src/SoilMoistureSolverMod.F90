@@ -42,7 +42,7 @@ contains
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
@@ -95,9 +95,10 @@ contains
           RechargeGwDeepWT =  RechargeGwDeepWT + DT * DrainSoilBot
        else
           SoilMoistureToWT = SoilMoistureToWT + DT * DrainSoilBot  / ThicknessSnowSoilLayer(NumSoilLayer)
-          SoilSaturationExcess = max( (SoilMoistureToWT - SMCMAX(NumSoilLayer)), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
+          SoilSaturationExcess = max( (SoilMoistureToWT - SoilMoistureSat(NumSoilLayer)), 0.0 ) * &
+                                 ThicknessSnowSoilLayer(NumSoilLayer)
           WMINUS = max( (1.0e-4 - SoilMoistureToWT), 0.0 ) * ThicknessSnowSoilLayer(NumSoilLayer)
-          SoilMoistureToWT      = max( min(SoilMoistureToWT, SMCMAX(NumSoilLayer)), 1.0e-4 )
+          SoilMoistureToWT      = max( min(SoilMoistureToWT, SoilMoistureSat(NumSoilLayer)), 1.0e-4 )
           SoilLiqWater(NumSoilLayer) = SoilLiqWater(NumSoilLayer) + SoilSaturationExcess / ThicknessSnowSoilLayer(NumSoilLayer)
           ! reduce fluxes at the bottom boundaries accordingly
           DrainSoilBot   = DrainSoilBot - SoilSaturationExcess/DT
@@ -106,25 +107,25 @@ contains
     endif
 
     do K = NumSoilLayer, 2, -1
-       SoilEffPorosity(K)  = max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+       SoilEffPorosity(K)  = max( 1.0e-4, (SoilMoistureSat(K) - SoilIce(K)) )
        SoilSaturationExcess     = max( (SoilLiqWater(K)-SoilEffPorosity(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
        SoilLiqWater(K)   = min( SoilEffPorosity(K), SoilLiqWater(K) )
        SoilLiqWater(K-1) = SoilLiqWater(K-1) + SoilSaturationExcess / ThicknessSnowSoilLayer(K-1)
     enddo
 
-    SoilEffPorosity(1) = max( 1.0e-4, (SMCMAX(1) - SoilIce(1)) )
+    SoilEffPorosity(1) = max( 1.0e-4, (SoilMoistureSat(1) - SoilIce(1)) )
     SoilSaturationExcess    = max( (SoilLiqWater(1)-SoilEffPorosity(1)), 0.0 ) * ThicknessSnowSoilLayer(1)
     SoilLiqWater(1)  = min( SoilEffPorosity(1), SoilLiqWater(1) )
 
     if ( SoilSaturationExcess > 0.0 ) then
        SoilLiqWater(2) = SoilLiqWater(2) + SoilSaturationExcess / ThicknessSnowSoilLayer(2)
        do K = 2, NumSoilLayer-1
-          SoilEffPorosity(K)  = max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+          SoilEffPorosity(K)  = max( 1.0e-4, (SoilMoistureSat(K) - SoilIce(K)) )
           SoilSaturationExcess     = max( (SoilLiqWater(K)-SoilEffPorosity(K)), 0.0 ) * ThicknessSnowSoilLayer(K)
           SoilLiqWater(K)   = min( SoilEffPorosity(K), SoilLiqWater(K) )
           SoilLiqWater(K+1) = SoilLiqWater(K+1) + SoilSaturationExcess / ThicknessSnowSoilLayer(K+1)
        enddo
-       SoilEffPorosity(NumSoilLayer) = max( 1.0e-4, (SMCMAX(NumSoilLayer) - SoilIce(NumSoilLayer)) )
+       SoilEffPorosity(NumSoilLayer) = max( 1.0e-4, (SoilMoistureSat(NumSoilLayer) - SoilIce(NumSoilLayer)) )
        SoilSaturationExcess = max( (SoilLiqWater(NumSoilLayer)-SoilEffPorosity(NumSoilLayer)), 0.0 ) * &
                               ThicknessSnowSoilLayer(NumSoilLayer)
        SoilLiqWater(NumSoilLayer)  = min( SoilEffPorosity(NumSoilLayer), SoilLiqWater(NumSoilLayer) )

@@ -70,7 +70,7 @@ contains
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               TileDrainFrac        => noahmp%water%state%TileDrainFrac         ,& ! in,     tile drainage map(fraction)
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture          ,& ! inout,  total soil water content [m3/m3]
               RechargeGwDeepWT        => noahmp%water%state%RechargeGwDeepWT         ,& ! inout,  recharge to or from the water table when deep [m]
@@ -108,21 +108,21 @@ contains
 
     ! for the case when snowmelt water is too large
     do K = 1, NumSoilLayer
-       SoilEffPorosity(K)= max( 1.0e-4, (SMCMAX(K) - SoilIce(K)) )
+       SoilEffPorosity(K)= max( 1.0e-4, (SoilMoistureSat(K) - SoilIce(K)) )
        RSAT    = RSAT + max( 0.0, SoilLiqWater(K) - SoilEffPorosity(K) ) * ThicknessSnowSoilLayer(K)
        SoilLiqWater(K) = min( SoilEffPorosity(K), SoilLiqWater(K) )
     enddo
 
     ! impermeable fraction due to frozen soil
     do K = 1, NumSoilLayer
-       SoilIceFrac(K) = min( 1.0, SoilIce(K) / SMCMAX(K) )
+       SoilIceFrac(K) = min( 1.0, SoilIce(K) / SoilMoistureSat(K) )
        SoilImpervFrac(K)  = max( 0.0, exp(-A*(1.0-SoilIceFrac(K))) - exp(-A) ) / (1.0 - exp(-A))
     enddo
 
     ! maximum soil ice content and minimum liquid water of all layers
     SoilIceMax = 0.0
     SoilImpervFracMax  = 0.0
-    SoilLiqWaterMin = SMCMAX(1)
+    SoilLiqWaterMin = SoilMoistureSat(1)
     do K = 1, NumSoilLayer
        if ( SoilIce(K) > SoilIceMax ) SoilIceMax = SoilIce(K)
        if ( SoilImpervFrac(K)  > SoilImpervFracMax  ) SoilImpervFracMax  = SoilImpervFrac(K)
@@ -147,7 +147,7 @@ contains
 
     ! determine iteration times  to solve soil water diffusion and moisture
     NITER = 3
-    if ( (InfilRateSfc*MainTimeStep) > (ThicknessSnowSoilLayer(1)*SMCMAX(1)) ) then
+    if ( (InfilRateSfc*MainTimeStep) > (ThicknessSnowSoilLayer(1)*SoilMoistureSat(1)) ) then
        NITER = NITER*2
     endif
     DTFINE  = MainTimeStep / NITER

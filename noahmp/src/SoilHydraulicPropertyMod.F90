@@ -11,7 +11,8 @@ module SoilHydraulicPropertyMod
 
 contains
 
-  subroutine SoilDiffusivityConductivityOpt1(noahmp, SoilWatDiffusivity, SoilWatConductivity, SoilMoisture, SoilImpervFrac, ISOIL)
+  subroutine SoilDiffusivityConductivityOpt1(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
+                                             SoilMoisture, SoilImpervFrac, ISOIL)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND1
@@ -35,23 +36,23 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
-              DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
-              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
+              SoilWatDiffusivitySat           => noahmp%water%param%SoilWatDiffusivitySat            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
+              SoilWatConductivitySat           => noahmp%water%param%SoilWatConductivitySat             & ! in,     saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
-    FACTR = max( 0.01, SoilMoisture/SMCMAX(ISOIL) )
+    FACTR = max( 0.01, SoilMoisture/SoilMoistureSat(ISOIL) )
 
     ! soil water diffusivity
-    EXPON = BEXP(ISOIL) + 2.0
-    SoilWatDiffusivity   = DWSAT(ISOIL) * FACTR ** EXPON
+    EXPON = SoilExpCoeffB(ISOIL) + 2.0
+    SoilWatDiffusivity   = SoilWatDiffusivitySat(ISOIL) * FACTR ** EXPON
     SoilWatDiffusivity   = SoilWatDiffusivity * (1.0 - SoilImpervFrac)
 
     ! soil hydraulic conductivity
-    EXPON = 2.0 * BEXP(ISOIL) + 3.0
-    SoilWatConductivity  = DKSAT(ISOIL) * FACTR ** EXPON
+    EXPON = 2.0 * SoilExpCoeffB(ISOIL) + 3.0
+    SoilWatConductivity  = SoilWatConductivitySat(ISOIL) * FACTR ** EXPON
     SoilWatConductivity  = SoilWatConductivity * (1.0 - SoilImpervFrac)
 
     end associate
@@ -59,7 +60,8 @@ contains
   end subroutine SoilDiffusivityConductivityOpt1
 
 
-  subroutine SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SoilMoisture, SoilIce, ISOIL)
+  subroutine SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
+                                             SoilMoisture, SoilIce, ISOIL)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND2
@@ -85,28 +87,28 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
-              DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
-              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
+              SoilWatDiffusivitySat           => noahmp%water%param%SoilWatDiffusivitySat            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
+              SoilWatConductivitySat           => noahmp%water%param%SoilWatConductivitySat             & ! in,     saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
-    FACTR1 = 0.05 / SMCMAX(ISOIL)
-    FACTR2 = max( 0.01, SoilMoisture/SMCMAX(ISOIL) )
+    FACTR1 = 0.05 / SoilMoistureSat(ISOIL)
+    FACTR2 = max( 0.01, SoilMoisture/SoilMoistureSat(ISOIL) )
     FACTR1 = min( FACTR1, FACTR2 )
 
     ! soil water diffusivity
-    EXPON  = BEXP(ISOIL) + 2.0
-    SoilWatDiffusivity    = DWSAT(ISOIL) * FACTR2 ** EXPON
+    EXPON  = SoilExpCoeffB(ISOIL) + 2.0
+    SoilWatDiffusivity    = SoilWatDiffusivitySat(ISOIL) * FACTR2 ** EXPON
     if ( SoilIce > 0.0 ) then
        VKWGT = 1.0 / ( 1.0 + (500.0 * SoilIce)**3.0 )
-       SoilWatDiffusivity   = VKWGT * SoilWatDiffusivity + (1.0-VKWGT) * DWSAT(ISOIL) * FACTR1 ** EXPON
+       SoilWatDiffusivity   = VKWGT * SoilWatDiffusivity + (1.0-VKWGT) * SoilWatDiffusivitySat(ISOIL) * FACTR1 ** EXPON
     endif
 
     ! soil hydraulic conductivity
-    EXPON = 2.0 * BEXP(ISOIL) + 3.0
-    SoilWatConductivity  = DKSAT(ISOIL) * FACTR2 ** EXPON
+    EXPON = 2.0 * SoilExpCoeffB(ISOIL) + 3.0
+    SoilWatConductivity  = SoilWatConductivitySat(ISOIL) * FACTR2 ** EXPON
 
     end associate
 

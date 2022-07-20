@@ -60,10 +60,9 @@ contains
                OptDynVicInfiltration => noahmp%config%nmlist%OptDynVicInfiltration ,& ! in,  options for infiltration in dynamic VIC runoff scheme
                SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
                SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
-               SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-               BBVIC           => noahmp%water%param%BBVIC            ,& ! in,     DVIC heterogeniety parameter for infiltration
-               GDVIC           => noahmp%water%param%GDVIC            ,& ! in,     DVIC Mean Capillary Drive (m) for infiltration models
-               BDVIC           => noahmp%water%param%BDVIC            ,& ! in,     DVIC model infiltration parameter
+               SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+               InfilHeteroDynVic           => noahmp%water%param%InfilHeteroDynVic            ,& ! in,     DVIC heterogeniety parameter for infiltration
+               InfilFacDynVic           => noahmp%water%param%InfilFacDynVic            ,& ! in,     DVIC model infiltration parameter
                RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
                InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,    infiltration rate at surface (mm/s)
               )
@@ -83,17 +82,17 @@ contains
      InfilRateSfc         = 0.0
      IZMAX         = 20
      ERROR         = 1.388889E-07 * DT ! 0.5 mm per hour time step
-     BB            = BBVIC
+     BB            = InfilHeteroDynVic
 
      do IZ = 1, NumSoilLayer-2
         TOP_MOIST     = TOP_MOIST + (SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ))            ! actual moisture in top layers, [m]
-        TOP_MAX_MOIST = TOP_MAX_MOIST + (SMCMAX(IZ) * (-1.0) * DepthSoilLayer(IZ))     ! maximum moisture in top layers, [m]  
+        TOP_MAX_MOIST = TOP_MAX_MOIST + (SoilMoistureSat(IZ) * (-1.0) * DepthSoilLayer(IZ))     ! maximum moisture in top layers, [m]  
      enddo
      if ( TOP_MOIST > TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
 
      DP     = SoilSfcInflow * DT                      ! precipitation depth, [m]
-     I_MAX  = TOP_MAX_MOIST * (BDVIC + 1.0)    ! maximum infiltration capacity, im, [m], Eq. 14
-     I_0    = I_MAX * (1.0 - (1.0 - (TOP_MOIST/TOP_MAX_MOIST)**(1.0 / (1.0+BDVIC)) ) )  ! infiltration capacity, i [m] in the Eq. 1
+     I_MAX  = TOP_MAX_MOIST * (InfilFacDynVic + 1.0)    ! maximum infiltration capacity, im, [m], Eq. 14
+     I_0    = I_MAX * (1.0 - (1.0 - (TOP_MOIST/TOP_MAX_MOIST)**(1.0 / (1.0+InfilFacDynVic)) ) )  ! infiltration capacity, i [m] in the Eq. 1
      ! I_MAX = CAP_minf ; I_0 = A  
      INFLMAX = 0
 
@@ -122,7 +121,7 @@ contains
            INFILTRTN = 0.0
            goto 2001
         else
-           I_0 = I_MAX * (1.0 - (1.0 - (TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+BDVIC))))
+           I_0 = I_MAX * (1.0 - (1.0 - (TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+InfilFacDynVic))))
            if ( (DP+I_0) > I_MAX ) then
               if ( (FMAX*DT) >= DP) then
                  YD     = I_MAX - I_0
@@ -208,7 +207,7 @@ contains
                     YD        = I_0 + YD
                     if ( TOP_MOIST <= 0.0 ) TOP_MOIST = 0.0
                     if ( TOP_MOIST >= TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
-                    I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+BDVIC))))
+                    I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+InfilFacDynVic))))
                     goto 2001
                  endif
               endif
@@ -277,7 +276,7 @@ contains
               TOP_MOIST = TOP_MOIST + INFILTRTN
               if ( TOP_MOIST <= 0.0 ) TOP_MOIST = 0.0
               if ( TOP_MOIST >= TOP_MAX_MOIST ) TOP_MOIST = TOP_MAX_MOIST
-              I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+BDVIC))))
+              I_0       = I_MAX * (1.0-(1.0-(TOP_MOIST/TOP_MAX_MOIST)**(1.0/(1.0+InfilFacDynVic))))
            endif
         endif
      endif

@@ -78,7 +78,7 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               FlagCropland          => noahmp%config%domain%FlagCropland         ,& ! in,    flag to identify croplands
-              IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
+              IrriFracThreshold        => noahmp%water%param%IrriFracThreshold         ,& ! in,    irrigation fraction parameter
               IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,    total input irrigation fraction
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,    water table depth [m]
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water [mm]
@@ -103,7 +103,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! before water balance check add irrigation water to precipitation
-    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) ) then
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) ) then
        PrecipTotRefHeight = PrecipTotRefHeight + &
                            (IrrigationRateSprinkler + IrrigationRateMicro + IrrigationRateFlood)*1000.0 / MainTimeStep  ! irrigation
     endif

@@ -48,9 +48,9 @@ contains
               MainTimeStep          => noahmp%config%domain%MainTimeStep          ,& ! in,    main noahmp timestep (s)
               SurfaceType             => noahmp%config%domain%SurfaceType            ,& ! in,    surface type 1-soil; 2-lake
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers (m)
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter
-              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,    saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,    soil B parameter
+              SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,    saturated soil matric potential (m)
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,    saturated value of soil moisture [m3/m3]
               FACT            => noahmp%energy%state%FACT            ,& ! in,    energy factor for soil & snow phase change
               STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [K]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
@@ -107,7 +107,7 @@ contains
           if ( OptSoilSupercoolWater == 1 ) then
              if ( STC(J) < ConstFreezePoint ) then
                 SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
-                SoilSupercoolWater(J) = SMCMAX(J) * (SMP / PSISAT(J)) ** (-1.0 / BEXP(J))
+                SoilSupercoolWater(J) = SoilMoistureSat(J) * (SMP / SoilMatPotentialSat(J)) ** (-1.0 / SoilExpCoeffB(J))
                 SoilSupercoolWater(J) = SoilSupercoolWater(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
              endif
           endif

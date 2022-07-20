@@ -39,9 +39,9 @@ contains
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth of soil layer-bottom [m]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               SoilMoistureEqui           => noahmp%water%state%SoilMoistureEqui  ,& ! in,     equilibrium soil water  content [m3/m3]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,     saturated soil matric potential (m)
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,     saturated soil matric potential (m)
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
               SoilMoisture             => noahmp%water%state%SoilMoisture             ,& ! inout,  total soil water content [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout,  water table depth [m]
               SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! inout,  soil moisture between bottom of the soil and the water table
@@ -65,27 +65,27 @@ contains
     if ( KWTD <= NumSoilLayer ) then    ! wtd in the resolved layers
        WTDOLD = WaterTableDepth
        if ( SoilMoisture(KWTD) > SoilMoistureEqui(KWTD) ) then
-          if ( SoilMoisture(KWTD) == SMCMAX(KWTD) ) then ! wtd went to the layer above
+          if ( SoilMoisture(KWTD) == SoilMoistureSat(KWTD) ) then ! wtd went to the layer above
              WaterTableDepth  = DepthSoilLayer0(IWTD)
-             RechargeGwShallowWT = -(WTDOLD - WaterTableDepth) * (SMCMAX(KWTD) - SoilMoistureEqui(KWTD))
+             RechargeGwShallowWT = -(WTDOLD - WaterTableDepth) * (SoilMoistureSat(KWTD) - SoilMoistureEqui(KWTD))
              IWTD = IWTD-1
              KWTD = KWTD-1
              if ( KWTD >= 1 ) then
                 if ( SoilMoisture(KWTD) > SoilMoistureEqui(KWTD) ) then
                    WTDOLD = WaterTableDepth
                    WaterTableDepth  = min( ( SoilMoisture(KWTD)*ThicknessSnowSoilLayer(KWTD) - SoilMoistureEqui(KWTD)*DepthSoilLayer0(IWTD) + &
-                          SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
-                   RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SMCMAX(KWTD)-SoilMoistureEqui(KWTD))
+                          SoilMoistureSat(KWTD)*DepthSoilLayer0(KWTD) ) / (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
+                   RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD))
                 endif
              endif
           else  ! wtd stays in the layer
              WaterTableDepth  = min( ( SoilMoisture(KWTD)*ThicknessSnowSoilLayer(KWTD) - SoilMoistureEqui(KWTD)*DepthSoilLayer0(IWTD) + &
-                    SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
-             RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SMCMAX(KWTD)-SoilMoistureEqui(KWTD))
+                    SoilMoistureSat(KWTD)*DepthSoilLayer0(KWTD) ) / (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
+             RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD))
           endif
        else   ! wtd has gone down to the layer below
           WaterTableDepth  = DepthSoilLayer0(KWTD)
-          RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SMCMAX(KWTD)-SoilMoistureEqui(KWTD))
+          RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD))
           KWTD = KWTD + 1
           IWTD = IWTD + 1
           ! wtd crossed to the layer below. Now adjust it there
@@ -93,11 +93,11 @@ contains
              WTDOLD = WaterTableDepth
              if ( SoilMoisture(KWTD) > SoilMoistureEqui(KWTD) ) then
                 WaterTableDepth = min( ( SoilMoisture(KWTD)*ThicknessSnowSoilLayer(KWTD) - SoilMoistureEqui(KWTD)*DepthSoilLayer0(IWTD) + &
-                      SMCMAX(KWTD)*DepthSoilLayer0(KWTD) ) / (SMCMAX(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
+                      SoilMoistureSat(KWTD)*DepthSoilLayer0(KWTD) ) / (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD)), DepthSoilLayer0(IWTD) )
              else
                 WaterTableDepth = DepthSoilLayer0(KWTD)
              endif
-             RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SMCMAX(KWTD)-SoilMoistureEqui(KWTD))
+             RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SoilMoistureSat(KWTD)-SoilMoistureEqui(KWTD))
           else
              WTDOLD = WaterTableDepth
              ! restore smoi to equilibrium value with water from the ficticious layer below
@@ -106,40 +106,40 @@ contains
              ! SoilMoisture(NumSoilLayer)=SoilMoistureEqui(NumSoilLayer)
 
              ! adjust wtd in the ficticious layer below
-             SMCEQDEEP = SMCMAX(NumSoilLayer) * ( -PSISAT(NumSoilLayer) / &
-                         (-PSISAT(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)))**(1.0/BEXP(NumSoilLayer))
+             SMCEQDEEP = SoilMoistureSat(NumSoilLayer) * ( -SoilMatPotentialSat(NumSoilLayer) / &
+                         (-SoilMatPotentialSat(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)))**(1.0/SoilExpCoeffB(NumSoilLayer))
              WaterTableDepth = min( (SoilMoistureToWT*ThicknessSnowSoilLayer(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
-                         SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
-                        (SMCMAX(NumSoilLayer)-SMCEQDEEP),DepthSoilLayer0(NumSoilLayer))
-             RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SMCMAX(NumSoilLayer)-SMCEQDEEP)
+                         SoilMoistureSat(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
+                        (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP),DepthSoilLayer0(NumSoilLayer))
+             RechargeGwShallowWT = RechargeGwShallowWT - (WTDOLD-WaterTableDepth) * (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP)
           endif
        endif
     else if ( WaterTableDepth >= (DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) then
     ! if wtd was already below the bottom of the resolved soil crust
        WTDOLD = WaterTableDepth
-       SMCEQDEEP = SMCMAX(NumSoilLayer) * ( -PSISAT(NumSoilLayer) / &
-                   (-PSISAT(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) )**(1.0/BEXP(NumSoilLayer))
+       SMCEQDEEP = SoilMoistureSat(NumSoilLayer) * ( -SoilMatPotentialSat(NumSoilLayer) / &
+                   (-SoilMatPotentialSat(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) )**(1.0/SoilExpCoeffB(NumSoilLayer))
        if ( SoilMoistureToWT > SMCEQDEEP ) then
           WaterTableDepth = min( (SoilMoistureToWT*ThicknessSnowSoilLayer(NumSoilLayer) - SMCEQDEEP*DepthSoilLayer0(NumSoilLayer) + &
-                      SMCMAX(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
-                    (SMCMAX(NumSoilLayer)-SMCEQDEEP), DepthSoilLayer0(NumSoilLayer) )
-          RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SMCMAX(NumSoilLayer)-SMCEQDEEP)
+                      SoilMoistureSat(NumSoilLayer)*(DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer))) / &
+                    (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP), DepthSoilLayer0(NumSoilLayer) )
+          RechargeGwShallowWT = -(WTDOLD-WaterTableDepth) * (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP)
        else
           RechargeGwShallowWT = -( WTDOLD - (DepthSoilLayer0(NumSoilLayer)-ThicknessSnowSoilLayer(NumSoilLayer)) ) * &
-                  (SMCMAX(NumSoilLayer) - SMCEQDEEP)
+                  (SoilMoistureSat(NumSoilLayer) - SMCEQDEEP)
           WTDOLD = DepthSoilLayer0(NumSoilLayer) - ThicknessSnowSoilLayer(NumSoilLayer)
           ! and now even further down
-          DZUP = (SMCEQDEEP-SoilMoistureToWT) * ThicknessSnowSoilLayer(NumSoilLayer) / (SMCMAX(NumSoilLayer)-SMCEQDEEP)
+          DZUP = (SMCEQDEEP-SoilMoistureToWT) * ThicknessSnowSoilLayer(NumSoilLayer) / (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP)
           WaterTableDepth  = WTDOLD - DZUP
-          RechargeGwShallowWT = RechargeGwShallowWT - (SMCMAX(NumSoilLayer)-SMCEQDEEP) * DZUP
+          RechargeGwShallowWT = RechargeGwShallowWT - (SoilMoistureSat(NumSoilLayer)-SMCEQDEEP) * DZUP
           SoilMoistureToWT = SMCEQDEEP
        endif
     endif
 
     if ( (IWTD < NumSoilLayer) .and. (IWTD > 0) ) then
-       SoilMoistureToWT = SMCMAX(IWTD)
+       SoilMoistureToWT = SoilMoistureSat(IWTD)
     else if ( (IWTD < NumSoilLayer) .and. (IWTD <= 0) ) then
-       SoilMoistureToWT = SMCMAX(1)
+       SoilMoistureToWT = SoilMoistureSat(1)
     endif
 
     end associate

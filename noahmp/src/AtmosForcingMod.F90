@@ -49,6 +49,7 @@ contains
               PrecipGraupelRefHeight  => noahmp%forcing%PrecipGraupelRefHeight     ,& ! in,  graupel rate [mm/s] at reference height
               PrecipHailRefHeight     => noahmp%forcing%PrecipHailRefHeight        ,& ! in,  hail rate [mm/s] at reference height
               RadSWDownRefHeight      => noahmp%forcing%RadSWDownRefHeight         ,& ! in,  downward shortwave radiation (W/m2) at reference height
+              SnowfallDensityMax      => noahmp%water%param%SnowfallDensityMax     ,& ! in,  maximum fresh snowfall density [kg/m3]
               THAIR                 => noahmp%energy%state%THAIR        ,& ! out,  surface potential temperature (k)
               EAIR                  => noahmp%energy%state%EAIR         ,& ! out,  vapor pressure air (pa)
               RHOAIR                => noahmp%energy%state%RHOAIR       ,& ! out,  density air (kg/m3)
@@ -133,7 +134,7 @@ contains
 
     ! Use WRF microphysics output
     ! Hedstrom NR and JW Pomeroy (1998), Hydrol. Processes, 12, 1611-1625
-    SnowfallDensity = min( 120.0, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
+    SnowfallDensity = min( SnowfallDensityMax, 67.92 + 51.25*exp((TemperatureAirRefHeight-ConstFreezePoint)/2.59) )   !fresh snow density !MB/AN: change to MIN  
     if ( OptRainSnowPartition == 4 ) then
        PRCP_FROZEN = PrecipSnowRefHeight + PrecipGraupelRefHeight + PrecipHailRefHeight
        if ( (PrecipNonConvRefHeight > 0.0) .and. (PRCP_FROZEN > 0.0) ) then

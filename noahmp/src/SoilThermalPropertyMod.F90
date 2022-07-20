@@ -41,9 +41,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
               CSOIL           => noahmp%energy%param%CSOIL           ,& ! in,     soil volumetric specific heat (j/m3/k)
-              QUARTZ          => noahmp%energy%param%QUARTZ          ,& ! in,     soil quartz content
+              SoilQuartzFrac          => noahmp%energy%param%SoilQuartzFrac          ,& ! in,     soil quartz content
               SoilMoisture            => noahmp%water%state%SoilMoisture       ,& ! in,     total soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3] 
               CVSOIL          => noahmp%energy%state%CVSOIL          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
@@ -63,22 +63,23 @@ contains
        ! ==== soil heat capacity
 
        SoilIceTmp(ISOIL) = SoilMoisture(ISOIL) - SoilLiqWater(ISOIL)
-       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SMCMAX(ISOIL)) * CSOIL &
-                         + (SMCMAX(ISOIL) - SoilMoisture(ISOIL)) * ConstHeatCapacAir + SoilIceTmp(ISOIL) * ConstHeatCapacIce
+       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SoilMoistureSat(ISOIL)) * CSOIL + &
+                         (SoilMoistureSat(ISOIL) - SoilMoisture(ISOIL)) * ConstHeatCapacAir + &
+                         SoilIceTmp(ISOIL) * ConstHeatCapacIce
 
        ! ==== soil thermal conductivity
 
-       SATRATIO = SoilMoisture(ISOIL) / SMCMAX(ISOIL) ! SATURATION RATIO
+       SATRATIO = SoilMoisture(ISOIL) / SoilMoistureSat(ISOIL) ! SATURATION RATIO
        ! UNFROZEN FRACTION (FROM 1., i.e., 100%LIQUID, TO 0. (100% FROZEN))
-       THKS = (THKQTZ ** QUARTZ(ISOIL)) * (THKO ** (1.0 - QUARTZ(ISOIL)))
+       THKS = (THKQTZ ** SoilQuartzFrac(ISOIL)) * (THKO ** (1.0 - SoilQuartzFrac(ISOIL)))
        ! UNFROZEN VOLUME FOR SATURATION (POROSITY*XUNFROZ)
        XUNFROZ = 1.0    ! Prevent divide by zero (suggested by D. Mocko)
        if ( SoilMoisture(ISOIL) > 0.0 ) XUNFROZ = SoilLiqWater(ISOIL) / SoilMoisture(ISOIL)
-       XU = XUNFROZ * SMCMAX(ISOIL)
+       XU = XUNFROZ * SoilMoistureSat(ISOIL)
        ! SATURATED THERMAL CONDUCTIVITY
-       THKSAT = THKS ** (1.0-SMCMAX(ISOIL)) * ConstThermConductIce ** (SMCMAX(ISOIL)-XU) * THKW ** (XU)
+       THKSAT = THKS ** (1.0-SoilMoistureSat(ISOIL)) * ConstThermConductIce ** (SoilMoistureSat(ISOIL)-XU) * THKW ** (XU)
        ! DRY THERMAL CONDUCTIVITY IN W.M-1.K-1
-       GAMMD  = (1.0 - SMCMAX(ISOIL)) * 2700.0
+       GAMMD  = (1.0 - SoilMoistureSat(ISOIL)) * 2700.0
        THKDRY = (0.135 * GAMMD + 64.7) / (2700.0 - 0.947 * GAMMD)
        ! THE KERSTEN NUMBER AKE
        if ( (SoilLiqWater(ISOIL)+0.0005) < SoilMoisture(ISOIL) ) then ! FROZEN 

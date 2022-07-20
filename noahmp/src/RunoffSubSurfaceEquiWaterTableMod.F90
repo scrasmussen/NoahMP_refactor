@@ -26,23 +26,23 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! in,    maximum soil imperviousness fraction
-              TIMEAN          => noahmp%water%param%TIMEAN           ,& ! in,     gridcell mean topgraphic index (global mean)
-              FFF             => noahmp%water%param%FFF              ,& ! in,     runoff decay factor (m-1)
-              RSBMX           => noahmp%water%param%RSBMX            ,& ! in,     baseflow coefficient [mm/s]
+              GridTopoIndex          => noahmp%water%param%GridTopoIndex           ,& ! in,     gridcell mean topgraphic index (global mean)
+              RunoffDecayFac             => noahmp%water%param%RunoffDecayFac              ,& ! in,     runoff decay factor (m-1)
+              BaseflowCoeff           => noahmp%water%param%BaseflowCoeff            ,& ! inout,     baseflow coefficient [mm/s]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! out,    water table depth [m]
               RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface             & ! out,    subsurface runoff [mm/s] 
              )
 ! ----------------------------------------------------------------------
 
     ! set parameter values specific for this scheme
-    FFF   = 2.0
-    RSBMX = 4.0
+    RunoffDecayFac   = 2.0
+    BaseflowCoeff = 4.0
 
     ! compute equilibrium water table depth
     call WaterTableEquilibrium(noahmp)
 
     ! compuate subsurface runoff mm/s
-    RunoffSubsurface = (1.0 - SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * WaterTableDepth)
+    RunoffSubsurface = (1.0 - SoilImpervFracMax) * BaseflowCoeff * exp(-GridTopoIndex) * exp(-RunoffDecayFac * WaterTableDepth)
 
     end associate
 

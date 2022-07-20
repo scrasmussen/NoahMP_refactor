@@ -29,7 +29,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,   depth [m] of layer-bottom from soil surface
-              NROOT           => noahmp%water%param%NROOT            ,& ! in,   number of soil layers with root present
+              NumSoilLayerRoot           => noahmp%water%param%NumSoilLayerRoot            ,& ! in,   number of soil layers with root present
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
               DepthSnowSoilLayer           => noahmp%config%domain%DepthSnowSoilLayer          ,& ! in,   depth of snow/soil layer-bottom (m)
               STC             => noahmp%energy%state%STC             ,& ! in,   snow and soil layer temperature [k]
@@ -49,8 +49,8 @@ contains
 
     ! initialize root-zone soil temperature
     TROOT = 0.0
-    do IZ = 1, NROOT
-       TROOT = TROOT + STC(IZ) * ThicknessSnowSoilLayer(IZ) / (-DepthSoilLayer(NROOT))
+    do IZ = 1, NumSoilLayerRoot
+       TROOT = TROOT + STC(IZ) * ThicknessSnowSoilLayer(IZ) / (-DepthSoilLayer(NumSoilLayerRoot))
     enddo
 
     end associate

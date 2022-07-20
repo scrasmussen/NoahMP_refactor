@@ -81,7 +81,7 @@ contains
               RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight        ,& ! in,    downward shortwave radiation [W/m2] at reference height
               OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
               FlagCropland           => noahmp%config%domain%FlagCropland        ,& ! in,    flag to identify croplands
-              IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,    irrigation fraction parameter
+              IrriFracThreshold        => noahmp%water%param%IrriFracThreshold         ,& ! in,    irrigation fraction parameter
               IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,    total input irrigation fraction
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
@@ -321,7 +321,7 @@ contains
     call SoilSnowWaterPhaseChange(noahmp)
 
     ! update sensible heat flux due to sprinkler irrigation evaporation
-    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) ) FSH = FSH - FIRR  ! (W/m2)
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) ) FSH = FSH - FIRR  ! (W/m2)
 
     ! update total surface albedo
     if ( RadSWDownRefHeight > 0.0 ) then

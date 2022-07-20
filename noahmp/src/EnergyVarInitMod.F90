@@ -318,7 +318,7 @@ contains
     
     if( .not. allocated( noahmp%energy%param%LAIM   ) ) allocate( noahmp%energy%param%LAIM   (1:12   ) )
     if( .not. allocated( noahmp%energy%param%SAIM   ) ) allocate( noahmp%energy%param%SAIM   (1:12   ) )
-    if( .not. allocated( noahmp%energy%param%QUARTZ ) ) allocate( noahmp%energy%param%QUARTZ (1:NumSoilLayer) )
+    if( .not. allocated( noahmp%energy%param%SoilQuartzFrac ) ) allocate( noahmp%energy%param%SoilQuartzFrac (1:NumSoilLayer) )
     if( .not. allocated( noahmp%energy%param%ALBSAT ) ) allocate( noahmp%energy%param%ALBSAT (1:NumSWRadBand) )
     if( .not. allocated( noahmp%energy%param%ALBDRY ) ) allocate( noahmp%energy%param%ALBDRY (1:NumSWRadBand) )
     if( .not. allocated( noahmp%energy%param%ALBLAK ) ) allocate( noahmp%energy%param%ALBLAK (1:NumSWRadBand) )
@@ -332,7 +332,7 @@ contains
     
     noahmp%energy%param%LAIM(:)         = undefined_real
     noahmp%energy%param%SAIM(:)         = undefined_real
-    noahmp%energy%param%QUARTZ(:)       = undefined_real
+    noahmp%energy%param%SoilQuartzFrac(:)       = undefined_real
     noahmp%energy%param%ALBSAT(:)       = undefined_real
     noahmp%energy%param%ALBDRY(:)       = undefined_real
     noahmp%energy%param%ALBLAK(:)       = undefined_real
@@ -450,7 +450,7 @@ contains
     noahmp%energy%param%OMEGAS(1:NumSWRadBand)    = NoahmpIO%OMEGAS_TABLE(1:NumSWRadBand)
 
     do ISOIL = 1, size(SoilType)
-       noahmp%energy%param%QUARTZ(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SoilType(ISOIL))
+       noahmp%energy%param%SoilQuartzFrac(ISOIL)   = NoahmpIO%QUARTZ_TABLE(SoilType(ISOIL))
     enddo
 
     if ( FlagUrban .eqv. .true. ) then

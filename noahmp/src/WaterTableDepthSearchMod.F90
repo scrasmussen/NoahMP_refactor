@@ -34,8 +34,8 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               DepthSoilLayer     => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
               ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
-              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
+              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
+              SoilMoistureWilt          => noahmp%water%param%SoilMoistureWilt           ,& ! in,     wilting point soil moisture [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth               & ! out,    water table depth [m]
              )
@@ -47,7 +47,7 @@ contains
 
     ! calculate/search for water table depth
     do K = NumSoilLayer, 1, -1
-       if ( (SoilMoisture(K) >= SMCREF(K)) .and. (SMCREF(K) > SMCWLT(K)) ) then
+       if ( (SoilMoisture(K) >= SoilMoistureFieldCap(K)) .and. (SoilMoistureFieldCap(K) > SoilMoistureWilt(K)) ) then
           if ( (SATLYRCHK == (K+1)) .or. (K == NumSoilLayer) ) SATLYRCHK = K
        endif
     enddo
@@ -59,7 +59,7 @@ contains
           WaterTableDepthTmp = 0.0
        endif
        do K = SATLYRCHK, NumSoilLayer
-          CWATAVAIL = CWATAVAIL + (SoilMoisture(K) - SMCREF(K)) * ThicknessSoilLayer(K)
+          CWATAVAIL = CWATAVAIL + (SoilMoisture(K) - SoilMoistureFieldCap(K)) * ThicknessSoilLayer(K)
        enddo
     else  ! no saturated layers...
        WaterTableDepthTmp   = -DepthSoilLayer(NumSoilLayer)

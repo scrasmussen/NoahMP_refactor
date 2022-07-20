@@ -50,18 +50,18 @@ contains
               SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! in,     maximum soil imperviousness fraction
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! in,     soil hydraulic conductivity [m/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              TIMEAN          => noahmp%water%param%TIMEAN           ,& ! in,     gridcell mean topgraphic index (global mean)
-              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,     saturated soil matric potential
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,     soil B parameter
-              ROUS            => noahmp%water%param%ROUS             ,& ! in,     specific yield [-], default:0.2
-              CMIC            => noahmp%water%param%CMIC             ,& ! in,     microprore content (0.0-1.0), default:0.2
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              GridTopoIndex          => noahmp%water%param%GridTopoIndex           ,& ! in,     gridcell mean topgraphic index (global mean)
+              SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,     saturated soil matric potential
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
+              SpecYieldGw            => noahmp%water%param%SpecYieldGw             ,& ! in,     specific yield [-], default:0.2
+              MicroPoreContent            => noahmp%water%param%MicroPoreContent             ,& ! in,     microprore content (0.0-1.0), default:0.2
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout,  water table depth [m]
               WaterStorageAquifer  => noahmp%water%state%WaterStorageAquifer ,& ! inout,  water storage in aquifer [mm]
               WaterStorageSoilAqf   => noahmp%water%state%WaterStorageSoilAqf ,& ! inout,  water storage in aquifer + saturated soil [mm]
-              FFF             => noahmp%water%param%FFF              ,& ! inout,  runoff decay factor (m-1)
-              RSBMX           => noahmp%water%param%RSBMX            ,& ! inout,  baseflow coefficient [mm/s]
+              RunoffDecayFac             => noahmp%water%param%RunoffDecayFac              ,& ! inout,  runoff decay factor (m-1)
+              BaseflowCoeff           => noahmp%water%param%BaseflowCoeff            ,& ! inout,  baseflow coefficient [mm/s]
               RechargeGw             => noahmp%water%flux%RechargeGw               ,& ! out,    groundwater recharge rate [mm/s]
               DischargeGw            => noahmp%water%flux%DischargeGw               & ! out,    groundwater discharge rate [mm/s]
              )
@@ -93,7 +93,7 @@ contains
     do IZ = 1, NumSoilLayer
        SoilMoisture(IZ)   = SoilLiqWater(IZ) + SoilIce(IZ)
        MLIQ(IZ)  = SoilLiqWater(IZ) * DZMM(IZ)
-       SoilEffPorosity(IZ) = max( 0.01, SMCMAX(IZ)-SoilIce(IZ) )
+       SoilEffPorosity(IZ) = max( 0.01, SoilMoistureSat(IZ)-SoilIce(IZ) )
        HK(IZ)    = 1.0e3 * SoilWatConductivity(IZ)
     enddo
 
@@ -107,15 +107,15 @@ contains
     enddo
 
     ! Groundwater discharge [mm/s]
-    FFF   = 6.0
-    RSBMX = 5.0
-    DischargeGw = (1.0-SoilImpervFracMax) * RSBMX * exp(-TIMEAN) * exp(-FFF * (WaterTableDepth-2.0))
+    RunoffDecayFac   = 6.0
+    BaseflowCoeff = 5.0
+    DischargeGw = (1.0-SoilImpervFracMax) * BaseflowCoeff * exp(-GridTopoIndex) * exp(-RunoffDecayFac * (WaterTableDepth-2.0))
 
     ! Matric potential at the layer above the water table
-    S_NODE = min( 1.0, SoilMoisture(IWT)/SMCMAX(IWT) )
+    S_NODE = min( 1.0, SoilMoisture(IWT)/SoilMoistureSat(IWT) )
     S_NODE = max( S_NODE, real(0.01,kind=8) )
-    SMPFZ  = -PSISAT(IWT) * 1000.0 * S_NODE**(-BEXP(IWT))   ! m -> mm
-    SMPFZ  = max( -120000.0, CMIC*SMPFZ )
+    SMPFZ  = -SoilMatPotentialSat(IWT) * 1000.0 * S_NODE**(-SoilExpCoeffB(IWT))   ! m -> mm
+    SMPFZ  = max( -120000.0, MicroPoreContent*SMPFZ )
 
     ! Recharge rate qin to groundwater
     KA      = HK(IWT)
@@ -129,21 +129,21 @@ contains
     if ( IWT == NumSoilLayer ) then
        WaterStorageAquifer = WaterStorageAquifer + (RechargeGw - DischargeGw) * MainTimeStep     !(mm)
        WaterStorageSoilAqf = WaterStorageAquifer
-       WaterTableDepth = (-DepthSoilLayer(NumSoilLayer) + 25.0) - WaterStorageAquifer / 1000.0 / ROUS      !(m)
+       WaterTableDepth = (-DepthSoilLayer(NumSoilLayer) + 25.0) - WaterStorageAquifer / 1000.0 / SpecYieldGw      !(m)
        MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) - RechargeGw * MainTimeStep        ! [mm]
        MLIQ(NumSoilLayer) = MLIQ(NumSoilLayer) + max( 0.0, (WaterStorageAquifer - 5000.0) )
        WaterStorageAquifer = min( WaterStorageAquifer, 5000.0 )
     else
        if ( IWT == NumSoilLayer-1 ) then
           WaterTableDepth = -DepthSoilLayer(NumSoilLayer) - &
-                           (WaterStorageSoilAqf - ROUS*1000.0*25.0) / (SoilEffPorosity(NumSoilLayer))/1000.0
+                           (WaterStorageSoilAqf - SpecYieldGw*1000.0*25.0) / (SoilEffPorosity(NumSoilLayer))/1000.0
        else
           WS = 0.0   ! water used to fill soil air pores
           do IZ = IWT+2, NumSoilLayer
              WS = WS + SoilEffPorosity(IZ) * DZMM(IZ)
           enddo
           WaterTableDepth = -DepthSoilLayer(IWT+1) - &
-                           (WaterStorageSoilAqf - ROUS*1000.0*25.0 - WS) / (SoilEffPorosity(IWT+1))/1000.0
+                           (WaterStorageSoilAqf - SpecYieldGw*1000.0*25.0 - WS) / (SoilEffPorosity(IWT+1))/1000.0
        endif
        WTSUB = 0.0
        do IZ = 1, NumSoilLayer

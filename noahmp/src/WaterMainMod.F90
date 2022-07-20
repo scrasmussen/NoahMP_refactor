@@ -41,8 +41,8 @@ contains
               CondenseVapGrd            => noahmp%water%flux%CondenseVapGrd              ,& ! in,     ground vapor condense rate total (dew+frost) [mm/s]
               RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! in,     ground surface rain rate [mm/s]
               SoilTranspFac          => noahmp%water%state%SoilTranspFac           ,& ! in,     soil water transpiration factor (0 to 1)
-              WSLMAX          => noahmp%water%param%WSLMAX           ,& ! in,     maximum lake water storage (mm)
-              NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
+              WaterStorageLakeMax          => noahmp%water%param%WaterStorageLakeMax           ,& ! in,     maximum lake water storage (mm)
+              NumSoilLayerRoot           => noahmp%water%param%NumSoilLayerRoot            ,& ! in,     number of soil layers with root present
               FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! in,     frozen ground (logical) to define latent heat pathway
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,     density air (kg/m3)
@@ -129,7 +129,7 @@ contains
     EvapSoilSfcLiq  = EvapSoilSfcLiq * 0.001 ! mm/s -> m/s
 
     ! transpiration
-    do IZ = 1, NROOT
+    do IZ = 1, NumSoilLayerRoot
        TranspWatLossSoil(IZ) = Transpiration * SoilTranspFac(IZ) * 0.001
     enddo
 
@@ -155,7 +155,7 @@ contains
     ! lake/soil water balances
     if ( SurfaceType == 2 ) then   ! lake
        RunoffSurface = 0.0
-       if ( WaterStorageLake >= WSLMAX ) RunoffSurface = SoilSfcInflow * 1000.0   ! mm/s
+       if ( WaterStorageLake >= WaterStorageLakeMax ) RunoffSurface = SoilSfcInflow * 1000.0   ! mm/s
        WaterStorageLake = WaterStorageLake + (SoilSfcInflow-EvapSoilSfcLiq) * 1000.0 * MainTimeStep - RunoffSurface * MainTimeStep   !mm
     else                   ! soil
        ! soil water processes (including groundwater and shallow water MMF update)

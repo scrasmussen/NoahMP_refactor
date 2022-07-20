@@ -39,11 +39,11 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,   total soil moisture [m3/m3]
               SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,   fraction of imperviousness due to frozen soil
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,   water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,   reference soil moisture (field capacity) (m3/m3)
-              AXAJ            => noahmp%water%param%AXAJ             ,& ! in,   Tension water distribution inflection parameter
-              BXAJ            => noahmp%water%param%BXAJ             ,& ! in,   Tension water distribution shape parameter
-              XXAJ            => noahmp%water%param%XXAJ             ,& ! in,   Free water distribution shape parameter
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,   saturated value of soil moisture [m3/m3]
+              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,   reference soil moisture (field capacity) (m3/m3)
+              TensionWatDistrInfl            => noahmp%water%param%TensionWatDistrInfl             ,& ! in,   Tension water distribution inflection parameter
+              TensionWatDistrShp            => noahmp%water%param%TensionWatDistrShp             ,& ! in,   Tension water distribution shape parameter
+              FreeWatDistrShp            => noahmp%water%param%FreeWatDistrShp             ,& ! in,   Free water distribution shape parameter
               RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,  surface runoff [mm/s]
               InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,  infiltration rate at surface (mm/s)
              )
@@ -60,14 +60,14 @@ contains
     InfilRateSfc   = 0.0
 
     do IZ = 1, NumSoilLayer-2
-       if ( (SoilMoisture(IZ) - SMCREF(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
-          SM  = SM + ( SoilMoisture(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)   !m
-          WM  = WM + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)                 !m  
+       if ( (SoilMoisture(IZ) - SoilMoistureFieldCap(IZ)) > 0.0 ) then   ! soil moisture greater than field capacity
+          SM  = SM + ( SoilMoisture(IZ) - SoilMoistureFieldCap(IZ) ) * (-1.0) * DepthSoilLayer(IZ)   !m
+          WM  = WM + SoilMoistureFieldCap(IZ) * (-1.0) * DepthSoilLayer(IZ)                 !m  
        else
           WM  = WM + SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ)
        endif
-       WM_MAX = WM_MAX + SMCREF(IZ) * (-1.0) * DepthSoilLayer(IZ)
-       SM_MAX = SM_MAX + ( SMCMAX(IZ) - SMCREF(IZ) ) * (-1.0) * DepthSoilLayer(IZ)
+       WM_MAX = WM_MAX + SoilMoistureFieldCap(IZ) * (-1.0) * DepthSoilLayer(IZ)
+       SM_MAX = SM_MAX + ( SoilMoistureSat(IZ) - SoilMoistureFieldCap(IZ) ) * (-1.0) * DepthSoilLayer(IZ)
     enddo
     WM = min( WM, WM_MAX ) ! tension water (m) 
     SM = min( SM, SM_MAX ) ! free water (m)
@@ -76,17 +76,19 @@ contains
     IRUNOFF = SoilImpervFrac(1) * SoilSfcInflow * DT
 
     ! solve pervious surface runoff (m) based on Eq. (310)
-    if ( (WM/WM_MAX) <= (0.5-AXAJ) ) then
-       PRUNOFF = (1.0-SoilImpervFrac(1)) * SoilSfcInflow * DT * ( (0.5-AXAJ)**(1.0-BXAJ) ) * ( (WM/WM_MAX)**BXAJ )
+    if ( (WM/WM_MAX) <= (0.5-TensionWatDistrInfl) ) then
+       PRUNOFF = (1.0-SoilImpervFrac(1)) * SoilSfcInflow * DT * &
+                 ((0.5-TensionWatDistrInfl)**(1.0-TensionWatDistrShp)) * ((WM/WM_MAX)**TensionWatDistrShp)
     else
-       PRUNOFF = (1.0-SoilImpervFrac(1)) * SoilSfcInflow * DT * (1.0 - (( (0.5+AXAJ)**(1.0-BXAJ) ) * ( (1.0-(WM/WM_MAX))**BXAJ )))
+       PRUNOFF = (1.0-SoilImpervFrac(1)) * SoilSfcInflow * DT * &
+                 (1.0-(((0.5+TensionWatDistrInfl)**(1.0-TensionWatDistrShp)) * ((1.0-(WM/WM_MAX))**TensionWatDistrShp)))
     endif
 
     ! estimate surface runoff based on Eq. (313)
     if ( SoilSfcInflow == 0.0 ) then
       RunoffSurface  = 0.0
     else
-      RunoffSurface  = PRUNOFF * ( 1.0 - ( (1.0-(SM/SM_MAX))**XXAJ ) ) + IRUNOFF
+      RunoffSurface  = PRUNOFF * ( 1.0 - ( (1.0-(SM/SM_MAX))**FreeWatDistrShp ) ) + IRUNOFF
     endif
     RunoffSurface = RunoffSurface / DT   ! m/s
     RunoffSurface = max( 0.0,    RunoffSurface )

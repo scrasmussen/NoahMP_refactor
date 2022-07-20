@@ -110,14 +110,14 @@ module WaterVarType
     real(kind=kind_noahmp) :: RechargeGwShallowWT        ! groundwater recharge to or from shallow water table [m]
     real(kind=kind_noahmp) :: SoilSaturationExcess       ! saturation excess of the total soil [m]
     real(kind=kind_noahmp) :: WaterTableHydro            ! water table depth estimated in WRF-Hydro fine grids [m]
-    real(kind=kind_noahmp) :: TileDrainFrac              ! tile drainage map(fraction)
+    real(kind=kind_noahmp) :: TileDrainFrac              ! tile drainage fraction
     real(kind=kind_noahmp) :: WaterStorageAquifer        ! water storage in aquifer [mm]
     real(kind=kind_noahmp) :: WaterStorageSoilAqf        ! water storage in aquifer + saturated soil [mm]
     real(kind=kind_noahmp) :: WaterStorageLake           ! water storage in lake (can be negative) [mm] 
     real(kind=kind_noahmp) :: WaterHeadSfc               ! surface water head [mm]
     real(kind=kind_noahmp) :: IrrigationFracGrid         ! total irrigation fraction from input for a grid
     real(kind=kind_noahmp) :: PrecipAreaFrac             ! fraction of the gridcell that receives precipitation
-    real(kind=kind_noahmp) :: SnowCoverFrac              ! snow cover fraction (-)
+    real(kind=kind_noahmp) :: SnowCoverFrac              ! snow cover fraction
     real(kind=kind_noahmp) :: SoilTranspFacAcc           ! accumulated soil water transpiration factor (0 to 1)
     real(kind=kind_noahmp) :: FrozenPrecipFrac           ! fraction of frozen precip in total precipitation
     real(kind=kind_noahmp) :: SoilWaterRootZone          ! root zone soil water
@@ -126,7 +126,7 @@ module WaterVarType
     real(kind=kind_noahmp) :: WaterBalanceError          ! water balance error [mm]
     real(kind=kind_noahmp) :: WaterStorageTotEnd         ! total water storage [mm] at the end of NoahMP process
 
-    integer               , allocatable, dimension(:) :: IndexPhaseChange      ! phase change index [0-none;1-melt;2-refreeze]
+    integer               , allocatable, dimension(:) :: IndexPhaseChange      ! phase change index (0-none;1-melt;2-refreeze)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIce               ! snow layer ice [mm]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SnowLiqWater          ! snow layer liquid water [mm]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceFracPrev       ! ice fraction in snow layers at previous timestep
@@ -139,7 +139,7 @@ module WaterVarType
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilImpervFrac        ! fraction of imperviousness due to frozen soil
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatConductivity   ! soil hydraulic/water conductivity [m/s]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatDiffusivity    ! soil water diffusivity [m2/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilEffPorosity       ! soil effective porosity (m3/m3) 
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilEffPorosity       ! soil effective porosity [m3/m3] 
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureEqui      ! equilibrium soil water  content [m3/m3]
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilTranspFac         ! soil water transpiration factor (0 to 1)
     real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceVol            ! partial volume of snow ice [m3/m3]
@@ -154,73 +154,72 @@ module WaterVarType
   type :: parameter_type
 
     ! define specific water parameter variables
-    integer                :: DRAIN_LAYER_OPT  ! starting soil layer for drainage
-    integer                :: TD_DEPTH         ! depth of drain tube from the soil surface
-    integer                :: NROOT            ! number of soil layers with root present
-    integer                :: IRR_HAR          ! number of days before harvest date to stop irrigation
-    real(kind=kind_noahmp) :: CH2OP            ! maximum canopy intercepted water per unit lai+sai (mm)
-    real(kind=kind_noahmp) :: C2_SnowCompact   ! overburden snow compaction parameter (m3/kg) default 21.e-3
-    real(kind=kind_noahmp) :: C3_SnowCompact   ! snow desctructive metamorphism compaction parameter1 [1/s]
-    real(kind=kind_noahmp) :: C4_SnowCompact   ! snow desctructive metamorphism compaction parameter2 [1/k]
-    real(kind=kind_noahmp) :: C5_SnowCompact   ! snow desctructive metamorphism compaction parameter3 
-    real(kind=kind_noahmp) :: DM_SnowCompact   ! upper Limit on destructive metamorphism compaction [kg/m3]
-    real(kind=kind_noahmp) :: ETA0_SnowCompact ! snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
-    real(kind=kind_noahmp) :: SNLIQMAXFRAC     ! maximum liquid water fraction in snow
-    real(kind=kind_noahmp) :: SSI              ! liquid water holding capacity for snowpack (m3/m3)
-    real(kind=kind_noahmp) :: SNOW_RET_FAC     ! snowpack water release timescale factor (1/s)
-    real(kind=kind_noahmp) :: FIRTFAC          ! flood application rate factor
-    real(kind=kind_noahmp) :: MICIR_RATE       ! micro irrigation rate (mm/hr)
-    real(kind=kind_noahmp) :: KDT              ! parameter to calculate maximum infiltration rate
-    real(kind=kind_noahmp) :: FRZX             ! parameter to calculate frozen soil impermeable fraction
-    real(kind=kind_noahmp) :: BVIC             ! VIC model infiltration parameter
-    real(kind=kind_noahmp) :: AXAJ             ! Tension water distribution inflection parameter
-    real(kind=kind_noahmp) :: BXAJ             ! Tension water distribution shape parameter
-    real(kind=kind_noahmp) :: XXAJ             ! Free water distribution shape parameter
-    real(kind=kind_noahmp) :: BBVIC            ! DVIC heterogeniety parameter for infiltration
-    real(kind=kind_noahmp) :: GDVIC            ! DVIC Mean Capillary Drive (m) for infiltration models
-    real(kind=kind_noahmp) :: BDVIC            ! DVIC model infiltration parameter
-    real(kind=kind_noahmp) :: SLOPE            ! slope index for soil drainage
-    real(kind=kind_noahmp) :: TD_DC            ! drainage coefficient (mm d^-1)
-    real(kind=kind_noahmp) :: TDSMC_FAC        ! drainage factor for soil moisture
-    real(kind=kind_noahmp) :: TD_DCOEF         ! drainage coefficent (m d^-1)
-    real(kind=kind_noahmp) :: TD_ADEPTH        ! Actual depth to impermeable layer form surface
-    real(kind=kind_noahmp) :: KLAT_FAC         ! multiplication factor to determine lateral hydraulic conductivity
-    real(kind=kind_noahmp) :: TD_DDRAIN        ! Depth of drain (m)
-    real(kind=kind_noahmp) :: TD_SPAC          ! distance between two drain tubes or tiles (m)
-    real(kind=kind_noahmp) :: TD_RADI          ! effective radius of drains (m)
-    real(kind=kind_noahmp) :: TD_D             ! depth to impervious layer from drain water level (m)
-    real(kind=kind_noahmp) :: FFF              ! runoff decay factor (m-1)
-    real(kind=kind_noahmp) :: RSBMX            ! baseflow coefficient [mm/s]
-    real(kind=kind_noahmp) :: TIMEAN           ! gridcell mean topgraphic index (global mean)
-    real(kind=kind_noahmp) :: FSATMX           ! maximum surface saturated fraction (global mean)
-    real(kind=kind_noahmp) :: ROUS             ! specific yield [-] for Niu et al. 2007 groundwater scheme
-    real(kind=kind_noahmp) :: CMIC             ! microprore content (0.0-1.0), 0.0: close to free drainage
-    real(kind=kind_noahmp) :: WSLMAX           ! maximum lake water storage (mm)
-    real(kind=kind_noahmp) :: SWEMAXGLA        ! Maximum SWE allowed at glaciers (mm)
-    real(kind=kind_noahmp) :: REFDK            ! Parameter in the surface runoff parameterization
-    real(kind=kind_noahmp) :: REFKDT           ! Parameter in the surface runoff parameterization
-    real(kind=kind_noahmp) :: FRZK             ! Frozen ground parameter
-    real(kind=kind_noahmp) :: IRR_LAI          ! minimum lai to trigger irrigation
-    real(kind=kind_noahmp) :: IRR_MAD          ! management allowable deficit (0-1)
-    real(kind=kind_noahmp) :: FILOSS           ! factor of flood irrigation loss
-    real(kind=kind_noahmp) :: SPRIR_RATE       ! sprinkler irrigation rate (mm/h)
-    real(kind=kind_noahmp) :: IRR_FRAC         ! irrigation Fraction
-    real(kind=kind_noahmp) :: IR_RAIN          ! maximum precipitation to stop irrigation trigger
-    real(kind=kind_noahmp) :: SNOWDEN_MIN      ! minimum fresh snowfall density (kg/m3)
-    real(kind=kind_noahmp) :: SWEMX            ! new snow mass to fully cover old snow (mm)
-    real(kind=kind_noahmp) :: PSIWLT           ! soil metric potential for wilting point (m)
-    real(kind=kind_noahmp) :: MFSNO            ! snowmelt m parameter
-    real(kind=kind_noahmp) :: SCFFAC           ! snow cover factor (m) (originally hard-coded 2.5*z0 in SCF formulation)
+    integer                :: DrainSoilLayerInd          ! starting soil layer for drainage
+    integer                :: TileDrainTubeDepth         ! depth [m] of drain tube from the soil surface for simple scheme
+    integer                :: NumSoilLayerRoot           ! number of soil layers with root present
+    integer                :: IrriStopDayBfHarvest       ! number of days before harvest date to stop irrigation
+    real(kind=kind_noahmp) :: CanopyLiqHoldCap           ! maximum canopy intercepted liquid water per unit lai+sai [mm]
+    real(kind=kind_noahmp) :: SnowCompactBurdenFac       ! overburden snow compaction parameter [m3/kg]
+    real(kind=kind_noahmp) :: SnowCompactAgingFac1       ! snow desctructive metamorphism compaction parameter1 [1/s]
+    real(kind=kind_noahmp) :: SnowCompactAgingFac2       ! snow desctructive metamorphism compaction parameter2 [1/k]
+    real(kind=kind_noahmp) :: SnowCompactAgingFac3       ! snow desctructive metamorphism compaction parameter3 
+    real(kind=kind_noahmp) :: SnowCompactAgingMax        ! upper Limit on destructive metamorphism compaction [kg/m3]
+    real(kind=kind_noahmp) :: SnowViscosityCoeff         ! snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
+    real(kind=kind_noahmp) :: SnowLiqFracMax             ! maximum liquid water fraction in snow
+    real(kind=kind_noahmp) :: SnowLiqHoldCap             ! liquid water holding capacity for snowpack [m3/m3]
+    real(kind=kind_noahmp) :: SnowLiqReleaseFac          ! snowpack water release timescale factor [1/s]
+    real(kind=kind_noahmp) :: IrriFloodRateFac           ! flood irrigation application rate factor
+    real(kind=kind_noahmp) :: IrriMicroRate              ! micro irrigation rate [mm/hr]
+    real(kind=kind_noahmp) :: SoilInfilMaxCoeff          ! parameter to calculate maximum soil infiltration rate
+    real(kind=kind_noahmp) :: SoilImpervFracCoeff        ! parameter to calculate frozen soil impermeable fraction
+    real(kind=kind_noahmp) :: InfilFacVic                ! VIC model infiltration parameter
+    real(kind=kind_noahmp) :: TensionWatDistrInfl        ! Tension water distribution inflection parameter
+    real(kind=kind_noahmp) :: TensionWatDistrShp         ! Tension water distribution shape parameter
+    real(kind=kind_noahmp) :: FreeWatDistrShp            ! Free water distribution shape parameter
+    real(kind=kind_noahmp) :: InfilHeteroDynVic          ! DVIC heterogeniety parameter for infiltration
+    real(kind=kind_noahmp) :: InfilCapillaryDynVic       ! DVIC Mean Capillary Drive (m) for infiltration models
+    real(kind=kind_noahmp) :: InfilFacDynVic             ! DVIC model infiltration parameter
+    real(kind=kind_noahmp) :: SoilDrainSlope             ! slope index for soil drainage
+    real(kind=kind_noahmp) :: TileDrainCoeffSp           ! drainage coefficient [mm d^-1] for simple scheme
+    real(kind=kind_noahmp) :: DrainFacSoilWat            ! drainage factor for soil moisture
+    real(kind=kind_noahmp) :: TileDrainCoeff             ! drainage coefficent [m d^-1] for Hooghoudt scheme
+    real(kind=kind_noahmp) :: DrainDepthToImperv         ! Actual depth of tile drainage to impermeable layer form surface
+    real(kind=kind_noahmp) :: LateralWatCondFac          ! multiplication factor to determine lateral hydraulic conductivity
+    real(kind=kind_noahmp) :: TileDrainDepth             ! Depth of drain [m] for Hooghoudt scheme
+    real(kind=kind_noahmp) :: DrainTubeDist              ! distance between two drain tubes or tiles [m]
+    real(kind=kind_noahmp) :: DrainTubeRadius            ! effective radius of drain tubes [m]
+    real(kind=kind_noahmp) :: DrainWatDepToImperv        ! depth to impervious layer from drain water level [m]
+    real(kind=kind_noahmp) :: RunoffDecayFac             ! runoff decay factor [m^-1]
+    real(kind=kind_noahmp) :: BaseflowCoeff              ! baseflow coefficient [mm/s]
+    real(kind=kind_noahmp) :: GridTopoIndex              ! gridcell mean topgraphic index (global mean)
+    real(kind=kind_noahmp) :: SoilSfcSatFracMax          ! maximum surface soil saturated fraction (global mean)
+    real(kind=kind_noahmp) :: SpecYieldGw                ! specific yield [-] for Niu et al. 2007 groundwater scheme
+    real(kind=kind_noahmp) :: MicroPoreContent           ! microprore content (0.0-1.0), 0.0: close to free drainage
+    real(kind=kind_noahmp) :: WaterStorageLakeMax        ! maximum lake water storage [mm]
+    real(kind=kind_noahmp) :: SnoWatEqvMaxGlacier        ! Maximum SWE allowed at glaciers [mm]
+    real(kind=kind_noahmp) :: SoilConductivityRef        ! Reference Soil Conductivity parameter (used in runoff formulation)
+    real(kind=kind_noahmp) :: SoilInfilFacRef            ! Reference Soil Infiltration Parameter (used in runoff formulation)
+    real(kind=kind_noahmp) :: GroundFrzCoeff             ! Frozen ground parameter to compute frozen soil impervious fraction
+    real(kind=kind_noahmp) :: IrriTriggerLaiMin          ! minimum lai to trigger irrigation
+    real(kind=kind_noahmp) :: SoilWatDeficitAllow        ! management allowable deficit (0-1)
+    real(kind=kind_noahmp) :: IrriFloodLossFrac          ! factor of flood irrigation loss
+    real(kind=kind_noahmp) :: IrriSprinklerRate          ! sprinkler irrigation rate [mm/h]
+    real(kind=kind_noahmp) :: IrriFracThreshold          ! irrigation Fraction threshold in a grid
+    real(kind=kind_noahmp) :: IrriStopPrecipThr          ! precipitation threshold [mm/hr] to stop irrigation trigger
+    real(kind=kind_noahmp) :: SnowfallDensityMax         ! maximum fresh snowfall density [kg/m3]
+    real(kind=kind_noahmp) :: SnowMassFullCoverOld       ! new snow mass to fully cover old snow [mm]
+    real(kind=kind_noahmp) :: SoilMatPotentialWilt       ! soil metric potential for wilting point [m]
+    real(kind=kind_noahmp) :: SnowMeltFac                ! snowmelt m parameter in snow cover fraction calculation
+    real(kind=kind_noahmp) :: SnowCoverFac               ! snow cover factor [m] (originally hard-coded 2.5*z0 in SCF formulation)
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCMAX  ! saturated value of soil moisture [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCWLT  ! wilting point soil moisture [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCREF  ! reference soil moisture (field capacity) (m3/m3)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMCDRY  ! dry soil moisture threshold (m3/m3)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DWSAT   ! saturated soil hydraulic diffusivity (m2/s)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DKSAT   ! saturated soil hydraulic conductivity [m/s]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: BEXP    ! soil B parameter
-    real(kind=kind_noahmp), allocatable, dimension(:) :: PSISAT  ! saturated soil matric potential (m)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: QUARTZ  !soil quartz content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureSat        ! saturated value of soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureWilt       ! wilting point soil moisture [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureFieldCap   ! reference soil moisture (field capacity) [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureDry        ! dry soil moisture threshold [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatDiffusivitySat  ! saturated soil hydraulic diffusivity [m2/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWatConductivitySat ! saturated soil hydraulic conductivity [m/s]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilExpCoeffB          ! soil exponent B paramete
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMatPotentialSat    ! saturated soil matric potential [m]
 
   end type parameter_type
 

@@ -37,11 +37,11 @@ contains
               DepthSoilLayer     => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep [s]
               ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
-              TD_DC           => noahmp%water%param%TD_DC            ,& ! in,     drainage coefficient (mm d^-1)
-              DRAIN_LAYER_OPT => noahmp%water%param%DRAIN_LAYER_OPT  ,& ! in,     starting soil layer for drainage
-              TD_DEPTH        => noahmp%water%param%TD_DEPTH         ,& ! in,     depth of drain tube from the soil surface
-              TDSMC_FAC       => noahmp%water%param%TDSMC_FAC        ,& ! in,     drainage factor for soil moisture
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
+              TileDrainCoeffSp           => noahmp%water%param%TileDrainCoeffSp            ,& ! in,     drainage coefficient (mm d^-1)
+              DrainSoilLayerInd => noahmp%water%param%DrainSoilLayerInd  ,& ! in,     starting soil layer for drainage
+              TileDrainTubeDepth        => noahmp%water%param%TileDrainTubeDepth         ,& ! in,     depth of drain tube from the soil surface
+              DrainFacSoilWat       => noahmp%water%param%DrainFacSoilWat        ,& ! in,     drainage factor for soil moisture
+              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout,  total soil moisture [m3/m3]
@@ -61,7 +61,7 @@ contains
     ThicknessSoilLayer = 0.0
     TDSUM  = 0.0
     TDFRAC = 0.0
-    TDDC   = TD_DC * MainTimeStep / (24.0 * 3600.0)
+    TDDC   = TileDrainCoeffSp * MainTimeStep / (24.0 * 3600.0)
 
     do K = 1, NumSoilLayer
        if ( K == 1 ) then
@@ -70,22 +70,22 @@ contains
           ThicknessSoilLayer(K) = DepthSoilLayer(K-1) - DepthSoilLayer(K)
        endif
     enddo
-    if ( DRAIN_LAYER_OPT == 0 ) then ! drainage from one specified layer in NoahmpTable.TBL
+    if ( DrainSoilLayerInd == 0 ) then ! drainage from one specified layer in NoahmpTable.TBL
        ! print*, "CASE = 1"
-       K        = TD_DEPTH
-       AVFC(K)  = SMCREF(K) - SoilIce (K)
-       OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+       K        = TileDrainTubeDepth
+       AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+       OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
        if ( OVRFC(K) > 0.0 ) then
           if ( OVRFC(K) > TDDC ) OVRFC(K) = TDDC
           TDRVOL   = TDRVOL  + OVRFC(K)
           SoilLiqWater(K)  = SoilLiqWater(K) - (OVRFC(K) / (ThicknessSoilLayer(K) * 1000.0))
           SoilMoisture(K)   = SoilLiqWater(K) + SoilIce (K)
        endif
-    else if ( DRAIN_LAYER_OPT == 1 ) then
+    else if ( DrainSoilLayerInd == 1 ) then
        !print*, "CASE = 2. Draining from layer 1 and 2"
        do K = 1, 2
-          AVFC(K)  = SMCREF(K) - SoilIce (K)
-          OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+          AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+          OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
           if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
           TDSUM    = TDSUM + OVRFC(K)
        enddo
@@ -103,11 +103,11 @@ contains
              SoilMoisture(K)   = SoilLiqWater(K) + SoilIce (K)
           enddo
        endif
-    else if ( DRAIN_LAYER_OPT == 2 ) then
+    else if ( DrainSoilLayerInd == 2 ) then
        !print*, "CASE = 3.  Draining from layer 1 2 and 3"
        do K = 1, 3
-          AVFC(K)  = SMCREF(K) - SoilIce (K)
-          OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+          AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+          OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
           if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
           TDSUM    = TDSUM + OVRFC(K)
        enddo
@@ -125,11 +125,11 @@ contains
              SoilMoisture(K)   = SoilLiqWater(K) + SoilIce (K)
           enddo
        endif
-    else if ( DRAIN_LAYER_OPT == 3 ) then
+    else if ( DrainSoilLayerInd == 3 ) then
        !print*, "CASE = 3.  Draining from layer 2 and 3"
        do K = 2, 3
-          AVFC(K)  = SMCREF(K) - SoilIce (K)
-          OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+          AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+          OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
           if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
           TDSUM    = TDSUM + OVRFC(K)
        enddo
@@ -147,11 +147,11 @@ contains
              SoilMoisture(K)   = SoilLiqWater(K) + SoilIce (K)
           enddo
        endif
-    else if ( DRAIN_LAYER_OPT == 4 ) then
+    else if ( DrainSoilLayerInd == 4 ) then
        !print*, "CASE = 4.  Draining from layer 3 and 4"
        do K = 3, 4
-          AVFC(K)  = SMCREF(K) - SoilIce (K)
-          OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+          AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+          OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
           if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
           TDSUM    = TDSUM + OVRFC(K)
        enddo
@@ -169,11 +169,11 @@ contains
              SoilMoisture(K)   = SoilLiqWater(K) + SoilIce (K)
           enddo
        endif
-    else if ( DRAIN_LAYER_OPT == 5 ) then ! from all the four layers
+    else if ( DrainSoilLayerInd == 5 ) then ! from all the four layers
        !print*, "CASE = 5  Draining from all four layers"
        do K = 1, 4
-          AVFC(K)  = SMCREF(K) - SoilIce (K)
-          OVRFC(K) = (SoilLiqWater(K) - (TDSMC_FAC*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
+          AVFC(K)  = SoilMoistureFieldCap(K) - SoilIce (K)
+          OVRFC(K) = (SoilLiqWater(K) - (DrainFacSoilWat*AVFC(K))) * ThicknessSoilLayer(K) * 1000.0 ! mm
           if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
           TDSUM    = TDSUM + OVRFC(K)
        enddo

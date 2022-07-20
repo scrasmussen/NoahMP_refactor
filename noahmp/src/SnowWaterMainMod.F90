@@ -38,7 +38,7 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step [s]
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              SWEMAXGLA       => noahmp%water%param%SWEMAXGLA        ,& ! in,     Maximum SWE allowed at glaciers (mm)
+              SnoWatEqvMaxGlacier       => noahmp%water%param%SnoWatEqvMaxGlacier        ,& ! in,     Maximum SWE allowed at glaciers (mm)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               DepthSnowSoilLayer           => noahmp%config%domain%DepthSnowSoilLayer          ,& ! inout,  depth of snow/soil layer-bottom (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
@@ -85,9 +85,9 @@ contains
     enddo
 
     ! to obtain equilibrium state of snow in glacier region
-    if ( SnowWaterEquiv > SWEMAXGLA ) then  ! SWEMAXGLA: 5000 mm -> maximum SWE
+    if ( SnowWaterEquiv > SnoWatEqvMaxGlacier ) then
        BDSNOW      = SnowIce(0) / ThicknessSnowSoilLayer(0)
-       GlacierExcessFlow     = SnowWaterEquiv - SWEMAXGLA
+       GlacierExcessFlow     = SnowWaterEquiv - SnoWatEqvMaxGlacier
        SnowIce(0)    = SnowIce(0)  - GlacierExcessFlow
        ThicknessSnowSoilLayer(0)   = ThicknessSnowSoilLayer(0) - GlacierExcessFlow / BDSNOW
        GlacierExcessFlow     = GlacierExcessFlow / MainTimeStep

@@ -40,7 +40,7 @@ contains
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
-              CH2OP           => noahmp%water%param%CH2OP            ,& ! in,    maximum intercepted water per unit lai+sai (mm)
+              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit lai+sai [mm]
               RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
               SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
@@ -79,7 +79,7 @@ contains
 
     ! ----------------------- canopy liquid water ------------------------------
     ! maximum canopy water
-    CanopyLiqWaterMax =  CH2OP * (ELAI + ESAI)
+    CanopyLiqWaterMax =  CanopyLiqHoldCap * (ELAI + ESAI)
 
     ! average rain interception and throughfall
     if ( (ELAI+ESAI) > 0.0 ) then

@@ -149,9 +149,9 @@ contains
                 call CAL_MON_DAY(INT(NoahmpIO%JULIAN),NoahmpIO%YR,JMONTH,JDAY)
                 if (SOLAR_TIME >= 21. .AND. SOLAR_TIME <= 23. .AND. JMONTH >= 5 .AND. JMONTH <= 9) then
                     noahmp%water%state%SoilMoisture(1) = &
-                      max(noahmp%water%state%SoilMoisture(1),noahmp%water%param%SMCREF(1))
+                      max(noahmp%water%state%SoilMoisture(1),noahmp%water%param%SoilMoistureFieldCap(1))
                     noahmp%water%state%SoilMoisture(2) = &
-                      max(noahmp%water%state%SoilMoisture(2),noahmp%water%param%SMCREF(2))
+                      max(noahmp%water%state%SoilMoisture(2),noahmp%water%param%SoilMoistureFieldCap(2))
                 endif
              endif
           endif

@@ -42,7 +42,7 @@ contains
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
-              SPRIR_RATE      => noahmp%water%param%SPRIR_RATE       ,& ! in,     sprinkler irrigation rate (mm/h)
+              IrriSprinklerRate      => noahmp%water%param%IrriSprinklerRate       ,& ! in,     sprinkler irrigation rate (mm/h)
               IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! in,     sprinkler irrigation fraction (0 to 1)
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
@@ -63,7 +63,7 @@ contains
     call IrrigationInfilPhilip(noahmp, MainTimeStep, FSUR)
 
     ! irrigation rate of sprinkler
-    TEMP_RATE = SPRIR_RATE * (1.0/1000.0) * MainTimeStep / 3600.0   ! NRCS rate/time step - calibratable
+    TEMP_RATE = IrriSprinklerRate * (1.0/1000.0) * MainTimeStep / 3600.0   ! NRCS rate/time step - calibratable
     IrrigationRateSprinkler  = min( FSUR*MainTimeStep, IrrigationAmtSprinkler, TEMP_RATE )        ! Limit the application rate to minimum of infiltration rate
                                                           ! and to the NRCS recommended rate, (m)
     ! evaporative loss from droplets: Based on Bavi et al., (2009). Evaporation 

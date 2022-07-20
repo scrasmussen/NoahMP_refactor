@@ -52,10 +52,10 @@ contains
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,   soil ice content [m3/m3]
               SoilIceMax         => noahmp%water%state%SoilIceMax          ,& ! in,   maximum soil ice content (m3/m3)
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,   water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,   saturated value of soil moisture [m3/m3]
-              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,   wilting point soil moisture [m3/m3]
-              KDT             => noahmp%water%param%KDT              ,& ! in,   parameter to calculate maximum infiltration rate
-              FRZX            => noahmp%water%param%FRZX             ,& ! in,   parameter to calculate frozen soil impermeable fraction
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,   saturated value of soil moisture [m3/m3]
+              SoilMoistureWilt          => noahmp%water%param%SoilMoistureWilt           ,& ! in,   wilting point soil moisture [m3/m3]
+              SoilInfilMaxCoeff             => noahmp%water%param%SoilInfilMaxCoeff              ,& ! in,   parameter to calculate maximum infiltration rate
+              SoilImpervFracCoeff            => noahmp%water%param%SoilImpervFracCoeff             ,& ! in,   parameter to calculate frozen soil impermeable fraction
               RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,  surface runoff [mm/s]
               InfilRateSfc           => noahmp%water%flux%InfilRateSfc              & ! out,  infiltration rate at surface (mm/s)
              )
@@ -69,20 +69,20 @@ contains
     if ( SoilSfcInflow > 0.0 ) then
 
        DT1   = DT / 86400.0
-       SMCAV = SMCMAX(1) - SMCWLT(1)
+       SMCAV = SoilMoistureSat(1) - SoilMoistureWilt(1)
 
        ! compute maximum infiltration rate
        DMAX(1) = -DepthSoilLayer(1) * SMCAV
        DICE    = -DepthSoilLayer(1) * SoilIce(1)
-       DMAX(1) =  DMAX(1)  * ( 1.0 - (SoilLiqWater(1) + SoilIce(1) - SMCWLT(1)) / SMCAV )
+       DMAX(1) =  DMAX(1)  * ( 1.0 - (SoilLiqWater(1) + SoilIce(1) - SoilMoistureWilt(1)) / SMCAV )
        DD      =  DMAX(1)
        do K = 2, NumSoilLayer
           DICE    = DICE + ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SoilIce(K)
           DMAX(K) = ( DepthSoilLayer(K-1) - DepthSoilLayer(K) ) * SMCAV
-          DMAX(K) = DMAX(K) * ( 1.0 - (SoilLiqWater(K) + SoilIce(K) - SMCWLT(K)) / SMCAV )
+          DMAX(K) = DMAX(K) * ( 1.0 - (SoilLiqWater(K) + SoilIce(K) - SoilMoistureWilt(K)) / SMCAV )
           DD      = DD + DMAX(K)
        enddo
-       VAL    = 1.0 - exp(-1.0 * KDT * DT1)
+       VAL    = 1.0 - exp(-1.0 * SoilInfilMaxCoeff * DT1)
        DDT    = DD * VAL
        PX     = max( 0.0, SoilSfcInflow * DT )
        INFMAX = ( PX * (DDT / (PX + DDT)) ) / DT
@@ -90,7 +90,7 @@ contains
        ! impermeable fraction due to frozen soil
        SoilImpervFrac = 1.0
        if ( DICE > 1.0e-2 ) then
-          ACRT  = CVFRZ * FRZX / DICE
+          ACRT  = CVFRZ * SoilImpervFracCoeff / DICE
           SUM1  = 1.0
           IALP1 = CVFRZ - 1
           do J = 1, IALP1

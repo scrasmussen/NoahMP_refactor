@@ -48,19 +48,19 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              BEXP            => noahmp%water%param%BEXP             ,& ! in,    soil B parameter
-              PSISAT          => noahmp%water%param%PSISAT           ,& ! in,    saturated soil matric potential (m)
-              SMCMAX          => noahmp%water%param%SMCMAX            & ! in,    saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,    soil B parameter
+              SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,    saturated soil matric potential (m)
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat            & ! in,    saturated value of soil moisture [m3/m3]
              )
 ! ----------------------------------------------------------------------
 
     ! limit on parameter B: B < 5.5  (use parameter BLIM)
     ! simulations showed if B > 5.5 unfrozen water content is
     ! non-realistically high at very low temperatures
-    BX = BEXP(ISOIL)
+    BX = SoilExpCoeffB(ISOIL)
 
     ! initializing iterations counter and interative solution flag
-    if ( BEXP(ISOIL) >  BLIM ) BX = BLIM
+    if ( SoilExpCoeffB(ISOIL) >  BLIM ) BX = BLIM
     NLOG = 0
 
     ! if soil temperature not largely below freezing point, SoilLiqWater = SoilMoisture
@@ -79,8 +79,8 @@ contains
 1001      Continue
           if ( .not. ((NLOG < 10) .and. (KCOUNT == 0)) ) goto 1002
           NLOG  = NLOG +1
-          DF    = alog ( (PSISAT(ISOIL)*ConstGravityAcc/ConstLatHeatFusion) * &
-                         ((1.0 + CK*SWL)**2.0) * (SMCMAX(ISOIL)/(SoilMoisture - SWL))**BX ) - &
+          DF    = alog ( (SoilMatPotentialSat(ISOIL)*ConstGravityAcc/ConstLatHeatFusion) * &
+                         ((1.0 + CK*SWL)**2.0) * (SoilMoistureSat(ISOIL)/(SoilMoisture - SWL))**BX ) - &
                          alog ( -(TKELV - ConstFreezePoint) / TKELV )
           DENOM = 2.0 * CK / (1.0 + CK * SWL) + BX / (SoilMoisture - SWL)
           SWLK  = SWL - DF / DENOM
@@ -109,8 +109,8 @@ contains
           print*, 'Flerchinger used in NEW version. Iterations=', NLOG
           !write(message, '("Flerchinger used in NEW version. Iterations=", I6)') NLOG
           !call wrf_message(trim(message))
-          FK = ( ( (ConstLatHeatFusion / (ConstGravityAcc * (-PSISAT(ISOIL)))) * &
-                   ((TKELV-ConstFreezePoint) / TKELV) )**(-1.0/BX) ) * SMCMAX(ISOIL)
+          FK = ( ( (ConstLatHeatFusion / (ConstGravityAcc * (-SoilMatPotentialSat(ISOIL)))) * &
+                   ((TKELV-ConstFreezePoint) / TKELV) )**(-1.0/BX) ) * SoilMoistureSat(ISOIL)
           if ( FK < 0.02 ) FK = 0.02
           FREE = min( FK, SoilMoisture )
        endif

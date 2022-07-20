@@ -114,7 +114,7 @@ module ConfigVarType
                                               ! 1 -> use input dominant soil texture (default)
                                               ! 2 -> use input soil texture that varies with depth
                                               ! 3 -> use soil composition (sand, clay, orgm) and pedotransfer function
-                                              ! 4 -> use input soil properties (BEXP_3D, SMCMAX_3D, etc.)
+                                              ! 4 -> use input soil properties
     integer :: OptPedotransfer             ! options for pedotransfer functions 
                                               ! only works when OptSoilProperty = 3
                                               ! 1 -> Saxton and Rawls (2006) scheme (default)

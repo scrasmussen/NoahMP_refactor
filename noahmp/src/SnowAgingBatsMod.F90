@@ -37,7 +37,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
-              SWEMX           => noahmp%water%param%SWEMX            ,& ! in,     new snow mass to fully cover old snow (mm)
+              SnowMassFullCoverOld           => noahmp%water%param%SnowMassFullCoverOld            ,& ! in,     new snow mass to fully cover old snow [mm]
               TAU0            => noahmp%energy%param%TAU0            ,& ! in,     snow aging parameter
               GRAIN_GROWTH    => noahmp%energy%param%GRAIN_GROWTH    ,& ! in,     vapor diffusion snow growth factor
               EXTRA_GROWTH    => noahmp%energy%param%EXTRA_GROWTH    ,& ! in,     extra snow growth factor near freezing
@@ -60,7 +60,7 @@ contains
        AGE3  = DIRT_SOOT
        TAGE  = AGE1 + AGE2 + AGE3
        DELA  = DELA0 * TAGE
-       DELS  = amax1( 0.0, SnowWaterEquiv-SnowWaterEquivPrev ) / SWEMX
+       DELS  = amax1( 0.0, SnowWaterEquiv-SnowWaterEquivPrev ) / SnowMassFullCoverOld
        SGE   = (TAUSS + DELA) * (1.0 - DELS)
        TAUSS = amax1( 0.0, SGE )
     endif

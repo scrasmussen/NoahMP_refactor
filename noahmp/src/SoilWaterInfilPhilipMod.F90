@@ -25,7 +25,7 @@ contains
 
 ! in & out variabls
     type(noahmp_type)     , intent(inout) :: noahmp
-    integer               , intent(in)    :: INFLMAX  ! check for maximum infiltration at SMCWLT 
+    integer               , intent(in)    :: INFLMAX  ! check for maximum infiltration at SoilMoistureWilt 
     real(kind=kind_noahmp), intent(in)    :: DT       ! timestep (may not be the same as model timestep)
     real(kind=kind_noahmp), intent(inout) :: FACC     ! accumulated infiltration rate (m/s)
     real(kind=kind_noahmp), intent(out)   :: FSUR     ! surface infiltration rate (m/s)
@@ -43,10 +43,10 @@ contains
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,     soil ice content [m3/m3] 
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
-              DWSAT           => noahmp%water%param%DWSAT            ,& ! in,     saturated soil hydraulic diffusivity (m2/s)
-              DKSAT           => noahmp%water%param%DKSAT             & ! in,     saturated soil hydraulic conductivity [m/s]
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              SoilMoistureWilt          => noahmp%water%param%SoilMoistureWilt           ,& ! in,     wilting point soil moisture [m3/m3]
+              SoilWatDiffusivitySat           => noahmp%water%param%SoilWatDiffusivitySat            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
+              SoilWatConductivitySat           => noahmp%water%param%SoilWatConductivitySat             & ! in,     saturated soil hydraulic conductivity [m/s]
               )
 ! ----------------------------------------------------------------------
 
@@ -54,15 +54,17 @@ contains
     if ( INFLMAX == 1) then
 
        ! estimate initial soil hydraulic conductivty and diffusivity (Ki, D(theta) in the equation)
-       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, SMCWLT(ISOIL), 0.0, ISOIL)
+       call SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
+                                            SoilMoistureWilt(ISOIL), 0.0, ISOIL)
 
        ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986)
        ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-       SP = sqrt(2.0 * (SMCMAX(ISOIL) - SMCWLT(ISOIL)) * (DWSAT(ISOIL) - SoilWatDiffusivity))
+       SP = sqrt(2.0 * (SoilMoistureSat(ISOIL) - SoilMoistureWilt(ISOIL)) * &
+                 (SoilWatDiffusivitySat(ISOIL) - SoilWatDiffusivity))
 
        ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-       AP = min( SoilWatConductivity, (2.0/3.0)*DKSAT(ISOIL) )
-       AP = max( AP,   (1.0/3.0)*DKSAT(ISOIL) )
+       AP = min( SoilWatConductivity, (2.0/3.0)*SoilWatConductivitySat(ISOIL) )
+       AP = max( AP,   (1.0/3.0)*SoilWatConductivitySat(ISOIL) )
 
        ! Maximun infiltration rate, m
        FSUR = (1.0/2.0) * SP * (DT**(-1.0/2.0)) + AP ! m/s
@@ -76,16 +78,17 @@ contains
 
        ! Sorptivity based on Eq. 10b from Kutílek, Miroslav, and Jana Valentová (1986) 
        ! Sorptivity approximations. Transport in Porous Media 1.1, 57-62.
-       SP = sqrt( 2.0 * max(0.0, (SMCMAX(ISOIL)-SoilMoisture(ISOIL))) * (DWSAT(ISOIL) - SoilWatDiffusivity) )
+       SP = sqrt( 2.0 * max(0.0, (SoilMoistureSat(ISOIL)-SoilMoisture(ISOIL))) * &
+                  (SoilWatDiffusivitySat(ISOIL) - SoilWatDiffusivity) )
        ! Parameter A in Eq. 9 of Valiantzas (2010) is given by
-       AP = min( SoilWatConductivity, (2.0/3.0)*DKSAT(ISOIL) )
-       AP = max( AP,   (1.0/3.0)*DKSAT(ISOIL) )
+       AP = min( SoilWatConductivity, (2.0/3.0)*SoilWatConductivitySat(ISOIL) )
+       AP = max( AP,   (1.0/3.0)*SoilWatConductivitySat(ISOIL) )
 
        ! Maximun infiltration rate, m
        FSUR = (1.0/2.0) * SP * (DT**(-1.0/2.0)) + AP ! m/s
 
        ! infiltration rate at surface
-       if ( DKSAT(ISOIL) < SoilSfcInflow ) then
+       if ( SoilWatConductivitySat(ISOIL) < SoilSfcInflow ) then
           FSUR = min( SoilSfcInflow, FSUR )
        else
           FSUR = SoilSfcInflow

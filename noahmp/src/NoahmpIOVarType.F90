@@ -806,7 +806,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp)                              :: WSLMAX_TABLE              ! maximum lake water storage (mm)
     real(kind=kind_noahmp)                              :: ROUS_TABLE                ! specific yield [-] for Niu et al. 2007 groundwater scheme
     real(kind=kind_noahmp)                              :: CMIC_TABLE                ! microprore content (0.0-1.0), 0.0: close to free drainage
-    real(kind=kind_noahmp)                              :: SNOWDEN_MIN_TABLE         ! fresh snowfall density (kg/m3)
+    real(kind=kind_noahmp)                              :: SNOWDEN_MAX_TABLE         ! maximum fresh snowfall density (kg/m3)
     real(kind=kind_noahmp)                              :: CLASS_ALB_REF_TABLE       ! reference snow albedo in CLASS scheme
     real(kind=kind_noahmp)                              :: CLASS_SNO_AGE_TABLE       ! snow aging e-folding time (s) in CLASS albedo scheme
     real(kind=kind_noahmp)                              :: CLASS_ALB_NEW_TABLE       ! fresh snow albedo in CLASS scheme

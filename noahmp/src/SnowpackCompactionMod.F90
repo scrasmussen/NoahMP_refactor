@@ -40,12 +40,12 @@ contains
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! in,     snow layer liquid water [mm]
               IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
               SnowIceFracPrev         => noahmp%water%state%SnowIceFracPrev     ,& ! in,     ice fraction in snow layers at previous timestep
-              C2              => noahmp%water%param%C2_SnowCompact   ,& ! in,     snow overburden compaction parameter (m3/kg)
-              C3              => noahmp%water%param%C3_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter1 [1/s]
-              C4              => noahmp%water%param%C4_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter2 [1/k]
-              C5              => noahmp%water%param%C5_SnowCompact   ,& ! in,     snow desctructive metamorphism compaction parameter3 
-              DM              => noahmp%water%param%DM_SnowCompact   ,& ! in,     upper Limit on destructive metamorphism compaction [kg/m3]
-              ETA0            => noahmp%water%param%ETA0_SnowCompact ,& ! in,     snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
+              SnowCompactBurdenFac              => noahmp%water%param%SnowCompactBurdenFac   ,& ! in,     snow overburden compaction parameter [m3/kg]
+              SnowCompactAgingFac1              => noahmp%water%param%SnowCompactAgingFac1   ,& ! in,     snow desctructive metamorphism compaction parameter1 [1/s]
+              SnowCompactAgingFac2              => noahmp%water%param%SnowCompactAgingFac2   ,& ! in,     snow desctructive metamorphism compaction parameter2 [1/k]
+              SnowCompactAgingFac3              => noahmp%water%param%SnowCompactAgingFac3   ,& ! in,     snow desctructive metamorphism compaction parameter3 
+              SnowCompactAgingMax              => noahmp%water%param%SnowCompactAgingMax   ,& ! in,     upper Limit on destructive metamorphism compaction [kg/m3]
+              SnowViscosityCoeff            => noahmp%water%param%SnowViscosityCoeff ,& ! in,     snow viscosity coefficient [kg-s/m2], Anderson1979: 0.52e6~1.38e6
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               CompactionSnowAging            => noahmp%water%flux%CompactionSnowAging              ,& ! out,    rate of compaction of snowpack due to destructive metamorphism [1/s]
@@ -76,13 +76,16 @@ contains
           TD    = max( 0.0, ConstFreezePoint-STC(J) )
 
           ! Settling/compaction as a result of destructive metamorphism
-          DEXPF   = exp( -C4 * TD )
-          CompactionSnowAging(J) = -C3 * DEXPF
-          if ( BI > DM ) CompactionSnowAging(J) = CompactionSnowAging(J) * exp( -46.0e-3 * (BI-DM) )
-          if ( SnowLiqWater(J) > (0.01*ThicknessSnowSoilLayer(J)) ) CompactionSnowAging(J) = CompactionSnowAging(J) * C5   ! Liquid water term
+          DEXPF   = exp( -SnowCompactAgingFac2 * TD )
+          CompactionSnowAging(J) = -SnowCompactAgingFac1 * DEXPF
+          if ( BI > SnowCompactAgingMax ) &
+             CompactionSnowAging(J) = CompactionSnowAging(J) * exp( -46.0e-3 * (BI-SnowCompactAgingMax) )
+          if ( SnowLiqWater(J) > (0.01*ThicknessSnowSoilLayer(J)) ) &
+             CompactionSnowAging(J) = CompactionSnowAging(J) * SnowCompactAgingFac3   ! Liquid water term
 
           ! Compaction due to overburden
-          CompactionSnowBurden(J) = -(BURDEN + 0.5*WX) * exp(-0.08*TD - C2*BI) / ETA0 ! 0.5*WX -> self-burden
+          CompactionSnowBurden(J) = -(BURDEN + 0.5*WX) * &
+                                    exp(-0.08*TD - SnowCompactBurdenFac*BI) / SnowViscosityCoeff ! 0.5*WX -> self-burden
 
           ! Compaction occurring during melt
           if ( IndexPhaseChange(J) == 1 ) then

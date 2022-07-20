@@ -43,13 +43,13 @@ contains
               OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,     irrigation method option
               DatePlanting          => noahmp%biochem%param%DatePlanting         ,& ! in,     Planting day (day of year)
               DateHarvest           => noahmp%biochem%param%DateHarvest          ,& ! in,     Harvest date (day of year)
-              SMCWLT          => noahmp%water%param%SMCWLT           ,& ! in,     wilting point soil moisture [m3/m3]
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
-              NROOT           => noahmp%water%param%NROOT            ,& ! in,     number of soil layers with root present
-              IRR_HAR         => noahmp%water%param%IRR_HAR          ,& ! in,     number of days before harvest date to stop irrigation
-              IRR_LAI         => noahmp%water%param%IRR_LAI          ,& ! in,     minimum lai to trigger irrigation
-              IRR_MAD         => noahmp%water%param%IRR_MAD          ,& ! in,     management allowable deficit (0-1)
-              FILOSS          => noahmp%water%param%FILOSS           ,& ! in,     factor of flood irrigation loss
+              SoilMoistureWilt          => noahmp%water%param%SoilMoistureWilt           ,& ! in,     wilting point soil moisture [m3/m3]
+              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,     reference soil moisture (field capacity) (m3/m3)
+              NumSoilLayerRoot           => noahmp%water%param%NumSoilLayerRoot            ,& ! in,     number of soil layers with root present
+              IrriStopDayBfHarvest         => noahmp%water%param%IrriStopDayBfHarvest          ,& ! in,     number of days before harvest date to stop irrigation
+              IrriTriggerLaiMin         => noahmp%water%param%IrriTriggerLaiMin          ,& ! in,     minimum lai to trigger irrigation
+              SoilWatDeficitAllow         => noahmp%water%param%SoilWatDeficitAllow          ,& ! in,     management allowable deficit (0-1)
+              IrriFloodLossFrac          => noahmp%water%param%IrriFloodLossFrac           ,& ! in,     factor of flood irrigation loss
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
               LAI             => noahmp%energy%state%LAI             ,& ! in,     leaf area index (m2/m2)
               IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,     irrigated area fraction of a grid
@@ -70,9 +70,10 @@ contains
 
     ! check if irrigation is can be activated or not
     if ( OptIrrigation == 2 ) then ! activate irrigation if within crop season
-       if ( (DayJulianInYear < DatePlanting) .or. (DayJulianInYear > (DateHarvest-IRR_HAR)) ) IRR_ACTIVE = .false.
+       if ( (DayJulianInYear < DatePlanting) .or. (DayJulianInYear > (DateHarvest-IrriStopDayBfHarvest)) ) &
+          IRR_ACTIVE = .false.
     elseif ( OptIrrigation == 3) then ! activate if LAI > threshold LAI
-       if ( LAI < IRR_LAI) IRR_ACTIVE = .false.
+       if ( LAI < IrriTriggerLaiMin) IRR_ACTIVE = .false.
     elseif ( (OptIrrigation > 3) .or. (OptIrrigation < 1) ) then
        IRR_ACTIVE = .false.
     endif
@@ -81,15 +82,15 @@ contains
        ! estimate available water and field capacity for the root zone
        SMCAVL = 0.0
        SMCLIM = 0.0
-       SMCAVL = ( SoilLiqWater(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)    ! current soil water (m) 
-       SMCLIM = ( SMCREF(1) - SMCWLT(1) ) * (-1.0) * DepthSoilLayer(1)  ! available water (m)
-       do K = 2, NROOT
-         SMCAVL = SMCAVL + ( SoilLiqWater(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
-         SMCLIM = SMCLIM + ( SMCREF(K) - SMCWLT(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
+       SMCAVL = ( SoilLiqWater(1) - SoilMoistureWilt(1) ) * (-1.0) * DepthSoilLayer(1)    ! current soil water (m) 
+       SMCLIM = ( SoilMoistureFieldCap(1) - SoilMoistureWilt(1) ) * (-1.0) * DepthSoilLayer(1)  ! available water (m)
+       do K = 2, NumSoilLayerRoot
+         SMCAVL = SMCAVL + ( SoilLiqWater(K) - SoilMoistureWilt(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
+         SMCLIM = SMCLIM + ( SoilMoistureFieldCap(K) - SoilMoistureWilt(K) ) * ( DepthSoilLayer(K-1) - DepthSoilLayer(K) )
        enddo
 
-      ! check if root zone soil moisture < IRR_MAD (calibratable)
-      if ( (SMCAVL/SMCLIM) <= IRR_MAD ) then
+      ! check if root zone soil moisture < SoilWatDeficitAllow (calibratable)
+      if ( (SMCAVL/SMCLIM) <= SoilWatDeficitAllow ) then
          ! amount of water need to be added to bring soil moisture back to 
          ! field capacity, i.e., irrigation water amount (m)
          IRRWATAMT = ( SMCLIM - SMCAVL ) * IrrigationFracGrid * FVEG
@@ -119,11 +120,11 @@ contains
          ! another, surface layers will be saturated. 
          ! flood irrigation amount (m) based on 2D IrrigationFracFlood
          if ( (IrrigationAmtFlood == 0.0) .and. (IrrigationFracFlood > 0.0) .and. (OptIrrigationMethod == 0) ) then
-            IrrigationAmtFlood = IrrigationFracFlood * IRRWATAMT * (FILOSS + 1)
+            IrrigationAmtFlood = IrrigationFracFlood * IRRWATAMT * (IrriFloodLossFrac + 1)
             IrrigationCntFlood = IrrigationCntFlood + 1
          !flood irrigation amount (m) based on namelist choice
          elseif ( (IrrigationAmtFlood == 0.0) .and. (OptIrrigationMethod == 3) ) then
-            IrrigationAmtFlood = IRRWATAMT * (FILOSS + 1)
+            IrrigationAmtFlood = IRRWATAMT * (IrriFloodLossFrac + 1)
             IrrigationCntFlood = IrrigationCntFlood + 1
          endif
       else

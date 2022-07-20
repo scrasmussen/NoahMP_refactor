@@ -283,7 +283,7 @@ module EnergyVarType
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
     real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:) :: QUARTZ      ! soil quartz content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilQuartzFrac      ! soil quartz content
     real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSAT      ! saturated soil albedos: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: ALBDRY      ! dry soil albedos: 1=vis, 2=nir
     real(kind=kind_noahmp), allocatable, dimension(:) :: ALBLAK      ! albedo frozen lakes: 1=vis, 2=nir

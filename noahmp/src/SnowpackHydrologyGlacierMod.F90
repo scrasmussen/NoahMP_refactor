@@ -43,9 +43,9 @@ contains
               FrostSnowSfcIce          => noahmp%water%flux%FrostSnowSfcIce            ,& ! in,     snow surface frost rate [mm/s]
               SublimSnowSfcIce          => noahmp%water%flux%SublimSnowSfcIce            ,& ! in,     snow surface sublimation rate [mm/s]
               RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! in,     ground surface rain rate [mm/s]
-              SNLIQMAXFRAC    => noahmp%water%param%SNLIQMAXFRAC     ,& ! in,     maximum liquid water fraction in snow
-              SSI             => noahmp%water%param%SSI              ,& ! in,     liquid water holding capacity for snowpack (m3/m3)
-              SNOW_RET_FAC    => noahmp%water%param%SNOW_RET_FAC     ,& ! in,     snowpack water release timescale factor (1/s)
+              SnowLiqFracMax    => noahmp%water%param%SnowLiqFracMax     ,& ! in,     maximum liquid water fraction in snow
+              SnowLiqHoldCap             => noahmp%water%param%SnowLiqHoldCap              ,& ! in,     liquid water holding capacity for snowpack [m3/m3]
+              SnowLiqReleaseFac    => noahmp%water%param%SnowLiqReleaseFac     ,& ! in,     snowpack water release timescale factor (1/s)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout,  snow depth [m]
@@ -133,15 +133,15 @@ contains
     do J = NumSnowLayerNeg+1, 0
        SnowLiqWater(J)   = SnowLiqWater(J) + InflowSnowLayer
        VOL_LIQ(J) = SnowLiqWater(J) / (ThicknessSnowSoilLayer(J)*ConstDensityWater)
-       QOUT       = max( 0.0, (VOL_LIQ(J) - SSI*SnowEffPorosity(J)) * ThicknessSnowSoilLayer(J) )
+       QOUT       = max( 0.0, (VOL_LIQ(J) - SnowLiqHoldCap*SnowEffPorosity(J)) * ThicknessSnowSoilLayer(J) )
        if ( J == 0 ) then
-          QOUT = max( (VOL_LIQ(J) - SnowEffPorosity(J)) * ThicknessSnowSoilLayer(J), SNOW_RET_FAC * MainTimeStep * QOUT )
+          QOUT = max( (VOL_LIQ(J) - SnowEffPorosity(J)) * ThicknessSnowSoilLayer(J), SnowLiqReleaseFac * MainTimeStep * QOUT )
        endif
        QOUT     = QOUT * ConstDensityWater
        SnowLiqWater(J) = SnowLiqWater(J) - QOUT
-       if ( ( SnowLiqWater(J) / (SnowIce(J)+SnowLiqWater(J)) ) > SNLIQMAXFRAC ) then
-          QOUT     = QOUT + ( SnowLiqWater(J) - SNLIQMAXFRAC/(1.0-SNLIQMAXFRAC) * SnowIce(J) )
-          SnowLiqWater(J) = SNLIQMAXFRAC / (1.0 - SNLIQMAXFRAC) * SnowIce(J)
+       if ( ( SnowLiqWater(J) / (SnowIce(J)+SnowLiqWater(J)) ) > SnowLiqFracMax ) then
+          QOUT     = QOUT + ( SnowLiqWater(J) - SnowLiqFracMax/(1.0-SnowLiqFracMax) * SnowIce(J) )
+          SnowLiqWater(J) = SnowLiqFracMax / (1.0 - SnowLiqFracMax) * SnowIce(J)
        endif
        InflowSnowLayer = QOUT
     enddo

@@ -110,14 +110,14 @@ contains
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MAX, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
                                                 PSIWLT, Z0SOIL, Z0LAKE
     namelist / noahmp_global_parameters /       CO2, O2, TIMEAN, FSATMX, Z0SNO, SSI, SNOW_RET_FAC ,SNOW_EMIS, SWEMX, TAU0,   &
                                                 GRAIN_GROWTH, EXTRA_GROWTH, DIRT_SOOT, BATS_COSZ, BATS_VIS_NEW,              &
                                                 BATS_NIR_NEW, BATS_VIS_AGE, BATS_NIR_AGE, BATS_VIS_DIR, BATS_NIR_DIR,        &
                                                 RSURF_SNOW, RSURF_EXP, C2_SNOWCOMPACT, C3_SNOWCOMPACT, C4_SNOWCOMPACT,       &
                                                 C5_SNOWCOMPACT, DM_SNOWCOMPACT, ETA0_SNOWCOMPACT, SNLIQMAXFRAC, SWEMAXGLA,   &
-                                                WSLMAX, ROUS, CMIC, SNOWDEN_MIN, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
+                                                WSLMAX, ROUS, CMIC, SNOWDEN_MAX, CLASS_ALB_REF, CLASS_SNO_AGE, CLASS_ALB_NEW,&
                                                 PSIWLT, Z0SOIL, Z0LAKE
 
     ! irrigation parameters
@@ -512,7 +512,7 @@ contains
     NoahmpIO%WSLMAX_TABLE           = -1.0e36
     NoahmpIO%ROUS_TABLE             = -1.0e36
     NoahmpIO%CMIC_TABLE             = -1.0e36
-    NoahmpIO%SNOWDEN_MIN_TABLE      = -1.0e36
+    NoahmpIO%SNOWDEN_MAX_TABLE      = -1.0e36
     NoahmpIO%CLASS_ALB_REF_TABLE    = -1.0e36
     NoahmpIO%CLASS_SNO_AGE_TABLE    = -1.0e36
     NoahmpIO%CLASS_ALB_NEW_TABLE    = -1.0e36
@@ -907,7 +907,7 @@ contains
     NoahmpIO%WSLMAX_TABLE           = WSLMAX
     NoahmpIO%ROUS_TABLE             = ROUS
     NoahmpIO%CMIC_TABLE             = CMIC
-    NoahmpIO%SNOWDEN_MIN_TABLE      = SNOWDEN_MIN
+    NoahmpIO%SNOWDEN_MAX_TABLE      = SNOWDEN_MAX
     NoahmpIO%CLASS_ALB_REF_TABLE    = CLASS_ALB_REF
     NoahmpIO%CLASS_SNO_AGE_TABLE    = CLASS_SNO_AGE
     NoahmpIO%CLASS_ALB_NEW_TABLE    = CLASS_ALB_NEW

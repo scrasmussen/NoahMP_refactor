@@ -36,8 +36,8 @@ contains
               DepthSoilLayer  => noahmp%config%domain%DepthSoilLayer ,& ! in,     depth [m] of layer-bottom from soil surface
               SoilMoisture            => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! in,     water input on soil surface [mm/s]
-              SMCMAX          => noahmp%water%param%SMCMAX           ,& ! in,     saturated value of soil moisture [m3/m3]
-              BVIC            => noahmp%water%param%BVIC             ,& ! in,     VIC model infiltration parameter
+              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
+              InfilFacVic            => noahmp%water%param%InfilFacVic             ,& ! in,     VIC model infiltration parameter
               RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! out,    surface runoff [mm/s]
               InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! out,    infiltration rate at surface (mm/s)
               SoilSaturateFrac            => noahmp%water%state%SoilSaturateFrac              & ! out,    fractional saturated area for soil moisture
@@ -57,18 +57,18 @@ contains
 
     do IZ = 1, NumSoilLayer-2
        TOP_MOIST     = TOP_MOIST + SoilMoisture(IZ) * (-1.0) * DepthSoilLayer(IZ)  ! m
-       TOP_MAX_MOIST = TOP_MAX_MOIST + SMCMAX(IZ) * (-1.0) * DepthSoilLayer(IZ) ! m  
+       TOP_MAX_MOIST = TOP_MAX_MOIST + SoilMoistureSat(IZ) * (-1.0) * DepthSoilLayer(IZ) ! m  
     enddo
 
     ! fractional saturated area from soil moisture
-    EX    = BVIC / ( 1.0 + BVIC )
+    EX    = InfilFacVic / ( 1.0 + InfilFacVic )
     SoilSaturateFrac  = 1.0 - ( max( 0.0, (1.0-(TOP_MOIST/TOP_MAX_MOIST))))**EX
     SoilSaturateFrac  = max(0.0, SoilSaturateFrac)
     SoilSaturateFrac  = min(1.0, SoilSaturateFrac)
 
     ! Infiltration for the previous time-step soil moisture based on SoilSaturateFrac
-    I_MAX = (1.0 + BVIC) * TOP_MAX_MOIST ! m
-    I_0   = I_MAX * ( 1.0 - (1.0 - SoilSaturateFrac)**(1.0/BVIC) ) !m
+    I_MAX = (1.0 + InfilFacVic) * TOP_MAX_MOIST ! m
+    I_0   = I_MAX * ( 1.0 - (1.0 - SoilSaturateFrac)**(1.0/InfilFacVic) ) !m
 
     ! Solve for surface runoff
     if ( SoilSfcInflow == 0.0 ) then
@@ -80,7 +80,7 @@ contains
     else
        BASIS  = 1.0 - ( ( I_0 + (SoilSfcInflow * DT) ) / I_MAX )
        RunoffSurface = SoilSfcInflow * DT - TOP_MAX_MOIST + TOP_MOIST + &
-                TOP_MAX_MOIST * ( BASIS**(1.0+BVIC) )
+                TOP_MAX_MOIST * ( BASIS**(1.0+InfilFacVic) )
     endif
 
     RunoffSurface = RunoffSurface / DT ! m/s

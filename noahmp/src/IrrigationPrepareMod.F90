@@ -30,8 +30,8 @@ contains
               LandUseDataName        => noahmp%config%domain%LandUseDataName       ,& ! in,     landuse data name (USGS or MODIS_IGBP)
               VegType         => noahmp%config%domain%VegType                 ,& ! in,    vegetation type
               OptIrrigationMethod => noahmp%config%nmlist%OptIrrigationMethod ,& ! in,    irrigation method option
-              IRR_FRAC        => noahmp%water%param%IRR_FRAC         ,& ! in,     irrigation fraction parameter
-              IR_RAIN         => noahmp%water%param%IR_RAIN          ,& ! in,     maximum precipitation to stop irrigation trigger
+              IrriFracThreshold        => noahmp%water%param%IrriFracThreshold         ,& ! in,     irrigation fraction threshold
+              IrriStopPrecipThr         => noahmp%water%param%IrriStopPrecipThr          ,& ! in,     maximum precipitation to stop irrigation trigger
               IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,     total input irrigation fraction of a grid
               IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               IrrigationAmtFlood         => noahmp%water%state%IrrigationAmtFlood          ,& ! inout,  flood irrigation water amount [m]
@@ -56,7 +56,7 @@ contains
 
     ! if OptIrrigationMethod = 0 and if methods are unknown for certain area, then use sprinkler irrigation method
     if ( (OptIrrigationMethod == 0) .and. (IrrigationFracSprinkler == 0.0) .and. (IrrigationFracMicro == 0.0) &
-         .and. (IrrigationFracFlood == 0.0) .and. (IrrigationFracGrid >= IRR_FRAC) ) then
+         .and. (IrrigationFracFlood == 0.0) .and. (IrrigationFracGrid >= IrriFracThreshold) ) then
        IrrigationFracSprinkler = 1.0
     endif
 
@@ -76,13 +76,13 @@ contains
     endif
 
     ! trigger irrigation
-    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IRR_FRAC) .and. &
-         (RainfallRefHeight < (IR_RAIN/3600.0)) .and. ((IrrigationAmtSprinkler+IrrigationAmtMicro+IrrigationAmtFlood) == 0.0) ) then
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) .and. &
+         (RainfallRefHeight < (IrriStopPrecipThr/3600.0)) .and. ((IrrigationAmtSprinkler+IrrigationAmtMicro+IrrigationAmtFlood) == 0.0) ) then
        call IrrigationTrigger(noahmp)
     endif
 
-    ! set irrigation off if larger than IR_RAIN mm/h for this time step and irr triggered last time step
-    if ( (RainfallRefHeight >= (IR_RAIN/3600.0)) .or. (IrrigationFracGrid < IRR_FRAC) ) then
+    ! set irrigation off if larger than IrriStopPrecipThr mm/h for this time step and irr triggered last time step
+    if ( (RainfallRefHeight >= (IrriStopPrecipThr/3600.0)) .or. (IrrigationFracGrid < IrriFracThreshold) ) then
         IrrigationAmtSprinkler = 0.0
         IrrigationAmtMicro = 0.0
         IrrigationAmtFlood = 0.0

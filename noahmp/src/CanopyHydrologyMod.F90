@@ -34,7 +34,7 @@ contains
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
               FROZEN_CANOPY   => noahmp%energy%state%FROZEN_CANOPY   ,& ! in,    used to define latent heat pathway
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
-              CH2OP           => noahmp%water%param%CH2OP            ,& ! in,    maximum intercepted water per unit lai+sai (mm)
+              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit lai+sai [mm]
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! inout, intercepted canopy liquid water [mm]
               CanopyIce          => noahmp%water%state%CanopyIce           ,& ! inout, intercepted canopy ice [mm]
               TV              => noahmp%energy%state%TV              ,& ! inout, vegetation temperature (k)
@@ -69,7 +69,7 @@ contains
 
 !=== canopy liquid water
     ! maximum canopy intercepted water
-    CanopyLiqWaterMax =  CH2OP * (ELAI + ESAI)
+    CanopyLiqWaterMax =  CanopyLiqHoldCap * (ELAI + ESAI)
 
     ! canopy evaporation, transpiration, and dew
     if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy

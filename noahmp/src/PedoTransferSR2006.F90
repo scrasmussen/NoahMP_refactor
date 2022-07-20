@@ -196,14 +196,15 @@ contains
     dwsat  = max(1.e-6,min(dwsat,   3.e-5))
     quartz = max(0.05 ,min(quartz,  0.95 ))
 
-    noahmp%water%param%SMCWLT = smcwlt  
-    noahmp%water%param%SMCREF = smcref    
-    noahmp%water%param%SMCMAX = smcmax    
-    noahmp%water%param%SMCDRY = smcdry    
-    noahmp%water%param%BEXP   = bexp    
-    noahmp%water%param%PSISAT = psisat    
-    noahmp%water%param%DKSAT  = dksat     
-    noahmp%water%param%QUARTZ = quartz     
+    noahmp%water%param%SoilMoistureWilt = smcwlt  
+    noahmp%water%param%SoilMoistureFieldCap = smcref    
+    noahmp%water%param%SoilMoistureSat = smcmax    
+    noahmp%water%param%SoilMoistureDry = smcdry    
+    noahmp%water%param%SoilExpCoeffB   = bexp    
+    noahmp%water%param%SoilMatPotentialSat = psisat    
+    noahmp%water%param%SoilWatConductivitySat  = dksat     
+    noahmp%water%param%SoilWatDiffusivitySat = dwsat
+    noahmp%energy%param%SoilQuartzFrac = quartz     
 
     end associate
 

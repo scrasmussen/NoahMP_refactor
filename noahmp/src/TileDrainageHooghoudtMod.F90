@@ -53,13 +53,13 @@ contains
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               GridSize        => noahmp%config%domain%GridSize       ,& ! in,    noahmp model grid spacing (m)
               ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
-              SMCREF          => noahmp%water%param%SMCREF           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
-              TD_DCOEF        => noahmp%water%param%TD_DCOEF         ,& ! in,    drainage coefficent (m/day)
-              TD_ADEPTH       => noahmp%water%param%TD_ADEPTH        ,& ! in,    Actual depth to impermeable layer from surface (m)
-              KLAT_FAC        => noahmp%water%param%KLAT_FAC         ,& ! in,    multiplication factor to determine lateral hydraulic conductivity
-              TD_DDRAIN       => noahmp%water%param%TD_DDRAIN        ,& ! in,    Depth of drain (m)
-              TD_SPAC         => noahmp%water%param%TD_SPAC          ,& ! in,    distance between two drain tubes or tiles (m)
-              TD_RADI         => noahmp%water%param%TD_RADI          ,& ! in,    effective radius of drains (m)
+              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
+              TileDrainCoeff        => noahmp%water%param%TileDrainCoeff         ,& ! in,    drainage coefficent (m/day)
+              DrainDepthToImperv       => noahmp%water%param%DrainDepthToImperv        ,& ! in,    Actual depth to impermeable layer from surface (m)
+              LateralWatCondFac        => noahmp%water%param%LateralWatCondFac         ,& ! in,    multiplication factor to determine lateral hydraulic conductivity
+              TileDrainDepth       => noahmp%water%param%TileDrainDepth        ,& ! in,    Depth of drain [m]
+              DrainTubeDist         => noahmp%water%param%DrainTubeDist          ,& ! in,    distance between two drain tubes or tiles (m)
+              DrainTubeRadius         => noahmp%water%param%DrainTubeRadius          ,& ! in,    effective radius of drains (m)
               SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! in,    soil hydraulic conductivity [m/s]
               SoilIce            => noahmp%water%state%SoilIce             ,& ! in,    soil ice content [m3/m3]
               WaterTableHydro         => noahmp%water%state%WaterTableHydro          ,& ! in,    water table depth estimated in WRF-Hydro fine grids (m)
@@ -82,7 +82,7 @@ contains
     DTOPL   = 0.0
     TD_LQ   = 0.0
     TD_TTSZ = 0.0
-    TDDC    = TD_DCOEF * 1000.0 * MainTimeStep / (24.0 * 3600.0) ! m per day to mm per timestep
+    TDDC    = TileDrainCoeff * 1000.0 * MainTimeStep / (24.0 * 3600.0) ! m per day to mm per timestep
 
     ! Thickness of soil layers    
     do K = 1, NumSoilLayer
@@ -102,7 +102,7 @@ contains
     YY = WaterTableDepth
 #endif
 
-    if ( YY > TD_ADEPTH) YY = TD_ADEPTH
+    if ( YY > DrainDepthToImperv) YY = DrainDepthToImperv
 
     ! Depth of saturated zone
     do K = 1, NumSoilLayer
@@ -119,36 +119,36 @@ contains
     ! amount of water over field capacity
     OVRFCS = 0.0
     do K = 1, NumSoilLayer
-       OVRFC(K) = (SoilLiqWater(K) - (SMCREF(K)-SoilIce(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
+       OVRFC(K) = (SoilLiqWater(K) - (SoilMoistureFieldCap(K)-SoilIce(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
        if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
        OVRFCS   = OVRFCS + OVRFC(K)
     enddo
 
     ! lateral hydraulic conductivity and total lateral flow
     do K = 1, NumSoilLayer
-       KLATK(K) = SoilWatConductivity(K) * KLAT_FAC * MainTimeStep ! m/s to m/timestep
+       KLATK(K) = SoilWatConductivity(K) * LateralWatCondFac * MainTimeStep ! m/s to m/timestep
        TD_LQ    = TD_LQ + (TD_SATZ(K) * KLATK(K))
        TD_TTSZ  = TD_TTSZ + TD_SATZ(K)
     enddo
     if ( TD_TTSZ < 0.001 ) TD_TTSZ = 0.001 ! unit is m
     if ( TD_LQ   < 0.001 ) TD_LQ   = 0.0    ! unit is m
     KLAT  = TD_LQ / TD_TTSZ ! lateral hydraulic conductivity per timestep
-    TD_DD = TD_ADEPTH - TD_DDRAIN
+    TD_DD = DrainDepthToImperv - TileDrainDepth
 
-    call TileDrainageEquiDepth(TD_DD, TD_SPAC, TD_RADI, TD_HAIL)
+    call TileDrainageEquiDepth(TD_DD, DrainTubeDist, DrainTubeRadius, TD_HAIL)
 
-    TD_DEPTH = TD_HAIL + TD_DDRAIN
-    TD_HEMD  = TD_DDRAIN - YY
+    TD_DEPTH = TD_HAIL + TileDrainDepth
+    TD_HEMD  = TileDrainDepth - YY
     if ( TD_HEMD <= 0.0 ) then
        TileDrain = 0.0
     else
        TileDrain = ( (8.0*KLAT*TD_HAIL*TD_HEMD) + (4.0*KLAT*TD_HEMD*TD_HEMD) ) & ! m per timestep
-                                                        / (TD_SPAC*TD_SPAC)
+                                                        / (DrainTubeDist*DrainTubeDist)
     endif
     TileDrain = TileDrain * 1000.0 ! m per timestep to mm/timestep /one tile
     if ( TileDrain <= 0.0 ) TileDrain = 0.0
     if ( TileDrain > TDDC ) TileDrain = TDDC
-    NDRAINS = int( GridSize / TD_SPAC )
+    NDRAINS = int( GridSize / DrainTubeDist )
     TileDrain  = TileDrain * NDRAINS
     if ( TileDrain > OVRFCS ) TileDrain = OVRFCS
 
@@ -159,11 +159,11 @@ contains
           if ( (TD_SATZ(K) > 0.0) .and. (OVRFC(K) > 0.0) ) then
              SoilLiqWaterAftDrain(K) = OVRFC(K) - TileDrainTmp ! remaining water after tile drain
              if ( SoilLiqWaterAftDrain(K) > 0.0 ) then
-                SoilLiqWater(K) = (SMCREF(K) - SoilIce(K)) + SoilLiqWaterAftDrain(K) / (ThicknessSoilLayer(K) * 1000.0)
+                SoilLiqWater(K) = (SoilMoistureFieldCap(K) - SoilIce(K)) + SoilLiqWaterAftDrain(K) / (ThicknessSoilLayer(K) * 1000.0)
                 SoilMoisture(K)  = SoilLiqWater(K) + SoilIce(K)
                 exit
              else
-                SoilLiqWater(K) = SMCREF(K) - SoilIce(K)
+                SoilLiqWater(K) = SoilMoistureFieldCap(K) - SoilIce(K)
                 SoilMoisture(K)  = SoilLiqWater(K) + SoilIce (K)
                 TileDrainTmp = TileDrainTmp - OVRFC(K)
              endif

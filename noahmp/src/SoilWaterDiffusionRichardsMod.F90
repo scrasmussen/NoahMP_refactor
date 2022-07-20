@@ -48,7 +48,7 @@ contains
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
               OptSoilPermeabilityFrozen => noahmp%config%nmlist%OptSoilPermeabilityFrozen,& ! in,     options for frozen soil permeability
               OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
-              SLOPE           => noahmp%water%param%SLOPE            ,& ! in,     slope index for soil drainage
+              SoilDrainSlope           => noahmp%water%param%SoilDrainSlope            ,& ! in,     slope index for soil drainage
               InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! in,     infiltration rate at surface (mm/s)
               EvapSoilSfcLiq           => noahmp%water%flux%EvapSoilSfcLiq             ,& ! in,     evaporation from soil surface [mm/s]
               TranspWatLossSoil          => noahmp%water%flux%TranspWatLossSoil            ,& ! in,    transpiration water loss from soil layers [mm/s]
@@ -120,7 +120,7 @@ contains
           endif
           if ( (OptRunoffSubsurface == 3) .or. (OptRunoffSubsurface == 6) .or. &
                (OptRunoffSubsurface == 7) .or. (OptRunoffSubsurface == 8) ) then
-             DrainSoilBot = SLOPE * SoilWatConductivity(K)
+             DrainSoilBot = SoilDrainSlope * SoilWatConductivity(K)
           endif
           if ( OptRunoffSubsurface == 4 ) then
              DrainSoilBot = (1.0 - SoilImpervFracMax) * SoilWatConductivity(K)

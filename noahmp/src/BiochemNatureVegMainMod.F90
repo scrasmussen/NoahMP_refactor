@@ -37,8 +37,8 @@ contains
               IndexIcePoint            => noahmp%config%domain%IndexIcePoint         ,& ! in,    land ice flag
               IndexBarrenPoint         => noahmp%config%domain%IndexBarrenPoint      ,& ! in,    bare soil flag
               FlagUrban       => noahmp%config%domain%FlagUrban    ,& ! in,    urban point flag
-              NROOT            => noahmp%water%param%NROOT           ,& ! in,    number of soil layers with root present
-              SMCMAX           => noahmp%water%param%SMCMAX          ,& ! in,    saturated value of soil moisture [m3/m3]
+              NumSoilLayerRoot            => noahmp%water%param%NumSoilLayerRoot           ,& ! in,    number of soil layers with root present
+              SoilMoistureSat           => noahmp%water%param%SoilMoistureSat          ,& ! in,    saturated value of soil moisture [m3/m3]
               SoilMoisture              => noahmp%water%state%SoilMoisture             ,& ! in,    soil moisture (ice + liq.) [m3/m3]
               SoilTranspFacAcc            => noahmp%water%state%SoilTranspFacAcc           ,& ! in,    accumulated soil water transpiration factor (0 to 1)
               LeafAreaPerMass1side              => noahmp%biochem%param%LeafAreaPerMass1side           ,& ! in,    single-side leaf area per Kg [m2/kg]
@@ -95,8 +95,9 @@ contains
     ! water stress
     SoilWaterStress = 1.0 - SoilTranspFacAcc
     SoilWaterRootZone  = 0.0
-    do J = 1, NROOT
-       SoilWaterRootZone = SoilWaterRootZone + SoilMoisture(J) / SMCMAX(J) * ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NROOT))
+    do J = 1, NumSoilLayerRoot
+       SoilWaterRootZone = SoilWaterRootZone + SoilMoisture(J) / SoilMoistureSat(J) * &
+                                               ThicknessSnowSoilLayer(J) / (-DepthSoilLayer(NumSoilLayerRoot))
     enddo
 
     ! start carbon process

@@ -32,7 +32,7 @@ contains
  
 ! --------------------------------------------------------------------
     associate(                                                        &
-              BDVIC           => noahmp%water%param%BDVIC             & ! in,     DVIC model infiltration parameter
+              InfilFacDynVic           => noahmp%water%param%InfilFacDynVic             & ! in,     DVIC model infiltration parameter
              )
 ! ----------------------------------------------------------------------
 
@@ -40,8 +40,8 @@ contains
     if ( TDEPTH > I_MAX ) TDEPTH = I_MAX
 
     ! Saturation excess runoff , Eq 5.
-    R1 = YD - ( (I_MAX/(BDVIC+1.0)) * ( ((1.0 - (I_0/I_MAX))**(BDVIC+1.0)) &
-                                    - ((1.0 - (TDEPTH/I_MAX))**(BDVIC+1.0))))
+    R1 = YD - ( (I_MAX/(InfilFacDynVic+1.0)) * ( ((1.0 - (I_0/I_MAX))**(InfilFacDynVic+1.0)) &
+                - ((1.0 - (TDEPTH/I_MAX))**(InfilFacDynVic+1.0))))
 
     if ( R1 < 0.0 ) R1 = 0.0
 

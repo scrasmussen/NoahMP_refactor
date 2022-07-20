@@ -33,7 +33,7 @@ contains
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
               IrrigationFracFlood           => noahmp%water%state%IrrigationFracFlood            ,& ! in,     fraction of grid under flood irrigation (0 to 1)
-              FIRTFAC         => noahmp%water%param%FIRTFAC          ,& ! in,     flood application rate factor
+              IrriFloodRateFac         => noahmp%water%param%IrriFloodRateFac          ,& ! in,     flood application rate factor
               IrrigationAmtFlood         => noahmp%water%state%IrrigationAmtFlood          ,& ! inout,  flood irrigation water amount [m]
               SoilSfcInflow          => noahmp%water%flux%SoilSfcInflow            ,& ! inout,  water input on soil surface [mm/s]
               IrrigationRateFlood        => noahmp%water%flux%IrrigationRateFlood           & ! inout,  flood irrigation water rate [m/timestep]
@@ -49,7 +49,7 @@ contains
     ! irrigation rate of flood irrigation. It should be
     ! greater than infiltration rate to get infiltration
     ! excess runoff at the time of application
-    IrrigationRateFlood = FSUR * MainTimeStep * FIRTFAC   ! Limit the application rate to fac*infiltration rate 
+    IrrigationRateFlood = FSUR * MainTimeStep * IrriFloodRateFac   ! Limit the application rate to fac*infiltration rate 
     IrrigationRateFlood = IrrigationRateFlood * IrrigationFracFlood
 
     if ( IrrigationRateFlood >= IrrigationAmtFlood ) then
