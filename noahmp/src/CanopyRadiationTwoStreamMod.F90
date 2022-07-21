@@ -84,16 +84,16 @@ contains
               WGAP            => noahmp%energy%state%WGAP            ,& ! out,   within canopy gap fraction for beam
               KOPEN           => noahmp%energy%state%KOPEN           ,& ! out,   gap fraction for diffue light
               GAP             => noahmp%energy%state%GAP             ,& ! out,   total gap fraction for beam ( <=1-shafac )
-              FABD            => noahmp%energy%flux%FABD             ,& ! out,   flux abs by veg (per unit direct flux)
-              FABI            => noahmp%energy%flux%FABI             ,& ! out,   flux abs by veg (per unit diffuse flux)
-              FTDD            => noahmp%energy%flux%FTDD             ,& ! out,   down direct flux below veg (per unit dir flux)
-              FTDI            => noahmp%energy%flux%FTDI             ,& ! out,   down direct flux below veg per unit dif flux (= 0)
-              FTID            => noahmp%energy%flux%FTID             ,& ! out,   down diffuse flux below veg (per unit dir flux)
-              FTII            => noahmp%energy%flux%FTII             ,& ! out,   down diffuse flux below veg (per unit dif flux)
-              FREVD           => noahmp%energy%flux%FREVD            ,& ! out,   flux reflected by veg layer (per unit direct flux)
-              FREVI           => noahmp%energy%flux%FREVI            ,& ! out,   flux reflected by veg layer (per unit diffuse flux)
-              FREGD           => noahmp%energy%flux%FREGD            ,& ! out,   flux reflected by ground (per unit direct flux)
-              FREGI           => noahmp%energy%flux%FREGI             & ! out,   flux reflected by ground (per unit diffuse flux)
+              RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! out,   flux abs by veg (per unit direct flux)
+              RadSwAbsVegDif            => noahmp%energy%flux%RadSwAbsVegDif             ,& ! out,   flux abs by veg (per unit diffuse flux)
+              RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! out,   down direct flux below veg (per unit dir flux)
+              RadSwDirTranGrdDif            => noahmp%energy%flux%RadSwDirTranGrdDif             ,& ! out,   down direct flux below veg per unit dif flux (= 0)
+              RadSwDifTranGrdDir            => noahmp%energy%flux%RadSwDifTranGrdDir             ,& ! out,   down diffuse flux below veg (per unit dir flux)
+              RadSwDifTranGrdDif            => noahmp%energy%flux%RadSwDifTranGrdDif             ,& ! out,   down diffuse flux below veg (per unit dif flux)
+              RadSwReflVegDir           => noahmp%energy%flux%RadSwReflVegDir            ,& ! out,   flux reflected by veg layer (per unit direct flux)
+              RadSwReflVegDif           => noahmp%energy%flux%RadSwReflVegDif            ,& ! out,   flux reflected by veg layer (per unit diffuse flux)
+              RadSwReflGrdDir           => noahmp%energy%flux%RadSwReflGrdDir            ,& ! out,   flux reflected by ground (per unit direct flux)
+              RadSwReflGrdDif           => noahmp%energy%flux%RadSwReflGrdDif             & ! out,   flux reflected by ground (per unit diffuse flux)
              )
 ! ----------------------------------------------------------------------
 
@@ -217,11 +217,11 @@ contains
        FTIS = (H9 * S1 + H10 / S1) * (1.0 - KOPEN) + KOPEN
     endif
     if ( IC == 0 ) then  ! direct
-       FTDD(IB) = FTDS
-       FTID(IB) = FTIS
+       RadSwDirTranGrdDir(IB) = FTDS
+       RadSwDifTranGrdDir(IB) = FTIS
     else  ! diffuse
-       FTDI(IB) = FTDS
-       FTII(IB) = FTIS
+       RadSwDirTranGrdDif(IB) = FTDS
+       RadSwDifTranGrdDif(IB) = FTIS
     endif
 
     ! flux reflected by the surface (veg. and ground)
@@ -236,19 +236,19 @@ contains
     endif
     if ( IC == 0 ) then ! direct
        ALBD(IB)  = FRES
-       FREVD(IB) = FREVEG
-       FREGD(IB) = FREBAR
+       RadSwReflVegDir(IB) = FREVEG
+       RadSwReflGrdDir(IB) = FREBAR
     else   ! diffuse
        ALBI(IB)  = FRES
-       FREVI(IB) = FREVEG
-       FREGI(IB) = FREBAR
+       RadSwReflVegDif(IB) = FREVEG
+       RadSwReflGrdDif(IB) = FREBAR
     endif
 
     ! flux absorbed by vegetation
     if ( IC == 0 ) then ! direct
-       FABD(IB) = 1.0 - ALBD(IB) - (1.0 - ALBGRD(IB)) * FTDD(IB) - (1.0 - ALBGRI(IB)) * FTID(IB)
+       RadSwAbsVegDir(IB) = 1.0 - ALBD(IB) - (1.0 - ALBGRD(IB)) * RadSwDirTranGrdDir(IB) - (1.0 - ALBGRI(IB)) * RadSwDifTranGrdDir(IB)
     else   ! diffuse
-       FABI(IB) = 1.0 - ALBI(IB) - (1.0 - ALBGRD(IB)) * FTDI(IB) - (1.0 - ALBGRI(IB)) * FTII(IB)
+       RadSwAbsVegDif(IB) = 1.0 - ALBI(IB) - (1.0 - ALBGRD(IB)) * RadSwDirTranGrdDif(IB) - (1.0 - ALBGRI(IB)) * RadSwDifTranGrdDif(IB)
     endif
 
     end associate

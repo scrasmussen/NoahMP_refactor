@@ -27,8 +27,8 @@ contains
     noahmp%forcing%TemperatureAirRefHeight  = undefined_real
     noahmp%forcing%WindEastwardRefHeight    = undefined_real
     noahmp%forcing%WindNorthwardRefHeight   = undefined_real
-    noahmp%forcing%RadLWDownRefHeight       = undefined_real
-    noahmp%forcing%RadSWDownRefHeight       = undefined_real
+    noahmp%forcing%RadLwDownRefHeight       = undefined_real
+    noahmp%forcing%RadSwDownRefHeight       = undefined_real
     noahmp%forcing%PrecipConvRefHeight      = undefined_real
     noahmp%forcing%PrecipNonConvRefHeight   = undefined_real
     noahmp%forcing%PrecipShConvRefHeight    = undefined_real
@@ -67,8 +67,8 @@ contains
     noahmp%forcing%SpecHumidityRefHeight    = NoahmpIO%QV_CURR(I,1,J)/(1.0+NoahmpIO%QV_CURR(I,1,J))  ! convert from mixing ratio to specific humidity
     noahmp%forcing%PressureAirRefHeight     = (NoahmpIO%P8W(I,1,J) + NoahmpIO%P8W(I,2,J)) * 0.5      ! air pressure [Pa] at middle point of lowest atmos model layer
     noahmp%forcing%PressureAirSurface       = NoahmpIO%P8W      (I,1,J)
-    noahmp%forcing%RadLWDownRefHeight       = NoahmpIO%GLW      (I,J)
-    noahmp%forcing%RadSWDownRefHeight       = NoahmpIO%SWDOWN   (I,J)
+    noahmp%forcing%RadLwDownRefHeight       = NoahmpIO%GLW      (I,J)
+    noahmp%forcing%RadSwDownRefHeight       = NoahmpIO%SWDOWN   (I,J)
     noahmp%forcing%TemperatureSoilBottom    = NoahmpIO%TMN      (I,J)
     noahmp%forcing%PrecipConvRefHeight      = NoahmpIO%MP_RAINC (I,J) / NoahmpIO%DTBL
     noahmp%forcing%PrecipNonConvRefHeight   = NoahmpIO%MP_RAINNC(I,J) / NoahmpIO%DTBL

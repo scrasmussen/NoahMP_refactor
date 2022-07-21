@@ -40,9 +40,9 @@ contains
               ThroughfallRain          => noahmp%water%flux%ThroughfallRain            ,& ! in,    throughfall for rain [mm/s]
               DripCanopySnow          => noahmp%water%flux%DripCanopySnow            ,& ! in,    drip (unloading) rate for intercepted snow [mm/s]
               ThroughfallSnow          => noahmp%water%flux%ThroughfallSnow            ,& ! in,    throughfall of snowfall [mm/s]
-              PAHV            => noahmp%energy%flux%PAHV             ,& ! out,   precipitation advected heat - vegetation net (W/m2)
-              PAHG            => noahmp%energy%flux%PAHG             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
-              PAHB            => noahmp%energy%flux%PAHB              & ! out,   precipitation advected heat - bare ground net (W/m2)
+              HeatPrecipAdvCanopy            => noahmp%energy%flux%HeatPrecipAdvCanopy             ,& ! out,   precipitation advected heat - vegetation net (W/m2)
+              HeatPrecipAdvVegGrd            => noahmp%energy%flux%HeatPrecipAdvVegGrd             ,& ! out,   precipitation advected heat - under canopy net (W/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd              & ! out,   precipitation advected heat - bare ground net (W/m2)
              )
 ! ----------------------------------------------------------------------
 
@@ -50,9 +50,9 @@ contains
     PAH_AC  = 0.0
     PAH_CG  = 0.0
     PAH_AG  = 0.0
-    PAHV    = 0.0
-    PAHG    = 0.0
-    PAHB    = 0.0
+    HeatPrecipAdvCanopy    = 0.0
+    HeatPrecipAdvVegGrd    = 0.0
+    HeatPrecipAdvBareGrd    = 0.0
 
     ! Heat advection for liquid rainfall
     PAH_AC = FVEG * RainfallRefHeight * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TV)
@@ -65,29 +65,29 @@ contains
     PAH_AG = PAH_AG + ThroughfallSnow * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
-    PAHV = PAH_AC - PAH_CG
-    PAHG = PAH_CG
-    PAHB = PAH_AG
+    HeatPrecipAdvCanopy = PAH_AC - PAH_CG
+    HeatPrecipAdvVegGrd = PAH_CG
+    HeatPrecipAdvBareGrd = PAH_AG
 
     ! adjust for FVEG
     if ( (FVEG > 0.0) .and. (FVEG < 1.0) ) then
-       PAHG = PAHG / FVEG         ! these will be multiplied by fraction later
-       PAHB = PAHB / (1.0-FVEG)
+       HeatPrecipAdvVegGrd = HeatPrecipAdvVegGrd / FVEG         ! these will be multiplied by fraction later
+       HeatPrecipAdvBareGrd = HeatPrecipAdvBareGrd / (1.0-FVEG)
     elseif ( FVEG <= 0.0 ) then
-       PAHB = PAHG + PAHB         ! for case of canopy getting buried
-       PAHG = 0.0
-       PAHV = 0.0
+       HeatPrecipAdvBareGrd = HeatPrecipAdvVegGrd + HeatPrecipAdvBareGrd         ! for case of canopy getting buried
+       HeatPrecipAdvVegGrd = 0.0
+       HeatPrecipAdvCanopy = 0.0
     elseif ( FVEG >= 1.0 ) then
-       PAHB = 0.0
+       HeatPrecipAdvBareGrd = 0.0
     endif
 
     ! Put some artificial limits here for stability
-    PAHV = max( PAHV, -20.0 )
-    PAHV = min( PAHV,  20.0 )
-    PAHG = max( PAHG, -20.0 )
-    PAHG = min( PAHG,  20.0 )
-    PAHB = max( PAHB, -20.0 )
-    PAHB = min( PAHB,  20.0 )
+    HeatPrecipAdvCanopy = max( HeatPrecipAdvCanopy, -20.0 )
+    HeatPrecipAdvCanopy = min( HeatPrecipAdvCanopy,  20.0 )
+    HeatPrecipAdvVegGrd = max( HeatPrecipAdvVegGrd, -20.0 )
+    HeatPrecipAdvVegGrd = min( HeatPrecipAdvVegGrd,  20.0 )
+    HeatPrecipAdvBareGrd = max( HeatPrecipAdvBareGrd, -20.0 )
+    HeatPrecipAdvBareGrd = min( HeatPrecipAdvBareGrd,  20.0 )
 
     end associate
 

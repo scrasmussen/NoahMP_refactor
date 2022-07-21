@@ -3,7 +3,7 @@ module SurfaceEnergyFluxBareGroundMod
 !!! Compute surface energy fluxes and budget for bare ground
 !!! Use newton-raphson iteration to solve for ground (tg) temperatures
 !!! Surface energy balance (bare soil):
-!!! Ground level: -SAB + IRB[TG] + SHB[TG] + EVB[TG] + GHB[TG] = 0
+!!! Ground level: -SAB + RadLwNetBareGrd[TG] + HeatSensibleBareGrd[TG] + HeatLatentBareGrd[TG] + HeatGroundBareGrd[TG] = 0
 
   use Machine
   use NoahmpVarType
@@ -57,15 +57,15 @@ contains
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               OptSurfaceDrag  => noahmp%config%nmlist%OptSurfaceDrag ,& ! in,    options for surface layer drag/exchange coefficient
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
-              RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              RadLwDownRefHeight => noahmp%forcing%RadLwDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               PressureAirSurface      => noahmp%forcing%PressureAirSurface ,& ! in,    air pressure [Pa] at surface-atmosphere interface
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
-              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
+              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
               THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
               EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at reference height
@@ -99,10 +99,10 @@ contains
               DESTG           => noahmp%energy%state%DESTB           ,& ! out,   bare ground d(ESTB)/dt at TG (pa/k)
               MOZ             => noahmp%energy%state%MOZB            ,& ! out,   Monin-Obukhov stability (z/L), above ZPD, bare ground
               FH2             => noahmp%energy%state%FH2B            ,& ! out,   M-O sen heat stability correction, 2m, bare ground
-              IRB             => noahmp%energy%flux%IRB              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
-              SHB             => noahmp%energy%flux%SHB              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
-              EVB             => noahmp%energy%flux%EVB              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
-              GHB             => noahmp%energy%flux%GHB               & ! out,   bare ground heat flux (w/m2) [+ to soil]
+              RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
+              HeatSensibleBareGrd             => noahmp%energy%flux%HeatSensibleBareGrd              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
+              HeatLatentBareGrd             => noahmp%energy%flux%HeatLatentBareGrd              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
+              HeatGroundBareGrd             => noahmp%energy%flux%HeatGroundBareGrd               & ! out,   bare ground heat flux (w/m2) [+ to soil/snow]
              )
 ! ----------------------------------------------------------------------
 
@@ -149,17 +149,17 @@ contains
        ! ground fluxes and temperature change
        CSH = RHOAIR * ConstHeatCapacAir / RAHB
        CEV = RHOAIR * ConstHeatCapacAir / GAMMAG / (RSURF + RAWB)
-       IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
-       SHB = CSH * (TGB        - TemperatureAirRefHeight )
-       EVB = CEV * (ESTG*RHSUR - EAIR        )
-       GHB = CGH * (TGB        - STC(NumSnowLayerNeg+1))
-       B   = SAG - IRB - SHB - EVB - GHB + PAHB
+       RadLwNetBareGrd = CIR * TGB**4 - EMG * RadLwDownRefHeight
+       HeatSensibleBareGrd = CSH * (TGB        - TemperatureAirRefHeight )
+       HeatLatentBareGrd = CEV * (ESTG*RHSUR - EAIR        )
+       HeatGroundBareGrd = CGH * (TGB        - STC(NumSnowLayerNeg+1))
+       B   = RadSwAbsGrd - RadLwNetBareGrd - HeatSensibleBareGrd - HeatLatentBareGrd - HeatGroundBareGrd + HeatPrecipAdvBareGrd
        A   = 4.0*CIR*TGB**3 + CSH + CEV*DESTG + CGH
        DTG = B / A
-       IRB = IRB + 4.0 * CIR * TGB**3 * DTG
-       SHB = SHB + CSH * DTG
-       EVB = EVB + CEV * DESTG * DTG
-       GHB = GHB + CGH * DTG
+       RadLwNetBareGrd = RadLwNetBareGrd + 4.0 * CIR * TGB**3 * DTG
+       HeatSensibleBareGrd = HeatSensibleBareGrd + CSH * DTG
+       HeatLatentBareGrd = HeatLatentBareGrd + CEV * DESTG * DTG
+       HeatGroundBareGrd = HeatGroundBareGrd + CGH * DTG
        TGB = TGB + DTG  ! update ground temperature
 
        ! for computing M-O length
@@ -183,10 +183,10 @@ contains
        if ( (SnowDepth > 0.05) .and. (TGB > ConstFreezePoint) ) then
           if ( OptSnowSoilTempTime == 1 ) TGB = ConstFreezePoint
           if ( OptSnowSoilTempTime == 3 ) TGB = (1.0 - SnowCoverFrac) * TGB + SnowCoverFrac * ConstFreezePoint  ! MB: allow TG>0C during melt v3.7
-          IRB = CIR * TGB**4 - EMG * RadLWDownRefHeight
-          SHB = CSH * (TGB        - TemperatureAirRefHeight)
-          EVB = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
-          GHB = SAG + PAHB - (IRB + SHB + EVB)
+          RadLwNetBareGrd = CIR * TGB**4 - EMG * RadLwDownRefHeight
+          HeatSensibleBareGrd = CSH * (TGB        - TemperatureAirRefHeight)
+          HeatLatentBareGrd = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
+          HeatGroundBareGrd = RadSwAbsGrd + HeatPrecipAdvBareGrd - (RadLwNetBareGrd + HeatSensibleBareGrd + HeatLatentBareGrd)
        endif
     endif
 
@@ -203,8 +203,8 @@ contains
           T2MB = TGB
           Q2B  = QSFC
        else
-          T2MB = TGB - SHB / (RHOAIR*ConstHeatCapacAir) * 1.0 / EHB2
-          Q2B  = QSFC - EVB / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
+          T2MB = TGB - HeatSensibleBareGrd / (RHOAIR*ConstHeatCapacAir) * 1.0 / EHB2
+          Q2B  = QSFC - HeatLatentBareGrd / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
        endif
        if ( FlagUrban .eqv. .true. ) Q2B = QSFC
     endif

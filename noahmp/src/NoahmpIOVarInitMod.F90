@@ -2174,7 +2174,6 @@ contains
     NoahmpIO%APARXY          = undefined_real
     NoahmpIO%PSNXY           = undefined_real
     NoahmpIO%SAVXY           = undefined_real
-    NoahmpIO%FIRAXY          = undefined_real
     NoahmpIO%SAGXY           = undefined_real
     NoahmpIO%RSSUNXY         = undefined_real
     NoahmpIO%RSSHAXY         = undefined_real

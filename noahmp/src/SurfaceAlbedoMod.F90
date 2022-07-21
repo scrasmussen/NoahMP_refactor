@@ -63,16 +63,16 @@ contains
               TAU             => noahmp%energy%state%TAU             ,& ! out,   leaf/stem transmittance weighted by fraction LAI and SAI
               VAI             => noahmp%energy%state%VAI             ,& ! out,   one-sided leaf+stem area index (m2/m2)
               GDIR            => noahmp%energy%state%GDIR            ,& ! out,   projected leaf+stem area in solar direction
-              FABD            => noahmp%energy%flux%FABD             ,& ! out,   flux abs by veg (per unit direct flux)
-              FABI            => noahmp%energy%flux%FABI             ,& ! out,   flux abs by veg (per unit diffuse flux)
-              FTDD            => noahmp%energy%flux%FTDD             ,& ! out,   down direct flux below veg (per unit dir flux)
-              FTID            => noahmp%energy%flux%FTID             ,& ! out,   down diffuse flux below veg (per unit dir flux)
-              FTII            => noahmp%energy%flux%FTII             ,& ! out,   down diffuse flux below veg (per unit dif flux)
-              FTDI            => noahmp%energy%flux%FTDI             ,& ! out,   down direct flux below veg per unit dif flux (= 0)
-              FREVD           => noahmp%energy%flux%FREVD            ,& ! out,   flux reflected by veg layer (per unit direct flux)
-              FREVI           => noahmp%energy%flux%FREVI            ,& ! out,   flux reflected by veg layer (per unit diffuse flux)
-              FREGD           => noahmp%energy%flux%FREGD            ,& ! out,   flux reflected by ground (per unit direct flux)
-              FREGI           => noahmp%energy%flux%FREGI             & ! out,   flux reflected by ground (per unit diffuse flux)
+              RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! out,   flux abs by veg (per unit direct flux)
+              RadSwAbsVegDif            => noahmp%energy%flux%RadSwAbsVegDif             ,& ! out,   flux abs by veg (per unit diffuse flux)
+              RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! out,   down direct flux below veg (per unit dir flux)
+              RadSwDifTranGrdDir            => noahmp%energy%flux%RadSwDifTranGrdDir             ,& ! out,   down diffuse flux below veg (per unit dir flux)
+              RadSwDifTranGrdDif            => noahmp%energy%flux%RadSwDifTranGrdDif             ,& ! out,   down diffuse flux below veg (per unit dif flux)
+              RadSwDirTranGrdDif            => noahmp%energy%flux%RadSwDirTranGrdDif             ,& ! out,   down direct flux below veg per unit dif flux (= 0)
+              RadSwReflVegDir           => noahmp%energy%flux%RadSwReflVegDir            ,& ! out,   flux reflected by veg layer (per unit direct flux)
+              RadSwReflVegDif           => noahmp%energy%flux%RadSwReflVegDif            ,& ! out,   flux reflected by veg layer (per unit diffuse flux)
+              RadSwReflGrdDir           => noahmp%energy%flux%RadSwReflGrdDir            ,& ! out,   flux reflected by ground (per unit direct flux)
+              RadSwReflGrdDif           => noahmp%energy%flux%RadSwReflGrdDif             & ! out,   flux reflected by ground (per unit diffuse flux)
              )
 ! ----------------------------------------------------------------------
 
@@ -91,16 +91,16 @@ contains
        ALBGRI(IB) = 0.0
        ALBSND(IB) = 0.0
        ALBSNI(IB) = 0.0
-       FABD(IB)   = 0.0
-       FABI(IB)   = 0.0
-       FTDD(IB)   = 0.0
-       FTDI(IB)   = 0.0
-       FTID(IB)   = 0.0
-       FTII(IB)   = 0.0
-       FREVD(IB)  = 0.0
-       FREVI(IB)  = 0.0
-       FREGD(IB)  = 0.0
-       FREGI(IB)  = 0.0
+       RadSwAbsVegDir(IB)   = 0.0
+       RadSwAbsVegDif(IB)   = 0.0
+       RadSwDirTranGrdDir(IB)   = 0.0
+       RadSwDirTranGrdDif(IB)   = 0.0
+       RadSwDifTranGrdDir(IB)   = 0.0
+       RadSwDifTranGrdDif(IB)   = 0.0
+       RadSwReflVegDir(IB)  = 0.0
+       RadSwReflVegDif(IB)  = 0.0
+       RadSwReflGrdDir(IB)  = 0.0
+       RadSwReflGrdDif(IB)  = 0.0
     enddo
     VAI = ELAI + ESAI
 

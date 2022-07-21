@@ -48,13 +48,13 @@ contains
               PrecipSnowRefHeight     => noahmp%forcing%PrecipSnowRefHeight        ,& ! in,  snowfall rate [mm/s] at reference height
               PrecipGraupelRefHeight  => noahmp%forcing%PrecipGraupelRefHeight     ,& ! in,  graupel rate [mm/s] at reference height
               PrecipHailRefHeight     => noahmp%forcing%PrecipHailRefHeight        ,& ! in,  hail rate [mm/s] at reference height
-              RadSWDownRefHeight      => noahmp%forcing%RadSWDownRefHeight         ,& ! in,  downward shortwave radiation (W/m2) at reference height
+              RadSwDownRefHeight      => noahmp%forcing%RadSwDownRefHeight         ,& ! in,  downward shortwave radiation (W/m2) at reference height
               SnowfallDensityMax      => noahmp%water%param%SnowfallDensityMax     ,& ! in,  maximum fresh snowfall density [kg/m3]
               THAIR                 => noahmp%energy%state%THAIR        ,& ! out,  surface potential temperature (k)
               EAIR                  => noahmp%energy%state%EAIR         ,& ! out,  vapor pressure air (pa)
               RHOAIR                => noahmp%energy%state%RHOAIR       ,& ! out,  density air (kg/m3)
-              SOLAD                 => noahmp%energy%flux%SOLAD         ,& ! out,  incoming direct solar radiation (w/m2)
-              SOLAI                 => noahmp%energy%flux%SOLAI         ,& ! out,  incoming diffuse solar radiation (w/m2)
+              RadSwDownDir                 => noahmp%energy%flux%RadSwDownDir         ,& ! out,  incoming direct solar radiation (w/m2)
+              RadSwDownDif                 => noahmp%energy%flux%RadSwDownDif         ,& ! out,  incoming diffuse solar radiation (w/m2)
               RainfallRefHeight                  => noahmp%water%flux%RainfallRefHeight           ,& ! out,  rainfall [mm/s] at reference height
               SnowfallRefHeight                  => noahmp%water%flux%SnowfallRefHeight           ,& ! out,  liquid equivalent snowfall [mm/s] at reference height
               PrecipTotRefHeight                  => noahmp%water%flux%PrecipTotRefHeight          ,& ! out,  total precipitation [mm/s] at reference height
@@ -75,11 +75,11 @@ contains
     ! downward solar radiation
     dir_frac = 0.7
     vis_frac = 0.5
-    if ( CosSolarZenithAngle <= 0.0 ) RadSWDownRefHeight = 0.0     ! filter by solar zenith angle
-    SOLAD(1) = RadSWDownRefHeight * dir_frac       * vis_frac        ! direct  vis
-    SOLAD(2) = RadSWDownRefHeight * dir_frac       * (1.0-vis_frac)  ! direct  nir
-    SOLAI(1) = RadSWDownRefHeight * (1.0-dir_frac) * vis_frac        ! diffuse vis
-    SOLAI(2) = RadSWDownRefHeight * (1.0-dir_frac) * (1.0-vis_frac)  ! diffuse nir
+    if ( CosSolarZenithAngle <= 0.0 ) RadSwDownRefHeight = 0.0     ! filter by solar zenith angle
+    RadSwDownDir(1) = RadSwDownRefHeight * dir_frac       * vis_frac        ! direct  vis
+    RadSwDownDir(2) = RadSwDownRefHeight * dir_frac       * (1.0-vis_frac)  ! direct  nir
+    RadSwDownDif(1) = RadSwDownRefHeight * (1.0-dir_frac) * vis_frac        ! diffuse vis
+    RadSwDownDif(2) = RadSwDownRefHeight * (1.0-dir_frac) * (1.0-vis_frac)  ! diffuse nir
 
     ! precipitation
     PrecipTotRefHeight = PrecipConvRefHeight + PrecipNonConvRefHeight + PrecipShConvRefHeight

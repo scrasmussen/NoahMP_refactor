@@ -130,52 +130,52 @@ contains
     associate(                                                        &
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
-              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
-              FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
-              FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
-              FIRA            => noahmp%energy%flux%FIRA             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
-              FSH             => noahmp%energy%flux%FSH              ,& ! in,    total sensible heat (w/m2) [+ to atm]
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! in,    ground (soil/snow) evap heat (w/m2) [+ to atm]
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
-              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              PAH             => noahmp%energy%flux%PAH              ,& ! in,    precipitation advected heat - total (W/m2)
+              RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
+              RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! in,    total absorbed solar radiation (w/m2)
+              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! in,    total reflected solar radiation (w/m2)
+              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! in,    total sensible heat (w/m2) [+ to atm]
+              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! in,    total ground latent heat (w/m2) [+ to atm]
+              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! in,    total ground heat flux (w/m2) [+ to soil/snow]
+              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
+              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! in,    precipitation advected heat - total (W/m2)
               ERRENG          => noahmp%energy%state%ERRENG          ,& ! out,   error in surface energy balance [w/m2]
               ERRSW           => noahmp%energy%state%ERRSW            & ! out,   error in shortwave radiation balance [w/m2]
              )
 ! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
-    ERRSW = RadSWDownRefHeight - (FSA + FSR)
+    ERRSW = RadSwDownRefHeight - (RadSwAbsTot + RadSwReflTot)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
        write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
        write(*,*) 'ERRSW =',  ERRSW
-       write(*,*) "RadSWDownRefHeight =", RadSWDownRefHeight
-       write(*,*) "FSR    =", FSR
-       write(*,*) "SAG    =", SAG
-       write(*,*) "FSA    =", FSA
+       write(*,*) "RadSwDownRefHeight =", RadSwDownRefHeight
+       write(*,*) "RadSwReflTot    =", RadSwReflTot
+       write(*,*) "RadSwAbsGrd    =", RadSwAbsGrd
+       write(*,*) "RadSwAbsTot    =", RadSwAbsTot
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Stop in Noah-MP")
        stop "Error"
     endif
 
     ! error in surface energy balance should be <0.01 W/m2
-    ERRENG = SAG + PAH - (FIRA + FSH + FGEV + SSOIL)
+    ERRENG = RadSwAbsGrd + HeatPrecipAdvTot - (RadLwNetTot + HeatSensibleTot + HeatLatentGrdTot + HeatGroundTot)
     ! print out diagnostics when error is large
     if ( abs(ERRENG) > 0.01 ) then
        write(*,*) 'ERRENG =',ERRENG,' at GridIndexI,GridIndexJ: ',GridIndexI,GridIndexJ
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Net longwave:     ",FIRA
+       write(*,'(a17,F10.4)') "Net longwave:     ",RadLwNetTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total sensible:   ",FSH
+       write(*,'(a17,F10.4)') "Total sensible:   ",HeatSensibleTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Ground evap:      ",FGEV
+       write(*,'(a17,F10.4)') "Ground evap:      ",HeatLatentGrdTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total ground:     ",SSOIL
+       write(*,'(a17,F10.4)') "Total ground:     ",HeatGroundTot
        !call wrf_message(trim(message))
-       write(*,'(a17,4F10.4)') "Precip advected: ",PAH
+       write(*,'(a17,4F10.4)') "Precip advected: ",HeatPrecipAdvTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "absorbed shortwave: ",SAG
+       write(*,'(a17,F10.4)') "absorbed shortwave: ",RadSwAbsGrd
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Energy budget problem in NOAHMP LSM")
        stop "Error"

@@ -43,29 +43,29 @@ contains
               FSHA            => noahmp%energy%state%FSHA            ,& ! in,    shaded fraction of canopy
               LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,    sunlit leaf area
               LAISHA          => noahmp%energy%state%LAISHA          ,& ! in,    shaded leaf area
-              SOLAD           => noahmp%energy%flux%SOLAD            ,& ! in,    incoming direct solar radiation (w/m2)
-              SOLAI           => noahmp%energy%flux%SOLAI            ,& ! in,    incoming diffuse solar radiation (w/m2)
-              FABD            => noahmp%energy%flux%FABD             ,& ! in,    flux abs by veg (per unit direct flux)
-              FABI            => noahmp%energy%flux%FABI             ,& ! in,    flux abs by veg (per unit diffuse flux)
-              FTDD            => noahmp%energy%flux%FTDD             ,& ! in,    down direct flux below veg (per unit dir flux)
-              FTID            => noahmp%energy%flux%FTID             ,& ! in,    down diffuse flux below veg (per unit dir flux)
-              FTII            => noahmp%energy%flux%FTII             ,& ! in,    down diffuse flux below veg (per unit dif flux)
+              RadSwDownDir           => noahmp%energy%flux%RadSwDownDir            ,& ! in,    incoming direct solar radiation (w/m2)
+              RadSwDownDif           => noahmp%energy%flux%RadSwDownDif            ,& ! in,    incoming diffuse solar radiation (w/m2)
+              RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! in,    flux abs by veg (per unit direct flux)
+              RadSwAbsVegDif            => noahmp%energy%flux%RadSwAbsVegDif             ,& ! in,    flux abs by veg (per unit diffuse flux)
+              RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! in,    down direct flux below veg (per unit dir flux)
+              RadSwDifTranGrdDir            => noahmp%energy%flux%RadSwDifTranGrdDir             ,& ! in,    down diffuse flux below veg (per unit dir flux)
+              RadSwDifTranGrdDif            => noahmp%energy%flux%RadSwDifTranGrdDif             ,& ! in,    down diffuse flux below veg (per unit dif flux)
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! in,    ground albedo (direct beam: vis, nir)
               ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! in,    ground albedo (diffuse: vis, nir)
               ALBD            => noahmp%energy%state%ALBD            ,& ! in,    surface albedo (direct)
               ALBI            => noahmp%energy%state%ALBI            ,& ! in,    surface albedo (diffuse)
-              FREVD           => noahmp%energy%flux%FREVD            ,& ! in,    flux reflected by veg layer (per unit direct flux)
-              FREVI           => noahmp%energy%flux%FREVI            ,& ! in,    flux reflected by veg layer (per unit diffuse flux)
-              FREGD           => noahmp%energy%flux%FREGD            ,& ! in,    flux reflected by ground (per unit direct flux)
-              FREGI           => noahmp%energy%flux%FREGI            ,& ! in,    flux reflected by ground (per unit diffuse flux)
-              PARSUN          => noahmp%energy%flux%PARSUN           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
-              PARSHA          => noahmp%energy%flux%PARSHA           ,& ! out,   average absorbed par for shaded leaves (w/m2)
-              SAV             => noahmp%energy%flux%SAV              ,& ! out,   solar radiation absorbed by vegetation (w/m2)
-              SAG             => noahmp%energy%flux%SAG              ,& ! out,   solar radiation absorbed by ground (w/m2)
-              FSA             => noahmp%energy%flux%FSA              ,& ! out,   total absorbed solar radiation (w/m2)
-              FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
-              FSRV            => noahmp%energy%flux%FSRV             ,& ! out,   reflected solar radiation by vegetation (w/m2)
-              FSRG            => noahmp%energy%flux%FSRG              & ! out,   reflected solar radiation by ground (w/m2)
+              RadSwReflVegDir           => noahmp%energy%flux%RadSwReflVegDir            ,& ! in,    flux reflected by veg layer (per unit direct flux)
+              RadSwReflVegDif           => noahmp%energy%flux%RadSwReflVegDif            ,& ! in,    flux reflected by veg layer (per unit diffuse flux)
+              RadSwReflGrdDir           => noahmp%energy%flux%RadSwReflGrdDir            ,& ! in,    flux reflected by ground (per unit direct flux)
+              RadSwReflGrdDif           => noahmp%energy%flux%RadSwReflGrdDif            ,& ! in,    flux reflected by ground (per unit diffuse flux)
+              RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
+              RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! out,   average absorbed par for shaded leaves (w/m2)
+              RadSwAbsVeg             => noahmp%energy%flux%RadSwAbsVeg              ,& ! out,   solar radiation absorbed by vegetation (w/m2)
+              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! out,   solar radiation absorbed by ground (w/m2)
+              RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! out,   total absorbed solar radiation (w/m2)
+              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
+              RadSwReflVeg            => noahmp%energy%flux%RadSwReflVeg             ,& ! out,   reflected solar radiation by vegetation (w/m2)
+              RadSwReflGrd            => noahmp%energy%flux%RadSwReflGrd              & ! out,   reflected solar radiation by ground (w/m2)
              )
 ! ----------------------------------------------------------------------
 
@@ -73,49 +73,51 @@ contains
     allocate( CAD (1:NumSWRadBand) )
     allocate( CAI (1:NumSWRadBand) )
     MPE    = 1.0e-6
-    SAG    = 0.0
-    SAV    = 0.0
-    FSA    = 0.0
-    FSR    = 0.0
-    FSRV   = 0.0
-    FSRG   = 0.0
-    PARSUN = 0.0
-    PARSHA = 0.0
+    RadSwAbsGrd    = 0.0
+    RadSwAbsVeg    = 0.0
+    RadSwAbsTot    = 0.0
+    RadSwReflTot    = 0.0
+    RadSwReflVeg   = 0.0
+    RadSwReflGrd   = 0.0
+    RadPhotoActAbsSunlit = 0.0
+    RadPhotoActAbsShade = 0.0
 
     do IB = 1, NumSWRadBand
        ! absorbed by canopy
-       CAD(IB) = SOLAD(IB) * FABD(IB)
-       CAI(IB) = SOLAI(IB) * FABI(IB)
-       SAV     = SAV + CAD(IB) + CAI(IB)
-       FSA     = FSA + CAD(IB) + CAI(IB)
+       CAD(IB) = RadSwDownDir(IB) * RadSwAbsVegDir(IB)
+       CAI(IB) = RadSwDownDif(IB) * RadSwAbsVegDif(IB)
+       RadSwAbsVeg     = RadSwAbsVeg + CAD(IB) + CAI(IB)
+       RadSwAbsTot     = RadSwAbsTot + CAD(IB) + CAI(IB)
        ! transmitted solar fluxes incident on ground
-       TRD = SOLAD(IB) * FTDD(IB)
-       TRI = SOLAD(IB) * FTID(IB) + SOLAI(IB) * FTII(IB)
+       TRD = RadSwDownDir(IB) * RadSwDirTranGrdDir(IB)
+       TRI = RadSwDownDir(IB) * RadSwDifTranGrdDir(IB) + RadSwDownDif(IB) * RadSwDifTranGrdDif(IB)
        ! solar radiation absorbed by ground surface
        ABSG = TRD * (1.0 - ALBGRD(IB)) + TRI * (1.0 - ALBGRI(IB))
-       SAG  = SAG + ABSG
-       FSA  = FSA + ABSG
+       RadSwAbsGrd  = RadSwAbsGrd + ABSG
+       RadSwAbsTot  = RadSwAbsTot + ABSG
     enddo
 
     ! partition visible canopy absorption to sunlit and shaded fractions
     ! to get average absorbed par for sunlit and shaded leaves
     LAIFRA = ELAI / max(VAI, MPE)
     if ( FSUN > 0.0 ) then
-       PARSUN = ( CAD(1) + FSUN * CAI(1) ) * LAIFRA / max(LAISUN, MPE)
-       PARSHA = ( FSHA * CAI(1) ) * LAIFRA / max(LAISHA, MPE)
+       RadPhotoActAbsSunlit = ( CAD(1) + FSUN * CAI(1) ) * LAIFRA / max(LAISUN, MPE)
+       RadPhotoActAbsShade = ( FSHA * CAI(1) ) * LAIFRA / max(LAISHA, MPE)
     else
-       PARSUN = 0.0
-       PARSHA = ( CAD(1) + CAI(1) ) * LAIFRA / max(LAISHA, MPE)
+       RadPhotoActAbsSunlit = 0.0
+       RadPhotoActAbsShade = ( CAD(1) + CAI(1) ) * LAIFRA / max(LAISHA, MPE)
     endif
 
     ! reflected solar radiation
-    RVIS = ALBD(1) * SOLAD(1) + ALBI(1) * SOLAI(1)
-    RNIR = ALBD(2) * SOLAD(2) + ALBI(2) * SOLAI(2)
-    FSR  = RVIS + RNIR
+    RVIS = ALBD(1) * RadSwDownDir(1) + ALBI(1) * RadSwDownDif(1)
+    RNIR = ALBD(2) * RadSwDownDir(2) + ALBI(2) * RadSwDownDif(2)
+    RadSwReflTot  = RVIS + RNIR
 
     ! reflected solar radiation of veg. and ground (combined ground)
-    FSRV = FREVD(1)*SOLAD(1) + FREVI(1)*SOLAI(1) + FREVD(2)*SOLAD(2) + FREVI(2)*SOLAI(2)
-    FSRG = FREGD(1)*SOLAD(1) + FREGI(1)*SOLAI(1) + FREGD(2)*SOLAD(2) + FREGI(2)*SOLAI(2)
+    RadSwReflVeg = RadSwReflVegDir(1)*RadSwDownDir(1) + RadSwReflVegDif(1)*RadSwDownDif(1) + &
+                   RadSwReflVegDir(2)*RadSwDownDir(2) + RadSwReflVegDif(2)*RadSwDownDif(2)
+    RadSwReflGrd = RadSwReflGrdDir(1)*RadSwDownDir(1) + RadSwReflGrdDif(1)*RadSwDownDif(1) + &
+                   RadSwReflGrdDir(2)*RadSwDownDir(2) + RadSwReflGrdDif(2)*RadSwDownDif(2)
 
     end associate
 

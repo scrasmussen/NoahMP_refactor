@@ -49,8 +49,8 @@ contains
               HS              => noahmp%energy%param%HS              ,& ! in,    Parameter used in vapor pressure deficit function
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
-              PARSUN          => noahmp%energy%flux%PARSUN           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
-              PARSHA          => noahmp%energy%flux%PARSHA           ,& ! in,    average absorbed par for shaded leaves (w/m2)
+              RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
+              RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! in,    average absorbed par for shaded leaves (w/m2)
               RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
               RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
               PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
@@ -73,7 +73,7 @@ contains
        call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * PARSUN / RGL
+       FF  = 2.0 * RadPhotoActAbsSunlit / RGL
        RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
        RCS = max( RCS, 0.0001 )
 
@@ -102,7 +102,7 @@ contains
        call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * PARSHA / RGL
+       FF  = 2.0 * RadPhotoActAbsShade / RGL
        RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
        RCS = max( RCS, 0.0001 )
 

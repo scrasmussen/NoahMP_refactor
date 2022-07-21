@@ -1,11 +1,10 @@
 module EnergyVarOutMod
 
 !!! Transfer column (1-D) Noah-MP energy variables to 2D NoahmpIO for output
-!!! Energy variables should be first defined in EnergyType.f90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: P. Valayamkunnath, C. He, & refactor team (April 27, 2021)
+! Refactered code: P. Valayamkunnath, C. He, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
   use Machine
@@ -38,7 +37,7 @@ contains
              )
 
              NoahmpIO%TSK      (I,J)         = noahmp%energy%state%TRAD
-             NoahmpIO%HFX      (I,J)         = noahmp%energy%flux%FSH
+             NoahmpIO%HFX      (I,J)         = noahmp%energy%flux%HeatSensibleTot
              NoahmpIO%GRDFLX   (I,J)         = noahmp%energy%flux%SSOIL
 
              if ( noahmp%energy%state%ALBEDO > -999 ) then
@@ -67,11 +66,11 @@ contains
              NoahmpIO%Q2MBXY   (I,J)         = noahmp%energy%state%Q2B/(1.0 - noahmp%energy%state%Q2B)  ! consistent with registry def of Q2
              NoahmpIO%TRADXY   (I,J)         = noahmp%energy%state%TRAD
              NoahmpIO%FVEGXY   (I,J)         = noahmp%energy%state%FVEG
-             NoahmpIO%FSAXY    (I,J)         = noahmp%energy%flux%FSA
-             NoahmpIO%FIRAXY   (I,J)         = noahmp%energy%flux%FIRA
-             NoahmpIO%APARXY   (I,J)         = noahmp%energy%flux%APAR
-             NoahmpIO%SAVXY    (I,J)         = noahmp%energy%flux%SAV
-             NoahmpIO%SAGXY    (I,J)         = noahmp%energy%flux%SAG
+             NoahmpIO%FSAXY    (I,J)         = noahmp%energy%flux%RadSwAbsTot
+             NoahmpIO%FIRAXY   (I,J)         = noahmp%energy%flux%RadLwNetTot
+             NoahmpIO%APARXY   (I,J)         = noahmp%energy%flux%RadPhotoActAbsCan
+             NoahmpIO%SAVXY    (I,J)         = noahmp%energy%flux%RadSwAbsVeg
+             NoahmpIO%SAGXY    (I,J)         = noahmp%energy%flux%RadSwAbsGrd
              NoahmpIO%RSSUNXY  (I,J)         = noahmp%energy%state%RSSUN
              NoahmpIO%RSSHAXY  (I,J)         = noahmp%energy%state%RSSHA
              LAISUN                          = max(noahmp%energy%state%LAISUN, 0.0)
@@ -97,24 +96,24 @@ contains
              NoahmpIO%TGBXY    (I,J)   = noahmp%energy%state%TGB
              NoahmpIO%CHVXY    (I,J)   = noahmp%energy%state%CHV
              NoahmpIO%CHBXY    (I,J)   = noahmp%energy%state%CHB
-             NoahmpIO%IRCXY    (I,J)   = noahmp%energy%flux%IRC
-             NoahmpIO%IRGXY    (I,J)   = noahmp%energy%flux%IRG
-             NoahmpIO%SHCXY    (I,J)   = noahmp%energy%flux%SHC
-             NoahmpIO%SHGXY    (I,J)   = noahmp%energy%flux%SHG
-             NoahmpIO%EVGXY    (I,J)   = noahmp%energy%flux%EVG
-             NoahmpIO%GHVXY    (I,J)   = noahmp%energy%flux%GHV
-             NoahmpIO%IRBXY    (I,J)   = noahmp%energy%flux%IRB
-             NoahmpIO%SHBXY    (I,J)   = noahmp%energy%flux%SHB
-             NoahmpIO%EVBXY    (I,J)   = noahmp%energy%flux%EVB
-             NoahmpIO%GHBXY    (I,J)   = noahmp%energy%flux%GHB
-             NoahmpIO%TRXY     (I,J)   = noahmp%energy%flux%TR
-             NoahmpIO%EVCXY    (I,J)   = noahmp%energy%flux%EVC
+             NoahmpIO%IRCXY    (I,J)   = noahmp%energy%flux%RadLwNetCanopy
+             NoahmpIO%IRGXY    (I,J)   = noahmp%energy%flux%RadLwNetVegGrd
+             NoahmpIO%SHCXY    (I,J)   = noahmp%energy%flux%HeatSensibleCanopy
+             NoahmpIO%SHGXY    (I,J)   = noahmp%energy%flux%HeatSensibleVegGrd
+             NoahmpIO%EVGXY    (I,J)   = noahmp%energy%flux%HeatLatentVegGrd
+             NoahmpIO%GHVXY    (I,J)   = noahmp%energy%flux%HeatGroundVegGrd
+             NoahmpIO%IRBXY    (I,J)   = noahmp%energy%flux%RadLwNetBareGrd
+             NoahmpIO%SHBXY    (I,J)   = noahmp%energy%flux%HeatSensibleBareGrd
+             NoahmpIO%EVBXY    (I,J)   = noahmp%energy%flux%HeatLatentBareGrd
+             NoahmpIO%GHBXY    (I,J)   = noahmp%energy%flux%HeatGroundBareGrd
+             NoahmpIO%TRXY     (I,J)   = noahmp%energy%flux%HeatLatentCanTransp
+             NoahmpIO%EVCXY    (I,J)   = noahmp%energy%flux%HeatLatentCanEvap
              NoahmpIO%CHLEAFXY (I,J)   = noahmp%energy%state%CHLEAF
              NoahmpIO%CHUCXY   (I,J)   = noahmp%energy%state%CHUC
              NoahmpIO%CHV2XY   (I,J)   = noahmp%energy%state%CHV2
              NoahmpIO%CHB2XY   (I,J)   = noahmp%energy%state%EHB2
              NoahmpIO%IRRSPLH  (I,J)   = NoahmpIO%IRRSPLH(I,J) + &
-                                         (noahmp%energy%flux%FIRR*noahmp%config%domain%MainTimeStep) ! Joules/m^2
+                                         (noahmp%energy%flux%HeatLatentIrriEvap*noahmp%config%domain%MainTimeStep) ! Joules/m^2
 
     end associate
 

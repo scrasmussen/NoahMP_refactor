@@ -39,7 +39,7 @@ contains
 
 !------------------------------------------------------------------------
     associate(                                                        &
-              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation (W/m2) at reference height
+              RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation (W/m2) at reference height
               T2M              => noahmp%energy%state%T2M            ,& ! in,    2-m air temperature (K)
               XLAI             => noahmp%energy%state%LAI            ,& ! in,    leaf area index, unadjusted for burying by snow
               PhotosynRadFrac            => noahmp%biochem%param%PhotosynRadFrac         ,& ! in,    Fraction of incoming solar radiation to photosynthetically active radiation
@@ -56,7 +56,7 @@ contains
 
     ! initialize
     TC  = T2M - 273.15
-    PAR = PhotosynRadFrac * RadSWDownRefHeight * 0.0036  !w to MJ m-2
+    PAR = PhotosynRadFrac * RadSwDownRefHeight * 0.0036  !w to MJ m-2
 
     ! compute Maximum CO2 assimulation rate g/co2/s
     if ( TC < TempMinCarbonAssim ) then

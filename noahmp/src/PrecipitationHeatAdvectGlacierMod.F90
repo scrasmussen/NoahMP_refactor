@@ -33,13 +33,13 @@ contains
               SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! out,   snowfall at ground surface [mm/s]
               RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! out,   rainfall at ground surface (mm/s)
-              PAHB            => noahmp%energy%flux%PAHB              & ! out,   precipitation advected heat - bare ground net (W/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd              & ! out,   precipitation advected heat - bare ground net (W/m2)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
     PAH_AG  = 0.0
-    PAHB    = 0.0
+    HeatPrecipAdvBareGrd    = 0.0
     RainfallGround   = RainfallRefHeight
     SnowfallGround   = SnowfallRefHeight
 
@@ -50,11 +50,11 @@ contains
     PAH_AG = PAH_AG + SnowfallGround * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
 
     ! net heat advection
-    PAHB = PAH_AG
+    HeatPrecipAdvBareGrd = PAH_AG
 
     ! Put some artificial limits here for stability
-    PAHB = max( PAHB, -20.0 )
-    PAHB = min( PAHB,  20.0 )
+    HeatPrecipAdvBareGrd = max( HeatPrecipAdvBareGrd, -20.0 )
+    HeatPrecipAdvBareGrd = min( HeatPrecipAdvBareGrd,  20.0 )
 
     end associate
 

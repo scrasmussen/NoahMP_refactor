@@ -3,8 +3,8 @@ module SurfaceEnergyFluxVegetatedMod
 !!! Compute surface energy fluxes and budget for vegetated surface
 !!! Use newton-raphson iteration to solve for vegetation (tv) and ground (tg) temperatures
 !!! Surface energy balance:
-!!! Canopy level: -SAV + IRC[TV] + SHC[TV] + EVC[TV] + TR[TV] = 0
-!!! Ground level: -SAG + IRG[TG] + SHG[TG] + EVG[TG] + GH[TG] = 0
+!!! Canopy level: -RadSwAbsVeg + RadLwNetCanopy[TV] + HeatSensibleCanopy[TV] + HeatLatentCanEvap[TV] + HeatLatentCanTransp[TV] = 0
+!!! Ground level: -RadSwAbsGrd + RadLwNetVegGrd[TG] + HeatSensibleVegGrd[TG] + HeatLatentVegGrd[TG] + HeatGroundVegGrd[TG] = 0
 
   use Machine
   use NoahmpVarType
@@ -81,7 +81,7 @@ contains
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme (only layer 1)
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
-              RadLWDownRefHeight      => noahmp%forcing%RadLWDownRefHeight      ,& ! in,    downward longwave radiation [W/m2] at reference height
+              RadLwDownRefHeight      => noahmp%forcing%RadLwDownRefHeight      ,& ! in,    downward longwave radiation [W/m2] at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight ,& ! in,    air temperature [K] at reference height
               PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight    ,& ! in,    air pressure [Pa] at reference height
               PressureAirSurface      => noahmp%forcing%PressureAirSurface      ,& ! in,    air pressure [Pa] at surface-atmos interface
@@ -91,10 +91,10 @@ contains
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water (mm)
               CanopyIce          => noahmp%water%state%CanopyIce           ,& ! in,    canopy intercepted ice [mm]
               HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
-              SAV             => noahmp%energy%flux%SAV              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
-              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
-              PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
+              RadSwAbsVeg             => noahmp%energy%flux%RadSwAbsVeg              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
+              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
+              HeatPrecipAdvCanopy            => noahmp%energy%flux%HeatPrecipAdvCanopy             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
+              HeatPrecipAdvVegGrd            => noahmp%energy%flux%HeatPrecipAdvVegGrd             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
               RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    surface reference height (m)
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
               UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
@@ -154,14 +154,14 @@ contains
               UC              => noahmp%energy%state%UC              ,& ! out,   wind speed at top of canopy (m/s)
               MOZ             => noahmp%energy%state%MOZV            ,& ! out,   Monin-Obukhov stability (z/L), above ZPD, vegetated
               FH2             => noahmp%energy%state%FH2V            ,& ! out,   M-O sen heat stability correction, 2m, vegetated
-              IRC             => noahmp%energy%flux%IRC              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
-              SHC             => noahmp%energy%flux%SHC              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
-              EVC             => noahmp%energy%flux%EVC              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
-              IRG             => noahmp%energy%flux%IRG              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
-              SHG             => noahmp%energy%flux%SHG              ,& ! out,   ground sensible heat flux (w/m2)     [+= to atm]
-              EVG             => noahmp%energy%flux%EVG              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
-              TR              => noahmp%energy%flux%TR               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
-              GH              => noahmp%energy%flux%GHV               & ! out,   vegetated ground heat (w/m2) [+ = to soil]
+              RadLwNetCanopy             => noahmp%energy%flux%RadLwNetCanopy              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
+              HeatSensibleCanopy             => noahmp%energy%flux%HeatSensibleCanopy              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
+              HeatLatentCanEvap             => noahmp%energy%flux%HeatLatentCanEvap              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
+              RadLwNetVegGrd             => noahmp%energy%flux%RadLwNetVegGrd              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
+              HeatSensibleVegGrd             => noahmp%energy%flux%HeatSensibleVegGrd              ,& ! out,   vegetated ground sensible heat flux (w/m2)     [+= to atm]
+              HeatLatentVegGrd             => noahmp%energy%flux%HeatLatentVegGrd              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
+              HeatLatentCanTransp              => noahmp%energy%flux%HeatLatentCanTransp               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
+              HeatGroundVegGrd   => noahmp%energy%flux%HeatGroundVegGrd               & ! out,   vegetated ground heat (w/m2) [+ = to soil/snow]
              )
 ! ----------------------------------------------------------------------
 
@@ -207,7 +207,7 @@ contains
     endif
 
     ! prepare for longwave rad.
-    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * RadLWDownRefHeight - &
+    AIR = -EMV * (1.0 + (1.0-EMV)*(1.0-EMG)) * RadLwDownRefHeight - &
           EMV * EMG * ConstStefanBoltzmann * TGV**4
     CIR = ( 2.0 - EMV * (1.0-EMG) ) * EMV * ConstStefanBoltzmann
 
@@ -280,22 +280,23 @@ contains
        ! evaluate surface fluxes with current temperature and solve for dts
        TAH  = ATA + BTA * TV               ! canopy air T.
        EAH  = AEA + BEA * ESTV             ! canopy air e
-       IRC  = FVEG * (AIR + CIR * TV**4)
-       SHC  = FVEG * RHOAIR * ConstHeatCapacAir * CVH * (TV - TAH)
-       EVC  = FVEG * RHOAIR * ConstHeatCapacAir * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
-       TR   = FVEG * RHOAIR * ConstHeatCapacAir * CTW * (ESTV - EAH) / GAMMAV
+       RadLwNetCanopy  = FVEG * (AIR + CIR * TV**4)
+       HeatSensibleCanopy  = FVEG * RHOAIR * ConstHeatCapacAir * CVH * (TV - TAH)
+       HeatLatentCanEvap  = FVEG * RHOAIR * ConstHeatCapacAir * CEW * (ESTV - EAH) / GAMMAV ! Barlage: change to v in v3.6
+       HeatLatentCanTransp   = FVEG * RHOAIR * ConstHeatCapacAir * CTW * (ESTV - EAH) / GAMMAV
        if ( TV > ConstFreezePoint ) then
-          EVC = min( CanopyLiqWater*LATHEAV/MainTimeStep, EVC )    ! Barlage: add if block for canopy ice in v3.6
+          HeatLatentCanEvap = min( CanopyLiqWater*LATHEAV/MainTimeStep, HeatLatentCanEvap )    ! Barlage: add if block for canopy ice in v3.6
        else
-          EVC = min( CanopyIce*LATHEAV/MainTimeStep, EVC )
+          HeatLatentCanEvap = min( CanopyIce*LATHEAV/MainTimeStep, HeatLatentCanEvap )
        endif
-       B    = SAV - IRC - SHC - EVC - TR + PAHV  ! additional w/m2
+       B    = RadSwAbsVeg - RadLwNetCanopy - HeatSensibleCanopy - &
+              HeatLatentCanEvap - HeatLatentCanTransp + HeatPrecipAdvCanopy  ! additional w/m2
        A    = FVEG * ( 4.0*CIR*TV**3 + CSH + (CEV+CTR)*DESTV ) !volumetric heat capacity
        DTV  = B / A
-       IRC  = IRC + FVEG * 4.0 * CIR * TV**3 * DTV
-       SHC  = SHC + FVEG * CSH * DTV
-       EVC  = EVC + FVEG * CEV * DESTV * DTV
-       TR   = TR  + FVEG * CTR * DESTV * DTV
+       RadLwNetCanopy  = RadLwNetCanopy + FVEG * 4.0 * CIR * TV**3 * DTV
+       HeatSensibleCanopy  = HeatSensibleCanopy + FVEG * CSH * DTV
+       HeatLatentCanEvap  = HeatLatentCanEvap + FVEG * CEV * DESTV * DTV
+       HeatLatentCanTransp   = HeatLatentCanTransp  + FVEG * CTR * DESTV * DTV
        TV   = TV + DTV       ! update vegetation surface temperature
        !TAH = ATA + BTA * TV  ! canopy air T; update here for consistency
 
@@ -314,7 +315,7 @@ contains
     enddo loop1  ! end stability iteration
 
     ! under-canopy fluxes and ground temperature
-    AIR = -EMG * (1.0 - EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
+    AIR = -EMG * (1.0 - EMV) * RadLwDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
     CIR = EMG * ConstStefanBoltzmann
     CSH = RHOAIR * ConstHeatCapacAir / RAHG
     CEV = RHOAIR * ConstHeatCapacAir / (GAMMAG * (RAWG+RSURF))  ! Barlage: change to ground v3.6
@@ -330,17 +331,17 @@ contains
           ESTG  = ESATI
           DESTG = DSATI
        endif
-       IRG = CIR * TGV**4 + AIR
-       SHG = CSH * (TGV        - TAH         )
-       EVG = CEV * (ESTG*RHSUR - EAH         )
-       GH  = CGH * (TGV        - STC(NumSnowLayerNeg+1))
-       B   = SAG - IRG - SHG - EVG - GH + PAHG
+       RadLwNetVegGrd = CIR * TGV**4 + AIR
+       HeatSensibleVegGrd = CSH * (TGV        - TAH         )
+       HeatLatentVegGrd = CEV * (ESTG*RHSUR - EAH         )
+       HeatGroundVegGrd  = CGH * (TGV        - STC(NumSnowLayerNeg+1))
+       B   = RadSwAbsGrd - RadLwNetVegGrd - HeatSensibleVegGrd - HeatLatentVegGrd - HeatGroundVegGrd + HeatPrecipAdvVegGrd
        A   = 4.0 * CIR * TGV**3 + CSH + CEV*DESTG + CGH
        DTG = B / A
-       IRG = IRG + 4.0 * CIR * TGV**3 * DTG
-       SHG = SHG + CSH * DTG
-       EVG = EVG + CEV * DESTG * DTG
-       GH  = GH  + CGH * DTG
+       RadLwNetVegGrd = RadLwNetVegGrd + 4.0 * CIR * TGV**3 * DTG
+       HeatSensibleVegGrd = HeatSensibleVegGrd + CSH * DTG
+       HeatLatentVegGrd = HeatLatentVegGrd + CEV * DESTG * DTG
+       HeatGroundVegGrd  = HeatGroundVegGrd  + CGH * DTG
        TGV = TGV + DTG
     enddo loop2
     !TAH = (CAH*TemperatureAirRefHeight + CVH*TV + CGH*TGV)/(CAH + CVH + CGH)
@@ -350,10 +351,10 @@ contains
        if ( (SnowDepth > 0.05) .and. (TGV > ConstFreezePoint) ) then
           if ( OptSnowSoilTempTime == 1 ) TGV = ConstFreezePoint
           if ( OptSnowSoilTempTime == 3 ) TGV = (1.0 - SnowCoverFrac) * TGV + SnowCoverFrac * ConstFreezePoint   ! MB: allow TGV>0C during melt v3.7
-          IRG = CIR * TGV**4 - EMG * (1.0-EMV) * RadLWDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
-          SHG = CSH * (TGV        - TAH)
-          EVG = CEV * (ESTG*RHSUR - EAH)
-          GH  = SAG + PAHG - (IRG + SHG + EVG)
+          RadLwNetVegGrd = CIR * TGV**4 - EMG * (1.0-EMV) * RadLwDownRefHeight - EMG * EMV * ConstStefanBoltzmann * TV**4
+          HeatSensibleVegGrd = CSH * (TGV        - TAH)
+          HeatLatentVegGrd = CEV * (ESTG*RHSUR - EAH)
+          HeatGroundVegGrd  = RadSwAbsGrd + HeatPrecipAdvVegGrd - (RadLwNetVegGrd + HeatSensibleVegGrd + HeatLatentVegGrd)
        endif
     endif
 
@@ -362,9 +363,9 @@ contains
     TAUYV = -RHOAIR * CM * UR * WindNorthwardRefHeight
 
     ! consistent vegetation air temperature and vapor pressure since TGV is not consistent with the TAH/EAH calculation.
-    ! TAH = TemperatureAirRefHeight + (SHG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) 
-    ! TAH = TemperatureAirRefHeight + (SHG*FVEG+SHC) / (RHOAIR*ConstHeatCapacAir*CAH) ! ground flux need fveg
-    ! EAH = EAIR + (EVC+FVEG*(TR+EVG)) / (RHOAIR*CAW*ConstHeatCapacAir/GAMMAG)
+    ! TAH = TemperatureAirRefHeight + (HeatSensibleVegGrd+HeatSensibleCanopy) / (RHOAIR*ConstHeatCapacAir*CAH) 
+    ! TAH = TemperatureAirRefHeight + (HeatSensibleVegGrd*FVEG+HeatSensibleCanopy) / (RHOAIR*ConstHeatCapacAir*CAH) ! ground flux need fveg
+    ! EAH = EAIR + (HeatLatentCanEvap+FVEG*(HeatLatentCanTransp+HeatLatentVegGrd)) / (RHOAIR*CAW*ConstHeatCapacAir/GAMMAG)
     ! MoistureFluxSfc = (QSFC-SpecHumidityRefHeight) * RHOAIR * CAW !*ConstHeatCapacAir/GAMMAG
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
@@ -378,9 +379,9 @@ contains
           !Q2V  = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))
           Q2V  = QSFC
        else
-          T2MV = TAH - (SHG + SHC/FVEG) / (RHOAIR * ConstHeatCapacAir) * 1.0 / CAH2
+          T2MV = TAH - (HeatSensibleVegGrd + HeatSensibleCanopy/FVEG) / (RHOAIR * ConstHeatCapacAir) * 1.0 / CAH2
           !Q2V = (EAH*0.622/(PressureAirRefHeight - 0.378*EAH))- MoistureFluxSfc/(RHOAIR*FV)* 1./ConstVonKarman * LOG((2.+Z0H)/Z0H)
-          Q2V  = QSFC - ( (EVC+TR)/FVEG + EVG ) / (LATHEAV * RHOAIR) * 1.0 / CQ2V
+          Q2V  = QSFC - ( (HeatLatentCanEvap+HeatLatentCanTransp)/FVEG + HeatLatentVegGrd ) / (LATHEAV * RHOAIR) * 1.0 / CQ2V
        endif
     endif
 

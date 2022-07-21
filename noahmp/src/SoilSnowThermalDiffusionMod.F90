@@ -53,9 +53,9 @@ contains
               STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
               DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
               HCPCT           => noahmp%energy%state%HCPCT           ,& ! in,    heat capacity [j/m3/k] for all soil & snow
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
-              PHI             => noahmp%energy%flux%PHI              ,& ! in,    light penetrating through soil/snow water (W/m2)
-              BOTFLX          => noahmp%energy%flux%EFLXB             & ! out,   energy influx from soil bottom (w/m2)
+              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! in,    total ground heat flux (w/m2) [+ to soil/snow]
+              RadSwPenetrateGrd             => noahmp%energy%flux%RadSwPenetrateGrd              ,& ! in,    light penetrating through soil/snow water (W/m2)
+              HeatFromSoilBot          => noahmp%energy%flux%HeatFromSoilBot             & ! out,   energy influx from soil bottom (w/m2)
              )
 ! ----------------------------------------------------------------------
 
@@ -82,24 +82,24 @@ contains
           TEMP1    = - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
-          EFLUX(K) = DF(K) * DTSDZ(K) - SSOIL - PHI(K)
+          EFLUX(K) = DF(K) * DTSDZ(K) - HeatGroundTot - RadSwPenetrateGrd(K)
        elseif ( K < NumSoilLayer ) then
           DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
           TEMP1    = DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
           DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
-          EFLUX(K) = ( DF(K)*DTSDZ(K) - DF(K-1)*DTSDZ(K-1) ) - PHI(K)
+          EFLUX(K) = ( DF(K)*DTSDZ(K) - DF(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
        elseif ( K == NumSoilLayer ) then
           DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
           TEMP1    =  DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)
           if ( OptSoilTemperatureBottom == 1 ) then
-             BOTFLX = 0.0
+             HeatFromSoilBot = 0.0
           endif
           if ( OptSoilTemperatureBottom == 2 ) then
              DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - ZBOT)
-             BOTFLX   = -DF(K) * DTSDZ(K)
+             HeatFromSoilBot   = -DF(K) * DTSDZ(K)
           endif
-          EFLUX(K) = ( -BOTFLX - DF(K-1)*DTSDZ(K-1) ) - PHI(K)
+          EFLUX(K) = ( -HeatFromSoilBot - DF(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
        endif
     enddo
 

@@ -172,77 +172,79 @@ contains
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              RadSWDownRefHeight => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
-              FSA             => noahmp%energy%flux%FSA              ,& ! in,    total absorbed solar radiation (w/m2)
-              FSR             => noahmp%energy%flux%FSR              ,& ! in,    total reflected solar radiation (w/m2)
-              FSRV            => noahmp%energy%flux%FSRV             ,& ! in,    reflected solar radiation by vegetation (w/m2)
-              FSRG            => noahmp%energy%flux%FSRG             ,& ! in,    reflected solar radiation by ground (w/m2)
-              FIRA            => noahmp%energy%flux%FIRA             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
-              FSH             => noahmp%energy%flux%FSH              ,& ! in,    total sensible heat (w/m2) [+ to atm]
-              FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! in,    ground (soil/snow) evap heat (w/m2) [+ to atm]
-              FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! in,    soil heat flux (w/m2) [+ to soil]
-              SAV             => noahmp%energy%flux%SAV              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
-              SAG             => noahmp%energy%flux%SAG              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              PAH             => noahmp%energy%flux%PAH              ,& ! in,    precipitation advected heat - total (W/m2)
-              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
-              PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
-              FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
+              RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
+              RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! in,    total absorbed solar radiation (w/m2)
+              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! in,    total reflected solar radiation (w/m2)
+              RadSwReflVeg            => noahmp%energy%flux%RadSwReflVeg             ,& ! in,    reflected solar radiation by vegetation (w/m2)
+              RadSwReflGrd            => noahmp%energy%flux%RadSwReflGrd             ,& ! in,    reflected solar radiation by ground (w/m2)
+              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! in,    total sensible heat (w/m2) [+ to atm]
+              HeatLatentCanopy            => noahmp%energy%flux%HeatLatentCanopy             ,& ! in,    canopy latent heat flux (w/m2) [+ to atm]
+              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! in,    total ground latent heat (w/m2) [+ to atm]
+              HeatLatentTransp            => noahmp%energy%flux%HeatLatentTransp             ,& ! in,    latent heat flux from transpiration (w/m2) [+ to atm]
+              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! in,   total ground heat flux (w/m2) [+ to soil/snow]
+              RadSwAbsVeg             => noahmp%energy%flux%RadSwAbsVeg              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
+              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
+              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! in,    precipitation advected heat - total (W/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
+              HeatPrecipAdvVegGrd            => noahmp%energy%flux%HeatPrecipAdvVegGrd             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
+              HeatPrecipAdvCanopy            => noahmp%energy%flux%HeatPrecipAdvCanopy             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
+              HeatLatentIrriEvap            => noahmp%energy%flux%HeatLatentIrriEvap             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
               ERRENG          => noahmp%energy%state%ERRENG          ,& ! out,   error in surface energy balance [w/m2]
               ERRSW           => noahmp%energy%state%ERRSW            & ! out,   error in shortwave radiation balance [w/m2]
              )
 ! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
-    ERRSW = RadSWDownRefHeight - (FSA + FSR)
+    ERRSW = RadSwDownRefHeight - (RadSwAbsTot + RadSwReflTot)
     ! print out diagnostics when error is large
     if ( abs(ERRSW) > 0.01 ) then  ! w/m2
        write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
        write(*,*) 'ERRSW =',  ERRSW
        write(*,*) "VEGETATION!"
-       write(*,*) "RadSWDownRefHeight*FVEG =",RadSWDownRefHeight * FVEG
-       write(*,*) "FVEG*SAV + SAG =",   FVEG * SAV + SAG
-       write(*,*) "FVEG*FSRV + FSRG =", FVEG * FSRV + FSRG
+       write(*,*) "RadSwDownRefHeight*FVEG =",RadSwDownRefHeight * FVEG
+       write(*,*) "FVEG*RadSwAbsVeg + RadSwAbsGrd =",   FVEG * RadSwAbsVeg + RadSwAbsGrd
+       write(*,*) "FVEG*RadSwReflVeg + RadSwReflGrd =", FVEG * RadSwReflVeg + RadSwReflGrd
        write(*,*) "GROUND!"
-       write(*,*) "(1.-FVEG)*RadSWDownRefHeight =", (1.0-FVEG)*RadSWDownRefHeight
-       write(*,*) "(1.-FVEG)*SAG =",    (1.0-FVEG) * SAG
-       write(*,*) "(1.-FVEG)*FSRG=",    (1.0-FVEG) * FSRG
-       write(*,*) "FSRV   =", FSRV
-       write(*,*) "FSRG   =", FSRG
-       write(*,*) "FSR    =", FSR
-       write(*,*) "SAV    =", SAV
-       write(*,*) "SAG    =", SAG
-       write(*,*) "FSA    =", FSA
+       write(*,*) "(1.-FVEG)*RadSwDownRefHeight =", (1.0-FVEG)*RadSwDownRefHeight
+       write(*,*) "(1.-FVEG)*RadSwAbsGrd =",    (1.0-FVEG) * RadSwAbsGrd
+       write(*,*) "(1.-FVEG)*RadSwReflGrd=",    (1.0-FVEG) * RadSwReflGrd
+       write(*,*) "RadSwReflVeg   =", RadSwReflVeg
+       write(*,*) "RadSwReflGrd   =", RadSwReflGrd
+       write(*,*) "RadSwReflTot    =", RadSwReflTot
+       write(*,*) "RadSwAbsVeg    =", RadSwAbsVeg
+       write(*,*) "RadSwAbsGrd    =", RadSwAbsGrd
+       write(*,*) "RadSwAbsTot    =", RadSwAbsTot
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Stop in Noah-MP")
        stop "Error"
     endif
 
     ! error in surface energy balance should be <0.01 W/m2
-    ERRENG = SAV + SAG + PAH - (FIRA + FSH + FCEV + FGEV + FCTR + SSOIL + FIRR)
+    ERRENG = RadSwAbsVeg + RadSwAbsGrd + HeatPrecipAdvTot - &
+            (RadLwNetTot + HeatSensibleTot + HeatLatentCanopy + HeatLatentGrdTot + &
+             HeatLatentTransp + HeatGroundTot + HeatLatentIrriEvap)
     ! print out diagnostics when error is large
     if ( abs(ERRENG) > 0.01 ) then
        write(*,*) 'ERRENG =',ERRENG,' at GridIndexI,GridIndexJ: ',GridIndexI,GridIndexJ
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Net solar:        ",FSA
+       write(*,'(a17,F10.4)') "Net solar:        ",RadSwAbsTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Net longwave:     ",FIRA
+       write(*,'(a17,F10.4)') "Net longwave:     ",RadLwNetTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total sensible:   ",FSH
+       write(*,'(a17,F10.4)') "Total sensible:   ",HeatSensibleTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Canopy evap:      ",FCEV
+       write(*,'(a17,F10.4)') "Canopy evap:      ",HeatLatentCanopy
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Ground evap:      ",FGEV
+       write(*,'(a17,F10.4)') "Ground evap:      ",HeatLatentGrdTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Transpiration:    ",FCTR
+       write(*,'(a17,F10.4)') "Transpiration:    ",HeatLatentTransp
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total ground:     ",SSOIL
+       write(*,'(a17,F10.4)') "Total ground:     ",HeatGroundTot
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Sprinkler:        ",FIRR
+       write(*,'(a17,F10.4)') "Sprinkler:        ",HeatLatentIrriEvap
        !call wrf_message(trim(message))
-       write(*,'(a17,4F10.4)') "Precip advected: ",PAH,PAHV,PAHG,PAHB
+       write(*,'(a17,4F10.4)') "Precip advected: ",HeatPrecipAdvTot,HeatPrecipAdvCanopy,HeatPrecipAdvVegGrd,HeatPrecipAdvBareGrd
        !call wrf_message(trim(message))
        write(*,'(a17,F10.4)') "Veg fraction:     ",FVEG
        !call wrf_message(trim(message))

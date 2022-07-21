@@ -1,14 +1,14 @@
 module EnergyVarType
 
 !!! Define column (1-D) Noah-MP Energy variables
-!!! Energy variable initialization is done in EnergyInit.f90
+!!! Energy variable initialization is done in EnergyVarInitMod.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
-  use Machine, only : kind_noahmp
+  use Machine
 
   implicit none
   save
@@ -18,54 +18,54 @@ module EnergyVarType
   type :: flux_type
 
     ! define specific energy flux variables
-    real(kind=kind_noahmp) :: FCEV            ! canopy evaporation (w/m2) [+ = to atm] 
-    real(kind=kind_noahmp) :: FCTR            ! transpiration (w/m2) [+ = to atm]
-    real(kind=kind_noahmp) :: FGEV            ! soil evap heat (w/m2) [+ to atm]
-    real(kind=kind_noahmp) :: FIRR            ! latent heating due to sprinkler irrigation evaporation [w/m2]
-    real(kind=kind_noahmp) :: PAHV            ! precipitation advected heat - vegetation net (W/m2)
-    real(kind=kind_noahmp) :: PAHG            ! precipitation advected heat - under canopy net (W/m2)
-    real(kind=kind_noahmp) :: PAHB            ! precipitation advected heat - bare ground net (W/m2)
-    real(kind=kind_noahmp) :: PAH             ! precipitation advected heat - total (W/m2)
-    real(kind=kind_noahmp) :: PARSUN          ! average absorbed par for sunlit leaves (w/m2)
-    real(kind=kind_noahmp) :: PARSHA          ! average absorbed par for shaded leaves (w/m2)
-    real(kind=kind_noahmp) :: SAV             ! solar radiation absorbed by vegetation (w/m2)
-    real(kind=kind_noahmp) :: SAG             ! solar radiation absorbed by ground (w/m2)
-    real(kind=kind_noahmp) :: FSA             ! total absorbed solar radiation (w/m2)
-    real(kind=kind_noahmp) :: FSR             ! total reflected solar radiation (w/m2)
-    real(kind=kind_noahmp) :: FSRV            ! reflected solar radiation by vegetation (w/m2)
-    real(kind=kind_noahmp) :: FSRG            ! reflected solar radiation by ground (w/m2)
-    real(kind=kind_noahmp) :: IRC             ! canopy net longwave radiation (w/m2) [+= to atm]
-    real(kind=kind_noahmp) :: SHC             ! canopy sensible heat flux (w/m2)     [+= to atm]
-    real(kind=kind_noahmp) :: EVC             ! canopy evaporation heat flux (w/m2)  [+= to atm]
-    real(kind=kind_noahmp) :: IRG             ! vegetated ground net longwave radiation (w/m2) [+= to atm]
-    real(kind=kind_noahmp) :: SHG             ! vegetated ground sensible heat flux (w/m2)     [+= to atm]
-    real(kind=kind_noahmp) :: EVG             ! vegetated ground evaporation heat flux (w/m2)  [+= to atm]
-    real(kind=kind_noahmp) :: TR              ! canopy transpiration heat flux (w/m2)[+= to atm]
-    real(kind=kind_noahmp) :: GHV             ! vegetated ground heat (w/m2) [+ = to soil]
-    real(kind=kind_noahmp) :: IRB             ! net longwave rad (w/m2) bare ground [+ to atm]
-    real(kind=kind_noahmp) :: SHB             ! sensible heat flux (w/m2) bare ground [+ to atm]
-    real(kind=kind_noahmp) :: EVB             ! latent heat flux (w/m2) bare ground [+ to atm]
-    real(kind=kind_noahmp) :: GHB             ! bare ground heat flux (w/m2) [+ to soil]
-    real(kind=kind_noahmp) :: SSOIL           ! soil heat flux (w/m2) [+ to soil]
-    real(kind=kind_noahmp) :: EFLXB           ! energy influx from soil bottom (w/m2)
-    real(kind=kind_noahmp) :: FIRA            ! total net LW. rad (w/m2)   [+ to atm]
-    real(kind=kind_noahmp) :: FSH             ! total sensible heat (w/m2) [+ to atm]
-    real(kind=kind_noahmp) :: APAR            ! total photosyn. active energy (w/m2)
-    real(kind=kind_noahmp) :: FIRE            ! emitted outgoing IR (w/m2)
+    real(kind=kind_noahmp) :: HeatLatentCanopy            ! canopy latent heat flux [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentTransp            ! latent heat flux from transpiration [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentGrdTot            ! total ground latent heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentIrriEvap          ! latent heating due to sprinkler irrigation evaporation [W/m2]
+    real(kind=kind_noahmp) :: HeatPrecipAdvCanopy         ! precipitation advected heat - canopy net [W/m2]
+    real(kind=kind_noahmp) :: HeatPrecipAdvVegGrd         ! precipitation advected heat - vegetated ground net [W/m2]
+    real(kind=kind_noahmp) :: HeatPrecipAdvBareGrd        ! precipitation advected heat - bare ground net [W/m2]
+    real(kind=kind_noahmp) :: HeatPrecipAdvTot            ! precipitation advected heat - total [W/m2]
+    real(kind=kind_noahmp) :: RadPhotoActAbsSunlit        ! absorbed photosyn. active radiation for sunlit leaves [W/m2]
+    real(kind=kind_noahmp) :: RadPhotoActAbsShade         ! absorbed photosyn. active radiation  for shaded leaves [W/m2]
+    real(kind=kind_noahmp) :: RadSwAbsVeg                 ! solar radiation absorbed by vegetation [W/m2]
+    real(kind=kind_noahmp) :: RadSwAbsGrd                 ! solar radiation absorbed by ground [W/m2]
+    real(kind=kind_noahmp) :: RadSwAbsTot                 ! total absorbed solar radiation [W/m2]
+    real(kind=kind_noahmp) :: RadSwReflTot                ! total reflected solar radiation [W/m2]
+    real(kind=kind_noahmp) :: RadSwReflVeg                ! reflected solar radiation by vegetation [W/m2]
+    real(kind=kind_noahmp) :: RadSwReflGrd                ! reflected solar radiation by ground [W/m2]
+    real(kind=kind_noahmp) :: RadLwNetCanopy              ! canopy net longwave radiation [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleCanopy          ! canopy sensible heat flux [W/m2]     (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentCanEvap           ! canopy evaporation heat flux [W/m2]  (+ = to atm)
+    real(kind=kind_noahmp) :: RadLwNetVegGrd              ! vegetated ground net longwave radiation [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleVegGrd          ! vegetated ground sensible heat flux [W/m2]     (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentVegGrd            ! vegetated ground latent heat flux [W/m2]  (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentCanTransp         ! canopy transpiration latent heat flux [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatGroundVegGrd            ! vegetated ground heat flux [W/m2] (+ = to soil/snow)
+    real(kind=kind_noahmp) :: RadLwNetBareGrd             ! bare ground net longwave rad [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleBareGrd         ! bare ground sensible heat flux [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentBareGrd           ! bare ground latent heat flux [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatGroundBareGrd           ! bare ground heat flux [W/m2] (+ = to soil/snow)
+    real(kind=kind_noahmp) :: HeatGroundTot               ! total ground heat flux [W/m2] (+ = to soil/snow)
+    real(kind=kind_noahmp) :: HeatFromSoilBot             ! energy influx from soil bottom [W/m2]
+    real(kind=kind_noahmp) :: RadLwNetTot                 ! total net longwave radiation [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleTot             ! total sensible heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: RadPhotoActAbsCan           ! total photosyn. active energy [W/m2] absorbed by canopy
+    real(kind=kind_noahmp) :: RadLwEmitTot                ! emitted outgoing longwave radiation [W/m2]
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FABD        ! flux abs by veg (per unit direct flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FABI        ! flux abs by veg (per unit diffuse flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FTDD        ! down direct flux below veg (per unit dir flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FTDI        ! down direct flux below veg per unit dif flux
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FTID        ! down diffuse flux below veg (per unit dir flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FTII        ! down diffuse flux below veg (per unit dif flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FREVD       ! flux reflected by veg layer (per unit direct flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FREVI       ! flux reflected by veg layer (per unit diffuse flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FREGD       ! flux reflected by ground (per unit direct flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: FREGI       ! flux reflected by ground (per unit diffuse flux)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAD       ! incoming direct solar radiation (w/m2)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SOLAI       ! incoming diffuse solar radiation (w/m2)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: PHI         ! light penetrating through soil/snow water (W/m2)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwAbsVegDir        ! solar flux absorbed by veg per unit direct flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwAbsVegDif        ! solar flux absorbed by veg per unit diffuse flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDirTranGrdDir    ! transmitted direct flux below veg per unit direct flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDirTranGrdDif    ! transmitted direct flux below veg per unit diffuse flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDifTranGrdDir    ! transmitted diffuse flux below veg per unit direct flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDifTranGrdDif    ! transmitted diffuse flux below veg per unit diffuse flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwReflVegDir       ! solar flux reflected by veg layer per unit direct flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwReflVegDif       ! solar flux reflected by veg layer per unit diffuse flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwReflGrdDir       ! solar flux reflected by ground per unit direct flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwReflGrdDif       ! solar flux reflected by ground per unit diffuse flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDownDir          ! incoming direct solar radiation [W/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwDownDif          ! incoming diffuse solar radiation [W/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwPenetrateGrd     ! light penetrating through soil/snow water [W/m2]
 
   end type flux_type
 

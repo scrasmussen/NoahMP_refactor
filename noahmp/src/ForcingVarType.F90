@@ -21,8 +21,8 @@ module ForcingVarType
     real(kind=kind_noahmp) :: TemperatureAirRefHeight  ! Air temperature [K] forcing at reference height
     real(kind=kind_noahmp) :: WindEastwardRefHeight    ! wind speed [m/s] in eastward dir at reference height
     real(kind=kind_noahmp) :: WindNorthwardRefHeight   ! wind speed [m/s] in northward dir at reference height
-    real(kind=kind_noahmp) :: RadSWDownRefHeight       ! downward shortwave radiation [W/m2] at reference height
-    real(kind=kind_noahmp) :: RadLWDownRefHeight       ! downward longwave radiation [W/m2] at reference height
+    real(kind=kind_noahmp) :: RadSwDownRefHeight       ! downward shortwave radiation [W/m2] at reference height
+    real(kind=kind_noahmp) :: RadLwDownRefHeight       ! downward longwave radiation [W/m2] at reference height
     real(kind=kind_noahmp) :: PressureAirRefHeight     ! air pressure [Pa] at reference height
     real(kind=kind_noahmp) :: PressureAirSurface       ! air pressure [Pa] at surface-atmosphere interface (lowest atmos model boundary)
     real(kind=kind_noahmp) :: PrecipConvRefHeight      ! convective precipitation rate [mm/s] at reference height

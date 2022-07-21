@@ -46,7 +46,7 @@ contains
               IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! in,     sprinkler irrigation fraction (0 to 1)
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
-              FIRR            => noahmp%energy%flux%FIRR             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
+              HeatLatentIrriEvap            => noahmp%energy%flux%HeatLatentIrriEvap             ,& ! inout,  latent heating due to sprinkler evaporation [w/m2]
               IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] to be applied, Sprinkler
               EvapIrriSprinkler            => noahmp%water%flux%EvapIrriSprinkler              ,& ! inout,  evaporation of irrigation water, sprinkler [mm/s]
               RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! inout,  rainfall [mm/s] at reference height
@@ -98,7 +98,7 @@ contains
     RainfallRefHeight = RainfallRefHeight + (IrrigationRateSprinkler * 1000.0 / MainTimeStep) ![mm/s]
 
     ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-    FIRR = IrriEvapLossSprinkler * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
+    HeatLatentIrriEvap = IrriEvapLossSprinkler * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
     EvapIrriSprinkler = IrriEvapLossSprinkler * 1000.0 / MainTimeStep          ! sprinkler evaporation (mm/s)
 
     end associate

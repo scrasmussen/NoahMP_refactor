@@ -75,10 +75,10 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                                    &
               PressureAirRefHeight   => noahmp%forcing%PressureAirRefHeight      ,& ! in,    air pressure [Pa] at reference height
-              RadLWDownRefHeight     => noahmp%forcing%RadLWDownRefHeight        ,& ! in,    downward longwave radiation [W/m2] at reference height
+              RadLwDownRefHeight     => noahmp%forcing%RadLwDownRefHeight        ,& ! in,    downward longwave radiation [W/m2] at reference height
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight     ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight    ,& ! in,    wind speed [m/s] in northward direction at reference height
-              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight        ,& ! in,    downward shortwave radiation [W/m2] at reference height
+              RadSwDownRefHeight     => noahmp%forcing%RadSwDownRefHeight        ,& ! in,    downward shortwave radiation [W/m2] at reference height
               OptSnowSoilTempTime    => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
               FlagCropland           => noahmp%config%domain%FlagCropland        ,& ! in,    flag to identify croplands
               IrriFracThreshold        => noahmp%water%param%IrriFracThreshold         ,& ! in,    irrigation fraction parameter
@@ -86,10 +86,10 @@ contains
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              FIRR            => noahmp%energy%flux%FIRR             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
-              PAHV            => noahmp%energy%flux%PAHV             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
-              PAHG            => noahmp%energy%flux%PAHG             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
-              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
+              HeatLatentIrriEvap            => noahmp%energy%flux%HeatLatentIrriEvap             ,& ! in,    latent heating due to sprinkler evaporation [w/m2]
+              HeatPrecipAdvCanopy            => noahmp%energy%flux%HeatPrecipAdvCanopy             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
+              HeatPrecipAdvVegGrd            => noahmp%energy%flux%HeatPrecipAdvVegGrd             ,& ! in,    precipitation advected heat - under canopy net (W/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
               TG              => noahmp%energy%state%TG              ,& ! inout, ground temperature (K)
               TV              => noahmp%energy%state%TV              ,& ! inout, vegetation temperature (K)
@@ -132,30 +132,30 @@ contains
               CHUC            => noahmp%energy%state%CHUC            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
               CHV2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s) vegetated
               ALBEDO          => noahmp%energy%state%ALBEDO          ,& ! out,   total shortwave surface albedo
-              FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
-              FIRA            => noahmp%energy%flux%FIRA             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
-              FSH             => noahmp%energy%flux%FSH              ,& ! out,   total sensible heat (w/m2) [+ to atm]
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! out,   soil evap heat (w/m2) [+ to atm]
-              FCEV            => noahmp%energy%flux%FCEV             ,& ! out,   canopy evaporation (w/m2) [+ = to atm]
-              FCTR            => noahmp%energy%flux%FCTR             ,& ! out,   transpiration (w/m2) [+ = to atm]
-              APAR            => noahmp%energy%flux%APAR             ,& ! out,   total photosyn. active energy (w/m2)
-              PARSUN          => noahmp%energy%flux%PARSUN           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
-              PARSHA          => noahmp%energy%flux%PARSHA           ,& ! out,   average absorbed par for shaded leaves (w/m2)
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
-              PAH             => noahmp%energy%flux%PAH              ,& ! out,   precipitation advected heat - total (W/m2)
-              FIRE            => noahmp%energy%flux%FIRE             ,& ! out,   emitted outgoing IR (w/m2)
-              IRC             => noahmp%energy%flux%IRC              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
-              IRG             => noahmp%energy%flux%IRG              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
-              IRB             => noahmp%energy%flux%IRB              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
-              SHC             => noahmp%energy%flux%SHC              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
-              SHG             => noahmp%energy%flux%SHG              ,& ! out,   ground sensible heat flux (w/m2)     [+= to atm]
-              SHB             => noahmp%energy%flux%SHB              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
-              EVG             => noahmp%energy%flux%EVG              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
-              EVB             => noahmp%energy%flux%EVB              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
-              EVC             => noahmp%energy%flux%EVC              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
-              TR              => noahmp%energy%flux%TR               ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
-              GHV             => noahmp%energy%flux%GHV              ,& ! out,   vegetated ground heat (w/m2) [+ = to soil]
-              GHB             => noahmp%energy%flux%GHB              ,& ! out,   bare ground heat flux (w/m2) [+ to soil]
+              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
+              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! out,   total sensible heat (w/m2) [+ to atm]
+              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
+              HeatLatentCanopy            => noahmp%energy%flux%HeatLatentCanopy             ,& ! out,   canopy latent heat flux (w/m2) [+ to atm]
+              HeatLatentTransp            => noahmp%energy%flux%HeatLatentTransp             ,& ! out,   latent heat flux from transpiration (w/m2) [+ to atm]
+              RadPhotoActAbsCan            => noahmp%energy%flux%RadPhotoActAbsCan             ,& ! out,   total photosyn. active energy (w/m2) absorbed by canopy
+              RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
+              RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! out,   average absorbed par for shaded leaves (w/m2)
+              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! out,   total ground heat flux (w/m2) [+ to soil/snow]
+              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! out,   precipitation advected heat - total (W/m2)
+              RadLwEmitTot            => noahmp%energy%flux%RadLwEmitTot             ,& ! out,   emitted outgoing IR (w/m2)
+              RadLwNetCanopy             => noahmp%energy%flux%RadLwNetCanopy              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
+              RadLwNetVegGrd             => noahmp%energy%flux%RadLwNetVegGrd              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
+              RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
+              HeatSensibleCanopy             => noahmp%energy%flux%HeatSensibleCanopy              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
+              HeatSensibleVegGrd             => noahmp%energy%flux%HeatSensibleVegGrd              ,& ! out,   vegetated ground sensible heat flux (w/m2)     [+= to atm]
+              HeatSensibleBareGrd             => noahmp%energy%flux%HeatSensibleBareGrd              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
+              HeatLatentVegGrd             => noahmp%energy%flux%HeatLatentVegGrd              ,& ! out,   ground evaporation heat flux (w/m2)  [+= to atm]
+              HeatLatentBareGrd             => noahmp%energy%flux%HeatLatentBareGrd              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
+              HeatLatentCanEvap             => noahmp%energy%flux%HeatLatentCanEvap              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
+              HeatLatentCanTransp     => noahmp%energy%flux%HeatLatentCanTransp     ,& ! out,   canopy transpiration heat flux (w/m2)[+= to atm]
+              HeatGroundVegGrd             => noahmp%energy%flux%HeatGroundVegGrd              ,& ! out,   vegetated ground heat (w/m2) [+ = to soil/snow]
+              HeatGroundBareGrd             => noahmp%energy%flux%HeatGroundBareGrd              ,& ! out,   bare ground heat flux (w/m2) [+ to soil/snow]
               PhotosynTotal             => noahmp%biochem%flux%PhotosynTotal             ,& ! out,   total leaf photosynthesis (umol co2 /m2 /s)
               PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
               PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
@@ -165,14 +165,14 @@ contains
     ! initialization
     TAUXV   = 0.0
     TAUYV   = 0.0
-    IRC     = 0.0
-    SHC     = 0.0
-    IRG     = 0.0
-    SHG     = 0.0
-    EVG     = 0.0
-    EVC     = 0.0
-    TR      = 0.0
-    GHV     = 0.0
+    RadLwNetCanopy     = 0.0
+    HeatSensibleCanopy     = 0.0
+    RadLwNetVegGrd     = 0.0
+    HeatSensibleVegGrd     = 0.0
+    HeatLatentVegGrd     = 0.0
+    HeatLatentCanEvap     = 0.0
+    HeatLatentCanTransp  = 0.0
+    HeatGroundVegGrd     = 0.0
     PhotosynLeafSunlit  = 0.0
     PhotosynLeafShade  = 0.0
     T2MV    = 0.0
@@ -181,7 +181,7 @@ contains
     CHLEAF  = 0.0
     CHUC    = 0.0
     CHV2    = 0.0
-    PAH     = 0.0
+    HeatPrecipAdvTot     = 0.0
 
     ! wind speed at reference height: ur >= 1
     UR = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
@@ -233,19 +233,19 @@ contains
     call SurfaceEnergyFluxBareGround(noahmp)
 
     ! compute grid mean quantities by weighting vegetated and bare portions
-    ! Energy balance at vege canopy: SAV          =(IRC+SHC+EVC+TR)     *FVEG  at   FVEG 
-    ! Energy balance at vege ground: SAG*    FVEG =(IRG+SHG+EVG+GHV)    *FVEG  at   FVEG
-    ! Energy balance at bare ground: SAG*(1.-FVEG)=(IRB+SHB+EVB+GHB)*(1.-FVEG) at 1-FVEG
+    ! Energy balance at vege canopy: RadSwAbsVeg          =(RadLwNetCanopy+HeatSensibleCanopy+HeatLatentCanEvap+HeatLatentCanTransp)     *FVEG  at   FVEG 
+    ! Energy balance at vege ground: RadSwAbsGrd*    FVEG =(RadLwNetVegGrd+HeatSensibleVegGrd+HeatLatentVegGrd+HeatGroundVegGrd)    *FVEG  at   FVEG
+    ! Energy balance at bare ground: RadSwAbsGrd*(1.-FVEG)=(RadLwNetBareGrd+HeatSensibleBareGrd+HeatLatentBareGrd+HeatGroundBareGrd)*(1.-FVEG) at 1-FVEG
     if ( (VEG .eqv. .true.) .and. (FVEG > 0) ) then
        TAUX  = FVEG * TAUXV + (1.0 - FVEG) * TAUXB
        TAUY  = FVEG * TAUYV + (1.0 - FVEG) * TAUYB
-       FIRA  = FVEG * IRG   + (1.0 - FVEG) * IRB   + IRC
-       FSH   = FVEG * SHG   + (1.0 - FVEG) * SHB   + SHC
-       FGEV  = FVEG * EVG   + (1.0 - FVEG) * EVB
-       SSOIL = FVEG * GHV   + (1.0 - FVEG) * GHB
-       FCEV  = EVC
-       FCTR  = TR
-       PAH   = FVEG * PAHG  + (1.0 - FVEG) * PAHB  + PAHV
+       RadLwNetTot  = FVEG * RadLwNetVegGrd   + (1.0 - FVEG) * RadLwNetBareGrd   + RadLwNetCanopy
+       HeatSensibleTot   = FVEG * HeatSensibleVegGrd   + (1.0 - FVEG) * HeatSensibleBareGrd   + HeatSensibleCanopy
+       HeatLatentGrdTot  = FVEG * HeatLatentVegGrd   + (1.0 - FVEG) * HeatLatentBareGrd
+       HeatGroundTot = FVEG * HeatGroundVegGrd   + (1.0 - FVEG) * HeatGroundBareGrd
+       HeatLatentCanopy  = HeatLatentCanEvap
+       HeatLatentTransp  = HeatLatentCanTransp
+       HeatPrecipAdvTot   = FVEG * HeatPrecipAdvVegGrd  + (1.0 - FVEG) * HeatPrecipAdvBareGrd  + HeatPrecipAdvCanopy
        TG    = FVEG * TGV   + (1.0 - FVEG) * TGB
        T2M   = FVEG * T2MV  + (1.0 - FVEG) * T2MB
        TS    = FVEG * TV    + (1.0 - FVEG) * TGB
@@ -257,15 +257,15 @@ contains
     else
        TAUX  = TAUXB
        TAUY  = TAUYB
-       FIRA  = IRB
-       FSH   = SHB
-       FGEV  = EVB
-       SSOIL = GHB
+       RadLwNetTot  = RadLwNetBareGrd
+       HeatSensibleTot   = HeatSensibleBareGrd
+       HeatLatentGrdTot  = HeatLatentBareGrd
+       HeatGroundTot = HeatGroundBareGrd
        TG    = TGB
        T2M   = T2MB
-       FCEV  = 0.0
-       FCTR  = 0.0
-       PAH   = PAHB
+       HeatLatentCanopy  = 0.0
+       HeatLatentTransp  = 0.0
+       HeatPrecipAdvTot   = HeatPrecipAdvBareGrd
        TS    = TG
        CM    = CMB
        CH    = CHB
@@ -279,12 +279,12 @@ contains
     endif
 
     ! emitted longwave radiation and physical check
-    FIRE = RadLWDownRefHeight + FIRA
-    if ( FIRE <= 0.0 ) then
+    RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
+    if ( RadLwEmitTot <= 0.0 ) then
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
        write(6,*) 'input of SHDFAC with LAI'
        write(6,*) 'SHDFAC=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG
-       write(6,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SnowDepth=',SnowDepth
+       write(6,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetTot=',RadLwNetTot,'SnowDepth=',SnowDepth
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
@@ -292,11 +292,11 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the canopy/ground system.
     ! Old TRAD calculation not taking into account Emissivity:
-    ! TRAD = (FIRE/ConstStefanBoltzmann)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * ConstStefanBoltzmann) )**0.25
+    ! TRAD = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
+    TRAD = ( (RadLwEmitTot - (1.0 - EMISSI)*RadLwDownRefHeight) / (EMISSI * ConstStefanBoltzmann) )**0.25
 
     ! other photosynthesis related quantities for biochem process
-    APAR = PARSUN * LAISUN + PARSHA * LAISHA
+    RadPhotoActAbsCan = RadPhotoActAbsSunlit * LAISUN + RadPhotoActAbsShade * LAISHA
     PhotosynTotal  = PhotosynLeafSunlit * LAISUN + PhotosynLeafShade * LAISHA
 
     ! compute snow and soil layer temperature
@@ -321,11 +321,12 @@ contains
     call SoilSnowWaterPhaseChange(noahmp)
 
     ! update sensible heat flux due to sprinkler irrigation evaporation
-    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) ) FSH = FSH - FIRR  ! (W/m2)
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) ) &
+       HeatSensibleTot = HeatSensibleTot - HeatLatentIrriEvap
 
     ! update total surface albedo
-    if ( RadSWDownRefHeight > 0.0 ) then
-       ALBEDO = FSR / RadSWDownRefHeight
+    if ( RadSwDownRefHeight > 0.0 ) then
+       ALBEDO = RadSwReflTot / RadSwDownRefHeight
     else
        ALBEDO = -999.9
     endif

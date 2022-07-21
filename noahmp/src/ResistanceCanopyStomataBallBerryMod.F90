@@ -79,8 +79,8 @@ contains
               O2              => noahmp%energy%state%O2AIR           ,& ! in,    atmospheric o2 concentration (pa)
               CO2             => noahmp%energy%state%CO2AIR          ,& ! in,    atmospheric co2 concentration (pa)
               RB              => noahmp%energy%state%RB              ,& ! in,    leaf boundary layer resistance (s/m)
-              PARSUN          => noahmp%energy%flux%PARSUN           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
-              PARSHA          => noahmp%energy%flux%PARSHA           ,& ! in,    average absorbed par for shaded leaves (w/m2)
+              RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
+              RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! in,    average absorbed par for shaded leaves (w/m2)
               RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
               RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
               PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
@@ -95,15 +95,15 @@ contains
     if ( IndexShade == 0 ) then
 
        ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
-       ! for PARSUN  > 0, in which case RS <= RSMAX and photosynthesis >= 0
+       ! for RadPhotoActAbsSunlit  > 0, in which case RS <= RSMAX and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSUN  = 1.0 / BP * CF  
        PhotosynLeafSunlit = 0.0           
 
-       if ( PARSUN > 0.0 ) then
+       if ( RadPhotoActAbsSunlit > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
           TC   = TV - ConstFreezePoint
-          PPF  = 4.6 * PARSUN
+          PPF  = 4.6 * RadPhotoActAbsSunlit
           J    = PPF * QuantumEfficiency25C
           KC   = KC25 * F1(AKC, TC)
           KO   = KO25 * F1(AKO, TC)
@@ -140,7 +140,7 @@ contains
 
           ! rs, rb:  s m**2 / umol -> s/m
           RSSUN = RSSUN * CF
-       endif ! PARSUN > 0.0
+       endif ! RadPhotoActAbsSunlit > 0.0
 
     endif ! IndexShade == 0
 
@@ -149,15 +149,15 @@ contains
     if ( IndexShade == 1 ) then
 
        ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
-       ! for PARSHA  > 0, in which case RS <= RSMAX and photosynthesis >= 0
+       ! for RadPhotoActAbsShade  > 0, in which case RS <= RSMAX and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
        RSSHA  = 1.0 / BP * CF
        PhotosynLeafShade = 0.0
 
-       if ( PARSHA > 0.0 ) then
+       if ( RadPhotoActAbsShade > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
           TC   = TV - ConstFreezePoint
-          PPF  = 4.6 * PARSHA
+          PPF  = 4.6 * RadPhotoActAbsShade
           J    = PPF * QuantumEfficiency25C
           KC   = KC25 * F1(AKC, TC)
           KO   = KO25 * F1(AKO, TC)
@@ -194,7 +194,7 @@ contains
 
           ! rs, rb:  s m**2 / umol -> s/m
           RSSHA = RSSHA * CF
-       endif ! PARSHA > 0.0
+       endif ! RadPhotoActAbsShade > 0.0
 
     endif ! IndexShade == 1
 

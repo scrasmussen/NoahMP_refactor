@@ -38,12 +38,12 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              RadLWDownRefHeight => noahmp%forcing%RadLWDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
-              RadSWDownRefHeight     => noahmp%forcing%RadSWDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
+              RadLwDownRefHeight => noahmp%forcing%RadLwDownRefHeight,& ! in,    downward longwave radiation [W/m2] at reference height
+              RadSwDownRefHeight     => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
-              PAHB            => noahmp%energy%flux%PAHB             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
+              HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
               TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
               TG              => noahmp%energy%state%TG              ,& ! inout, ground temperature (K)
               QSFC            => noahmp%energy%state%QSFC            ,& ! inout, water vapor mixing ratio bare ground
@@ -69,18 +69,17 @@ contains
               CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
               CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
               ALBEDO          => noahmp%energy%state%ALBEDO          ,& ! out,   total shortwave surface albedo
-              FSR             => noahmp%energy%flux%FSR              ,& ! out,   total reflected solar radiation (w/m2)
-              FIRA            => noahmp%energy%flux%FIRA             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
-              FSH             => noahmp%energy%flux%FSH              ,& ! out,   total sensible heat (w/m2) [+ to atm]
-              FGEV            => noahmp%energy%flux%FGEV             ,& ! out,   soil evap heat (w/m2) [+ to atm]
-              FCEV            => noahmp%energy%flux%FCEV             ,& ! out,   canopy evaporation (w/m2) [+ = to atm]
-              SSOIL           => noahmp%energy%flux%SSOIL            ,& ! out,   soil heat flux (w/m2) [+ to soil]
-              PAH             => noahmp%energy%flux%PAH              ,& ! out,   precipitation advected heat - total (W/m2)
-              FIRE            => noahmp%energy%flux%FIRE             ,& ! out,   emitted outgoing IR (w/m2)
-              IRB             => noahmp%energy%flux%IRB              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
-              SHB             => noahmp%energy%flux%SHB              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
-              EVB             => noahmp%energy%flux%EVB              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
-              GHB             => noahmp%energy%flux%GHB               & ! out,   bare ground heat flux (w/m2) [+ to soil]
+              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
+              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! out,   total sensible heat (w/m2) [+ to atm]
+              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
+              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! out,   total ground heat flux (w/m2) [+ to soil/snow]
+              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! out,   precipitation advected heat - total (W/m2)
+              RadLwEmitTot            => noahmp%energy%flux%RadLwEmitTot             ,& ! out,   emitted outgoing IR (w/m2)
+              RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
+              HeatSensibleBareGrd             => noahmp%energy%flux%HeatSensibleBareGrd              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
+              HeatLatentBareGrd             => noahmp%energy%flux%HeatLatentBareGrd              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
+              HeatGroundBareGrd             => noahmp%energy%flux%HeatGroundBareGrd               & ! out,   bare ground heat flux (w/m2) [+ to soil/snow]
              )
 ! ----------------------------------------------------------------------
 
@@ -118,16 +117,16 @@ contains
     call SurfaceEnergyFluxGlacier(noahmp)
 
     ! assign glacier bare ground quantity to grid-level quantity
-    ! Energy balance at glacier (bare) ground: SAG+PAHB=IRB+SHB+EVB+GHB
+    ! Energy balance at glacier (bare) ground: RadSwAbsGrd+HeatPrecipAdvBareGrd=RadLwNetBareGrd+HeatSensibleBareGrd+HeatLatentBareGrd+HeatGroundBareGrd
     TAUX  = TAUXB
     TAUY  = TAUYB
-    FIRA  = IRB
-    FSH   = SHB
-    FGEV  = EVB
-    SSOIL = GHB
+    RadLwNetTot  = RadLwNetBareGrd
+    HeatSensibleTot   = HeatSensibleBareGrd
+    HeatLatentGrdTot  = HeatLatentBareGrd
+    HeatGroundTot = HeatGroundBareGrd
     TG    = TGB
     T2M   = T2MB
-    PAH   = PAHB
+    HeatPrecipAdvTot   = HeatPrecipAdvBareGrd
     TS    = TG
     CM    = CMB
     CH    = CHB
@@ -136,10 +135,10 @@ contains
     Z0WRF = Z0MG
 
     ! emitted longwave radiation and physical check
-    FIRE = RadLWDownRefHeight + FIRA
-    if ( FIRE <= 0.0 ) then
+    RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
+    if ( RadLwEmitTot <= 0.0 ) then
        write(*,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
-       write(*,*) 'RadLWDownRefHeight=',RadLWDownRefHeight,'FIRA=',FIRA,'SnowDepth=',SnowDepth
+       write(*,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetTot=',RadLwNetTot,'SnowDepth=',SnowDepth
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
@@ -148,8 +147,8 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the ground system.
     ! Old TRAD calculation not taking into account Emissivity:
-    ! TRAD = (FIRE/ConstStefanBoltzmann)**0.25
-    TRAD = ( (FIRE - (1.0 - EMISSI)*RadLWDownRefHeight) / (EMISSI * ConstStefanBoltzmann) ) ** 0.25
+    ! TRAD = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
+    TRAD = ( (RadLwEmitTot - (1.0 - EMISSI)*RadLwDownRefHeight) / (EMISSI * ConstStefanBoltzmann) ) ** 0.25
 
     ! compute snow and glacier ice temperature
     call GlacierTemperatureMain(noahmp)
@@ -167,8 +166,8 @@ contains
     call GlacierPhaseChange(noahmp)
 
     ! update total surface albedo
-    if ( RadSWDownRefHeight > 0.0 ) then
-       ALBEDO = FSR / RadSWDownRefHeight
+    if ( RadSwDownRefHeight > 0.0 ) then
+       ALBEDO = RadSwReflTot / RadSwDownRefHeight
     else
        ALBEDO = -999.9
     endif

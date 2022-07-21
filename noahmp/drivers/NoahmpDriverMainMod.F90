@@ -186,12 +186,12 @@ contains
               noahmp%energy%state%Z0WRF = 0.002 
               noahmp%energy%state%TGB   = noahmp%energy%state%TG   
               noahmp%energy%state%CHB   = noahmp%energy%state%CH 
-              noahmp%energy%flux%IRB    = noahmp%energy%flux%FIRA
-              noahmp%energy%flux%SHB    = noahmp%energy%flux%FSH
-              noahmp%energy%flux%EVB    = noahmp%energy%flux%FGEV
-              noahmp%energy%flux%GHB    = noahmp%energy%flux%SSOIL 
+              noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetTot
+              noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleTot
+              noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrdTot
+              noahmp%energy%flux%HeatGroundBareGrd    = noahmp%energy%flux%HeatGroundTot 
               NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapSoilNet
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%FGEV         
+              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrdTot         
           else
 
               !---------------------------------------------------------------------
@@ -211,10 +211,10 @@ contains
                                           noahmp%water%flux%Transpiration + &
                                           noahmp%water%flux%EvapIrriSprinkler
                                      
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%FGEV + &
-                                          noahmp%energy%flux%FCEV + &
-                                          noahmp%energy%flux%FCTR + &
-                                          noahmp%energy%flux%FIRR                                     
+              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrdTot + &
+                                          noahmp%energy%flux%HeatLatentCanopy + &
+                                          noahmp%energy%flux%HeatLatentTransp + &
+                                          noahmp%energy%flux%HeatLatentIrriEvap                                     
          
           endif ! glacial split ends 
  

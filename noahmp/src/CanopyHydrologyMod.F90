@@ -26,8 +26,8 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    noahmp main time step (s)
-              FCEV            => noahmp%energy%flux%FCEV             ,& ! in,    canopy evaporation (w/m2) [+ = to atm]
-              FCTR            => noahmp%energy%flux%FCTR             ,& ! in,    transpiration (w/m2) [+ = to atm]
+              HeatLatentCanopy            => noahmp%energy%flux%HeatLatentCanopy             ,& ! in,    canopy latent heat flux (w/m2) [+ to atm]
+              HeatLatentTransp            => noahmp%energy%flux%HeatLatentTransp             ,& ! in,    latent heat flux from transpiration (w/m2) [+ to atm]
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
@@ -73,17 +73,17 @@ contains
 
     ! canopy evaporation, transpiration, and dew
     if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy
-       Transpiration = max( FCTR/ConstLatHeatVapor, 0.0 )
-       EvapCanopyLiq = max( FCEV/ConstLatHeatVapor, 0.0 )
-       DewCanopyLiq = abs( min( FCEV/ConstLatHeatVapor, 0.0 ) )
+       Transpiration = max( HeatLatentTransp/ConstLatHeatVapor, 0.0 )
+       EvapCanopyLiq = max( HeatLatentCanopy/ConstLatHeatVapor, 0.0 )
+       DewCanopyLiq = abs( min( HeatLatentCanopy/ConstLatHeatVapor, 0.0 ) )
        SublimCanopyIce = 0.0
        FrostCanopyIce = 0.0
     else
-       Transpiration = max( FCTR/ConstLatHeatSublim, 0.0 )
+       Transpiration = max( HeatLatentTransp/ConstLatHeatSublim, 0.0 )
        EvapCanopyLiq = 0.0
        DewCanopyLiq = 0.0
-       SublimCanopyIce = max( FCEV/ConstLatHeatSublim, 0.0 )
-       FrostCanopyIce = abs( min( FCEV/ConstLatHeatSublim, 0.0 ) )
+       SublimCanopyIce = max( HeatLatentCanopy/ConstLatHeatSublim, 0.0 )
+       FrostCanopyIce = abs( min( HeatLatentCanopy/ConstLatHeatSublim, 0.0 ) )
     endif
 
     ! canopy water balance. for convenience allow dew to bring CanopyLiqWater above

@@ -26,10 +26,10 @@ contains
     associate(                                                         &
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              NumSWRadBand => noahmp%config%domain%NumSWRadBand   &
+              NumSWRadBand    => noahmp%config%domain%NumSWRadBand     &
              )
     
-    ! energy state variable
+    ! energy state variables
     noahmp%energy%state%FROZEN_CANOPY   = .false.
     noahmp%energy%state%FROZEN_GROUND   = .false.
     noahmp%energy%state%ELAI            = undefined_real 
@@ -205,71 +205,84 @@ contains
     noahmp%energy%state%ALBD(:)         = undefined_real
     noahmp%energy%state%ALBI(:)         = undefined_real
     
-    ! energy flux variable
-    noahmp%energy%flux%FCEV             = undefined_real
-    noahmp%energy%flux%FCTR             = undefined_real
-    noahmp%energy%flux%FGEV             = undefined_real
-    noahmp%energy%flux%FIRR             = 0.0
-    noahmp%energy%flux%PAHV             = undefined_real
-    noahmp%energy%flux%PAHG             = undefined_real
-    noahmp%energy%flux%PAHB             = undefined_real
-    noahmp%energy%flux%PAH              = undefined_real
-    noahmp%energy%flux%PARSUN           = undefined_real
-    noahmp%energy%flux%PARSHA           = undefined_real
-    noahmp%energy%flux%SAV              = undefined_real
-    noahmp%energy%flux%SAG              = undefined_real
-    noahmp%energy%flux%FSA              = undefined_real
-    noahmp%energy%flux%FSR              = undefined_real
-    noahmp%energy%flux%FSRV             = undefined_real
-    noahmp%energy%flux%FSRG             = undefined_real
-    noahmp%energy%flux%IRC              = undefined_real
-    noahmp%energy%flux%SHC              = undefined_real
-    noahmp%energy%flux%EVC              = undefined_real
-    noahmp%energy%flux%IRG              = undefined_real
-    noahmp%energy%flux%SHG              = undefined_real
-    noahmp%energy%flux%EVG              = undefined_real
-    noahmp%energy%flux%TR               = undefined_real
-    noahmp%energy%flux%GHV              = undefined_real
-    noahmp%energy%flux%IRB              = undefined_real
-    noahmp%energy%flux%SHB              = undefined_real
-    noahmp%energy%flux%EVB              = undefined_real
-    noahmp%energy%flux%GHB              = undefined_real
-    noahmp%energy%flux%SSOIL            = undefined_real
-    noahmp%energy%flux%EFLXB            = undefined_real
-    noahmp%energy%flux%FIRA             = undefined_real
-    noahmp%energy%flux%FSH              = undefined_real
-    noahmp%energy%flux%APAR             = undefined_real
-    noahmp%energy%flux%FIRE             = undefined_real
+    ! energy flux variables
+    noahmp%energy%flux%HeatLatentCanopy             = undefined_real
+    noahmp%energy%flux%HeatLatentTransp             = undefined_real
+    noahmp%energy%flux%HeatLatentGrdTot             = undefined_real
+    noahmp%energy%flux%HeatPrecipAdvCanopy          = undefined_real
+    noahmp%energy%flux%HeatPrecipAdvVegGrd          = undefined_real
+    noahmp%energy%flux%HeatPrecipAdvBareGrd         = undefined_real
+    noahmp%energy%flux%HeatPrecipAdvTot             = undefined_real
+    noahmp%energy%flux%RadPhotoActAbsSunlit         = undefined_real
+    noahmp%energy%flux%RadPhotoActAbsShade          = undefined_real
+    noahmp%energy%flux%RadSwAbsVeg                  = undefined_real
+    noahmp%energy%flux%RadSwAbsGrd                  = undefined_real
+    noahmp%energy%flux%RadSwAbsTot                  = undefined_real
+    noahmp%energy%flux%RadSwReflTot                 = undefined_real
+    noahmp%energy%flux%RadSwReflVeg                 = undefined_real
+    noahmp%energy%flux%RadSwReflGrd                 = undefined_real
+    noahmp%energy%flux%RadLwNetCanopy               = undefined_real
+    noahmp%energy%flux%HeatSensibleCanopy           = undefined_real
+    noahmp%energy%flux%HeatLatentCanEvap            = undefined_real
+    noahmp%energy%flux%RadLwNetVegGrd               = undefined_real
+    noahmp%energy%flux%HeatSensibleVegGrd           = undefined_real
+    noahmp%energy%flux%HeatLatentVegGrd             = undefined_real
+    noahmp%energy%flux%HeatLatentCanTransp          = undefined_real
+    noahmp%energy%flux%HeatGroundVegGrd             = undefined_real
+    noahmp%energy%flux%RadLwNetBareGrd              = undefined_real
+    noahmp%energy%flux%HeatSensibleBareGrd          = undefined_real
+    noahmp%energy%flux%HeatLatentBareGrd            = undefined_real
+    noahmp%energy%flux%HeatGroundBareGrd            = undefined_real
+    noahmp%energy%flux%HeatGroundTot                = undefined_real
+    noahmp%energy%flux%HeatFromSoilBot              = undefined_real
+    noahmp%energy%flux%RadLwNetTot                  = undefined_real
+    noahmp%energy%flux%HeatSensibleTot              = undefined_real
+    noahmp%energy%flux%RadPhotoActAbsCan            = undefined_real
+    noahmp%energy%flux%RadLwEmitTot                 = undefined_real
+    noahmp%energy%flux%HeatLatentIrriEvap           = 0.0
+ 
+    if ( .not. allocated(noahmp%energy%flux%RadSwAbsVegDir) )      &
+       allocate( noahmp%energy%flux%RadSwAbsVegDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwAbsVegDif) )      &
+       allocate( noahmp%energy%flux%RadSwAbsVegDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDirTranGrdDir) )  &
+       allocate( noahmp%energy%flux%RadSwDirTranGrdDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDirTranGrdDif) )  &
+       allocate( noahmp%energy%flux%RadSwDirTranGrdDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDifTranGrdDir) )  &
+       allocate( noahmp%energy%flux%RadSwDifTranGrdDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDifTranGrdDif) )  &
+       allocate( noahmp%energy%flux%RadSwDifTranGrdDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwReflVegDir) )     &
+       allocate( noahmp%energy%flux%RadSwReflVegDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwReflVegDif) )     &
+       allocate( noahmp%energy%flux%RadSwReflVegDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwReflGrdDir) )     &
+       allocate( noahmp%energy%flux%RadSwReflGrdDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwReflGrdDif) )     &
+       allocate( noahmp%energy%flux%RadSwReflGrdDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDownDir) )        &
+       allocate( noahmp%energy%flux%RadSwDownDir(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwDownDif) )        &
+       allocate( noahmp%energy%flux%RadSwDownDif(1:NumSWRadBand) )
+    if ( .not. allocated(noahmp%energy%flux%RadSwPenetrateGrd) )   &
+       allocate( noahmp%energy%flux%RadSwPenetrateGrd(-NumSnowLayerMax+1:NumSoilLayer) )
     
-    if( .not. allocated( noahmp%energy%flux%FABD  ) ) allocate( noahmp%energy%flux%FABD  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FABI  ) ) allocate( noahmp%energy%flux%FABI  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FTDD  ) ) allocate( noahmp%energy%flux%FTDD  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FTDI  ) ) allocate( noahmp%energy%flux%FTDI  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FTID  ) ) allocate( noahmp%energy%flux%FTID  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FTII  ) ) allocate( noahmp%energy%flux%FTII  (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FREVD ) ) allocate( noahmp%energy%flux%FREVD (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FREVI ) ) allocate( noahmp%energy%flux%FREVI (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FREGD ) ) allocate( noahmp%energy%flux%FREGD (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%FREGI ) ) allocate( noahmp%energy%flux%FREGI (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%SOLAD ) ) allocate( noahmp%energy%flux%SOLAD (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%SOLAI ) ) allocate( noahmp%energy%flux%SOLAI (1:NumSWRadBand) )
-    if( .not. allocated( noahmp%energy%flux%PHI   ) ) allocate( noahmp%energy%flux%PHI   (-NumSnowLayerMax+1:NumSoilLayer) )
+    noahmp%energy%flux%RadSwAbsVegDir    (:)        = undefined_real
+    noahmp%energy%flux%RadSwAbsVegDif    (:)        = undefined_real
+    noahmp%energy%flux%RadSwDirTranGrdDir(:)        = undefined_real
+    noahmp%energy%flux%RadSwDirTranGrdDif(:)        = undefined_real
+    noahmp%energy%flux%RadSwDifTranGrdDir(:)        = undefined_real
+    noahmp%energy%flux%RadSwDifTranGrdDif(:)        = undefined_real
+    noahmp%energy%flux%RadSwReflVegDir   (:)        = undefined_real
+    noahmp%energy%flux%RadSwReflVegDif   (:)        = undefined_real
+    noahmp%energy%flux%RadSwReflGrdDir   (:)        = undefined_real
+    noahmp%energy%flux%RadSwReflGrdDif   (:)        = undefined_real
+    noahmp%energy%flux%RadSwDownDir      (:)        = undefined_real
+    noahmp%energy%flux%RadSwDownDif      (:)        = undefined_real
+    noahmp%energy%flux%RadSwPenetrateGrd (:)        = undefined_real
     
-    noahmp%energy%flux%FABD(:)          = undefined_real
-    noahmp%energy%flux%FABI(:)          = undefined_real
-    noahmp%energy%flux%FTDD(:)          = undefined_real
-    noahmp%energy%flux%FTDI(:)          = undefined_real
-    noahmp%energy%flux%FTID(:)          = undefined_real
-    noahmp%energy%flux%FTII(:)          = undefined_real
-    noahmp%energy%flux%FREVD(:)         = undefined_real
-    noahmp%energy%flux%FREVI(:)         = undefined_real
-    noahmp%energy%flux%FREGD(:)         = undefined_real
-    noahmp%energy%flux%FREGI(:)         = undefined_real
-    noahmp%energy%flux%SOLAD(:)         = undefined_real
-    noahmp%energy%flux%SOLAI(:)         = undefined_real
-    noahmp%energy%flux%PHI(:)           = undefined_real
-    
-    ! energy parameter variable
+    ! energy parameter variables
     noahmp%energy%param%RC              = undefined_real
     noahmp%energy%param%HVT             = undefined_real
     noahmp%energy%param%HVB             = undefined_real
@@ -360,21 +373,20 @@ contains
     ! local loop index
     integer                          :: ISOIL
 
-    associate(                                                  &
-              I           => noahmp%config%domain%GridIndexI   ,&
-              J           => noahmp%config%domain%GridIndexJ   ,&
-              VegType     => noahmp%config%domain%VegType      ,&
-              SoilType     => noahmp%config%domain%SoilType      ,&
-              CropType    => noahmp%config%domain%CropType     ,&
-              SoilColor   => noahmp%config%domain%SoilColor    ,&
-              FlagUrban  => noahmp%config%domain%FlagUrban   ,&
+    associate(                                                         &
+              I               => noahmp%config%domain%GridIndexI      ,&
+              J               => noahmp%config%domain%GridIndexJ      ,&
+              VegType         => noahmp%config%domain%VegType         ,&
+              SoilType        => noahmp%config%domain%SoilType        ,&
+              CropType        => noahmp%config%domain%CropType        ,&
+              SoilColor       => noahmp%config%domain%SoilColor       ,&
+              FlagUrban       => noahmp%config%domain%FlagUrban       ,&
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              NumSWRadBand       => noahmp%config%domain%NumSWRadBand         &
+              NumSWRadBand    => noahmp%config%domain%NumSWRadBand     &
              )
 
-    !energy state variable
-    
+    ! energy state variables
     noahmp%energy%state%LAI               = NoahmpIO%LAI    (I,J)
     noahmp%energy%state%SAI               = NoahmpIO%XSAIXY (I,J)
     noahmp%energy%state%QSFC              = NoahmpIO%QSFC   (I,J)
@@ -390,7 +402,8 @@ contains
     noahmp%energy%state%CM                = NoahmpIO%CMXY  (I,J)
     noahmp%energy%state%CO2AIR            = NoahmpIO%CO2_TABLE * noahmp%forcing%PressureAirRefHeight
     noahmp%energy%state%O2AIR             = NoahmpIO%O2_TABLE * noahmp%forcing%PressureAirRefHeight
-    ! energy parameter variable
+
+    ! energy parameter variables
     noahmp%energy%param%RC                 = NoahmpIO%RC_TABLE(VegType)
     noahmp%energy%param%HVT                = NoahmpIO%HVT_TABLE(VegType)
     noahmp%energy%param%HVB                = NoahmpIO%HVB_TABLE(VegType)
