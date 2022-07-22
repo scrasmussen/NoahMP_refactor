@@ -36,8 +36,8 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              DLEAF           => noahmp%energy%param%DLEAF           ,& ! in,    characteristic leaf dimension (m)
-              CWPVT           => noahmp%energy%param%CWPVT           ,& ! in,    canopy wind extinction parameter
+              LeafDimLength           => noahmp%energy%param%LeafDimLength           ,& ! in,    characteristic leaf dimension (m)
+              CanopyWindExtFac           => noahmp%energy%param%CanopyWindExtFac           ,& ! in,    canopy wind extinction parameter
               RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (K)
               TAH             => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
@@ -83,7 +83,7 @@ contains
     endif
 
     ! wind attenuation within canopy
-    CWPC    = (CWPVT * VAI * HCAN * FHG)**0.5
+    CWPC    = (CanopyWindExtFac * VAI * HCAN * FHG)**0.5
     TMP1    = exp( -CWPC * Z0HG / HCAN )
     TMP2    = exp( -CWPC * (Z0H + ZPD) / HCAN )
     TMPRAH2 = HCAN * exp(CWPC) / CWPC * (TMP1-TMP2)
@@ -96,7 +96,7 @@ contains
 
     ! leaf boundary layer resistance
     TMPRB = CWPC * 50.0 / ( 1.0 - exp(-CWPC/2.0) )
-    RB    = TMPRB * sqrt(DLEAF / UC)
+    RB    = TMPRB * sqrt(LeafDimLength / UC)
     RB    = min( max(RB, 5.0), 50.0 ) ! limit RB to 5-50, typically RB<50
 
     end associate

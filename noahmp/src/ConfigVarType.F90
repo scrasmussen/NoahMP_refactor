@@ -5,7 +5,7 @@ module ConfigVarType
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
   use Machine
@@ -14,18 +14,17 @@ module ConfigVarType
   save
   private
 
-!=== define "namelist" sub-type of config_type (config%nmlist%variable)
+!=== define "namelist" sub-type of config (config%nmlist%variable)
   type :: namelist_type
 
-    ! define specific namelist variables
     integer :: OptDynamicVeg               ! options for dynamic vegetation
-                                              ! 1 -> off (use table LAI; use FVEG = SHDFAC from input)
+                                              ! 1 -> off (use table LAI; use FVEG = VegFracGreen from input)
                                               ! 2 -> on  (together with OptStomataResistance = 1)
                                               ! 3 -> off (use table LAI; calculate FVEG)
                                               ! 4 -> off (use table LAI; use maximum vegetation fraction) (default)
                                               ! 5 -> on  (use maximum vegetation fraction)
-                                              ! 6 -> on  (use FVEG = SHDFAC from input)
-                                              ! 7 -> off (use input LAI; use FVEG = SHDFAC from input)
+                                              ! 6 -> on  (use FVEG = VegFracGreen from input)
+                                              ! 7 -> off (use input LAI; use FVEG = VegFracGreen from input)
                                               ! 8 -> off (use input LAI; calculate FVEG)
                                               ! 9 -> off (use input LAI; use maximum vegetation fraction)
     integer :: OptRainSnowPartition        ! options for partitioning  precipitation into rainfall & snowfall
@@ -125,10 +124,9 @@ module ConfigVarType
   end type namelist_type
 
 
-!=== define "domain" sub-type of config_type (config%domain%variable)
+!=== define "domain" sub-type of config (config%domain%variable)
   type :: domain_type
 
-    ! define specific domain variables
     character(len=256)     :: LandUseDataName             ! landuse dataset name (USGS or MODIFIED_IGBP_MODIS_NOAH)
     logical                :: FlagUrban                   ! flag for urban grid
     logical                :: FlagCropland                ! flag to identify croplands
@@ -174,7 +172,7 @@ module ConfigVarType
 !=== define config type that includes namelist & domain subtypes
   type, public :: config_type
 
-    type(namelist_type) :: nmlist ! not using "namelist" to avoid issue with Fortran intrinsic namelist function
+    type(namelist_type) :: nmlist
     type(domain_type)   :: domain
 
   end type config_type

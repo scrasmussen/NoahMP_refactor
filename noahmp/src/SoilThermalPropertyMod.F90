@@ -42,7 +42,7 @@ contains
     associate(                                                        &
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
               SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
-              CSOIL           => noahmp%energy%param%CSOIL           ,& ! in,     soil volumetric specific heat (j/m3/k)
+              SoilHeatCapacity           => noahmp%energy%param%SoilHeatCapacity           ,& ! in,     soil volumetric specific heat (j/m3/k)
               SoilQuartzFrac          => noahmp%energy%param%SoilQuartzFrac          ,& ! in,     soil quartz content
               SoilMoisture            => noahmp%water%state%SoilMoisture       ,& ! in,     total soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3] 
@@ -63,7 +63,7 @@ contains
        ! ==== soil heat capacity
 
        SoilIceTmp(ISOIL) = SoilMoisture(ISOIL) - SoilLiqWater(ISOIL)
-       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SoilMoistureSat(ISOIL)) * CSOIL + &
+       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SoilMoistureSat(ISOIL)) * SoilHeatCapacity + &
                          (SoilMoistureSat(ISOIL) - SoilMoisture(ISOIL)) * ConstHeatCapacAir + &
                          SoilIceTmp(ISOIL) * ConstHeatCapacIce
 

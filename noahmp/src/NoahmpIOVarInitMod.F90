@@ -82,12 +82,12 @@ contains
     character(len=256)                             :: message
     character(len=10)                              :: SLTYPE
     integer                                        :: SLCATS
-    real(kind=kind_noahmp), dimension(MAX_SOILTYP) :: BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
-                                                      BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
+    real(kind=kind_noahmp), dimension(MAX_SOILTYP) :: BB, DRYSMC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
+                                                      BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC, HC
     namelist / noahmp_stas_soil_categories /          SLTYPE, SLCATS
-    namelist / noahmp_soil_stas_parameters /          BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
+    namelist / noahmp_soil_stas_parameters /          BB, DRYSMC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
                                                       BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
-    namelist / noahmp_soil_stas_ruc_parameters /      BB, DRYSMC, F11, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
+    namelist / noahmp_soil_stas_ruc_parameters /      BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW, WLTSMC, QTZ,    &
                                                       BVIC, AXAJ, BXAJ, XXAJ, BDVIC, BBVIC, GDVIC
 
     ! general parameters
@@ -267,7 +267,6 @@ contains
     ! soil parameters
     allocate( NoahmpIO%BEXP_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%SMCDRY_TABLE(MAX_SOILTYP) )
-    allocate( NoahmpIO%F1_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%SMCMAX_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%SMCREF_TABLE(MAX_SOILTYP) )
     allocate( NoahmpIO%PSISAT_TABLE(MAX_SOILTYP) )
@@ -442,7 +441,6 @@ contains
     NoahmpIO%SLCATS_TABLE       = -99999
     NoahmpIO%BEXP_TABLE         = -1.0e36
     NoahmpIO%SMCDRY_TABLE       = -1.0e36
-    NoahmpIO%F1_TABLE           = -1.0e36
     NoahmpIO%SMCMAX_TABLE       = -1.0e36
     NoahmpIO%SMCREF_TABLE       = -1.0e36
     NoahmpIO%PSISAT_TABLE       = -1.0e36
@@ -796,7 +794,6 @@ contains
     NoahmpIO%SLCATS_TABLE             = SLCATS
     NoahmpIO%BEXP_TABLE(1:SLCATS)     = BB(1:SLCATS)
     NoahmpIO%SMCDRY_TABLE(1:SLCATS)   = DRYSMC(1:SLCATS)
-    NoahmpIO%F1_TABLE(1:SLCATS)       = F11(1:SLCATS)
     NoahmpIO%SMCMAX_TABLE(1:SLCATS)   = MAXSMC(1:SLCATS)
     NoahmpIO%SMCREF_TABLE(1:SLCATS)   = REFSMC(1:SLCATS)
     NoahmpIO%PSISAT_TABLE(1:SLCATS)   = SATPSI(1:SLCATS)

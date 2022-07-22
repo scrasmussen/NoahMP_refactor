@@ -33,9 +33,9 @@ contains
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,     snow cover fraction [-]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
-              ALBSAT          => noahmp%energy%param%ALBSAT          ,& ! in,     saturated soil albedos: 1=vis, 2=nir
-              ALBDRY          => noahmp%energy%param%ALBDRY          ,& ! in,     dry soil albedos: 1=vis, 2=nir
-              ALBLAK          => noahmp%energy%param%ALBLAK          ,& ! in,     albedo frozen lakes: 1=vis, 2=nir
+              AlbedoSoilSat          => noahmp%energy%param%AlbedoSoilSat          ,& ! in,     saturated soil albedos: 1=vis, 2=nir
+              AlbedoSoilDry          => noahmp%energy%param%AlbedoSoilDry          ,& ! in,     dry soil albedos: 1=vis, 2=nir
+              AlbedoLakeFrz          => noahmp%energy%param%AlbedoLakeFrz          ,& ! in,     albedo frozen lakes: 1=vis, 2=nir
               TG              => noahmp%energy%state%TG              ,& ! in,     ground temperature (k)
               ALBSND          => noahmp%energy%state%ALBSND          ,& ! in,     snow albedo for direct(1=vis, 2=nir)
               ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! in,     snow albedo for diffuse(1=vis, 2=nir)
@@ -51,13 +51,13 @@ contains
        INC = max( 0.11 - 0.40*SoilMoisture(1), 0.0 )
 
        if ( SurfaceType == 1 )  then  ! soil
-          ALBSOD(IB) = min( ALBSAT(IB)+INC, ALBDRY(IB) )
+          ALBSOD(IB) = min( AlbedoSoilSat(IB)+INC, AlbedoSoilDry(IB) )
           ALBSOI(IB) = ALBSOD(IB)
        elseif ( TG > ConstFreezePoint ) then  ! unfrozen lake, wetland
           ALBSOD(IB) = 0.06 / ( max(0.01, CosSolarZenithAngle)**1.7 + 0.15 )
           ALBSOI(IB) = 0.06
        else    !frozen lake, wetland
-          ALBSOD(IB) = ALBLAK(IB)
+          ALBSOD(IB) = AlbedoLakeFrz(IB)
           ALBSOI(IB) = ALBSOD(IB)
        endif
 

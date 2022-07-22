@@ -937,7 +937,6 @@ module NoahmpIOVarType
     integer                                             :: SLCATS_TABLE      ! number of soil categories
     real(kind=kind_noahmp), allocatable, dimension(:)   :: BEXP_TABLE        ! soil B parameter
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCDRY_TABLE      ! dry soil moisture threshold
-    real(kind=kind_noahmp), allocatable, dimension(:)   :: F1_TABLE          ! soil thermal diffusivity/conductivity coef
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCMAX_TABLE      ! porosity, saturated value of soil moisture (volumetric)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: SMCREF_TABLE      ! reference soil moisture (field capacity) (volumetric)
     real(kind=kind_noahmp), allocatable, dimension(:)   :: PSISAT_TABLE      ! saturated soil matric potential

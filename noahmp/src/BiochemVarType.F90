@@ -14,10 +14,9 @@ module BiochemVarType
   save
   private
 
-!=== define "flux" sub-type of biochem_type (biochem%flux%variable)
+!=== define "flux" sub-type of biochem (biochem%flux%variable)
   type :: flux_type
 
-    ! define specific biochem flux variables
     real(kind=kind_noahmp) :: PhotosynTotal              ! total leaf photosynthesis [umol co2/m2/s]
     real(kind=kind_noahmp) :: PhotosynLeafSunlit         ! sunlit leaf photosynthesis [umol co2/m2/s]
     real(kind=kind_noahmp) :: PhotosynLeafShade          ! shaded leaf photosynthesis [umol co2/m2/s]
@@ -64,10 +63,9 @@ module BiochemVarType
   end type flux_type
 
 
-!=== define "state" sub-type of biochem_type (biochem%state%variable)
+!=== define "state" sub-type of biochem (biochem%state%variable)
   type :: state_type
 
-    ! define specific biochem state variables
     integer                :: PlantGrowStage             ! plant growing stage
     integer                :: IndexPlanting              ! Planting index (0=off, 1=on)
     integer                :: IndexHarvest               ! Harvest index (0=on,1=off)
@@ -102,10 +100,9 @@ module BiochemVarType
   end type state_type
 
 
-!=== define "parameter" sub-type of biochem_type (biochem%param%variable)
+!=== define "parameter" sub-type of biochem (biochem%param%variable)
   type :: parameter_type
 
-    ! define specific biochem parameter variables
     integer                :: DatePlanting               ! planting date
     integer                :: DateHarvest                ! harvest date
     real(kind=kind_noahmp) :: QuantumEfficiency25C       ! quantum efficiency at 25c (umol co2 / umol photon)

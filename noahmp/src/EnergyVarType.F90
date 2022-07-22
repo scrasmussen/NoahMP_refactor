@@ -14,10 +14,9 @@ module EnergyVarType
   save
   private
 
-!=== define "flux" sub-type of energy_type (energy%flux%variable)
+!=== define "flux" sub-type of energy (energy%flux%variable)
   type :: flux_type
 
-    ! define specific energy flux variables
     real(kind=kind_noahmp) :: HeatLatentCanopy            ! canopy latent heat flux [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentTransp            ! latent heat flux from transpiration [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentGrdTot            ! total ground latent heat [W/m2] (+ = to atm)
@@ -70,10 +69,9 @@ module EnergyVarType
   end type flux_type
 
 
-!=== define "state" sub-type of energy_type (energy%state%variable)
+!=== define "state" sub-type of energy (energy%state%variable)
   type :: state_type
 
-    ! define specific energy state variables
     logical                :: FROZEN_CANOPY   ! used to define latent heat pathway
     logical                :: FROZEN_GROUND   ! used to define latent heat pathway
     real(kind=kind_noahmp) :: ELAI            ! leaf area index, after burying by snow
@@ -231,69 +229,68 @@ module EnergyVarType
   end type state_type
 
 
-!=== define "parameter" sub-type of energy_type (energy%param%variable)
+!=== define "parameter" sub-type of energy (energy%param%variable)
   type :: parameter_type
 
-    ! define specific energy parameter variables
-    real(kind=kind_noahmp) :: RC               ! tree crown radius (m)
-    real(kind=kind_noahmp) :: HVT              ! top of canopy (m)
-    real(kind=kind_noahmp) :: HVB              ! bottom of canopy (m)
-    real(kind=kind_noahmp) :: Z0MVT            ! momentum roughness length (m)
-    real(kind=kind_noahmp) :: DEN              ! tree density (no. of trunks per m2)
-    real(kind=kind_noahmp) :: XL               ! leaf/stem orientation index
-    real(kind=kind_noahmp) :: BETADS           ! two-stream parameter betad for snow (dir rad)
-    real(kind=kind_noahmp) :: BETAIS           ! two-stream parameter betad for snow (dif rad)
-    real(kind=kind_noahmp) :: CSOIL            ! vol. soil heat capacity [j/m3/K]
-    real(kind=kind_noahmp) :: TAU0             ! snow aging parameter for BATS snow albedo
-    real(kind=kind_noahmp) :: GRAIN_GROWTH     ! vapor diffusion snow growth factor for BATS snow albedo
-    real(kind=kind_noahmp) :: DIRT_SOOT        ! dirt and soot effect factor for BATS snow albedo
-    real(kind=kind_noahmp) :: EXTRA_GROWTH     ! extra snow growth factor near freezing for BATS snow albedo
-    real(kind=kind_noahmp) :: BATS_COSZ        ! zenith angle snow albedo adjustment
-    real(kind=kind_noahmp) :: BATS_VIS_NEW     ! new snow visible albedo
-    real(kind=kind_noahmp) :: BATS_NIR_NEW     ! new snow NIR albedo
-    real(kind=kind_noahmp) :: BATS_VIS_AGE     ! age factor for diffuse visible snow albedo
-    real(kind=kind_noahmp) :: BATS_NIR_AGE     ! age factor for diffuse NIR snow albedo
-    real(kind=kind_noahmp) :: BATS_VIS_DIR     ! cosz factor for direct visible snow albedo
-    real(kind=kind_noahmp) :: BATS_NIR_DIR     ! cosz factor for direct NIR snow albedo
-    real(kind=kind_noahmp) :: CLASS_ALB_REF    ! reference snow albedo in CLASS scheme
-    real(kind=kind_noahmp) :: CLASS_SNO_AGE    ! snow aging e-folding time (s) in CLASS albedo scheme
-    real(kind=kind_noahmp) :: CLASS_ALB_NEW    ! fresh snow albedo in CLASS albedo scheme
-    real(kind=kind_noahmp) :: BP               ! minimum leaf conductance (umol/m**2/s)
-    real(kind=kind_noahmp) :: KC25             ! co2 michaelis-menten constant at 25c (pa)
-    real(kind=kind_noahmp) :: KO25             ! o2 michaelis-menten constant at 25c (pa)
-    real(kind=kind_noahmp) :: AKC              ! q10 for kc25
-    real(kind=kind_noahmp) :: AKO              ! q10 for ko25
-    real(kind=kind_noahmp) :: RGL              ! Parameter used in radiation stress function in Jarvis scheme
-    real(kind=kind_noahmp) :: RSMIN            ! Minimum stomatal resistance [s m-1] in Jarvis scheme
-    real(kind=kind_noahmp) :: RSMAX            ! Maximal stomatal resistance [s m-1] in Jarvis scheme
-    real(kind=kind_noahmp) :: TOPT             ! Optimum transpiration air temperature [K] in Jarvis scheme
-    real(kind=kind_noahmp) :: HS               ! Parameter used in vapor pressure deficit function in Jarvis scheme
-    real(kind=kind_noahmp) :: DLEAF            ! characteristic leaf dimension (m)
-    real(kind=kind_noahmp) :: CZIL             ! Calculate roughness length of heat
-    real(kind=kind_noahmp) :: SNOW_EMIS        ! snow emissivity
-    real(kind=kind_noahmp) :: CWPVT            ! empirical canopy wind absorption parameter
-    real(kind=kind_noahmp) :: Z0SNO            ! snow surface roughness length (m) (0.002)
-    real(kind=kind_noahmp) :: Z0SOIL           ! Bare-soil roughness length (m) (i.e., under the canopy)
-    real(kind=kind_noahmp) :: Z0LAKE           ! lake surface roughness length (m)
-    real(kind=kind_noahmp) :: EICE             ! ice surface emissivity
-    real(kind=kind_noahmp) :: RSURF_EXP        ! exponent in the shape parameter for soil resistance option 1
-    real(kind=kind_noahmp) :: RSURF_SNOW       ! surface resistance for snow(s/m)
-    real(kind=kind_noahmp) :: SHDFAC           ! vegetation fraction
-    real(kind=kind_noahmp) :: SHDMAX           ! yearly maximum vegetation fraction
+    real(kind=kind_noahmp) :: TreeCrownRadius             ! tree crown radius [m]
+    real(kind=kind_noahmp) :: HeightCanopyTop             ! height of canopy top [m]
+    real(kind=kind_noahmp) :: HeightCanopyBot             ! height of canopy bottom [m]
+    real(kind=kind_noahmp) :: RoughLenMomVeg              ! momentum roughness length [m] vegetated
+    real(kind=kind_noahmp) :: TreeDensity                 ! tree density [no. of trunks per m2]
+    real(kind=kind_noahmp) :: CanopyOrientIndex           ! leaf/stem orientation index
+    real(kind=kind_noahmp) :: UpscatterCoeffSnowDir       ! Upscattering parameters for snow for direct radiation
+    real(kind=kind_noahmp) :: UpscatterCoeffSnowDif       ! Upscattering parameters for snow for diffuse radiation
+    real(kind=kind_noahmp) :: SoilHeatCapacity            ! volumetric soil heat capacity [j/m3/K]
+    real(kind=kind_noahmp) :: SnowAgeFacBats              ! snow aging parameter for BATS snow albedo
+    real(kind=kind_noahmp) :: SnowGrowVapFacBats          ! vapor diffusion snow growth factor for BATS snow albedo
+    real(kind=kind_noahmp) :: SnowSootFacBats             ! dirt and soot effect factor for BATS snow albedo
+    real(kind=kind_noahmp) :: SnowGrowFrzFacBats          ! extra snow growth factor near freezing for BATS snow albedo
+    real(kind=kind_noahmp) :: SolarZenithAdjBats          ! zenith angle snow albedo adjustment
+    real(kind=kind_noahmp) :: FreshSnoAlbVisBats          ! new snow visible albedo for BATS
+    real(kind=kind_noahmp) :: FreshSnoAlbNirBats          ! new snow NIR albedo for BATS
+    real(kind=kind_noahmp) :: SnoAgeFacDifVisBats         ! age factor for diffuse visible snow albedo for BATS
+    real(kind=kind_noahmp) :: SnoAgeFacDifNirBats         ! age factor for diffuse NIR snow albedo for BATS
+    real(kind=kind_noahmp) :: SzaFacDirVisBats            ! cosz factor for direct visible snow albedo for BATS
+    real(kind=kind_noahmp) :: SzaFacDirNirBats            ! cosz factor for direct NIR snow albedo for BATS
+    real(kind=kind_noahmp) :: SnowAlbRefClass             ! reference snow albedo in CLASS scheme
+    real(kind=kind_noahmp) :: SnowAgeFacClass             ! snow aging e-folding time [s] in CLASS albedo scheme
+    real(kind=kind_noahmp) :: SnowAlbFreshClass           ! fresh snow albedo in CLASS albedo scheme
+    real(kind=kind_noahmp) :: ConductanceLeafMin          ! minimum leaf conductance [umol/m**2/s]
+    real(kind=kind_noahmp) :: Co2MmConst25C               ! co2 michaelis-menten constant at 25c [Pa]
+    real(kind=kind_noahmp) :: O2MmConst25C                ! o2 michaelis-menten constant at 25c [Pa]
+    real(kind=kind_noahmp) :: Co2MmConstQ10               ! change in co2 Michaelis-Menten constant for every 10-deg C temperature change
+    real(kind=kind_noahmp) :: O2MmConstQ10                ! change in o2 michaelis-menten constant for every 10-deg C temperature change
+    real(kind=kind_noahmp) :: RadiationStressFac          ! Parameter used in radiation stress function in Jarvis scheme
+    real(kind=kind_noahmp) :: ResistanceStomataMin        ! Minimum stomatal resistance [s m-1] in Jarvis scheme
+    real(kind=kind_noahmp) :: ResistanceStomataMax        ! Maximal stomatal resistance [s m-1] in Jarvis scheme
+    real(kind=kind_noahmp) :: AirTempOptimTransp          ! Optimum transpiration air temperature [K] in Jarvis scheme
+    real(kind=kind_noahmp) :: VaporPresDeficitFac         ! Parameter used in vapor pressure deficit function in Jarvis scheme
+    real(kind=kind_noahmp) :: LeafDimLength               ! characteristic leaf dimension [m]
+    real(kind=kind_noahmp) :: ZilitinkevichCoeff          ! Zilitinkevich coefficient for heat exchange coefficient calculation
+    real(kind=kind_noahmp) :: EmissivitySnow              ! snow emissivity
+    real(kind=kind_noahmp) :: CanopyWindExtFac            ! empirical canopy wind extinction parameter
+    real(kind=kind_noahmp) :: RoughLenMomSno              ! snow surface roughness length [m]
+    real(kind=kind_noahmp) :: RoughLenMomSoil             ! Bare-soil roughness length [m]
+    real(kind=kind_noahmp) :: RoughLenMomLake             ! lake surface roughness length [m]
+    real(kind=kind_noahmp) :: EmissivityIceSfc            ! ice surface emissivity
+    real(kind=kind_noahmp) :: ResistanceSoilExp           ! exponent in the shape parameter for soil resistance option 1
+    real(kind=kind_noahmp) :: ResistanceSnowSfc           ! surface resistance for snow [s/m]
+    real(kind=kind_noahmp) :: VegFracGreen                ! green vegetation fraction
+    real(kind=kind_noahmp) :: VegFracAnnMax               ! annual maximum vegetation fraction
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: LAIM        ! monthly leaf area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SAIM        ! monthly stem area index, one-sided
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilQuartzFrac      ! soil quartz content
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBSAT      ! saturated soil albedos: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBDRY      ! dry soil albedos: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBLAK      ! albedo frozen lakes: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: OMEGAS      ! two-stream parameter omega for snow
-    real(kind=kind_noahmp), allocatable, dimension(:) :: RHOL        ! leaf reflectance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: RHOS        ! stem reflectance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TAUL        ! leaf transmittance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TAUS        ! stem transmittance: 1=vis, 2=nir
-    real(kind=kind_noahmp), allocatable, dimension(:) :: EG          ! emissivity soil surface: 1=soil, 2=lake
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ALBICE      ! land/glacier ice albedo: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: LeafAreaIndexMon      ! monthly leaf area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: StemAreaIndexMon      ! monthly stem area index, one-sided
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilQuartzFrac        ! soil quartz content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilSat         ! saturated soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilDry         ! dry soil albedos: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoLakeFrz         ! albedo frozen lakes: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ScatterCoeffSnow      ! Scattering coefficient for snow
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ReflectanceLeaf       ! leaf reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ReflectanceStem       ! stem reflectance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TransmittanceLeaf     ! leaf transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TransmittanceStem     ! stem transmittance: 1=vis, 2=nir
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EmissivitySoilLake    ! emissivity soil surface: 1=soil, 2=lake
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoLandIce         ! land/glacier ice albedo: 1=vis, 2=nir
 
   end type parameter_type
 

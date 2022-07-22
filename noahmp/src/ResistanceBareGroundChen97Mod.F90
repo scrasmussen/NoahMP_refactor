@@ -75,7 +75,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
-              CZIL            => noahmp%energy%param%CZIL            ,& ! in,    Calculate roughness length of heat
+              ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Calculate roughness length of heat
               RefHeightAboveGround => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
               THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
               SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
@@ -94,9 +94,9 @@ contains
 
     ! ZTFC: RATIO OF ZOH/ZOM  LESS OR EQUAL THAN 1
     ! C......ZTFC=0.1
-    ! CZIL: CONSTANT C IN Zilitinkevich, S. S.1995,:NOTE ABOUT ZT
+    ! ZilitinkevichCoeff: CONSTANT C IN Zilitinkevich, S. S.1995,:NOTE ABOUT ZT
     ILECH = 0
-    ZILFC = -CZIL * VKRM * SQVISC
+    ZILFC = -ZilitinkevichCoeff * VKRM * SQVISC
     ZU    = Z0
     RDZ   = 1.0 / RefHeightAboveGround
     CXCH  = EXCM * RDZ

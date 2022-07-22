@@ -31,11 +31,11 @@ contains
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
-              HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
-              Z0MVT           => noahmp%energy%param%Z0MVT           ,& ! in,    momentum roughness length vegetated (m)
-              Z0SNO           => noahmp%energy%param%Z0SNO           ,& ! in,    snow surface roughness length (m)
-              Z0SOIL          => noahmp%energy%param%Z0SOIL          ,& ! in,    bare-soil roughness length (m) (i.e., under the canopy)
-              Z0LAKE          => noahmp%energy%param%Z0LAKE          ,& ! in,    lake surface roughness length (m)
+              HeightCanopyTop             => noahmp%energy%param%HeightCanopyTop             ,& ! in,    top of canopy (m)
+              RoughLenMomVeg           => noahmp%energy%param%RoughLenMomVeg           ,& ! in,    momentum roughness length vegetated (m)
+              RoughLenMomSno           => noahmp%energy%param%RoughLenMomSno           ,& ! in,    snow surface roughness length (m)
+              RoughLenMomSoil          => noahmp%energy%param%RoughLenMomSoil          ,& ! in,    bare-soil roughness length (m) (i.e., under the canopy)
+              RoughLenMomLake          => noahmp%energy%param%RoughLenMomLake          ,& ! in,    lake surface roughness length (m)
               TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
               Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
               Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
@@ -48,19 +48,19 @@ contains
     ! ground roughness length
     if ( SurfaceType == 2 ) then ! Lake 
        if ( TG <= ConstFreezePoint ) then
-          Z0MG = Z0LAKE * (1.0 - SnowCoverFrac) + SnowCoverFrac * Z0SNO
+          Z0MG = RoughLenMomLake * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSno
        else
-          Z0MG = Z0LAKE
+          Z0MG = RoughLenMomLake
        endif
     else  ! soil
-       Z0MG = Z0SOIL * (1.0 - SnowCoverFrac) + SnowCoverFrac * Z0SNO
+       Z0MG = RoughLenMomSoil * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSno
     endif
 
     ! surface roughness length and displacement height
     ZPDG = SnowDepth
     if ( VEG .eqv. .true. ) then
-       Z0M = Z0MVT
-       ZPD = 0.65 * HVT
+       Z0M = RoughLenMomVeg
+       ZPD = 0.65 * HeightCanopyTop
        if ( SnowDepth > ZPD ) ZPD = SnowDepth
     else
        Z0M = Z0MG
@@ -69,14 +69,14 @@ contains
 
     ! special case for urban
     if ( FlagUrban .eqv. .true. ) then
-       Z0MG = Z0MVT
-       ZPDG = 0.65 * HVT
+       Z0MG = RoughLenMomVeg
+       ZPDG = 0.65 * HeightCanopyTop
        Z0M  = Z0MG
        ZPD  = ZPDG
     endif
 
     ! reference height above ground
-    RefHeightAboveGround = max( ZPD, HVT ) + RefHeightAboveSfc
+    RefHeightAboveGround = max( ZPD, HeightCanopyTop ) + RefHeightAboveSfc
     if ( ZPDG >= RefHeightAboveGround ) RefHeightAboveGround = ZPDG + RefHeightAboveSfc
 
     end associate

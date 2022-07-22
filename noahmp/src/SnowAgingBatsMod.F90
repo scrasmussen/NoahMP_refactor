@@ -38,10 +38,10 @@ contains
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     main noahmp timestep (s)
               SnowMassFullCoverOld           => noahmp%water%param%SnowMassFullCoverOld            ,& ! in,     new snow mass to fully cover old snow [mm]
-              TAU0            => noahmp%energy%param%TAU0            ,& ! in,     snow aging parameter
-              GRAIN_GROWTH    => noahmp%energy%param%GRAIN_GROWTH    ,& ! in,     vapor diffusion snow growth factor
-              EXTRA_GROWTH    => noahmp%energy%param%EXTRA_GROWTH    ,& ! in,     extra snow growth factor near freezing
-              DIRT_SOOT       => noahmp%energy%param%DIRT_SOOT       ,& ! in,     dirt and soot effect factor
+              SnowAgeFacBats            => noahmp%energy%param%SnowAgeFacBats            ,& ! in,     snow aging parameter
+              SnowGrowVapFacBats    => noahmp%energy%param%SnowGrowVapFacBats    ,& ! in,     vapor diffusion snow growth factor
+              SnowGrowFrzFacBats    => noahmp%energy%param%SnowGrowFrzFacBats    ,& ! in,     extra snow growth factor near freezing
+              SnowSootFacBats       => noahmp%energy%param%SnowSootFacBats       ,& ! in,     dirt and soot effect factor
               TG              => noahmp%energy%state%TG              ,& ! in,     ground temperature (k)
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,     snow water equivalent [mm]
               SnowWaterEquivPrev          => noahmp%water%state%SnowWaterEquivPrev           ,& ! in,     snow water equivalent at previous time step (mm)
@@ -53,11 +53,11 @@ contains
     if ( SnowWaterEquiv <= 0.0 ) then
        TAUSS = 0.0
     else
-       DELA0 = MainTimeStep / TAU0
-       ARG   = GRAIN_GROWTH * (1.0/ConstFreezePoint - 1.0/TG)
+       DELA0 = MainTimeStep / SnowAgeFacBats
+       ARG   = SnowGrowVapFacBats * (1.0/ConstFreezePoint - 1.0/TG)
        AGE1  = exp(ARG)
-       AGE2  = exp( amin1( 0.0, EXTRA_GROWTH*ARG ) )
-       AGE3  = DIRT_SOOT
+       AGE2  = exp( amin1( 0.0, SnowGrowFrzFacBats*ARG ) )
+       AGE3  = SnowSootFacBats
        TAGE  = AGE1 + AGE2 + AGE3
        DELA  = DELA0 * TAGE
        DELS  = amax1( 0.0, SnowWaterEquiv-SnowWaterEquivPrev ) / SnowMassFullCoverOld

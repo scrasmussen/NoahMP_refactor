@@ -70,7 +70,7 @@ contains
     ! section 2.1.2 of Peters-Lidard et al. (1997, JGR, VOL 102(D4)).
     ! not in use because of the separation of the canopy layer from the ground.
     ! but this may represent the effects of leaf litter (Niu comments)
-    ! DF(1) = DF(1) * EXP (SBETA * SHDFAC)
+    ! DF(1) = DF(1) * EXP (SBETA * VegFracGreen)
 
     ! compute lake thermal properties (no consideration of turbulent mixing for this version)
     if ( SurfaceType == 2 ) then

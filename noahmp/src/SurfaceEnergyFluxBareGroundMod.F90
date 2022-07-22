@@ -62,6 +62,7 @@ contains
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
               PressureAirSurface      => noahmp%forcing%PressureAirSurface ,& ! in,    air pressure [Pa] at surface-atmosphere interface
+              ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Zilitinkevich Coefficient for exchange coefficient calculation
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
@@ -124,7 +125,7 @@ contains
        if ( ITER == 1 ) then
           Z0H = Z0M
        else
-          Z0H = Z0M !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0M))
+          Z0H = Z0M !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FV*Z0M))
        endif
 
        ! aerodyn resistances between reference heigths and d+z0v

@@ -34,13 +34,13 @@ contains
     associate(                                                        &
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
-              BATS_COSZ       => noahmp%energy%param%BATS_COSZ       ,& ! in,     zenith angle snow albedo adjustment
-              BATS_VIS_NEW    => noahmp%energy%param%BATS_VIS_NEW    ,& ! in,     new snow visible albedo
-              BATS_NIR_NEW    => noahmp%energy%param%BATS_NIR_NEW    ,& ! in,     new snow NIR albedo
-              BATS_VIS_AGE    => noahmp%energy%param%BATS_VIS_AGE    ,& ! in,     age factor for diffuse visible snow albedo
-              BATS_NIR_AGE    => noahmp%energy%param%BATS_NIR_AGE    ,& ! in,     age factor for diffuse NIR snow albedo
-              BATS_VIS_DIR    => noahmp%energy%param%BATS_VIS_DIR    ,& ! in,     cosz factor for direct visible snow albedo
-              BATS_NIR_DIR    => noahmp%energy%param%BATS_NIR_DIR    ,& ! in,     cosz factor for direct NIR snow albedo
+              SolarZenithAdjBats       => noahmp%energy%param%SolarZenithAdjBats       ,& ! in,     zenith angle snow albedo adjustment
+              FreshSnoAlbVisBats    => noahmp%energy%param%FreshSnoAlbVisBats    ,& ! in,     new snow visible albedo
+              FreshSnoAlbNirBats    => noahmp%energy%param%FreshSnoAlbNirBats    ,& ! in,     new snow NIR albedo
+              SnoAgeFacDifVisBats    => noahmp%energy%param%SnoAgeFacDifVisBats    ,& ! in,     age factor for diffuse visible snow albedo
+              SnoAgeFacDifNirBats    => noahmp%energy%param%SnoAgeFacDifNirBats    ,& ! in,     age factor for diffuse NIR snow albedo
+              SzaFacDirVisBats    => noahmp%energy%param%SzaFacDirVisBats    ,& ! in,     cosz factor for direct visible snow albedo
+              SzaFacDirNirBats    => noahmp%energy%param%SzaFacDirNirBats    ,& ! in,     cosz factor for direct NIR snow albedo
               FAGE            => noahmp%energy%state%FAGE            ,& ! in,     snow age factor
               ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
               ALBSNI          => noahmp%energy%state%ALBSNI           & ! out,    snow albedo for diffuse(1=vis, 2=nir)
@@ -52,15 +52,15 @@ contains
     ALBSNI(1: NumSWRadBand) = 0.0
 
     ! when CosSolarZenithAngle > 0
-    SL        = BATS_COSZ
+    SL        = SolarZenithAdjBats
     SL1       = 1.0 / SL
     SL2       = 2.0 * SL
     CF1       = ( (1.0 + SL1) / (1.0 + SL2*CosSolarZenithAngle) - SL1 )
     FZEN      = amax1( CF1, 0.0 )
-    ALBSNI(1) = BATS_VIS_NEW * ( 1.0 - BATS_VIS_AGE * FAGE )           ! vis diffuse
-    ALBSNI(2) = BATS_NIR_NEW * ( 1.0 - BATS_NIR_AGE * FAGE )           ! nir diffuse
-    ALBSND(1) = ALBSNI(1) + BATS_VIS_DIR * FZEN * (1.0 - ALBSNI(1))    ! vis direct
-    ALBSND(2) = ALBSNI(2) + BATS_NIR_DIR * FZEN * (1.0 - ALBSNI(2))    ! nir direct
+    ALBSNI(1) = FreshSnoAlbVisBats * ( 1.0 - SnoAgeFacDifVisBats * FAGE )           ! vis diffuse
+    ALBSNI(2) = FreshSnoAlbNirBats * ( 1.0 - SnoAgeFacDifNirBats * FAGE )           ! nir diffuse
+    ALBSND(1) = ALBSNI(1) + SzaFacDirVisBats * FZEN * (1.0 - ALBSNI(1))    ! vis direct
+    ALBSND(2) = ALBSNI(2) + SzaFacDirNirBats * FZEN * (1.0 - ALBSNI(2))    ! nir direct
 
     end associate
 

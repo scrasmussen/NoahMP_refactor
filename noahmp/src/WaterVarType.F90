@@ -14,10 +14,9 @@ module WaterVarType
   save
   private
 
-!=== define "flux" sub-type of water_type (water%flux%variable)
+!=== define "flux" sub-type of water (water%flux%variable)
   type :: flux_type
 
-    ! define specific water flux variables
     real(kind=kind_noahmp) :: RainfallRefHeight          ! liquid rainfall rate [mm/s] at reference height
     real(kind=kind_noahmp) :: SnowfallRefHeight          ! snowfall rate [mm/s] at reference height
     real(kind=kind_noahmp) :: PrecipTotRefHeight         ! total precipitation [mm/s] at reference height
@@ -74,10 +73,9 @@ module WaterVarType
   end type flux_type
 
 
-!=== define "state" sub-type of water_type (water%state%variable)
+!=== define "state" sub-type of water (water%state%variable)
   type :: state_type
 
-    ! define specific water state variables
     integer                :: IrrigationCntSprinkler     ! irrigation event number, Sprinkler
     integer                :: IrrigationCntMicro         ! irrigation event number, Micro
     integer                :: IrrigationCntFlood         ! irrigation event number, Flood
@@ -150,10 +148,9 @@ module WaterVarType
   end type state_type
 
 
-!=== define "parameter" sub-type of water_type (water%param%variable)
+!=== define "parameter" sub-type of water (water%param%variable)
   type :: parameter_type
 
-    ! define specific water parameter variables
     integer                :: DrainSoilLayerInd          ! starting soil layer for drainage
     integer                :: TileDrainTubeDepth         ! depth [m] of drain tube from the soil surface for simple scheme
     integer                :: NumSoilLayerRoot           ! number of soil layers with root present

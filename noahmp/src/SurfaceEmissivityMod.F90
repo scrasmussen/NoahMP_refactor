@@ -27,9 +27,9 @@ contains
     associate(                                                        &
               IndicatorIceSfc => noahmp%config%domain%IndicatorIceSfc ,& ! in,    indicator for ice point: 1->seaice; -1->land ice; 0->soil
               SurfaceType     => noahmp%config%domain%SurfaceType     ,& ! in,    surface type 1-soil; 2-lake
-              SNOW_EMIS       => noahmp%energy%param%SNOW_EMIS       ,& ! in,    snow emissivity
-              EG              => noahmp%energy%param%EG              ,& ! in,    emissivity soil surface
-              EICE            => noahmp%energy%param%EICE            ,& ! in,    emissivity ice surface
+              EmissivitySnow       => noahmp%energy%param%EmissivitySnow       ,& ! in,    snow emissivity
+              EmissivitySoilLake              => noahmp%energy%param%EmissivitySoilLake              ,& ! in,    emissivity soil surface
+              EmissivityIceSfc            => noahmp%energy%param%EmissivityIceSfc            ,& ! in,    emissivity ice surface
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
@@ -45,9 +45,9 @@ contains
 
     ! ground emissivity
     if ( IndicatorIceSfc == 1 ) then
-       EMG = EICE * (1.0 - SnowCoverFrac) + SNOW_EMIS * SnowCoverFrac  ! move hard-coded snow emissivity as a global parameter to MPTABLE
+       EMG = EmissivityIceSfc * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
     else
-       EMG = EG(SurfaceType) * (1.0 - SnowCoverFrac) + SNOW_EMIS * SnowCoverFrac
+       EMG = EmissivitySoilLake(SurfaceType) * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
     endif
 
     ! net surface emissivity

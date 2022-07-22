@@ -37,8 +37,8 @@ contains
               DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,    depth [m] of layer-bottom from soil surface
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,    logical flag for urban grid
               OptGroundResistanceEvap => noahmp%config%nmlist%OptGroundResistanceEvap,& ! in,    options for ground resistance to evaporation/sublimation
-              RSURF_EXP       => noahmp%energy%param%RSURF_EXP       ,& ! in,    exponent in the shape parameter for soil resistance
-              RSURF_SNOW      => noahmp%energy%param%RSURF_SNOW      ,& ! in,    surface resistance for snow(s/m)
+              ResistanceSoilExp       => noahmp%energy%param%ResistanceSoilExp       ,& ! in,    exponent in the shape parameter for soil resistance
+              ResistanceSnowSfc      => noahmp%energy%param%ResistanceSnowSfc      ,& ! in,    surface resistance for snow(s/m)
               SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,    saturated value of soil moisture [m3/m3]
               SoilMoistureWilt          => noahmp%water%param%SoilMoistureWilt           ,& ! in,    wilting point soil moisture [m3/m3]
               SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,    soil B parameter
@@ -63,7 +63,7 @@ contains
           ! taking the "residual water content" to be the wilting point, 
           ! and correcting the exponent on the D term (typo in SZ09 ?)
           L_RSURF = (-DepthSoilLayer(1)) * &
-                    (exp((1.0-min(1.0,SoilLiqWater(1)/SoilMoistureSat(1))) ** RSURF_EXP)-1.0) / (2.71828-1.0)
+                    (exp((1.0-min(1.0,SoilLiqWater(1)/SoilMoistureSat(1))) ** ResistanceSoilExp)-1.0) / (2.71828-1.0)
           D_RSURF = 2.2e-5 * SoilMoistureSat(1) * SoilMoistureSat(1) * &
                     (1.0 - SoilMoistureWilt(1)/SoilMoistureSat(1)) ** (2.0 + 3.0/SoilExpCoeffB(1))
           RSURF = L_RSURF / D_RSURF
@@ -73,7 +73,7 @@ contains
           RSURF = SnowCoverFrac * 1.0 + (1.0 - SnowCoverFrac) * exp(8.25 - 6.0*SoilEvapFac) 
        endif
        if ( OptGroundResistanceEvap == 4 ) then ! SnowCoverFrac weighted; snow RSURF set in MPTABLE v3.8
-          RSURF = 1.0 / ( SnowCoverFrac * (1.0/RSURF_SNOW) + (1.0 - SnowCoverFrac) * (1.0/max(RSURF,0.001)) )
+          RSURF = 1.0 / ( SnowCoverFrac * (1.0/ResistanceSnowSfc) + (1.0 - SnowCoverFrac) * (1.0/max(RSURF,0.001)) )
        endif
        if ( (SoilLiqWater(1) < 0.01) .and. (SnowDepth == 0.0) ) RSURF = 1.0e6
 

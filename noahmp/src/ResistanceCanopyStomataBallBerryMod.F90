@@ -68,11 +68,11 @@ contains
               CarboxylRateMaxQ10           => noahmp%biochem%param%CarboxylRateMaxQ10          ,& ! in,    change in maximum rate of carboxylation for every 10C temperature change
               PhotosynPathC3           => noahmp%biochem%param%PhotosynPathC3          ,& ! in,    C3 photosynthetic pathway indicator: 0. = c4, 1. = c3
               SlopeConductToPhotosyn => noahmp%biochem%param%SlopeConductToPhotosyn,& ! in,    slope of conductance-to-photosynthesis relationship
-              KC25            => noahmp%energy%param%KC25            ,& ! in,    co2 michaelis-menten constant at 25c (pa)
-              KO25            => noahmp%energy%param%KO25            ,& ! in,    o2 michaelis-menten constant at 25c (pa)
-              AKC             => noahmp%energy%param%AKC             ,& ! in,    q10 for kc25
-              AKO             => noahmp%energy%param%AKO             ,& ! in,    q10 for ko25
-              BP              => noahmp%energy%param%BP              ,& ! in,    minimum leaf conductance (umol/m**2/s)
+              Co2MmConst25C            => noahmp%energy%param%Co2MmConst25C            ,& ! in,    co2 michaelis-menten constant at 25c (pa)
+              O2MmConst25C            => noahmp%energy%param%O2MmConst25C            ,& ! in,    o2 michaelis-menten constant at 25c (pa)
+              Co2MmConstQ10             => noahmp%energy%param%Co2MmConstQ10             ,& ! in,    q10 for Co2MmConst25C
+              O2MmConstQ10             => noahmp%energy%param%O2MmConstQ10             ,& ! in,    q10 for ko25
+              ConductanceLeafMin              => noahmp%energy%param%ConductanceLeafMin              ,& ! in,    minimum leaf conductance (umol/m**2/s)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               ESTV            => noahmp%energy%state%ESTV            ,& ! in,    saturation vapor pressure at TV (pa)
               EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
@@ -94,10 +94,10 @@ contains
     ! Sunlit case
     if ( IndexShade == 0 ) then
 
-       ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
-       ! for RadPhotoActAbsSunlit  > 0, in which case RS <= RSMAX and photosynthesis >= 0
+       ! initialize RS=maximum value and photosynthesis=0 because will only do calculations
+       ! for RadPhotoActAbsSunlit  > 0, in which case RS <= maximum value and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
-       RSSUN  = 1.0 / BP * CF  
+       RSSUN  = 1.0 / ConductanceLeafMin * CF  
        PhotosynLeafSunlit = 0.0           
 
        if ( RadPhotoActAbsSunlit > 0.0 ) then
@@ -105,8 +105,8 @@ contains
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * RadPhotoActAbsSunlit
           J    = PPF * QuantumEfficiency25C
-          KC   = KC25 * F1(AKC, TC)
-          KO   = KO25 * F1(AKO, TC)
+          KC   = Co2MmConst25C * F1(Co2MmConstQ10, TC)
+          KO   = O2MmConst25C * F1(O2MmConstQ10, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
           VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
@@ -124,8 +124,8 @@ contains
              WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafSunlit = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafSunlit, MPE )
-             A      = SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = (SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight / CS + BP) * RLB - 1.0
+             A      = SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + ConductanceLeafMin
+             B      = (SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight / CS + ConductanceLeafMin) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )
@@ -148,10 +148,10 @@ contains
     ! same as Sunlit case but using shaded input and output
     if ( IndexShade == 1 ) then
 
-       ! initialize RS=RSMAX and photosynthesis=0 because will only do calculations
-       ! for RadPhotoActAbsShade  > 0, in which case RS <= RSMAX and photosynthesis >= 0
+       ! initialize RS=maximum value and photosynthesis=0 because will only do calculations
+       ! for RadPhotoActAbsShade  > 0, in which case RS <= maximum value and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
-       RSSHA  = 1.0 / BP * CF
+       RSSHA  = 1.0 / ConductanceLeafMin * CF
        PhotosynLeafShade = 0.0
 
        if ( RadPhotoActAbsShade > 0.0 ) then
@@ -159,8 +159,8 @@ contains
           TC   = TV - ConstFreezePoint
           PPF  = 4.6 * RadPhotoActAbsShade
           J    = PPF * QuantumEfficiency25C
-          KC   = KC25 * F1(AKC, TC)
-          KO   = KO25 * F1(AKO, TC)
+          KC   = Co2MmConst25C * F1(Co2MmConstQ10, TC)
+          KO   = O2MmConst25C * F1(O2MmConstQ10, TC)
           AWC  = KC * ( 1.0 + O2 / KO )
           CP   = 0.5 * KC / KO * O2 * 0.21
           VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
@@ -178,8 +178,8 @@ contains
              WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafShade = min( WJ, WC, WE ) * IndexGrowSeason
              CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafShade, MPE )
-             A      = SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + BP
-             B      = (SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight / CS + BP) * RLB - 1.0
+             A      = SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + ConductanceLeafMin
+             B      = (SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight / CS + ConductanceLeafMin) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
                 Q   = -0.5 * ( B + sqrt(B*B - 4.0*A*C) )

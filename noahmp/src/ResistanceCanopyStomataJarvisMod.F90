@@ -42,11 +42,11 @@ contains
     associate(                                                        &
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight,& ! in,  air pressure [Pa] at reference height
               SoilTranspFacAcc           => noahmp%water%state%SoilTranspFacAcc            ,& ! in,    accumulated soil water transpiration factor (0 to 1)
-              RGL             => noahmp%energy%param%RGL             ,& ! in,    Parameter used in radiation stress function
-              RSMIN           => noahmp%energy%param%RSMIN           ,& ! in,    Minimum stomatal resistance [s m-1]
-              RSMAX           => noahmp%energy%param%RSMAX           ,& ! in,    Maximal stomatal resistance [s m-1]
-              TOPT            => noahmp%energy%param%TOPT            ,& ! in,    Optimum transpiration air temperature [K]
-              HS              => noahmp%energy%param%HS              ,& ! in,    Parameter used in vapor pressure deficit function
+              RadiationStressFac             => noahmp%energy%param%RadiationStressFac             ,& ! in,    Parameter used in radiation stress function
+              ResistanceStomataMin           => noahmp%energy%param%ResistanceStomataMin           ,& ! in,    Minimum stomatal resistance [s m-1]
+              ResistanceStomataMax           => noahmp%energy%param%ResistanceStomataMax           ,& ! in,    Maximal stomatal resistance [s m-1]
+              AirTempOptimTransp            => noahmp%energy%param%AirTempOptimTransp            ,& ! in,    Optimum transpiration air temperature [K]
+              VaporPresDeficitFac              => noahmp%energy%param%VaporPresDeficitFac              ,& ! in,    Parameter used in vapor pressure deficit function
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
               RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
@@ -73,20 +73,20 @@ contains
        call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * RadPhotoActAbsSunlit / RGL
-       RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
+       FF  = 2.0 * RadPhotoActAbsSunlit / RadiationStressFac
+       RCS = (FF + ResistanceStomataMin / ResistanceStomataMax) / (1.0 + FF)
        RCS = max( RCS, 0.0001 )
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (TOPT - TV)**2.0 )
+       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TV)**2.0 )
        RCT = max( RCT, 0.0001 )
 
        ! contribution due to vapor pressure deficit
-       RCQ = 1.0 / ( 1.0 + HS * max(0.0, Q2SAT-Q2) )
+       RCQ = 1.0 / ( 1.0 + VaporPresDeficitFac * max(0.0, Q2SAT-Q2) )
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSUN  = RSMIN / (RCS * RCT * RCQ * SoilTranspFacAcc)
+       RSSUN  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafSunlit = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 0
@@ -102,20 +102,20 @@ contains
        call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * RadPhotoActAbsShade / RGL
-       RCS = (FF + RSMIN / RSMAX) / (1.0 + FF)
+       FF  = 2.0 * RadPhotoActAbsShade / RadiationStressFac
+       RCS = (FF + ResistanceStomataMin / ResistanceStomataMax) / (1.0 + FF)
        RCS = max( RCS, 0.0001 )
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (TOPT - TV)**2.0 )
+       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TV)**2.0 )
        RCT = max( RCT, 0.0001 )
 
        ! contribution due to vapor pressure deficit
-       RCQ = 1.0 / ( 1.0 + HS * max(0.0, Q2SAT-Q2) )
+       RCQ = 1.0 / ( 1.0 + VaporPresDeficitFac * max(0.0, Q2SAT-Q2) )
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSHA  = RSMIN / (RCS * RCT * RCQ * SoilTranspFacAcc)
+       RSSHA  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafShade = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 1

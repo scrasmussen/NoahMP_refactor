@@ -16,7 +16,6 @@ module ForcingVarType
 
   type, public :: forcing_type
 
-    ! define specific forcing variables
     real(kind=kind_noahmp) :: SpecHumidityRefHeight    ! Specific humidity [kg water vapor / kg moist air] forcing at reference height
     real(kind=kind_noahmp) :: TemperatureAirRefHeight  ! Air temperature [K] forcing at reference height
     real(kind=kind_noahmp) :: WindEastwardRefHeight    ! wind speed [m/s] in eastward dir at reference height

@@ -282,8 +282,8 @@ contains
     RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
     if ( RadLwEmitTot <= 0.0 ) then
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
-       write(6,*) 'input of SHDFAC with LAI'
-       write(6,*) 'SHDFAC=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG
+       write(6,*) 'input of VegFracGreen with LAI'
+       write(6,*) 'VegFrac=',FVEG,'VAI=',VAI,'TV=',TV,'TG=',TG
        write(6,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetTot=',RadLwNetTot,'SnowDepth=',SnowDepth
        !call wrf_error_fatal("STOP in Noah-MP")
     endif

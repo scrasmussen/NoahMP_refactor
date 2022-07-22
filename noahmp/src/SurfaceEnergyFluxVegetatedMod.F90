@@ -90,7 +90,8 @@ contains
               CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! in,    wetted or snowed fraction of the canopy
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! in,    canopy intercepted liquid water (mm)
               CanopyIce          => noahmp%water%state%CanopyIce           ,& ! in,    canopy intercepted ice [mm]
-              HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
+              HeightCanopyTop             => noahmp%energy%param%HeightCanopyTop             ,& ! in,    top of canopy (m)
+              ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Zilitinkevich Coefficient for exchange coefficient calculation
               RadSwAbsVeg             => noahmp%energy%flux%RadSwAbsVeg              ,& ! in,    solar radiation absorbed by vegetation (w/m2)
               RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
               HeatPrecipAdvCanopy            => noahmp%energy%flux%HeatPrecipAdvCanopy             ,& ! in,    precipitation advected heat - vegetation net (W/m2)
@@ -193,7 +194,7 @@ contains
     QSFC = 0.622 * EAIR / (PressureAirSurface - 0.378*EAIR)
 
     ! canopy height
-    HCAN = HVT
+    HCAN = HeightCanopyTop
     ! wind speed at canopy height
     !UC = UR * log(HCAN/Z0M) / log(RefHeightAboveGround/Z0M)
     UC = UR * log( (HCAN - ZPD + Z0M)/Z0M ) / log(RefHeightAboveGround/Z0M)   ! MB: add ZPD v3.7
@@ -219,8 +220,8 @@ contains
           Z0H  = Z0M
           Z0HG = Z0MG
        else
-          Z0H  = Z0M    !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0M))
-          Z0HG = Z0MG   !* exp(-CZIL * 0.4 * 258.2 * sqrt(FV*Z0MG))
+          Z0H  = Z0M    !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FV*Z0M))
+          Z0HG = Z0MG   !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FV*Z0MG))
        endif
 
        ! aerodyn resistances between RefHeightAboveGround and d+z0v

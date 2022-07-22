@@ -41,10 +41,10 @@ contains
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
-              RHOL            => noahmp%energy%param%RHOL            ,& ! in,    leaf reflectance: 1=vis, 2=nir
-              RHOS            => noahmp%energy%param%RHOS            ,& ! in,    stem reflectance: 1=vis, 2=nir
-              TAUL            => noahmp%energy%param%TAUL            ,& ! in,    leaf transmittance: 1=vis, 2=nir
-              TAUS            => noahmp%energy%param%TAUS            ,& ! in,    stem transmittance: 1=vis, 2=nir
+              ReflectanceLeaf            => noahmp%energy%param%ReflectanceLeaf            ,& ! in,    leaf reflectance: 1=vis, 2=nir
+              ReflectanceStem            => noahmp%energy%param%ReflectanceStem            ,& ! in,    stem reflectance: 1=vis, 2=nir
+              TransmittanceLeaf            => noahmp%energy%param%TransmittanceLeaf            ,& ! in,    leaf transmittance: 1=vis, 2=nir
+              TransmittanceStem            => noahmp%energy%param%TransmittanceStem            ,& ! in,    stem transmittance: 1=vis, 2=nir
               ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
               ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,   ground albedo (direct beam: vis, nir)
@@ -111,8 +111,8 @@ contains
        WL  = ELAI / max(VAI, MPE)
        WS  = ESAI / max(VAI, MPE)
        do IB = 1, NumSWRadBand
-          RHO(IB) = max( RHOL(IB)*WL + RHOS(IB)*WS, MPE )
-          TAU(IB) = max( TAUL(IB)*WL + TAUS(IB)*WS, MPE )
+          RHO(IB) = max( ReflectanceLeaf(IB)*WL + ReflectanceStem(IB)*WS, MPE )
+          TAU(IB) = max( TransmittanceLeaf(IB)*WL + TransmittanceStem(IB)*WS, MPE )
        enddo
 
        ! snow aging

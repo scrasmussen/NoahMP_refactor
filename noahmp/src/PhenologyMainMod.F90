@@ -48,12 +48,12 @@ contains
               Latitude        => noahmp%config%domain%Latitude    ,& ! in,    latitude (degree)
               NumDayInYear    => noahmp%config%domain%NumDayInYear ,& ! in,    Number of days in the particular year
               DayJulianInYear          => noahmp%config%domain%DayJulianInYear      ,& ! in,    Julian day of year
-              HVT             => noahmp%energy%param%HVT          ,& ! in,    top of canopy (m)
-              HVB             => noahmp%energy%param%HVB          ,& ! in,    bottom of canopy (m)
-              LAIM            => noahmp%energy%param%LAIM         ,& ! in,    monthly leaf area index, one-sided
-              SAIM            => noahmp%energy%param%SAIM         ,& ! in,    monthly stem area index, one-sided
-              SHDMAX          => noahmp%energy%param%SHDMAX       ,& ! in,    yearly maximum vegetation fraction
-              SHDFAC          => noahmp%energy%param%SHDFAC       ,& ! in,    green vegetation fraction
+              HeightCanopyTop             => noahmp%energy%param%HeightCanopyTop          ,& ! in,    top of canopy (m)
+              HeightCanopyBot             => noahmp%energy%param%HeightCanopyBot          ,& ! in,    bottom of canopy (m)
+              LeafAreaIndexMon            => noahmp%energy%param%LeafAreaIndexMon         ,& ! in,    monthly leaf area index, one-sided
+              StemAreaIndexMon            => noahmp%energy%param%StemAreaIndexMon         ,& ! in,    monthly stem area index, one-sided
+              VegFracAnnMax          => noahmp%energy%param%VegFracAnnMax       ,& ! in,    annual maximum vegetation fraction
+              VegFracGreen          => noahmp%energy%param%VegFracGreen       ,& ! in,    green vegetation fraction
               TemperatureMinPhotosyn            => noahmp%biochem%param%TemperatureMinPhotosyn        ,& ! in,    minimum temperature for photosynthesis (k)
               PlantGrowStage             => noahmp%biochem%state%PlantGrowStage         ,& ! in,    plant growing stage
               SnowDepth           => noahmp%water%state%SnowDepth         ,& ! in,    snow depth [m]
@@ -88,8 +88,8 @@ contains
           WT2 = 1.0 - WT1
           if ( IT1 <  1 ) IT1 = 12
           if ( IT2 > 12 ) IT2 = 1
-          LAI = WT1 * LAIM(IT1) + WT2 * LAIM(IT2)
-          SAI = WT1 * SAIM(IT1) + WT2 * SAIM(IT2)
+          LAI = WT1 * LeafAreaIndexMon(IT1) + WT2 * LeafAreaIndexMon(IT2)
+          SAI = WT1 * StemAreaIndexMon(IT1) + WT2 * StemAreaIndexMon(IT2)
        endif
 
        ! no dynamic vegetation, use input LAI time series
@@ -110,10 +110,10 @@ contains
     endif   ! CropType == 0
 
     ! vegetation fraction buried by snow
-    DB = min( max(SnowDepth-HVB,0.0), (HVT-HVB) )
-    FB = DB / max( 1.0e-06, (HVT-HVB) )   ! snow buried fraction
-    if ( (HVT > 0.0) .and. (HVT <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect changes to HVT in MPTABLE
-       SNOWHC = HVT * exp(-SnowDepth / 0.2)
+    DB = min( max(SnowDepth-HeightCanopyBot,0.0), (HeightCanopyTop-HeightCanopyBot) )
+    FB = DB / max( 1.0e-06, (HeightCanopyTop-HeightCanopyBot) )   ! snow buried fraction
+    if ( (HeightCanopyTop > 0.0) .and. (HeightCanopyTop <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect changes to HeightCanopyTop in MPTABLE
+       SNOWHC = HeightCanopyTop * exp(-SnowDepth / 0.2)
        FB     = min(SnowDepth, SNOWHC) / SNOWHC
     endif
 
@@ -133,15 +133,15 @@ contains
 
     ! compute vegetation fraction
     ! input green vegetation fraction should be consistent with LAI
-    ! use FVEG = SHDFAC from input
+    ! use FVEG = VegFracGreen from input
     if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 6) .or. (OptDynamicVeg == 7) ) then
-       FVEG = SHDFAC
+       FVEG = VegFracGreen
     ! computed FVEG from LAI & SAI
     elseif ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 8) ) then
        FVEG = 1.0 - exp(-0.52 * (LAI + SAI))
     ! use yearly maximum vegetation fraction
     elseif ( (OptDynamicVeg == 4) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 9) ) then
-       FVEG = SHDMAX
+       FVEG = VegFracAnnMax
     ! outside existing vegetation options
     else
        write(*,*) "Un-recognized dynamic vegetation option (OptDynamicVeg)... "
@@ -150,7 +150,7 @@ contains
     endif
     ! use maximum vegetation fraction for crop run
     if ( (OptCropModel > 0) .and. (CropType > 0) ) then
-       FVEG = SHDMAX
+       FVEG = VegFracAnnMax
     endif
 
     ! adjust unreasonable vegetation fraction

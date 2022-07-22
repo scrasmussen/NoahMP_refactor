@@ -62,14 +62,14 @@ contains
               OptCanopyRadiationTransfer => noahmp%config%nmlist%OptCanopyRadiationTransfer,& ! in,    options for canopy radiation transfer
               CosSolarZenithAngle        => noahmp%config%domain%CosSolarZenithAngle ,& ! in,    cosine solar zenith angle
               CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! in,    wetted or snowed fraction of the canopy
-              RC              => noahmp%energy%param%RC              ,& ! in,    tree crown radius (m)
-              HVT             => noahmp%energy%param%HVT             ,& ! in,    top of canopy (m)
-              HVB             => noahmp%energy%param%HVB             ,& ! in,    bottom of canopy (m)
-              DEN             => noahmp%energy%param%DEN             ,& ! in,    tree density (no. of trunks per m2)
-              XL              => noahmp%energy%param%XL              ,& ! in,    leaf/stem orientation index
-              OMEGAS          => noahmp%energy%param%OMEGAS          ,& ! in,    two-stream parameter omega for snow
-              BETADS          => noahmp%energy%param%BETADS          ,& ! in,    two-stream parameter betad for snow (dir rad)
-              BETAIS          => noahmp%energy%param%BETAIS          ,& ! in,    two-stream parameter betad for snow (dif rad)
+              TreeCrownRadius              => noahmp%energy%param%TreeCrownRadius              ,& ! in,    tree crown radius (m)
+              HeightCanopyTop             => noahmp%energy%param%HeightCanopyTop             ,& ! in,    top of canopy (m)
+              HeightCanopyBot             => noahmp%energy%param%HeightCanopyBot             ,& ! in,    bottom of canopy (m)
+              TreeDensity             => noahmp%energy%param%TreeDensity             ,& ! in,    tree density (no. of trunks per m2)
+              CanopyOrientIndex              => noahmp%energy%param%CanopyOrientIndex              ,& ! in,    leaf/stem orientation index
+              ScatterCoeffSnow          => noahmp%energy%param%ScatterCoeffSnow          ,& ! in,    Scattering coefficient for snow
+              UpscatterCoeffSnowDir          => noahmp%energy%param%UpscatterCoeffSnowDir          ,& ! in,    Upscattering parameters for snow for direct radiation
+              UpscatterCoeffSnowDif          => noahmp%energy%param%UpscatterCoeffSnowDif          ,& ! in,    Upscattering parameters for snow for diffuse radiation
               VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
               TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
               ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! in,    ground albedo (direct beam: vis, nir)
@@ -104,13 +104,13 @@ contains
        KOPEN = 1.0
     else
        if ( OptCanopyRadiationTransfer == 1 ) then
-          DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * RC**2)
-          HD      = HVT - HVB
+          DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * TreeCrownRadius**2)
+          HD      = HeightCanopyTop - HeightCanopyBot
           BB      = 0.5 * HD
-          THETAP  = atan( BB / RC * tan(acos(max(0.01, CosSolarZenithAngle))) )
-         !BGAP    = exp( DEN * ConstPI * RC**2 / cos(THETAP) )
-          BGAP    = exp( -DENFVEG * ConstPI * RC**2 / cos(THETAP) )
-          FA      = VAI / ( 1.33 * ConstPI * RC**3.0 * (BB/RC) * DENFVEG )
+          THETAP  = atan( BB / TreeCrownRadius * tan(acos(max(0.01, CosSolarZenithAngle))) )
+         !BGAP    = exp( TreeDensity * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
+          BGAP    = exp( -DENFVEG * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
+          FA      = VAI / ( 1.33 * ConstPI * TreeCrownRadius**3.0 * (BB/TreeCrownRadius) * DENFVEG )
           NEWVAI  = HD * FA
           WGAP    = (1.0 - BGAP) * exp(-0.5 * NEWVAI / CosSolarZenithAngle)
           GAP     = min( 1.0-FVEG, BGAP+WGAP )
@@ -134,7 +134,7 @@ contains
     ! weights of leaf and stem values.
 
     COSZI  = max( 0.001, CosSolarZenithAngle )
-    CHIL   = min( max(XL, -0.4), 0.6 )
+    CHIL   = min( max(CanopyOrientIndex, -0.4), 0.6 )
     if ( abs(CHIL) <= 0.01 ) CHIL = 0.01
     PHI1   = 0.5 - 0.633 * CHIL - 0.330 * CHIL * CHIL
     PHI2   = 0.877 * (1.0 - 2.0 * PHI1)
@@ -154,9 +154,9 @@ contains
        TMP1 = BETADL
        TMP2 = BETAIL
     else
-       TMP0 =   (1.0 - CanopyWetFrac) * OMEGAL          + CanopyWetFrac * OMEGAS(IB)
-       TMP1 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETADL + CanopyWetFrac * OMEGAS(IB) * BETADS ) / TMP0 ! direct
-       TMP2 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETAIL + CanopyWetFrac * OMEGAS(IB) * BETAIS ) / TMP0 ! diffuse
+       TMP0 =   (1.0 - CanopyWetFrac) * OMEGAL          + CanopyWetFrac * ScatterCoeffSnow(IB)
+       TMP1 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETADL + CanopyWetFrac * ScatterCoeffSnow(IB) * UpscatterCoeffSnowDir ) / TMP0 ! direct
+       TMP2 = ( (1.0 - CanopyWetFrac) * OMEGAL * BETAIL + CanopyWetFrac * ScatterCoeffSnow(IB) * UpscatterCoeffSnowDif ) / TMP0 ! diffuse
     endif
     OMEGA = TMP0
     BETAD = TMP1
