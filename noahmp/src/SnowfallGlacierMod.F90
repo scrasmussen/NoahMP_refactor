@@ -37,7 +37,7 @@ contains
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout,  snow water equivalent [mm]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout,  snow layer ice [mm]
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout,  snow layer liquid water [mm]
-              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout,  snow and soil layer temperature [k]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout,  thickness of snow/soil layers (m)
              ) 
 ! ----------------------------------------------------------------------
@@ -57,7 +57,7 @@ contains
        NEWNODE   =  1
        ThicknessSnowSoilLayer(0) = SnowDepth
        SnowDepth     = 0.0
-       STC(0)    = min(273.16, TemperatureAirRefHeight)   ! temporary setup
+       TemperatureSoilSnow(0)    = min(273.16, TemperatureAirRefHeight)   ! temporary setup
        SnowIce(0)  = SnowWaterEquiv
        SnowLiqWater(0)  = 0.0
     endif

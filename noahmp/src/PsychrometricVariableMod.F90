@@ -25,34 +25,34 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (K)
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (K)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (K)
               LATHEAV         => noahmp%energy%state%LATHEAV         ,& ! out,   latent heat of vaporization/subli (j/kg), canopy
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
-              FROZEN_CANOPY   => noahmp%energy%state%FROZEN_CANOPY   ,& ! out,   used to define latent heat pathway
-              FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! out,   frozen ground (logical) to define latent heat pathway
+              FlagFrozenCanopy   => noahmp%energy%state%FlagFrozenCanopy   ,& ! out,   used to define latent heat pathway
+              FlagFrozenGround   => noahmp%energy%state%FlagFrozenGround   ,& ! out,   frozen ground (logical) to define latent heat pathway
               GAMMAV          => noahmp%energy%state%GAMMAV          ,& ! out,   psychrometric constant (pa/K), canopy
               GAMMAG          => noahmp%energy%state%GAMMAG           & ! out,   psychrometric constant (pa/K), ground
              )
 ! ----------------------------------------------------------------------
 
     ! for canopy
-    if ( TV > ConstFreezePoint ) then   ! Barlage: add distinction between ground and vegetation in v3.6
+    if ( TemperatureCanopy > ConstFreezePoint ) then   ! Barlage: add distinction between ground and vegetation in v3.6
        LATHEAV       = ConstLatHeatVapor
-       FROZEN_CANOPY = .false.
+       FlagFrozenCanopy = .false.
     else
        LATHEAV       = ConstLatHeatSublim
-       FROZEN_CANOPY = .true.
+       FlagFrozenCanopy = .true.
     endif
     GAMMAV = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAV)
 
     ! for ground
-    if ( TG > ConstFreezePoint ) then
+    if ( TemperatureGrd > ConstFreezePoint ) then
        LATHEAG       = ConstLatHeatVapor
-       FROZEN_GROUND = .false.
+       FlagFrozenGround = .false.
     else
        LATHEAG       = ConstLatHeatSublim
-       FROZEN_GROUND = .true.
+       FlagFrozenGround = .true.
     endif
     GAMMAG = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAG)
 

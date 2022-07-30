@@ -1,6 +1,6 @@
 module ResistanceLeafToGroundMod
 
-!!! Compute under-canopy aerodynamic resistance (RAG) and leaf boundary layer resistance (RB)
+!!! Compute under-canopy aerodynamic resistance and leaf boundary layer resistance
 
   use Machine
   use NoahmpVarType
@@ -10,7 +10,7 @@ module ResistanceLeafToGroundMod
 
 contains
 
-  subroutine ResistanceLeafToGround(noahmp, ITER, VAI, HG)
+  subroutine ResistanceLeafToGround(noahmp, ITER, VegAreaIndEff, HG)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: RAGRB
@@ -22,7 +22,7 @@ contains
 
     integer               , intent(in   ) :: ITER         ! iteration index
     real(kind=kind_noahmp), intent(in   ) :: HG           ! temporary ground sensible heat flux (w/m2) in each iteration
-    real(kind=kind_noahmp), intent(in   ) :: VAI          ! temporary effective LAI+SAI with constraint (<=6.0)
+    real(kind=kind_noahmp), intent(in   ) :: VegAreaIndEff          ! temporary effective vegetation area index with constraint (<=6.0)
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variable
@@ -38,24 +38,23 @@ contains
     associate(                                                        &
               LeafDimLength           => noahmp%energy%param%LeafDimLength           ,& ! in,    characteristic leaf dimension (m)
               CanopyWindExtFac           => noahmp%energy%param%CanopyWindExtFac           ,& ! in,    canopy wind extinction parameter
-              RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (K)
-              TAH             => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
-              ZPD             => noahmp%energy%state%ZPD             ,& ! in,    zero plane displacement (m)
-              Z0MG            => noahmp%energy%state%Z0MG            ,& ! in,    roughness length, momentum, ground (m)
-              HCAN            => noahmp%energy%state%HCAN            ,& ! in,    canopy height (m) [note: hcan >= z0mg]
-              UC              => noahmp%energy%state%UC              ,& ! in,    wind speed at top of canopy (m/s)
-              Z0H             => noahmp%energy%state%Z0HV            ,& ! in,    roughness length, sensible heat (m), vegetated
-              Z0HG            => noahmp%energy%state%Z0HG            ,& ! in,    roughness length, sensible heat ground (m), below canopy
+              DensityAirRefHeight          => noahmp%energy%state%DensityAirRefHeight          ,& ! in,    density air (kg/m3)
+              TemperatureCanopyAir             => noahmp%energy%state%TemperatureCanopyAir             ,& ! in,    canopy air temperature (K)
+              ZeroPlaneDispSfc             => noahmp%energy%state%ZeroPlaneDispSfc             ,& ! in,    zero plane displacement (m)
+              RoughLenMomGrd            => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, ground (m)
+              CanopyHeight            => noahmp%energy%state%CanopyHeight            ,& ! in,    canopy height (m)
+              WindSpdCanopyTop              => noahmp%energy%state%WindSpdCanopyTop              ,& ! in,    wind speed at top of canopy (m/s)
+              RoughLenShCanopy             => noahmp%energy%state%RoughLenShCanopy            ,& ! in,    roughness length, sensible heat (m), canopy
+              RoughLenShVegGrd            => noahmp%energy%state%RoughLenShVegGrd            ,& ! in,    roughness length, sensible heat ground (m), below canopy
               FV              => noahmp%energy%state%FVV             ,& ! in,    friction velocity (m/s), vegetated
               FHG             => noahmp%energy%state%FHG             ,& ! inout, stability correction ground, below canopy
-              CWPC            => noahmp%energy%state%CWPC            ,& ! out,   canopy wind extinction coefficient
+              WindExtCoeffCanopy            => noahmp%energy%state%WindExtCoeffCanopy            ,& ! out,   canopy wind extinction coefficient
               MOZG            => noahmp%energy%state%MOZG            ,& ! out,   Monin-Obukhov stability parameter ground, below canopy
               MOLG            => noahmp%energy%state%MOLG            ,& ! out,   Monin-Obukhov length (m), ground, below canopy
-              RAMG            => noahmp%energy%state%RAMG            ,& ! out,   ground aerodynamic resistance for momentum (s/m)
-              RAHG            => noahmp%energy%state%RAHG            ,& ! out,   ground aerodynamic resistance for sensible heat (s/m)
-              RAWG            => noahmp%energy%state%RAWG            ,& ! out,   ground aerodynamic resistance for water vapor (s/m)
-              RB              => noahmp%energy%state%RB               & ! out,   bulk leaf boundary layer resistance (s/m)
+              ResistanceMomUndCan            => noahmp%energy%state%ResistanceMomUndCan            ,& ! out,   ground aerodynamic resistance for momentum (s/m)
+              ResistanceShUndCan            => noahmp%energy%state%ResistanceShUndCan            ,& ! out,   ground aerodynamic resistance for sensible heat (s/m)
+              ResistanceLhUndCan            => noahmp%energy%state%ResistanceLhUndCan            ,& ! out,   ground aerodynamic resistance for water vapor (s/m)
+              ResistanceLeafBoundary              => noahmp%energy%state%ResistanceLeafBoundary               & ! out,   bulk leaf boundary layer resistance (s/m)
              )
 ! ----------------------------------------------------------------------
 
@@ -66,10 +65,10 @@ contains
 
     ! stability correction to below canopy resistance
     if ( ITER > 1 ) then
-       TMP1 = ConstVonKarman * (ConstGravityAcc / TAH) * HG / (RHOAIR * ConstHeatCapacAir)
+       TMP1 = ConstVonKarman * (ConstGravityAcc / TemperatureCanopyAir) * HG / (DensityAirRefHeight * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOLG = -1.0 * FV**3 / TMP1
-       MOZG = min( (ZPD-Z0MG)/MOLG, 1.0 )
+       MOZG = min( (ZeroPlaneDispSfc-RoughLenMomGrd)/MOLG, 1.0 )
     endif
     if ( MOZG < 0.0 ) then
        FHGNEW = (1.0 - 15.0 * MOZG)**(-0.25)
@@ -83,21 +82,21 @@ contains
     endif
 
     ! wind attenuation within canopy
-    CWPC    = (CanopyWindExtFac * VAI * HCAN * FHG)**0.5
-    TMP1    = exp( -CWPC * Z0HG / HCAN )
-    TMP2    = exp( -CWPC * (Z0H + ZPD) / HCAN )
-    TMPRAH2 = HCAN * exp(CWPC) / CWPC * (TMP1-TMP2)
+    WindExtCoeffCanopy    = (CanopyWindExtFac * VegAreaIndEff * CanopyHeight * FHG)**0.5
+    TMP1    = exp( -WindExtCoeffCanopy * RoughLenShVegGrd / CanopyHeight )
+    TMP2    = exp( -WindExtCoeffCanopy * (RoughLenShCanopy + ZeroPlaneDispSfc) / CanopyHeight )
+    TMPRAH2 = CanopyHeight * exp(WindExtCoeffCanopy) / WindExtCoeffCanopy * (TMP1-TMP2)
 
-    ! aerodynamic resistances raw and rah between heights zpd+z0h and z0hg.
-    KH   = max ( ConstVonKarman * FV * (HCAN-ZPD), MPE )
-    RAMG = 0.0
-    RAHG = TMPRAH2 / KH
-    RAWG = RAHG
+    ! aerodynamic resistances raw and rah between heights ZeroPlaneDisp+RoughLenShVegGrd and RoughLenShVegGrd.
+    KH   = max ( ConstVonKarman * FV * (CanopyHeight-ZeroPlaneDispSfc), MPE )
+    ResistanceMomUndCan = 0.0
+    ResistanceShUndCan = TMPRAH2 / KH
+    ResistanceLhUndCan = ResistanceShUndCan
 
     ! leaf boundary layer resistance
-    TMPRB = CWPC * 50.0 / ( 1.0 - exp(-CWPC/2.0) )
-    RB    = TMPRB * sqrt(LeafDimLength / UC)
-    RB    = min( max(RB, 5.0), 50.0 ) ! limit RB to 5-50, typically RB<50
+    TMPRB = WindExtCoeffCanopy * 50.0 / ( 1.0 - exp(-WindExtCoeffCanopy/2.0) )
+    ResistanceLeafBoundary    = TMPRB * sqrt(LeafDimLength / WindSpdCanopyTop)
+    ResistanceLeafBoundary    = min( max(ResistanceLeafBoundary, 5.0), 50.0 ) ! limit ResistanceLeafBoundary to 5-50, typically <50
 
     end associate
 

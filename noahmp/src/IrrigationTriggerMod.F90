@@ -5,7 +5,7 @@ module IrrigationTriggerMod
 !!! capacity. There are two options here to trigger the irrigation scheme based on MAD
 !!! OptIrrigation = 1 -> if irrigated fraction > threshold fraction
 !!! OptIrrigation = 2 -> if irrigated fraction > threshold fraction and within crop season
-!!! OptIrrigation = 3 -> if irrigated fraction > threshold fraction and LAI > threshold LAI
+!!! OptIrrigation = 3 -> if irrigated fraction > threshold fraction and LeafAreaIndex > threshold LeafAreaIndex
 
   use Machine
   use NoahmpVarType
@@ -50,8 +50,8 @@ contains
               IrriTriggerLaiMin         => noahmp%water%param%IrriTriggerLaiMin          ,& ! in,     minimum lai to trigger irrigation
               SoilWatDeficitAllow         => noahmp%water%param%SoilWatDeficitAllow          ,& ! in,     management allowable deficit (0-1)
               IrriFloodLossFrac          => noahmp%water%param%IrriFloodLossFrac           ,& ! in,     factor of flood irrigation loss
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,     greeness vegetation fraction (-)
-              LAI             => noahmp%energy%state%LAI             ,& ! in,     leaf area index (m2/m2)
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,     greeness vegetation fraction (-)
+              LeafAreaIndex             => noahmp%energy%state%LeafAreaIndex             ,& ! in,     leaf area index (m2/m2)
               IrrigationFracGrid          => noahmp%water%state%IrrigationFracGrid           ,& ! in,     irrigated area fraction of a grid
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
               IrrigationFracMicro           => noahmp%water%state%IrrigationFracMicro            ,& ! in,     fraction of grid under micro irrigation (0 to 1)
@@ -72,8 +72,8 @@ contains
     if ( OptIrrigation == 2 ) then ! activate irrigation if within crop season
        if ( (DayJulianInYear < DatePlanting) .or. (DayJulianInYear > (DateHarvest-IrriStopDayBfHarvest)) ) &
           IRR_ACTIVE = .false.
-    elseif ( OptIrrigation == 3) then ! activate if LAI > threshold LAI
-       if ( LAI < IrriTriggerLaiMin) IRR_ACTIVE = .false.
+    elseif ( OptIrrigation == 3) then ! activate if LeafAreaIndex > threshold LeafAreaIndex
+       if ( LeafAreaIndex < IrriTriggerLaiMin) IRR_ACTIVE = .false.
     elseif ( (OptIrrigation > 3) .or. (OptIrrigation < 1) ) then
        IRR_ACTIVE = .false.
     endif
@@ -93,7 +93,7 @@ contains
       if ( (SMCAVL/SMCLIM) <= SoilWatDeficitAllow ) then
          ! amount of water need to be added to bring soil moisture back to 
          ! field capacity, i.e., irrigation water amount (m)
-         IRRWATAMT = ( SMCLIM - SMCAVL ) * IrrigationFracGrid * FVEG
+         IRRWATAMT = ( SMCLIM - SMCAVL ) * IrrigationFracGrid * VegFrac
 
          ! sprinkler irrigation amount (m) based on 2D IrrigationFracSprinkler
          if ( (IrrigationAmtSprinkler == 0.0) .and. (IrrigationFracSprinkler > 0.0) .and. (OptIrrigationMethod == 0) ) then

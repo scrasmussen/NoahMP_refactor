@@ -40,8 +40,8 @@ contains
 !------------------------------------------------------------------------
     associate(                                                        &
               RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation (W/m2) at reference height
-              T2M              => noahmp%energy%state%T2M            ,& ! in,    2-m air temperature (K)
-              XLAI             => noahmp%energy%state%LAI            ,& ! in,    leaf area index, unadjusted for burying by snow
+              TemperatureAir2m              => noahmp%energy%state%TemperatureAir2m            ,& ! in,    2-m air temperature (K)
+              LeafAreaIndex             => noahmp%energy%state%LeafAreaIndex            ,& ! in,    leaf area index, unadjusted for burying by snow
               PhotosynRadFrac            => noahmp%biochem%param%PhotosynRadFrac         ,& ! in,    Fraction of incoming solar radiation to photosynthetically active radiation
               TempMinCarbonAssim          => noahmp%biochem%param%TempMinCarbonAssim       ,& ! in,    Minimum temperature for CO2 assimulation [C]
               TempMaxCarbonAssim          => noahmp%biochem%param%TempMaxCarbonAssim       ,& ! in,    CO2 assimulation linearly increasing until reaching this temperature [C]
@@ -55,7 +55,7 @@ contains
 !------------------------------------------------------------------------
 
     ! initialize
-    TC  = T2M - 273.15
+    TC  = TemperatureAir2m - 273.15
     PAR = PhotosynRadFrac * RadSwDownRefHeight * 0.0036  !w to MJ m-2
 
     ! compute Maximum CO2 assimulation rate g/co2/s
@@ -66,19 +66,19 @@ contains
     elseif ( (TC >= TempMaxCarbonAssim) .and. (TC < TempMaxCarbonAssimMax) ) then
        Amax = CarbonAssimRefMax
     else
-       Amax= CarbonAssimRefMax - 0.2 * (T2M - TempMaxCarbonAssimMax)
+       Amax= CarbonAssimRefMax - 0.2 * (TemperatureAir2m - TempMaxCarbonAssimMax)
     endif              
     Amax = max(Amax, 0.01)
 
     ! compute coefficients
-    if ( XLAI <= 0.05 ) then
-       L1 = 0.1127 * 0.05   !use initial LAI(0.05), avoid error
+    if ( LeafAreaIndex <= 0.05 ) then
+       L1 = 0.1127 * 0.05   !use initial LeafAreaIndex(0.05), avoid error
        L2 = 0.5    * 0.05
        L3 = 0.8873 * 0.05
     else
-       L1 = 0.1127 * XLAI
-       L2 = 0.5    * XLAI
-       L3 = 0.8873 * XLAI
+       L1 = 0.1127 * LeafAreaIndex
+       L2 = 0.5    * LeafAreaIndex
+       L3 = 0.8873 * LeafAreaIndex
     endif
 
     I1 = LightExtCoeff * PAR * exp(-LightExtCoeff * L1)
@@ -93,10 +93,10 @@ contains
     A3 = Amax * (1 - exp(-LighUseEfficiency * I3 / Amax))
 
     ! compute photosynthesis rate
-    if ( XLAI <= 0.05 ) then
+    if ( LeafAreaIndex <= 0.05 ) then
        A = (A1 + A2 + A3) / 3.6 * 0.05
-    elseif ( (XLAI > 0.05) .and. (XLAI <= 4.0) ) then
-       A = (A1 + A2 + A3) / 3.6 * XLAI
+    elseif ( (LeafAreaIndex > 0.05) .and. (LeafAreaIndex <= 4.0) ) then
+       A = (A1 + A2 + A3) / 3.6 * LeafAreaIndex
     else
        A = (A1 + A2 + A3) / 3.6 * 4
     endif    

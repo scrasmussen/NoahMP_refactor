@@ -36,33 +36,33 @@ contains
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
               FlagUrban      => noahmp%config%domain%FlagUrban     ,& ! in,     logical flag for urban grid
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,     snow depth [m]
-              STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
-              DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
-              HCPCT           => noahmp%energy%state%HCPCT           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
-              FACT            => noahmp%energy%state%FACT            ,& ! out,    energy factor for soil & snow phase change
-              CVSNO           => noahmp%energy%state%CVSNO           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
-              TKSNO           => noahmp%energy%state%TKSNO           ,& ! out,    snow layer thermal conductivity (w/m/k)
-              CVSOIL          => noahmp%energy%state%CVSOIL          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
-              TKSOIL          => noahmp%energy%state%TKSOIL           & ! out,    soil layer thermal conductivity (w/m/k)
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,     snow and soil layer temperature [k]
+              ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
+              HeatCapacSoilSnow           => noahmp%energy%state%HeatCapacSoilSnow           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
+              PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! out,    energy factor for soil & snow phase change
+              HeatCapacVolSnow           => noahmp%energy%state%HeatCapacVolSnow           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
+              ThermConductSnow           => noahmp%energy%state%ThermConductSnow           ,& ! out,    snow layer thermal conductivity (w/m/k)
+              HeatCapacVolSoil          => noahmp%energy%state%HeatCapacVolSoil          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
+              ThermConductSoil          => noahmp%energy%state%ThermConductSoil           & ! out,    soil layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
     ! compute snow thermal conductivity and heat capacity
     call SnowThermalProperty(noahmp)
     do IZ = NumSnowLayerNeg+1, 0
-       DF   (IZ) = TKSNO(IZ)
-       HCPCT(IZ) = CVSNO(IZ)
+       ThermConductSoilSnow   (IZ) = ThermConductSnow(IZ)
+       HeatCapacSoilSnow(IZ) = HeatCapacVolSnow(IZ)
     enddo
 
     ! compute soil thermal properties
     call SoilThermalProperty(noahmp)
     do IZ = 1, NumSoilLayer
-       DF   (IZ) = TKSOIL(IZ)
-       HCPCT(IZ) = CVSOIL(IZ)
+       ThermConductSoilSnow   (IZ) = ThermConductSoil(IZ)
+       HeatCapacSoilSnow(IZ) = HeatCapacVolSoil(IZ)
     enddo
     if ( FlagUrban .eqv. .true. ) then
        do IZ = 1, NumSoilLayer
-          DF(IZ) = 3.24
+          ThermConductSoilSnow(IZ) = 3.24
        enddo
     endif
 
@@ -70,31 +70,31 @@ contains
     ! section 2.1.2 of Peters-Lidard et al. (1997, JGR, VOL 102(D4)).
     ! not in use because of the separation of the canopy layer from the ground.
     ! but this may represent the effects of leaf litter (Niu comments)
-    ! DF(1) = DF(1) * EXP (SBETA * VegFracGreen)
+    ! ThermConductSoilSnow(1) = ThermConductSoilSnow(1) * EXP (SBETA * VegFracGreen)
 
     ! compute lake thermal properties (no consideration of turbulent mixing for this version)
     if ( SurfaceType == 2 ) then
        do IZ = 1, NumSoilLayer
-          if ( STC(IZ) > ConstFreezePoint) then
-             HCPCT(IZ) = ConstHeatCapacWater
-             DF(IZ)    = ConstThermConductWater  !+ KEDDY * ConstHeatCapacWater 
+          if ( TemperatureSoilSnow(IZ) > ConstFreezePoint) then
+             HeatCapacSoilSnow(IZ) = ConstHeatCapacWater
+             ThermConductSoilSnow(IZ)    = ConstThermConductWater  !+ KEDDY * ConstHeatCapacWater 
           else
-             HCPCT(IZ) = ConstHeatCapacIce
-             DF(IZ)    = ConstThermConductIce
+             HeatCapacSoilSnow(IZ) = ConstHeatCapacIce
+             ThermConductSoilSnow(IZ)    = ConstThermConductIce
           endif
        enddo
     endif
 
     ! combine a temporary variable used for melting/freezing of snow and frozen soil
     do IZ = NumSnowLayerNeg+1, NumSoilLayer
-       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * ThicknessSnowSoilLayer(IZ))
+       PhaseChgFacSoilSnow(IZ) = MainTimeStep / (HeatCapacSoilSnow(IZ) * ThicknessSnowSoilLayer(IZ))
     enddo
 
     ! snow/soil interface
     if ( NumSnowLayerNeg == 0 ) then
-       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SnowDepth) / (SnowDepth + ThicknessSnowSoilLayer(1))
+       ThermConductSoilSnow(1) = (ThermConductSoilSnow(1)*ThicknessSnowSoilLayer(1) + 0.35*SnowDepth) / (SnowDepth + ThicknessSnowSoilLayer(1))
     else
-       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + DF(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
+       ThermConductSoilSnow(1) = (ThermConductSoilSnow(1)*ThicknessSnowSoilLayer(1) + ThermConductSoilSnow(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
     endif
 
     end associate

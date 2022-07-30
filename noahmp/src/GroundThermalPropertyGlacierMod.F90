@@ -34,12 +34,11 @@ contains
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,     thickness of snow/soil layers (m)
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,     actual number of snow layers (negative)
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,     snow depth [m]
-              STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
-              DF              => noahmp%energy%state%DF              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
-              HCPCT           => noahmp%energy%state%HCPCT           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
-              FACT            => noahmp%energy%state%FACT            ,& ! out,    energy factor for soil & snow phase change
-              CVSNO           => noahmp%energy%state%CVSNO           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
-              TKSNO           => noahmp%energy%state%TKSNO           ,& ! out,    snow layer thermal conductivity (w/m/k)
+              ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! out,    thermal conductivity [w/m/k] for all soil & snow
+              HeatCapacSoilSnow           => noahmp%energy%state%HeatCapacSoilSnow           ,& ! out,    heat capacity [j/m3/k] for all soil & snow
+              PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! out,    energy factor for soil & snow phase change
+              HeatCapacVolSnow           => noahmp%energy%state%HeatCapacVolSnow           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
+              ThermConductSnow           => noahmp%energy%state%ThermConductSnow           ,& ! out,    snow layer thermal conductivity (w/m/k)
               CVGLAICE        => noahmp%energy%state%CVGLAICE        ,& ! out,    glacier ice layer volumetric specific heat (j/m3/k)
               TKGLAICE        => noahmp%energy%state%TKGLAICE         & ! out,    glacier ice layer thermal conductivity (w/m/k)
              )
@@ -48,27 +47,27 @@ contains
     ! compute snow thermal conductivity and heat capacity
     call SnowThermalProperty(noahmp)
     do IZ = NumSnowLayerNeg+1, 0
-       DF   (IZ) = TKSNO(IZ)
-       HCPCT(IZ) = CVSNO(IZ)
+       ThermConductSoilSnow   (IZ) = ThermConductSnow(IZ)
+       HeatCapacSoilSnow(IZ) = HeatCapacVolSnow(IZ)
     enddo
 
     ! compute glacier ice thermal properties (using Noah glacial ice approximations)
     call GlacierIceThermalProperty(noahmp)
     do IZ = 1, NumSoilLayer
-       DF   (IZ) = TKGLAICE(IZ)
-       HCPCT(IZ) = CVGLAICE(IZ)
+       ThermConductSoilSnow   (IZ) = TKGLAICE(IZ)
+       HeatCapacSoilSnow(IZ) = CVGLAICE(IZ)
     enddo
 
     ! combine a temporary variable used for melting/freezing of snow and glacier ice
     do IZ = NumSnowLayerNeg+1, NumSoilLayer
-       FACT(IZ) = MainTimeStep / (HCPCT(IZ) * ThicknessSnowSoilLayer(IZ))
+       PhaseChgFacSoilSnow(IZ) = MainTimeStep / (HeatCapacSoilSnow(IZ) * ThicknessSnowSoilLayer(IZ))
     enddo
 
     ! snow/glacier ice interface
     if ( NumSnowLayerNeg == 0 ) then
-       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + 0.35*SnowDepth) / (SnowDepth + ThicknessSnowSoilLayer(1))
+       ThermConductSoilSnow(1) = (ThermConductSoilSnow(1)*ThicknessSnowSoilLayer(1) + 0.35*SnowDepth) / (SnowDepth + ThicknessSnowSoilLayer(1))
     else
-       DF(1) = (DF(1)*ThicknessSnowSoilLayer(1) + DF(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
+       ThermConductSoilSnow(1) = (ThermConductSoilSnow(1)*ThicknessSnowSoilLayer(1) + ThermConductSoilSnow(0)*ThicknessSnowSoilLayer(0)) / (ThicknessSnowSoilLayer(0) + ThicknessSnowSoilLayer(1))
     endif
 
     end associate

@@ -46,7 +46,7 @@ contains
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,    soil water content [m3/m3]
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (K)
               RSURF           => noahmp%energy%state%RSURF           ,& ! out,   ground surface resistance (s/m)
               RHSUR           => noahmp%energy%state%RHSUR            & ! out,   raltive humidity in surface soil/snow air space (-)
              )
@@ -78,7 +78,7 @@ contains
        if ( (SoilLiqWater(1) < 0.01) .and. (SnowDepth == 0.0) ) RSURF = 1.0e6
 
        SoilMatPotentialSfc = -SoilMatPotentialSat(1) * (max(0.01,SoilLiqWater(1)) / SoilMoistureSat(1)) ** (-SoilExpCoeffB(1))
-       RHSUR = SnowCoverFrac + (1.0 - SnowCoverFrac) * exp(SoilMatPotentialSfc * ConstGravityAcc / (ConstGasWaterVapor * TG))
+       RHSUR = SnowCoverFrac + (1.0 - SnowCoverFrac) * exp(SoilMatPotentialSfc * ConstGravityAcc / (ConstGasWaterVapor * TemperatureGrd))
     endif
 
     ! urban

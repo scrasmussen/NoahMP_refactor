@@ -44,7 +44,7 @@ contains
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout,  snow layer liquid water [mm]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil liquid moisture (m3/m3)
               SoilIce            => noahmp%water%state%SoilIce             ,& ! inout,  soil ice moisture (m3/m3)
-              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout,  snow and soil layer temperature [k]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,   surface ponding [mm] from liquid in thin snow layer combination
               PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,  surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
@@ -81,7 +81,7 @@ contains
           ! shift all elements above this down by one.
           if ( (J > NumSnowLayerNeg+1) .and. (NumSnowLayerNeg < -1) ) then
              do I = J, NumSnowLayerNeg+2, -1
-                STC(I)    = STC(I-1)
+                TemperatureSoilSnow(I)    = TemperatureSoilSnow(I-1)
                 SnowLiqWater(I)  = SnowLiqWater(I-1)
                 SnowIce(I)  = SnowIce(I-1)
                 ThicknessSnowSoilLayer(I) = ThicknessSnowSoilLayer(I-1)
@@ -145,13 +145,13 @@ contains
              endif
 
              ! update combined snow water & temperature
-             call SnowLayerWaterCombo(ThicknessSnowSoilLayer(J), SnowLiqWater(J), SnowIce(J), STC(J), &
-                                      ThicknessSnowSoilLayer(L), SnowLiqWater(L), SnowIce(L), STC(L) )
+             call SnowLayerWaterCombo(ThicknessSnowSoilLayer(J), SnowLiqWater(J), SnowIce(J), TemperatureSoilSnow(J), &
+                                      ThicknessSnowSoilLayer(L), SnowLiqWater(L), SnowIce(L), TemperatureSoilSnow(L) )
 
              ! Now shift all elements above this down one.
              if ( (J-1) > (NumSnowLayerNeg+1) ) then
                 do K = J-1, NumSnowLayerNeg+2, -1
-                   STC(K)    = STC(K-1)
+                   TemperatureSoilSnow(K)    = TemperatureSoilSnow(K-1)
                    SnowIce(K)  = SnowIce(K-1)
                    SnowLiqWater(K)  = SnowLiqWater(K-1)
                    ThicknessSnowSoilLayer(K) = ThicknessSnowSoilLayer(K-1)

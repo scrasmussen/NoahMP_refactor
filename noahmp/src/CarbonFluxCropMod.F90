@@ -67,10 +67,10 @@ contains
               NitrogenConcFoliage => noahmp%biochem%state%NitrogenConcFoliage ,& ! in,    foliage nitrogen concentration (%)
               IndexPlanting             => noahmp%biochem%state%IndexPlanting            ,& ! in,    Planting index
               PlantGrowStage             => noahmp%biochem%state%PlantGrowStage            ,& ! in,    plant growing stage
-              STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              XLAI            => noahmp%energy%state%LAI             ,& ! inout, leaf area index [-]
-              XSAI            => noahmp%energy%state%SAI             ,& ! inout, stem area index [-]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [K]
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              LeafAreaIndex            => noahmp%energy%state%LeafAreaIndex             ,& ! inout, leaf area index [-]
+              StemAreaIndex            => noahmp%energy%state%StemAreaIndex             ,& ! inout, stem area index [-]
               LeafMass          => noahmp%biochem%state%LeafMass         ,& ! inout, leaf mass [g/m2]
               RootMass          => noahmp%biochem%state%RootMass         ,& ! inout, mass of fine roots [g/m2]
               StemMass          => noahmp%biochem%state%StemMass         ,& ! inout, stem mass [g/m2]
@@ -134,8 +134,8 @@ contains
 
     ! mainteinance respiration
     RespFacNitrogenFoliage     = min( NitrogenConcFoliage / max(1.0e-06, NitrogenConcFoliageMax), 1.0 )
-    RespFacTemperature      = RespMaintQ10**((TV - 298.16) / 10.0)
-    RespirationLeaf    = RespMaintLeaf25C * RespFacTemperature * RespFacNitrogenFoliage * XLAI * (1.0 - SoilWaterStress)         ! umol/m2/s
+    RespFacTemperature      = RespMaintQ10**((TemperatureCanopy - 298.16) / 10.0)
+    RespirationLeaf    = RespMaintLeaf25C * RespFacTemperature * RespFacNitrogenFoliage * LeafAreaIndex * (1.0 - SoilWaterStress)         ! umol/m2/s
     RespirationLeafMaint  = min( (LeafMass - LeafMassMin) / MainTimeStep, RespirationLeaf*30.0e-6 )       ! g/m2/s
     RespirationRoot  = RespMaintRoot25C * (RootMass * 1.0e-3) * RespFacTemperature * 30.0e-6         ! g/m2/s
     RespirationStem  = RespMaintStem25C * (StemMass * 1.0e-3) * RespFacTemperature * 30.0e-6         ! g/m2/s
@@ -151,7 +151,7 @@ contains
     TurnoverLeaf  = TurnoverCoeffLeafCrop(PlantGrowStage) * 1.0e-6 * LeafMass
     TurnoverRoot  = TurnoverCoeffRootCrop(PlantGrowStage) * 1.0e-6 * RootMass
     TurnoverStem  = TurnoverCoeffStemCrop(PlantGrowStage) * 1.0e-6 * StemMass
-    SC      = exp( -0.3 * max(0.0, TV-TemperaureLeafFreeze) ) * (LeafMass/120.0)
+    SC      = exp( -0.3 * max(0.0, TemperatureCanopy-TemperaureLeafFreeze) ) * (LeafMass/120.0)
     SD      = exp( (SoilWaterStress - 1.0) * WaterStressCoeff )
     DeathLeaf = LeafMass * 1.0e-6 * &
                (LeafDeathWaterCoeffCrop(PlantGrowStage) * SD + LeafDeathTempCoeffCrop(PlantGrowStage) * SC)
@@ -218,7 +218,7 @@ contains
     CarbonMassShallowSoil = CarbonMassShallowSoil + &
                             (TurnoverRoot+TurnoverLeaf+TurnoverStem+DeathLeaf) * MainTimeStep 
     !endif
-    MicroRespFactorSoilTemp    = 2.0**((STC(1) - 283.16) / 10.0)
+    MicroRespFactorSoilTemp    = 2.0**((TemperatureSoilSnow(1) - 283.16) / 10.0)
     MicroRespFactorSoilWater    = SoilWaterRootZone / (0.20 + SoilWaterRootZone) * 0.23 / (0.23 + SoilWaterRootZone)
     RespirationSoil = MicroRespFactorSoilWater * MicroRespFactorSoilTemp * &
                       MicroRespCoeff * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
@@ -241,8 +241,8 @@ contains
     CarbonMassLiveTot  = LeafMass + RootMass + GrainMass        
  
     ! leaf area index and stem area index
-    XLAI   = max( LeafMass*LeafAreaPerBiomass, LeafAreaIndexMin )
-    XSAI   = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
+    LeafAreaIndex   = max( LeafMass*LeafAreaPerBiomass, LeafAreaIndexMin )
+    StemAreaIndex   = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
    
     ! After harversting
     !if ( PlantGrowStage == 8 ) then
@@ -254,8 +254,8 @@ contains
     !if ( (PlantGrowStage == 1) .or. (PlantGrowStage == 2) .or. (PlantGrowStage == 8) ) then
     if ( (PlantGrowStage == 8) .and. &
          ((GrainMass > 0.0) .or. (LeafMass > 0) .or. (StemMass > 0) .or. (RootMass > 0)) ) then
-       XLAI   = 0.05
-       XSAI   = 0.05
+       LeafAreaIndex   = 0.05
+       StemAreaIndex   = 0.05
        LeafMass = LeafMassMin
        StemMass = StemMassMin
        RootMass = 0

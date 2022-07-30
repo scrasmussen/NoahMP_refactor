@@ -28,16 +28,16 @@ contains
               EmissivitySnow       => noahmp%energy%param%EmissivitySnow       ,& ! in,    snow emissivity
               EmissivityIceSfc            => noahmp%energy%param%EmissivityIceSfc            ,& ! in,    emissivity ice surface
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
-              EMG             => noahmp%energy%state%EMG             ,& ! out,   ground emissivity
-              EMISSI          => noahmp%energy%state%EMISSI           & ! out,   surface emissivity
+              EmissivityGrd             => noahmp%energy%state%EmissivityGrd             ,& ! out,   ground emissivity
+              EmissivitySfc          => noahmp%energy%state%EmissivitySfc           & ! out,   surface emissivity
              )
 ! ----------------------------------------------------------------------
 
     ! ground emissivity
-    EMG = EmissivityIceSfc * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
+    EmissivityGrd = EmissivityIceSfc * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
 
     ! surface emissivity
-    EMISSI = EMG
+    EmissivitySfc = EmissivityGrd
 
     end associate
 

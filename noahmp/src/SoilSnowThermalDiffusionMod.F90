@@ -50,9 +50,9 @@ contains
               OptSnowSoilTempTime      => noahmp%config%nmlist%OptSnowSoilTempTime      ,& ! in,  options for snow/soil temperature time scheme
               TemperatureSoilBottom    => noahmp%forcing%TemperatureSoilBottom          ,& ! in,  bottom boundary soil temperature [K]
               ZBOT            => noahmp%energy%state%ZBOTSNO         ,& ! in,    depth of lower boundary condition (m) from snow surface
-              STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
-              DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
-              HCPCT           => noahmp%energy%state%HCPCT           ,& ! in,    heat capacity [j/m3/k] for all soil & snow
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [K]
+              ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
+              HeatCapacSoilSnow           => noahmp%energy%state%HeatCapacSoilSnow           ,& ! in,    heat capacity [j/m3/k] for all soil & snow
               HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! in,    total ground heat flux (w/m2) [+ to soil/snow]
               RadSwPenetrateGrd             => noahmp%energy%flux%RadSwPenetrateGrd              ,& ! in,    light penetrating through soil/snow water (W/m2)
               HeatFromSoilBot          => noahmp%energy%flux%HeatFromSoilBot             & ! out,   energy influx from soil bottom (w/m2)
@@ -78,28 +78,28 @@ contains
     ! compute gradient and flux of soil/snow thermal diffusion
     do K = NumSnowLayerNeg+1, NumSoilLayer
        if ( K == (NumSnowLayerNeg+1) ) then
-          DENOM(K) = - DepthSnowSoilLayer(K) * HCPCT(K)
+          DENOM(K) = - DepthSnowSoilLayer(K) * HeatCapacSoilSnow(K)
           TEMP1    = - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
-          DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
-          EFLUX(K) = DF(K) * DTSDZ(K) - HeatGroundTot - RadSwPenetrateGrd(K)
+          DTSDZ(K) = 2.0 * (TemperatureSoilSnow(K) - TemperatureSoilSnow(K+1)) / TEMP1
+          EFLUX(K) = ThermConductSoilSnow(K) * DTSDZ(K) - HeatGroundTot - RadSwPenetrateGrd(K)
        elseif ( K < NumSoilLayer ) then
-          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
+          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HeatCapacSoilSnow(K)
           TEMP1    = DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K+1)
           DDZ(K)   = 2.0 / TEMP1
-          DTSDZ(K) = 2.0 * (STC(K) - STC(K+1)) / TEMP1
-          EFLUX(K) = ( DF(K)*DTSDZ(K) - DF(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
+          DTSDZ(K) = 2.0 * (TemperatureSoilSnow(K) - TemperatureSoilSnow(K+1)) / TEMP1
+          EFLUX(K) = ( ThermConductSoilSnow(K)*DTSDZ(K) - ThermConductSoilSnow(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
        elseif ( K == NumSoilLayer ) then
-          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HCPCT(K)
+          DENOM(K) = (DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)) * HeatCapacSoilSnow(K)
           TEMP1    =  DepthSnowSoilLayer(K-1) - DepthSnowSoilLayer(K)
           if ( OptSoilTemperatureBottom == 1 ) then
              HeatFromSoilBot = 0.0
           endif
           if ( OptSoilTemperatureBottom == 2 ) then
-             DTSDZ(K) = (STC(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - ZBOT)
-             HeatFromSoilBot   = -DF(K) * DTSDZ(K)
+             DTSDZ(K) = (TemperatureSoilSnow(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - ZBOT)
+             HeatFromSoilBot   = -ThermConductSoilSnow(K) * DTSDZ(K)
           endif
-          EFLUX(K) = ( -HeatFromSoilBot - DF(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
+          EFLUX(K) = ( -HeatFromSoilBot - ThermConductSoilSnow(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)
        endif
     enddo
 
@@ -107,19 +107,19 @@ contains
     do K = NumSnowLayerNeg+1, NumSoilLayer
        if ( K == (NumSnowLayerNeg+1) ) then
           AI(K) =   0.0
-          CI(K) = - DF(K)   * DDZ(K) / DENOM(K)
+          CI(K) = - ThermConductSoilSnow(K)   * DDZ(K) / DENOM(K)
           if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
              BI(K) = - CI(K)
           endif
           if ( OptSnowSoilTempTime == 2 ) then
-             BI(K) = - CI(K) + DF(K) / ( 0.5*DepthSnowSoilLayer(K)*DepthSnowSoilLayer(K)*HCPCT(K) )
+             BI(K) = - CI(K) + ThermConductSoilSnow(K) / ( 0.5*DepthSnowSoilLayer(K)*DepthSnowSoilLayer(K)*HeatCapacSoilSnow(K) )
           endif
        elseif ( K < NumSoilLayer ) then
-          AI(K) = - DF(K-1) * DDZ(K-1) / DENOM(K)
-          CI(K) = - DF(K  ) * DDZ(K  ) / DENOM(K)
+          AI(K) = - ThermConductSoilSnow(K-1) * DDZ(K-1) / DENOM(K)
+          CI(K) = - ThermConductSoilSnow(K  ) * DDZ(K  ) / DENOM(K)
           BI(K) = - (AI(K) + CI (K))
        elseif ( K == NumSoilLayer ) then
-          AI(K) = - DF(K-1) * DDZ(K-1) / DENOM(K)
+          AI(K) = - ThermConductSoilSnow(K-1) * DDZ(K-1) / DENOM(K)
           CI(K) = 0.0
           BI(K) = - (AI(K) + CI(K))
        endif

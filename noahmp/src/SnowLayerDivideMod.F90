@@ -41,7 +41,7 @@ contains
     associate(                                                        &
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,    maximum number of snow layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! inout, actual number of snow layers (negative)
-              STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [k]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [k]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout, thickness of snow/soil layers (m)
@@ -63,7 +63,7 @@ contains
           DZ(J)    = ThicknessSnowSoilLayer(J+NumSnowLayerNeg)
           SWICE(J) = SnowIce(J+NumSnowLayerNeg)
           SWLIQ(J) = SnowLiqWater(J+NumSnowLayerNeg)
-          TSNO(J)  = STC(J+NumSnowLayerNeg)
+          TSNO(J)  = TemperatureSoilSnow(J+NumSnowLayerNeg)
        endif
     enddo
 
@@ -144,7 +144,7 @@ contains
        ThicknessSnowSoilLayer(J) = DZ(J-NumSnowLayerNeg)
        SnowIce(J)  = SWICE(J-NumSnowLayerNeg)
        SnowLiqWater(J)  = SWLIQ(J-NumSnowLayerNeg)
-       STC(J)    = TSNO(J-NumSnowLayerNeg)
+       TemperatureSoilSnow(J)    = TSNO(J-NumSnowLayerNeg)
     enddo
 
     end associate

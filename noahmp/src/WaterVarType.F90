@@ -155,7 +155,7 @@ module WaterVarType
     integer                :: TileDrainTubeDepth         ! depth [m] of drain tube from the soil surface for simple scheme
     integer                :: NumSoilLayerRoot           ! number of soil layers with root present
     integer                :: IrriStopDayBfHarvest       ! number of days before harvest date to stop irrigation
-    real(kind=kind_noahmp) :: CanopyLiqHoldCap           ! maximum canopy intercepted liquid water per unit lai+sai [mm]
+    real(kind=kind_noahmp) :: CanopyLiqHoldCap           ! maximum canopy intercepted liquid water per unit veg area index [mm]
     real(kind=kind_noahmp) :: SnowCompactBurdenFac       ! overburden snow compaction parameter [m3/kg]
     real(kind=kind_noahmp) :: SnowCompactAgingFac1       ! snow desctructive metamorphism compaction parameter1 [1/s]
     real(kind=kind_noahmp) :: SnowCompactAgingFac2       ! snow desctructive metamorphism compaction parameter2 [1/k]

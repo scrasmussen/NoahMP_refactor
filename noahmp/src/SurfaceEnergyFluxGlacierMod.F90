@@ -1,9 +1,9 @@
 module SurfaceEnergyFluxGlacierMod
 
 !!! Compute surface energy fluxes and budget for bare ground (glacier)
-!!! Use newton-raphson iteration to solve for ground (tg) temperatures
+!!! Use newton-raphson iteration to solve for ground temperatures
 !!! Surface energy balance (bare soil):
-!!! Ground level: -SAB + RadLwNetBareGrd[TG] + HeatSensibleBareGrd[TG] + HeatLatentBareGrd[TG] + HeatGroundBareGrd[TG] = 0
+!!! Ground level: -RadSwAbsGrd + RadLwNetBareGrd + HeatSensibleBareGrd + HeatLatentBareGrd + HeatGroundBareGrd = 0
 
   use Machine
   use NoahmpVarType
@@ -67,38 +67,37 @@ contains
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,    glacier/soil water content [m3/m3]
               RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
               HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
-              THAIR           => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)           
-              EAIR            => noahmp%energy%state%EAIR            ,& ! in,    vapor pressure air (pa) at reference height
+              WindSpdRefHeight              => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
+              PressureVaporRefHeight            => noahmp%energy%state%PressureVaporRefHeight            ,& ! in,    vapor pressure air (pa) at reference height
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,    specific humidity (kg/kg) at reference height
-              RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
+              DensityAirRefHeight          => noahmp%energy%state%DensityAirRefHeight          ,& ! in,    density air (kg/m3)
               RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
-              EMG             => noahmp%energy%state%EMG             ,& ! in,    ground emissivity
-              STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [k]
-              DF              => noahmp%energy%state%DF              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
+              EmissivityGrd             => noahmp%energy%state%EmissivityGrd             ,& ! in,    ground emissivity
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [k]
+              ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
               RSURF           => noahmp%energy%state%RSURF           ,& ! in,    ground surface resistance (s/m)
-              Z0M             => noahmp%energy%state%Z0MG            ,& ! in,    roughness length, momentum, ground (m)
+              RoughLenMomGrd             => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, ground (m)
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,    latent heat of vaporization/subli (j/kg), ground
               GAMMAG          => noahmp%energy%state%GAMMAG          ,& ! in,    psychrometric constant (pa/K), ground
-              QSFC            => noahmp%energy%state%QSFC            ,& ! inout, water vapor mixing ratio at lowest model layer
-              TGB             => noahmp%energy%state%TGB             ,& ! inout, bare ground temperature (K)
-              CM              => noahmp%energy%state%CMB             ,& ! inout, momentum exchange coefficient (m/s), above ZPD, bare ground
-              CH              => noahmp%energy%state%CHB             ,& ! inout, heat exchange coefficient (m/s), above ZPD, bare ground
-              TAUXB           => noahmp%energy%state%TAUXB           ,& ! out,   wind stress: east-west (n/m2) bare ground
-              TAUYB           => noahmp%energy%state%TAUYB           ,& ! out,   wind stress: north-south (n/m2) bare ground
-              T2MB            => noahmp%energy%state%T2MB            ,& ! out,   2 m height air temperature (k) bare ground
-              Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
+              SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! inout, specific humidity at bare surface
+              TemperatureGrdBare             => noahmp%energy%state%TemperatureGrdBare             ,& ! inout, bare ground temperature (K)
+              CM              => noahmp%energy%state%CMB             ,& ! inout, momentum exchange coefficient (m/s), above ZeroPlaneDisp, bare ground
+              CH              => noahmp%energy%state%CHB             ,& ! inout, heat exchange coefficient (m/s), above ZeroPlaneDisp, bare ground
+              WindStressEwBare           => noahmp%energy%state%WindStressEwBare           ,& ! out,   wind stress: east-west (n/m2) bare ground
+              WindStressNsBare           => noahmp%energy%state%WindStressNsBare           ,& ! out,   wind stress: north-south (n/m2) bare ground
+              TemperatureAir2mBare            => noahmp%energy%state%TemperatureAir2mBare            ,& ! out,   2 m height air temperature (k) bare ground
+              SpecHumidity2mBare            => noahmp%energy%state%SpecHumidity2mBare             ,& ! out,   bare ground 2-m specific humidity
               EHB             => noahmp%energy%state%EHB             ,& ! out,   bare ground sensible heat exchange coefficient (m/s)
               EHB2            => noahmp%energy%state%EHB2            ,& ! out,   bare ground 2-m sensible heat exchange coefficient (m/s)
               EMB             => noahmp%energy%state%EMB             ,& ! out,   bare ground momentum exchange coefficient (m/s)
               FV              => noahmp%energy%state%FVB             ,& ! out,   friction velocity (m/s), vegetated
-              Z0H             => noahmp%energy%state%Z0HB            ,& ! out,   roughness length, sensible heat (m), bare ground
-              RAWB            => noahmp%energy%state%RAWB            ,& ! out,   aerodynamic resistance for water vapor (s/m), bare ground
-              RAHB            => noahmp%energy%state%RAHB            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
-              RAMB            => noahmp%energy%state%RAMB            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
-              ESTG            => noahmp%energy%state%ESTB            ,& ! out,   bare ground saturation vapor pressure at TG (pa)
-              DESTG           => noahmp%energy%state%DESTB           ,& ! out,   bare ground d(ESTB)/dt at TG (pa/k)
-              MOZ             => noahmp%energy%state%MOZB            ,& ! out,   Monin-Obukhov stability (z/L), above ZPD, bare ground
+              RoughLenShBareGrd             => noahmp%energy%state%RoughLenShBareGrd            ,& ! out,   roughness length, sensible heat (m), bare ground
+              ResistanceLhBareGrd            => noahmp%energy%state%ResistanceLhBareGrd            ,& ! out,   aerodynamic resistance for water vapor (s/m), bare ground
+              ResistanceShBareGrd            => noahmp%energy%state%ResistanceShBareGrd            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
+              ResistanceMomBareGrd            => noahmp%energy%state%ResistanceMomBareGrd            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
+              VapPresSatGrdBare            => noahmp%energy%state%VapPresSatGrdBare            ,& ! out,   bare ground saturation vapor pressure at TemperatureGrd (pa)
+              VapPresSatGrdBareTempD           => noahmp%energy%state%VapPresSatGrdBareTempD           ,& ! out,   bare ground d(VapPresSatGrdBare)/dt at TemperatureGrd (pa/k)
+              MOZ             => noahmp%energy%state%MOZB            ,& ! out,   Monin-Obukhov stability (z/L), above ZeroPlaneDisp, bare ground
               FH2             => noahmp%energy%state%FH2B            ,& ! out,   M-O sen heat stability correction, 2m, bare ground
               RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
               HeatSensibleBareGrd             => noahmp%energy%flux%HeatSensibleBareGrd              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
@@ -115,8 +114,8 @@ contains
     H      = 0.0
     MoistureFluxSfc    = 0.0
     FV     = 0.1
-    CIR    = EMG * ConstStefanBoltzmann
-    CGH    = 2.0 * DF(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
+    CIR    = EmissivityGrd * ConstStefanBoltzmann
+    CGH    = 2.0 * ThermConductSoilSnow(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
     allocate(SoilIceTmp(1:NumSoilLayer))
     SoilIceTmp = 0.0
 
@@ -124,93 +123,93 @@ contains
     loop3: do ITER = 1, NITERB
 
        ! ground roughness length
-       Z0H = Z0M
+       RoughLenShBareGrd = RoughLenMomGrd
 
        ! aerodyn resistances between heights reference height and d+z0v
        call ResistanceBareGroundMOST(noahmp, ITER, H, MOZSGN)
 
        ! conductance variables for diagnostics         
-       EMB = 1.0 / RAMB
-       EHB = 1.0 / RAHB
+       EMB = 1.0 / ResistanceMomBareGrd
+       EHB = 1.0 / ResistanceShBareGrd
 
-       ! ES and d(ES)/dt evaluated at TG
-       T = TDC(TGB)
+       ! ES and d(ES)/dt evaluated at TemperatureGrd
+       T = TDC(TemperatureGrdBare)
        call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
        if ( T > 0.0 ) then
-          ESTG  = ESATW
-          DESTG = DSATW
+          VapPresSatGrdBare  = ESATW
+          VapPresSatGrdBareTempD = DSATW
        else
-          ESTG  = ESATI
-          DESTG = DSATI
+          VapPresSatGrdBare  = ESATI
+          VapPresSatGrdBareTempD = DSATI
        endif
 
        ! ground fluxes and temperature change
-       CSH = RHOAIR * ConstHeatCapacAir / RAHB
+       CSH = DensityAirRefHeight * ConstHeatCapacAir / ResistanceShBareGrd
        if ( (SnowDepth > 0.0) .or. (OptGlacierTreatment == 1) ) then
-          CEV = RHOAIR * ConstHeatCapacAir / GAMMAG / (RSURF + RAWB)
+          CEV = DensityAirRefHeight * ConstHeatCapacAir / GAMMAG / (RSURF + ResistanceLhBareGrd)
        else
           CEV = 0.0   ! don't allow any sublimation of glacier in OptGlacierTreatment=2
        endif
-       RadLwNetBareGrd = CIR * TGB**4 - EMG * RadLwDownRefHeight
-       HeatSensibleBareGrd = CSH * (TGB        - TemperatureAirRefHeight      )
-       HeatLatentBareGrd = CEV * (ESTG*RHSUR - EAIR        )
-       HeatGroundBareGrd = CGH * (TGB        - STC(NumSnowLayerNeg+1))
+       RadLwNetBareGrd = CIR * TemperatureGrdBare**4 - EmissivityGrd * RadLwDownRefHeight
+       HeatSensibleBareGrd = CSH * (TemperatureGrdBare        - TemperatureAirRefHeight      )
+       HeatLatentBareGrd = CEV * (VapPresSatGrdBare*RHSUR - PressureVaporRefHeight        )
+       HeatGroundBareGrd = CGH * (TemperatureGrdBare        - TemperatureSoilSnow(NumSnowLayerNeg+1))
        B   = RadSwAbsGrd - RadLwNetBareGrd - HeatSensibleBareGrd - HeatLatentBareGrd - HeatGroundBareGrd + HeatPrecipAdvBareGrd
-       A   = 4.0*CIR*TGB**3 + CSH + CEV*DESTG + CGH
+       A   = 4.0*CIR*TemperatureGrdBare**3 + CSH + CEV*VapPresSatGrdBareTempD + CGH
        DTG = B / A
-       RadLwNetBareGrd = RadLwNetBareGrd + 4.0 * CIR * TGB**3 * DTG
+       RadLwNetBareGrd = RadLwNetBareGrd + 4.0 * CIR * TemperatureGrdBare**3 * DTG
        HeatSensibleBareGrd = HeatSensibleBareGrd + CSH * DTG
-       HeatLatentBareGrd = HeatLatentBareGrd + CEV * DESTG * DTG
+       HeatLatentBareGrd = HeatLatentBareGrd + CEV * VapPresSatGrdBareTempD * DTG
        HeatGroundBareGrd = HeatGroundBareGrd + CGH * DTG
-       TGB = TGB + DTG  ! update ground temperature
+       TemperatureGrdBare = TemperatureGrdBare + DTG  ! update ground temperature
 
        ! for computing M-O length
-       H = CSH * (TGB - TemperatureAirRefHeight)
+       H = CSH * (TemperatureGrdBare - TemperatureAirRefHeight)
 
        ! update specific humidity
-       T = TDC(TGB)
+       T = TDC(TemperatureGrdBare)
        call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
        if ( T > 0.0 ) then
-          ESTG = ESATW
+          VapPresSatGrdBare = ESATW
        else
-          ESTG = ESATI
+          VapPresSatGrdBare = ESATI
        endif
-       QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirRefHeight - 0.378 * (ESTG*RHSUR))
-       MoistureFluxSfc  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
+       SpecHumiditySfcBare = 0.622 * (VapPresSatGrdBare*RHSUR) / (PressureAirRefHeight - 0.378 * (VapPresSatGrdBare*RHSUR))
+       MoistureFluxSfc  = (SpecHumiditySfcBare - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
 
     enddo loop3 ! end stability iteration
 
-    ! if snow on ground and TGB > freezing point: reset TGB = freezing point. reevaluate ground fluxes.
+    ! if snow on ground and TemperatureGrdBare > freezing point: reset TemperatureGrdBare = freezing point. reevaluate ground fluxes.
     SoilIceTmp = SoilMoisture - SoilLiqWater
     if ( (OptSnowSoilTempTime == 1) .or. (OptSnowSoilTempTime == 3) ) then
        if ( (maxval(SoilIceTmp) > 0.0 .or. SnowDepth > 0.05) .and. &
-            (TGB > ConstFreezePoint) .and. (OptGlacierTreatment == 1) ) then
-          TGB = ConstFreezePoint
-          T = TDC(TGB) ! MB: recalculate ESTG
+            (TemperatureGrdBare > ConstFreezePoint) .and. (OptGlacierTreatment == 1) ) then
+          TemperatureGrdBare = ConstFreezePoint
+          T = TDC(TemperatureGrdBare) ! MB: recalculate VapPresSatGrdBare
           call VaporPressureSaturation(T, ESATW, ESATI, DSATW, DSATI)
-          ESTG = ESATI
-          QSFC = 0.622 * (ESTG*RHSUR) / (PressureAirRefHeight - 0.378 * (ESTG*RHSUR))
-          MoistureFluxSfc  = (QSFC - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
-          RadLwNetBareGrd  = CIR * TGB**4 - EMG * RadLwDownRefHeight
-          HeatSensibleBareGrd  = CSH * (TGB        - TemperatureAirRefHeight)
-          HeatLatentBareGrd  = CEV * (ESTG*RHSUR - EAIR  )          !ESTG reevaluate ?
+          VapPresSatGrdBare = ESATI
+          SpecHumiditySfcBare = 0.622 * (VapPresSatGrdBare*RHSUR) / (PressureAirRefHeight - 0.378 * (VapPresSatGrdBare*RHSUR))
+          MoistureFluxSfc  = (SpecHumiditySfcBare - SpecHumidityRefHeight) * CEV * GAMMAG / ConstHeatCapacAir
+          RadLwNetBareGrd  = CIR * TemperatureGrdBare**4 - EmissivityGrd * RadLwDownRefHeight
+          HeatSensibleBareGrd  = CSH * (TemperatureGrdBare        - TemperatureAirRefHeight)
+          HeatLatentBareGrd  = CEV * (VapPresSatGrdBare*RHSUR - PressureVaporRefHeight  )          !VapPresSatGrdBare reevaluate ?
           HeatGroundBareGrd  = RadSwAbsGrd + HeatPrecipAdvBareGrd - (RadLwNetBareGrd + HeatSensibleBareGrd + HeatLatentBareGrd)
        endif
     endif
 
     ! wind stresses
-    TAUXB = -RHOAIR * CM * UR * WindEastwardRefHeight
-    TAUYB = -RHOAIR * CM * UR * WindNorthwardRefHeight
+    WindStressEwBare = -DensityAirRefHeight * CM * WindSpdRefHeight * WindEastwardRefHeight
+    WindStressNsBare = -DensityAirRefHeight * CM * WindSpdRefHeight * WindNorthwardRefHeight
 
     ! 2m air temperature
-    EHB2 = FV * ConstVonKarman / ( log((2.0+Z0H)/Z0H) - FH2 )
+    EHB2 = FV * ConstVonKarman / ( log((2.0+RoughLenShBareGrd)/RoughLenShBareGrd) - FH2 )
     CQ2B = EHB2
     if ( EHB2 < 1.0e-5 ) then
-       T2MB = TGB
-       Q2B  = QSFC
+       TemperatureAir2mBare = TemperatureGrdBare
+       SpecHumidity2mBare  = SpecHumiditySfcBare
     else
-       T2MB = TGB - HeatSensibleBareGrd / (RHOAIR*ConstHeatCapacAir) * 1.0 / EHB2
-       Q2B  = QSFC - HeatLatentBareGrd / (LATHEAG*RHOAIR) * (1.0/CQ2B + RSURF)
+       TemperatureAir2mBare = TemperatureGrdBare - HeatSensibleBareGrd / (DensityAirRefHeight*ConstHeatCapacAir) * 1.0 / EHB2
+       SpecHumidity2mBare  = SpecHumiditySfcBare - HeatLatentBareGrd / (LATHEAG*DensityAirRefHeight) * (1.0/CQ2B + RSURF)
     endif
 
     ! update CH 

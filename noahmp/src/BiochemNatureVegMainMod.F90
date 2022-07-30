@@ -55,8 +55,8 @@ contains
               RespirationSoilOrg           => noahmp%biochem%flux%RespirationSoilOrg         ,& ! out,   soil organic respiration [g/m2/s C]
               CarbonMassSoilTot            => noahmp%biochem%state%CarbonMassSoilTot         ,& ! out,   total soil carbon [g/m2 C]
               CarbonMassLiveTot            => noahmp%biochem%state%CarbonMassLiveTot         ,& ! out,   total living carbon ([g/m2 C]
-              XLAI             => noahmp%energy%state%LAI            ,& ! out,   leaf area index [-]
-              XSAI             => noahmp%energy%state%SAI            ,& ! out,   stem area index [-]
+              LeafAreaIndex             => noahmp%energy%state%LeafAreaIndex            ,& ! out,   leaf area index [-]
+              StemAreaIndex             => noahmp%energy%state%StemAreaIndex            ,& ! out,   stem area index [-]
               SoilWaterRootZone            => noahmp%water%state%SoilWaterRootZone           ,& ! out,   root zone soil water [-]
               SoilWaterStress           => noahmp%water%state%SoilWaterStress          ,& ! out,   water stress coeficient [-]  (1. for wilting)
               LeafAreaPerMass             => noahmp%biochem%state%LeafAreaPerMass           & ! out,   leaf area per unit mass [m2/g]
@@ -71,8 +71,8 @@ contains
     ! no biogeochemistry in non-vegetated points
     if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
          (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
-       XLAI   = 0.0
-       XSAI   = 0.0
+       LeafAreaIndex   = 0.0
+       StemAreaIndex   = 0.0
        GrossPriProduction    = 0.0
        NetPriProductionTot    = 0.0
        NetEcoExchange    = 0.0

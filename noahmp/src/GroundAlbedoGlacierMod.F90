@@ -30,16 +30,16 @@ contains
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,     snow cover fraction [-]
               AlbedoLandIce          => noahmp%energy%param%AlbedoLandIce          ,& ! in,     albedo land ice: 1=vis, 2=nir
-              ALBSND          => noahmp%energy%state%ALBSND          ,& ! in,     snow albedo for direct(1=vis, 2=nir)
-              ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! in,     snow albedo for diffuse(1=vis, 2=nir)
-              ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,    ground albedo (direct beam: vis, nir)
-              ALBGRI          => noahmp%energy%state%ALBGRI           & ! out,    ground albedo (diffuse: vis, nir)
+              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! in,     snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif          ,& ! in,     snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! out,    ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif           & ! out,    ground albedo (diffuse: vis, nir)
              )
 ! ----------------------------------------------------------------------
 
     do IB = 1, NumSWRadBand
-       ALBGRD(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + ALBSND(IB) * SnowCoverFrac
-       ALBGRI(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + ALBSNI(IB) * SnowCoverFrac
+       AlbedoGrdDir(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + AlbedoSnowDir(IB) * SnowCoverFrac
+       AlbedoGrdDif(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + AlbedoSnowDif(IB) * SnowCoverFrac
     enddo
 
     end associate

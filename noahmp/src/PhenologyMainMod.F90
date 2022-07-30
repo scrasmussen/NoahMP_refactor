@@ -1,6 +1,6 @@
 module PhenologyMainMod
 
-!!! Main Phenology module to estimate vegetation phenology (LAI, SAI, FVEG)
+!!! Main Phenology module to estimate vegetation phenology
 !!! considering vegeation canopy being buries by snow and evolution in time
 
   use Machine
@@ -27,7 +27,6 @@ contains
     integer                          :: K           ! index
     integer                          :: IT1,IT2     ! interpolation months
     real(kind=kind_noahmp)           :: DB          ! thickness of canopy buried by snow (m)
-    real(kind=kind_noahmp)           :: FB          ! fraction of canopy buried by snow
     real(kind=kind_noahmp)           :: SNOWHC      ! critical snow depth at which short vege is fully covered by snow
     real(kind=kind_noahmp)           :: DAY         ! current day of year (0<=DAY<NumDayInYear)
     real(kind=kind_noahmp)           :: WT1,WT2     ! interpolation weights
@@ -57,21 +56,21 @@ contains
               TemperatureMinPhotosyn            => noahmp%biochem%param%TemperatureMinPhotosyn        ,& ! in,    minimum temperature for photosynthesis (k)
               PlantGrowStage             => noahmp%biochem%state%PlantGrowStage         ,& ! in,    plant growing stage
               SnowDepth           => noahmp%water%state%SnowDepth         ,& ! in,    snow depth [m]
-              TV              => noahmp%energy%state%TV           ,& ! in,    vegetation temperature (k)
-              TROOT           => noahmp%energy%state%TROOT        ,& ! in,    root-zone averaged temperature (k)
-              LAI             => noahmp%energy%state%LAI          ,& ! inout, LAI, unadjusted for burying by snow
-              SAI             => noahmp%energy%state%SAI          ,& ! inout, SAI, unadjusted for burying by snow
-              ELAI            => noahmp%energy%state%ELAI         ,& ! out,   leaf area index, after burying by snow
-              ESAI            => noahmp%energy%state%ESAI         ,& ! out,   stem area index, after burying by snow
-              FVEG            => noahmp%energy%state%FVEG         ,& ! out,   green vegetation fraction 
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy           ,& ! in,    vegetation temperature (k)
+              LeafAreaIndex             => noahmp%energy%state%LeafAreaIndex          ,& ! inout, LeafAreaIndex, unadjusted for burying by snow
+              StemAreaIndex             => noahmp%energy%state%StemAreaIndex          ,& ! inout, StemAreaIndex, unadjusted for burying by snow
+              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff         ,& ! out,   leaf area index, after burying by snow
+              StemAreaIndEff            => noahmp%energy%state%StemAreaIndEff         ,& ! out,   stem area index, after burying by snow
+              VegFrac            => noahmp%energy%state%VegFrac         ,& ! out,   green vegetation fraction 
+              CanopyFracSnowBury            => noahmp%energy%state%CanopyFracSnowBury         ,& ! out,   fraction of canopy buried by snow
               IndexGrowSeason             => noahmp%biochem%state%IndexGrowSeason          & ! out,   growing season index (0=off, 1=on)
              )                    
 !----------------------------------------------------------------------
 
-    ! compute LAI based on dynamic vegetation option
+    ! compute LeafAreaIndex based on dynamic vegetation option
     if ( CropType == 0 ) then
 
-       ! no dynamic vegetation, use table LAI
+       ! no dynamic vegetation, use table LeafAreaIndex
        if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 4) ) then
           if ( Latitude >= 0.0 ) then
             ! Northern Hemisphere
@@ -88,43 +87,43 @@ contains
           WT2 = 1.0 - WT1
           if ( IT1 <  1 ) IT1 = 12
           if ( IT2 > 12 ) IT2 = 1
-          LAI = WT1 * LeafAreaIndexMon(IT1) + WT2 * LeafAreaIndexMon(IT2)
-          SAI = WT1 * StemAreaIndexMon(IT1) + WT2 * StemAreaIndexMon(IT2)
+          LeafAreaIndex = WT1 * LeafAreaIndexMon(IT1) + WT2 * LeafAreaIndexMon(IT2)
+          StemAreaIndex = WT1 * StemAreaIndexMon(IT1) + WT2 * StemAreaIndexMon(IT2)
        endif
 
-       ! no dynamic vegetation, use input LAI time series
+       ! no dynamic vegetation, use input LeafAreaIndex time series
        if ( (OptDynamicVeg == 7) .or. (OptDynamicVeg == 8) .or. (OptDynamicVeg == 9) ) then
-          SAI = max( 0.05, 0.1*LAI )   ! when reading LAI, set SAI to 10% LAI, but not below 0.05 MB: v3.8
-          if ( LAI < 0.05 ) SAI = 0.0  ! if LAI below minimum, make sure SAI = 0
+          StemAreaIndex = max( 0.05, 0.1*LeafAreaIndex )   ! when reading LeafAreaIndex, set StemAreaIndex to 10% LeafAreaIndex, but not below 0.05 MB: v3.8
+          if ( LeafAreaIndex < 0.05 ) StemAreaIndex = 0.0  ! if LeafAreaIndex below minimum, make sure StemAreaIndex = 0
        endif
-       if ( SAI < 0.05 ) SAI = 0.0     ! MB: SAI CHECK, change to 0.05 v3.6
-       if ( (LAI < 0.05) .or. (SAI == 0.0) ) LAI = 0.0  ! MB: LAI CHECK
+       if ( StemAreaIndex < 0.05 ) StemAreaIndex = 0.0     ! MB: StemAreaIndex CHECK, change to 0.05 v3.6
+       if ( (LeafAreaIndex < 0.05) .or. (StemAreaIndex == 0.0) ) LeafAreaIndex = 0.0  ! MB: LeafAreaIndex CHECK
 
        ! for non-vegetation point
        if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
             (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
-          LAI = 0.0
-          SAI = 0.0
+          LeafAreaIndex = 0.0
+          StemAreaIndex = 0.0
        endif
 
     endif   ! CropType == 0
 
     ! vegetation fraction buried by snow
     DB = min( max(SnowDepth-HeightCanopyBot,0.0), (HeightCanopyTop-HeightCanopyBot) )
-    FB = DB / max( 1.0e-06, (HeightCanopyTop-HeightCanopyBot) )   ! snow buried fraction
+    CanopyFracSnowBury = DB / max( 1.0e-06, (HeightCanopyTop-HeightCanopyBot) )   ! snow buried fraction
     if ( (HeightCanopyTop > 0.0) .and. (HeightCanopyTop <= 1.0) ) then    ! MB: change to 1.0 and 0.2 to reflect changes to HeightCanopyTop in MPTABLE
        SNOWHC = HeightCanopyTop * exp(-SnowDepth / 0.2)
-       FB     = min(SnowDepth, SNOWHC) / SNOWHC
+       CanopyFracSnowBury     = min(SnowDepth, SNOWHC) / SNOWHC
     endif
 
-    ! adjust LAI and SAI bused on snow bury
-    ELAI = LAI * (1.0 - FB)
-    ESAI = SAI * (1.0 - FB)
-    if ( (ESAI < 0.05) .and. (CropType == 0) ) ESAI = 0.0                       ! MB: ESAI CHECK, change to 0.05 v3.6
-    if ( ((ELAI < 0.05) .or. (ESAI == 0.0)) .and. (CropType == 0) ) ELAI = 0.0  ! MB: LAI CHECK
+    ! adjust LeafAreaIndex and StemAreaIndex bused on snow bury
+    LeafAreaIndEff = LeafAreaIndex * (1.0 - CanopyFracSnowBury)
+    StemAreaIndEff = StemAreaIndex * (1.0 - CanopyFracSnowBury)
+    if ( (StemAreaIndEff < 0.05) .and. (CropType == 0) ) StemAreaIndEff = 0.0                       ! MB: StemAreaIndEff CHECK, change to 0.05 v3.6
+    if ( ((LeafAreaIndEff < 0.05) .or. (StemAreaIndEff == 0.0)) .and. (CropType == 0) ) LeafAreaIndEff = 0.0  ! MB: LeafAreaIndex CHECK
 
     ! set growing season flag
-    if ( ((TV > TemperatureMinPhotosyn) .and. (CropType == 0)) .or. &
+    if ( ((TemperatureCanopy > TemperatureMinPhotosyn) .and. (CropType == 0)) .or. &
          ((PlantGrowStage > 2) .and. (PlantGrowStage < 7) .and. (CropType > 0))) then
        IndexGrowSeason = 1.0
     else
@@ -132,16 +131,16 @@ contains
     endif 
 
     ! compute vegetation fraction
-    ! input green vegetation fraction should be consistent with LAI
-    ! use FVEG = VegFracGreen from input
+    ! input green vegetation fraction should be consistent with LeafAreaIndex
+    ! use VegFrac = VegFracGreen from input
     if ( (OptDynamicVeg == 1) .or. (OptDynamicVeg == 6) .or. (OptDynamicVeg == 7) ) then
-       FVEG = VegFracGreen
-    ! computed FVEG from LAI & SAI
+       VegFrac = VegFracGreen
+    ! computed VegFrac from LeafAreaIndex & StemAreaIndex
     elseif ( (OptDynamicVeg == 2) .or. (OptDynamicVeg == 3) .or. (OptDynamicVeg == 8) ) then
-       FVEG = 1.0 - exp(-0.52 * (LAI + SAI))
+       VegFrac = 1.0 - exp(-0.52 * (LeafAreaIndex + StemAreaIndex))
     ! use yearly maximum vegetation fraction
     elseif ( (OptDynamicVeg == 4) .or. (OptDynamicVeg == 5) .or. (OptDynamicVeg == 9) ) then
-       FVEG = VegFracAnnMax
+       VegFrac = VegFracAnnMax
     ! outside existing vegetation options
     else
        write(*,*) "Un-recognized dynamic vegetation option (OptDynamicVeg)... "
@@ -150,13 +149,13 @@ contains
     endif
     ! use maximum vegetation fraction for crop run
     if ( (OptCropModel > 0) .and. (CropType > 0) ) then
-       FVEG = VegFracAnnMax
+       VegFrac = VegFracAnnMax
     endif
 
     ! adjust unreasonable vegetation fraction
-    if ( FVEG <= 0.05 ) FVEG = 0.05
-    if ( (FlagUrban .eqv. .true.) .or. (VegType == IndexBarrenPoint) ) FVEG = 0.0
-    if ( (ELAI+ESAI) == 0.0 ) FVEG = 0.0
+    if ( VegFrac <= 0.05 ) VegFrac = 0.05
+    if ( (FlagUrban .eqv. .true.) .or. (VegType == IndexBarrenPoint) ) VegFrac = 0.0
+    if ( (LeafAreaIndEff+StemAreaIndEff) == 0.0 ) VegFrac = 0.0
 
     ! determine if activate dynamic vegetation or crop run
     FlagDynamicCrop = .false.

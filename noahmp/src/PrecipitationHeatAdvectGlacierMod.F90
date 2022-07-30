@@ -28,7 +28,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (k)
               RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
               SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! out,   snowfall at ground surface [mm/s]
@@ -44,10 +44,10 @@ contains
     SnowfallGround   = SnowfallRefHeight
 
     ! Heat advection for liquid rainfall
-    PAH_AG = RainfallGround * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = RainfallGround * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TemperatureGrd)
 
     ! Heat advection for snowfall
-    PAH_AG = PAH_AG + SnowfallGround * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AG = PAH_AG + SnowfallGround * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TemperatureGrd)
 
     ! net heat advection
     HeatPrecipAdvBareGrd = PAH_AG

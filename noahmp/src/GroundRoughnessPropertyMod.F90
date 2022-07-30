@@ -33,51 +33,51 @@ contains
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               HeightCanopyTop             => noahmp%energy%param%HeightCanopyTop             ,& ! in,    top of canopy (m)
               RoughLenMomVeg           => noahmp%energy%param%RoughLenMomVeg           ,& ! in,    momentum roughness length vegetated (m)
-              RoughLenMomSno           => noahmp%energy%param%RoughLenMomSno           ,& ! in,    snow surface roughness length (m)
+              RoughLenMomSnow           => noahmp%energy%param%RoughLenMomSnow           ,& ! in,    snow surface roughness length (m)
               RoughLenMomSoil          => noahmp%energy%param%RoughLenMomSoil          ,& ! in,    bare-soil roughness length (m) (i.e., under the canopy)
               RoughLenMomLake          => noahmp%energy%param%RoughLenMomLake          ,& ! in,    lake surface roughness length (m)
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (K)
-              Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
-              Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
-              ZPD             => noahmp%energy%state%ZPD             ,& ! out,   surface zero plane displacement (m)
-              ZPDG            => noahmp%energy%state%ZPDG            ,& ! out,   ground zero plane displacement (m)
-              RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround  & ! out,  reference height [m] above ground
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (K)
+              RoughLenMomSfc             => noahmp%energy%state%RoughLenMomSfc             ,& ! out,   roughness length, momentum, (m), surface
+              RoughLenMomGrd            => noahmp%energy%state%RoughLenMomGrd            ,& ! out,   roughness length, momentum, ground (m)
+              ZeroPlaneDispSfc             => noahmp%energy%state%ZeroPlaneDispSfc             ,& ! out,   surface zero plane displacement (m)
+              ZeroPlaneDispGrd            => noahmp%energy%state%ZeroPlaneDispGrd            ,& ! out,   ground zero plane displacement (m)
+              RefHeightAboveGrd            => noahmp%energy%state%RefHeightAboveGrd  & ! out,  reference height [m] above ground
              )
 ! ----------------------------------------------------------------------
 
     ! ground roughness length
     if ( SurfaceType == 2 ) then ! Lake 
-       if ( TG <= ConstFreezePoint ) then
-          Z0MG = RoughLenMomLake * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSno
+       if ( TemperatureGrd <= ConstFreezePoint ) then
+          RoughLenMomGrd = RoughLenMomLake * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSnow
        else
-          Z0MG = RoughLenMomLake
+          RoughLenMomGrd = RoughLenMomLake
        endif
     else  ! soil
-       Z0MG = RoughLenMomSoil * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSno
+       RoughLenMomGrd = RoughLenMomSoil * (1.0 - SnowCoverFrac) + SnowCoverFrac * RoughLenMomSnow
     endif
 
     ! surface roughness length and displacement height
-    ZPDG = SnowDepth
+    ZeroPlaneDispGrd = SnowDepth
     if ( VEG .eqv. .true. ) then
-       Z0M = RoughLenMomVeg
-       ZPD = 0.65 * HeightCanopyTop
-       if ( SnowDepth > ZPD ) ZPD = SnowDepth
+       RoughLenMomSfc = RoughLenMomVeg
+       ZeroPlaneDispSfc = 0.65 * HeightCanopyTop
+       if ( SnowDepth > ZeroPlaneDispSfc ) ZeroPlaneDispSfc = SnowDepth
     else
-       Z0M = Z0MG
-       ZPD = ZPDG
+       RoughLenMomSfc = RoughLenMomGrd
+       ZeroPlaneDispSfc = ZeroPlaneDispGrd
     endif
 
     ! special case for urban
     if ( FlagUrban .eqv. .true. ) then
-       Z0MG = RoughLenMomVeg
-       ZPDG = 0.65 * HeightCanopyTop
-       Z0M  = Z0MG
-       ZPD  = ZPDG
+       RoughLenMomGrd = RoughLenMomVeg
+       ZeroPlaneDispGrd = 0.65 * HeightCanopyTop
+       RoughLenMomSfc  = RoughLenMomGrd
+       ZeroPlaneDispSfc  = ZeroPlaneDispGrd
     endif
 
     ! reference height above ground
-    RefHeightAboveGround = max( ZPD, HeightCanopyTop ) + RefHeightAboveSfc
-    if ( ZPDG >= RefHeightAboveGround ) RefHeightAboveGround = ZPDG + RefHeightAboveSfc
+    RefHeightAboveGrd = max( ZeroPlaneDispSfc, HeightCanopyTop ) + RefHeightAboveSfc
+    if ( ZeroPlaneDispGrd >= RefHeightAboveGrd ) RefHeightAboveGrd = ZeroPlaneDispGrd + RefHeightAboveSfc
 
     end associate
 

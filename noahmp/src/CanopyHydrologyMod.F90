@@ -28,16 +28,14 @@ contains
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    noahmp main time step (s)
               HeatLatentCanopy            => noahmp%energy%flux%HeatLatentCanopy             ,& ! in,    canopy latent heat flux (w/m2) [+ to atm]
               HeatLatentTransp            => noahmp%energy%flux%HeatLatentTransp             ,& ! in,    latent heat flux from transpiration (w/m2) [+ to atm]
-              ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
-              ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              FROZEN_CANOPY   => noahmp%energy%state%FROZEN_CANOPY   ,& ! in,    used to define latent heat pathway
+              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff            ,& ! in,    leaf area index, after burying by snow
+              StemAreaIndEff            => noahmp%energy%state%StemAreaIndEff            ,& ! in,    stem area index, after burying by snow
+              FlagFrozenCanopy   => noahmp%energy%state%FlagFrozenCanopy   ,& ! in,    used to define latent heat pathway
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
-              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit lai+sai [mm]
+              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit veg area index [mm]
               CanopyLiqWater          => noahmp%water%state%CanopyLiqWater           ,& ! inout, intercepted canopy liquid water [mm]
               CanopyIce          => noahmp%water%state%CanopyIce           ,& ! inout, intercepted canopy ice [mm]
-              TV              => noahmp%energy%state%TV              ,& ! inout, vegetation temperature (k)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! inout, vegetation temperature (k)
               CanopyTotalWater             => noahmp%water%state%CanopyTotalWater              ,& ! out,   total canopy intercepted water [mm]
               CanopyWetFrac            => noahmp%water%state%CanopyWetFrac             ,& ! out,   wetted or snowed fraction of the canopy
               CanopyIceMax          => noahmp%water%state%CanopyIceMax           ,& ! out,   canopy capacity for snow interception [mm]
@@ -69,10 +67,10 @@ contains
 
 !=== canopy liquid water
     ! maximum canopy intercepted water
-    CanopyLiqWaterMax =  CanopyLiqHoldCap * (ELAI + ESAI)
+    CanopyLiqWaterMax =  CanopyLiqHoldCap * (LeafAreaIndEff + StemAreaIndEff)
 
     ! canopy evaporation, transpiration, and dew
-    if ( FROZEN_CANOPY .eqv. .false. ) then    ! Barlage: change to frozen_canopy
+    if ( FlagFrozenCanopy .eqv. .false. ) then    ! Barlage: change to FlagFrozenCanopy
        Transpiration = max( HeatLatentTransp/ConstLatHeatVapor, 0.0 )
        EvapCanopyLiq = max( HeatLatentCanopy/ConstLatHeatVapor, 0.0 )
        DewCanopyLiq = abs( min( HeatLatentCanopy/ConstLatHeatVapor, 0.0 ) )
@@ -94,7 +92,7 @@ contains
 
 !=== canopy ice 
     ! maximum canopy intercepted ice
-    CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (ELAI + ESAI)
+    CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (LeafAreaIndEff + StemAreaIndEff)
 
     ! canopy sublimation and frost
     SublimCanopyIce = min( CanopyIce/MainTimeStep, SublimCanopyIce )
@@ -111,21 +109,21 @@ contains
 
 !=== phase change
     ! canopy ice melting
-    if ( (CanopyIce > 1.0e-6) .and. (TV > ConstFreezePoint) ) then
-       MeltCanopyIce = min( CanopyIce/MainTimeStep, (TV-ConstFreezePoint) * ConstHeatCapacIce * &
+    if ( (CanopyIce > 1.0e-6) .and. (TemperatureCanopy > ConstFreezePoint) ) then
+       MeltCanopyIce = min( CanopyIce/MainTimeStep, (TemperatureCanopy-ConstFreezePoint) * ConstHeatCapacIce * &
                      CanopyIce / ConstDensityIce / (MainTimeStep*ConstLatHeatFusion) )
        CanopyIce = max( 0.0, CanopyIce - MeltCanopyIce*MainTimeStep )
        CanopyLiqWater = max( 0.0, CanopyLiqWater + MeltCanopyIce*MainTimeStep )
-       TV     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TV
+       TemperatureCanopy     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TemperatureCanopy
     endif
 
     ! canopy water refreeezing
-    if ( (CanopyLiqWater > 1.0e-6) .and. (TV < ConstFreezePoint) ) then
-       RefrzCanopyLiq  = min( CanopyLiqWater/MainTimeStep, (ConstFreezePoint-TV) * ConstHeatCapacWater * &
+    if ( (CanopyLiqWater > 1.0e-6) .and. (TemperatureCanopy < ConstFreezePoint) ) then
+       RefrzCanopyLiq  = min( CanopyLiqWater/MainTimeStep, (ConstFreezePoint-TemperatureCanopy) * ConstHeatCapacWater * &
                      CanopyLiqWater / ConstDensityWater / (MainTimeStep*ConstLatHeatFusion) )
        CanopyLiqWater = max( 0.0, CanopyLiqWater - RefrzCanopyLiq*MainTimeStep )
        CanopyIce = max( 0.0, CanopyIce + RefrzCanopyLiq*MainTimeStep )
-       TV     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TV
+       TemperatureCanopy     = CanopyWetFrac*ConstFreezePoint + (1.0 - CanopyWetFrac)*TemperatureCanopy
     ENDIF
 
 !=== update total canopy water

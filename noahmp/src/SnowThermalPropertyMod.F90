@@ -37,8 +37,8 @@ contains
               SnowIceVol          => noahmp%water%state%SnowIceVol           ,& ! out,    partial volume of snow ice [m3/m3]
               SnowLiqWaterVol          => noahmp%water%state%SnowLiqWaterVol           ,& ! out,    partial volume of snow liquid water [m3/m3]
               SnowEffPorosity           => noahmp%water%state%SnowEffPorosity       ,& ! out,    snow effective porosity [m3/m3]
-              CVSNO           => noahmp%energy%state%CVSNO           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
-              TKSNO           => noahmp%energy%state%TKSNO            & ! out,    snow layer thermal conductivity (w/m/k)
+              HeatCapacVolSnow           => noahmp%energy%state%HeatCapacVolSnow           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
+              ThermConductSnow           => noahmp%energy%state%ThermConductSnow            & ! out,    snow layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
@@ -56,17 +56,17 @@ contains
     ! thermal capacity of snow
     do IZ = NumSnowLayerNeg+1, 0
        BDSNOI(IZ) = (SnowIce(IZ) + SnowLiqWater(IZ)) / ThicknessSnowSoilLayer(IZ)
-       CVSNO(IZ)  = ConstHeatCapacIce * SnowIceVol(IZ) + ConstHeatCapacWater * SnowLiqWaterVol(IZ)
-      ! CVSNO(IZ) = 0.525e06  ! constant
+       HeatCapacVolSnow(IZ)  = ConstHeatCapacIce * SnowIceVol(IZ) + ConstHeatCapacWater * SnowLiqWaterVol(IZ)
+      ! HeatCapacVolSnow(IZ) = 0.525e06  ! constant
     enddo
 
     ! thermal conductivity of snow
     do IZ = NumSnowLayerNeg+1, 0
-       if (OptSnowThermConduct == 1) TKSNO(IZ) = 3.2217e-6 * BDSNOI(IZ)**2.0               ! Stieglitz(yen,1965)
-       if (OptSnowThermConduct == 2) TKSNO(IZ) = 2e-2 + 2.5e-6 * BDSNOI(IZ) * BDSNOI(IZ)   ! Anderson, 1976
-       if (OptSnowThermConduct == 3) TKSNO(IZ) = 0.35                                      ! constant
-       if (OptSnowThermConduct == 4) TKSNO(IZ) = 2.576e-6 * BDSNOI(IZ)**2.0 + 0.074        ! Verseghy (1991)
-       if (OptSnowThermConduct == 5) TKSNO(IZ) = 2.22 * (BDSNOI(IZ)/1000.0)**1.88          ! Douvill(Yen, 1981)
+       if (OptSnowThermConduct == 1) ThermConductSnow(IZ) = 3.2217e-6 * BDSNOI(IZ)**2.0               ! Stieglitz(yen,1965)
+       if (OptSnowThermConduct == 2) ThermConductSnow(IZ) = 2e-2 + 2.5e-6 * BDSNOI(IZ) * BDSNOI(IZ)   ! Anderson, 1976
+       if (OptSnowThermConduct == 3) ThermConductSnow(IZ) = 0.35                                      ! constant
+       if (OptSnowThermConduct == 4) ThermConductSnow(IZ) = 2.576e-6 * BDSNOI(IZ)**2.0 + 0.074        ! Verseghy (1991)
+       if (OptSnowThermConduct == 5) ThermConductSnow(IZ) = 2.22 * (BDSNOI(IZ)/1000.0)**1.88          ! Douvill(Yen, 1981)
     enddo
 
     end associate

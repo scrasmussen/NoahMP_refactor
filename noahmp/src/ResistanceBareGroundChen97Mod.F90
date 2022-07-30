@@ -76,19 +76,19 @@ contains
     associate(                                                        &
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
               ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Calculate roughness length of heat
-              RefHeightAboveGround => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
-              THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
-              SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
-              Z0              => noahmp%energy%state%Z0MG            ,& ! in,    roughness length, momentum, (m), ground
-              THZ0            => noahmp%energy%state%TGB             ,& ! in,    bare ground temperature (K)
-              AKMS            => noahmp%energy%state%CMB             ,& ! inout, drag coefficient for momentum, above ZPD, bare ground
-              AKHS            => noahmp%energy%state%CHB             ,& ! inout, drag coefficient for heat, above ZPD, bare ground
-              RLMO            => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, bare ground
+              RefHeightAboveGrd => noahmp%energy%state%RefHeightAboveGrd            ,& ! in,    reference height [m] above ground
+              TemperaturePotRefHeight            => noahmp%energy%state%TemperaturePotRefHeight           ,& ! in,    potential temp at reference height (k)
+              WindSpdRefHeight          => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
+              RoughLenMomGrd              => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, (m), ground
+              TemperatureGrdBare            => noahmp%energy%state%TemperatureGrdBare             ,& ! in,    bare ground temperature (K)
+              AKMS            => noahmp%energy%state%CMB             ,& ! inout, drag coefficient for momentum, above ZeroPlaneDisp, bare ground
+              AKHS            => noahmp%energy%state%CHB             ,& ! inout, drag coefficient for heat, above ZeroPlaneDisp, bare ground
+              RLMO            => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, bare ground
               WSTAR2          => noahmp%energy%state%WSTARB          ,& ! inout, friction velocity in vertical direction (m/s), bare ground
               USTAR           => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
-              RAMB            => noahmp%energy%state%RAMB            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
-              RAHB            => noahmp%energy%state%RAHB            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
-              RAWB            => noahmp%energy%state%RAWB             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
+              ResistanceMomBareGrd            => noahmp%energy%state%ResistanceMomBareGrd            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
+              ResistanceShBareGrd            => noahmp%energy%state%ResistanceShBareGrd            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
+              ResistanceLhBareGrd            => noahmp%energy%state%ResistanceLhBareGrd             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
              )
 ! ----------------------------------------------------------------------
 
@@ -97,13 +97,13 @@ contains
     ! ZilitinkevichCoeff: CONSTANT C IN Zilitinkevich, S. S.1995,:NOTE ABOUT ZT
     ILECH = 0
     ZILFC = -ZilitinkevichCoeff * VKRM * SQVISC
-    ZU    = Z0
-    RDZ   = 1.0 / RefHeightAboveGround
+    ZU    = RoughLenMomGrd
+    RDZ   = 1.0 / RefHeightAboveGrd
     CXCH  = EXCM * RDZ
-    DTHV  = THLM - THZ0
+    DTHV  = TemperaturePotRefHeight - TemperatureGrdBare
 
     ! BELJARS correction of friction velocity u*
-    DU2   = max( SFCSPD*SFCSPD, EPSU2 )
+    DU2   = max( WindSpdRefHeight*WindSpdRefHeight, EPSU2 )
     BTGH  = BTG * HPBL
     if ( ITER == 1 ) then
        if ( BTGH*AKHS*DTHV /= 0.0 ) then
@@ -116,9 +116,9 @@ contains
     endif
 
     ! ZILITINKEVITCH approach for ZT
-    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*Z0)) * Z0 )
-    ZSLU  = RefHeightAboveGround + ZU
-    ZSLT  = RefHeightAboveGround + ZT
+    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*RoughLenMomGrd)) * RoughLenMomGrd )
+    ZSLU  = RefHeightAboveGrd + ZU
+    ZSLT  = RefHeightAboveGrd + ZT
     RLOGU = log(ZSLU / ZU)
     RLOGT = log(ZSLT / ZT)
 
@@ -172,8 +172,8 @@ contains
     USTAR = max( sqrt(AKMS * sqrt(DU2+ WSTAR2)), EPSUST )
 
     ! ZILITINKEVITCH fix for ZT
-    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * Z0)) * Z0 )
-    ZSLT   = RefHeightAboveGround + ZT
+    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * RoughLenMomGrd)) * RoughLenMomGrd )
+    ZSLT   = RefHeightAboveGrd + ZT
     RLOGT  = log(ZSLT / ZT)
     USTARK = USTAR * VKRM
 
@@ -196,17 +196,17 @@ contains
     RLMO = RLMA
 
     ! Undo the multiplication by windspeed that applies to drag coeff CH & CM
-    AKHS = AKHS / SFCSPD
-    AKMS = AKMS / SFCSPD
+    AKHS = AKHS / WindSpdRefHeight
+    AKMS = AKMS / WindSpdRefHeight
     if ( SnowDepth > 0.0 ) then
        AKMS = min( 0.01, AKMS )   ! CM & CH are too large, causing
        AKHS = min( 0.01, AKHS )   ! computational instability
     endif
 
     ! compute aerodynamic resistance
-    RAMB = max( 1.0, 1.0 / (AKMS*SFCSPD) )
-    RAHB = max( 1.0, 1.0 / (AKHS*SFCSPD) )
-    RAWB = RAHB
+    ResistanceMomBareGrd = max( 1.0, 1.0 / (AKMS*WindSpdRefHeight) )
+    ResistanceShBareGrd = max( 1.0, 1.0 / (AKHS*WindSpdRefHeight) )
+    ResistanceLhBareGrd = ResistanceShBareGrd
 
     end associate
 

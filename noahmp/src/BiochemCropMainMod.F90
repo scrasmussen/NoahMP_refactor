@@ -50,8 +50,8 @@ contains
               WoodMass             => noahmp%biochem%state%WoodMass          ,& ! inout, mass of wood (incl. woody roots) [g/m2]
               CarbonMassDeepSoil           => noahmp%biochem%state%CarbonMassDeepSoil        ,& ! inout, stable carbon in deep soil [g/m2]
               CarbonMassShallowSoil           => noahmp%biochem%state%CarbonMassShallowSoil        ,& ! inout, short-lived carbon in shallow soil [g/m2]
-              XLAI             => noahmp%energy%state%LAI            ,& ! inout, leaf area index [-]
-              XSAI             => noahmp%energy%state%SAI            ,& ! inout, stem area index [-]
+              LeafAreaIndex             => noahmp%energy%state%LeafAreaIndex            ,& ! inout, leaf area index [-]
+              StemAreaIndex             => noahmp%energy%state%StemAreaIndex            ,& ! inout, stem area index [-]
               GrossPriProduction              => noahmp%biochem%flux%GrossPriProduction            ,& ! out,   net instantaneous assimilation [g/m2/s C]
               NetPriProductionTot              => noahmp%biochem%flux%NetPriProductionTot            ,& ! out,   net primary productivity [g/m2/s C]
               NetEcoExchange              => noahmp%biochem%flux%NetEcoExchange            ,& ! out,   net ecosystem exchange [g/m2/s CO2]
@@ -73,8 +73,8 @@ contains
     ! no biogeochemistry in non-vegetated points
     if ( (VegType == IndexWaterPoint) .or. (VegType == IndexBarrenPoint) .or. &
          (VegType == IndexIcePoint  ) .or. (FlagUrban .eqv. .true.) ) then
-       XLAI   = 0.0
-       XSAI   = 0.0
+       LeafAreaIndex   = 0.0
+       StemAreaIndex   = 0.0
        GrossPriProduction    = 0.0
        NetPriProductionTot    = 0.0
        NetEcoExchange    = 0.0

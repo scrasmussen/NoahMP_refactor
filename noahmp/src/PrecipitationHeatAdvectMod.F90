@@ -31,9 +31,9 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,   air temperature [K] at reference height
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (k)
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,    greeness vegetation fraction (-)
               RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
               SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               DripCanopyRain          => noahmp%water%flux%DripCanopyRain            ,& ! in,    drip rate for intercepted rain [mm/s]
@@ -55,29 +55,29 @@ contains
     HeatPrecipAdvBareGrd    = 0.0
 
     ! Heat advection for liquid rainfall
-    PAH_AC = FVEG * RainfallRefHeight * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = DripCanopyRain * (ConstHeatCapacWater/1000.0) * (TV - TG)
-    PAH_AG = ThroughfallRain * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = VegFrac * RainfallRefHeight * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TemperatureCanopy)
+    PAH_CG = DripCanopyRain * (ConstHeatCapacWater/1000.0) * (TemperatureCanopy - TemperatureGrd)
+    PAH_AG = ThroughfallRain * (ConstHeatCapacWater/1000.0) * (TemperatureAirRefHeight - TemperatureGrd)
 
     ! Heat advection for snowfall
-    PAH_AC = PAH_AC + FVEG * SnowfallRefHeight * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TV)
-    PAH_CG = PAH_CG + DripCanopySnow * (ConstHeatCapacIce/1000.0) * (TV - TG)
-    PAH_AG = PAH_AG + ThroughfallSnow * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TG)
+    PAH_AC = PAH_AC + VegFrac * SnowfallRefHeight * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TemperatureCanopy)
+    PAH_CG = PAH_CG + DripCanopySnow * (ConstHeatCapacIce/1000.0) * (TemperatureCanopy - TemperatureGrd)
+    PAH_AG = PAH_AG + ThroughfallSnow * (ConstHeatCapacIce/1000.0) * (TemperatureAirRefHeight - TemperatureGrd)
 
     ! net heat advection
     HeatPrecipAdvCanopy = PAH_AC - PAH_CG
     HeatPrecipAdvVegGrd = PAH_CG
     HeatPrecipAdvBareGrd = PAH_AG
 
-    ! adjust for FVEG
-    if ( (FVEG > 0.0) .and. (FVEG < 1.0) ) then
-       HeatPrecipAdvVegGrd = HeatPrecipAdvVegGrd / FVEG         ! these will be multiplied by fraction later
-       HeatPrecipAdvBareGrd = HeatPrecipAdvBareGrd / (1.0-FVEG)
-    elseif ( FVEG <= 0.0 ) then
+    ! adjust for VegFrac
+    if ( (VegFrac > 0.0) .and. (VegFrac < 1.0) ) then
+       HeatPrecipAdvVegGrd = HeatPrecipAdvVegGrd / VegFrac         ! these will be multiplied by fraction later
+       HeatPrecipAdvBareGrd = HeatPrecipAdvBareGrd / (1.0-VegFrac)
+    elseif ( VegFrac <= 0.0 ) then
        HeatPrecipAdvBareGrd = HeatPrecipAdvVegGrd + HeatPrecipAdvBareGrd         ! for case of canopy getting buried
        HeatPrecipAdvVegGrd = 0.0
        HeatPrecipAdvCanopy = 0.0
-    elseif ( FVEG >= 1.0 ) then
+    elseif ( VegFrac >= 1.0 ) then
        HeatPrecipAdvBareGrd = 0.0
     endif
 

@@ -35,12 +35,12 @@ contains
               MainTimeStep           => noahmp%config%domain%MainTimeStep     ,& ! in,    noahmp main time step (s)
               WindEastwardRefHeight  => noahmp%forcing%WindEastwardRefHeight  ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight ,& ! in,    wind speed [m/s] in northward direction at reference height
-              ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
-              ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              TG              => noahmp%energy%state%TG              ,& ! in,    ground temperature (k)
-              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit lai+sai [mm]
+              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff            ,& ! in,    leaf area index, after burying by snow
+              StemAreaIndEff            => noahmp%energy%state%StemAreaIndEff            ,& ! in,    stem area index, after burying by snow
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,    greeness vegetation fraction (-)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (k)
+              CanopyLiqHoldCap           => noahmp%water%param%CanopyLiqHoldCap            ,& ! in,    maximum intercepted liquid water per unit veg area index [mm]
               RainfallRefHeight            => noahmp%water%flux%RainfallRefHeight              ,& ! in,    total liquid rainfall [mm/s] before interception
               SnowfallRefHeight            => noahmp%water%flux%SnowfallRefHeight              ,& ! in,    total snowfall [mm/s] before interception
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,    bulk density of snowfall (kg/m3)
@@ -79,16 +79,16 @@ contains
 
     ! ----------------------- canopy liquid water ------------------------------
     ! maximum canopy water
-    CanopyLiqWaterMax =  CanopyLiqHoldCap * (ELAI + ESAI)
+    CanopyLiqWaterMax =  CanopyLiqHoldCap * (LeafAreaIndEff + StemAreaIndEff)
 
     ! average rain interception and throughfall
-    if ( (ELAI+ESAI) > 0.0 ) then
-       InterceptCanopyRain  = FVEG * RainfallRefHeight * PrecipAreaFrac  ! max interception capability
+    if ( (LeafAreaIndEff+StemAreaIndEff) > 0.0 ) then
+       InterceptCanopyRain  = VegFrac * RainfallRefHeight * PrecipAreaFrac  ! max interception capability
        InterceptCanopyRain  = min( InterceptCanopyRain, (CanopyLiqWaterMax-CanopyLiqWater)/MainTimeStep * &
                                    (1.0-exp(-RainfallRefHeight*MainTimeStep/CanopyLiqWaterMax)) )
        InterceptCanopyRain  = max( InterceptCanopyRain, 0.0 )
-       DripCanopyRain = FVEG * RainfallRefHeight - InterceptCanopyRain
-       ThroughfallRain = (1.0 - FVEG) * RainfallRefHeight
+       DripCanopyRain = VegFrac * RainfallRefHeight - InterceptCanopyRain
+       ThroughfallRain = (1.0 - VegFrac) * RainfallRefHeight
        CanopyLiqWater = max( 0.0, CanopyLiqWater + InterceptCanopyRain*MainTimeStep )
     else
        InterceptCanopyRain  = 0.0
@@ -102,20 +102,20 @@ contains
 
     ! ----------------------- canopy ice ------------------------------
     ! maximum canopy ice
-    CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (ELAI + ESAI)
+    CanopyIceMax = 6.6 * (0.27 + 46.0/SnowfallDensity) * (LeafAreaIndEff + StemAreaIndEff)
 
     ! average snow interception and throughfall
-    if ( (ELAI+ESAI) > 0.0 ) then
-       InterceptCanopySnow = FVEG * SnowfallRefHeight * PrecipAreaFrac
+    if ( (LeafAreaIndEff+StemAreaIndEff) > 0.0 ) then
+       InterceptCanopySnow = VegFrac * SnowfallRefHeight * PrecipAreaFrac
        InterceptCanopySnow = min( InterceptCanopySnow, (CanopyIceMax-CanopyIce)/MainTimeStep * &
                                   (1.0-exp(-SnowfallRefHeight*MainTimeStep/CanopyIceMax)) )
        InterceptCanopySnow = max( InterceptCanopySnow, 0.0 )
-       FT    = max( 0.0, (TV - 270.15) / 1.87e5 )
+       FT    = max( 0.0, (TemperatureCanopy - 270.15) / 1.87e5 )
        FV    = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
        ICEDRIP = max( 0.0, CanopyIce ) * (FV + FT)
-       DripCanopySnow  = (FVEG * SnowfallRefHeight - InterceptCanopySnow) + ICEDRIP
-       ThroughfallSnow  = (1.0 - FVEG) * SnowfallRefHeight
+       DripCanopySnow  = (VegFrac * SnowfallRefHeight - InterceptCanopySnow) + ICEDRIP
+       ThroughfallSnow  = (1.0 - VegFrac) * SnowfallRefHeight
        CanopyIce  = max( 0.0, CanopyIce + (InterceptCanopySnow-ICEDRIP)*MainTimeStep )
     else
        InterceptCanopySnow  = 0.0
@@ -142,7 +142,7 @@ contains
     RainfallGround   = DripCanopyRain + ThroughfallRain
     SnowfallGround   = DripCanopySnow + ThroughfallSnow
     SnowDepthIncr = SnowfallGround / SnowfallDensity
-    if ( (SurfaceType == 2) .and. (TG > ConstFreezePoint) ) then
+    if ( (SurfaceType == 2) .and. (TemperatureGrd > ConstFreezePoint) ) then
        SnowfallGround   = 0.0
        SnowDepthIncr = 0.0
     endif

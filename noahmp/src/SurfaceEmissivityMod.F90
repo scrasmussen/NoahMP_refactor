@@ -31,27 +31,27 @@ contains
               EmissivitySoilLake              => noahmp%energy%param%EmissivitySoilLake              ,& ! in,    emissivity soil surface
               EmissivityIceSfc            => noahmp%energy%param%EmissivityIceSfc            ,& ! in,    emissivity ice surface
               SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
-              ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
-              ESAI            => noahmp%energy%state%ESAI            ,& ! in,    stem area index, after burying by snow
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              EMV             => noahmp%energy%state%EMV             ,& ! out,   vegetation emissivity
-              EMG             => noahmp%energy%state%EMG             ,& ! out,   ground emissivity
-              EMISSI          => noahmp%energy%state%EMISSI           & ! out,   surface emissivity
+              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff            ,& ! in,    leaf area index, after burying by snow
+              StemAreaIndEff            => noahmp%energy%state%StemAreaIndEff            ,& ! in,    stem area index, after burying by snow
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,    greeness vegetation fraction (-)
+              EmissivityVeg             => noahmp%energy%state%EmissivityVeg             ,& ! out,   vegetation emissivity
+              EmissivityGrd             => noahmp%energy%state%EmissivityGrd             ,& ! out,   ground emissivity
+              EmissivitySfc          => noahmp%energy%state%EmissivitySfc           & ! out,   surface emissivity
              )
 ! ----------------------------------------------------------------------
 
     ! vegetation emissivity
-    EMV = 1.0 - exp( -(ELAI + ESAI) / 1.0 )
+    EmissivityVeg = 1.0 - exp( -(LeafAreaIndEff + StemAreaIndEff) / 1.0 )
 
     ! ground emissivity
     if ( IndicatorIceSfc == 1 ) then
-       EMG = EmissivityIceSfc * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
+       EmissivityGrd = EmissivityIceSfc * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
     else
-       EMG = EmissivitySoilLake(SurfaceType) * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
+       EmissivityGrd = EmissivitySoilLake(SurfaceType) * (1.0 - SnowCoverFrac) + EmissivitySnow * SnowCoverFrac
     endif
 
     ! net surface emissivity
-    EMISSI = FVEG * ( EMG*(1-EMV) + EMV + EMV*(1-EMV)*(1-EMG) ) + (1-FVEG) * EMG
+    EmissivitySfc = VegFrac * ( EmissivityGrd*(1-EmissivityVeg) + EmissivityVeg + EmissivityVeg*(1-EmissivityVeg)*(1-EmissivityGrd) ) + (1-VegFrac) * EmissivityGrd
 
     end associate
 

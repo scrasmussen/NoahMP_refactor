@@ -34,23 +34,23 @@ contains
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
               OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
-              ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! out,   ground albedo (direct beam: vis, nir)
-              ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! out,   ground albedo (diffuse: vis, nir)
-              ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,   snow albedo for direct(1=vis, 2=nir)
-              ALBSNI          => noahmp%energy%state%ALBSNI          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
-              ALBD            => noahmp%energy%state%ALBD            ,& ! out,   surface albedo (direct)
-              ALBI            => noahmp%energy%state%ALBI             & ! out,   surface albedo (diffuse)
+              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! out,   ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! out,   ground albedo (diffuse: vis, nir)
+              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! out,   snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoSfcDir            => noahmp%energy%state%AlbedoSfcDir            ,& ! out,   surface albedo (direct)
+              AlbedoSfcDif            => noahmp%energy%state%AlbedoSfcDif             & ! out,   surface albedo (diffuse)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
     do IB = 1, NumSWRadBand
-       ALBD(IB)   = 0.0
-       ALBI(IB)   = 0.0
-       ALBGRD(IB) = 0.0
-       ALBGRI(IB) = 0.0
-       ALBSND(IB) = 0.0
-       ALBSNI(IB) = 0.0
+       AlbedoSfcDir(IB)   = 0.0
+       AlbedoSfcDif(IB)   = 0.0
+       AlbedoGrdDir(IB) = 0.0
+       AlbedoGrdDif(IB) = 0.0
+       AlbedoSnowDir(IB) = 0.0
+       AlbedoSnowDif(IB) = 0.0
     enddo
 
     ! solar radiation process is only done if there is light
@@ -67,8 +67,8 @@ contains
        call GroundAlbedoGlacier(noahmp)
 
        ! surface albedo
-       ALBD = ALBGRD
-       ALBI = ALBGRI
+       AlbedoSfcDir = AlbedoGrdDir
+       AlbedoSfcDif = AlbedoGrdDif
 
     endif  ! CosSolarZenithAngle > 0
 

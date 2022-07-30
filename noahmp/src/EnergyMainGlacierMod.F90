@@ -44,31 +44,30 @@ contains
               WindNorthwardRefHeight => noahmp%forcing%WindNorthwardRefHeight,& ! in,    wind speed [m/s] in northward direction at reference height
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime ,& ! in,    options for snow/soil temperature time scheme
               HeatPrecipAdvBareGrd            => noahmp%energy%flux%HeatPrecipAdvBareGrd             ,& ! in,    precipitation advected heat - bare ground net (W/m2)
-              TS              => noahmp%energy%state%TS              ,& ! inout, surface temperature (K)
-              TG              => noahmp%energy%state%TG              ,& ! inout, ground temperature (K)
-              QSFC            => noahmp%energy%state%QSFC            ,& ! inout, water vapor mixing ratio bare ground
-              Q1              => noahmp%energy%state%Q1              ,& ! inout, surface layer water vapor mixing ratio
+              TemperatureSfc              => noahmp%energy%state%TemperatureSfc              ,& ! inout, surface temperature (K)
+              TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! inout, ground temperature (K)
+              SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! inout, specific humidity at bare surface
+              SpecHumiditySfc              => noahmp%energy%state%SpecHumiditySfc              ,& ! inout, specific humidity at surface grid mean
               CM              => noahmp%energy%state%CM              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
               CH              => noahmp%energy%state%CH              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
-              Z0WRF           => noahmp%energy%state%Z0WRF           ,& ! out,   roughness length, momentum, surface, sent to coupled model
-              TAUX            => noahmp%energy%state%TAUX            ,& ! out,   wind stress: east-west (n/m2) grid mean
-              TAUY            => noahmp%energy%state%TAUY            ,& ! out,   wind stress: north-south (n/m2) grid mean
-              TRAD            => noahmp%energy%state%TRAD            ,& ! out,   radiative temperature (K)
-              T2M             => noahmp%energy%state%T2M             ,& ! out,   grid mean 2-m air temperature (K)
-              T2MB            => noahmp%energy%state%T2MB            ,& ! out,   2 m height air temperature (k) bare ground
-              EMISSI          => noahmp%energy%state%EMISSI          ,& ! out,   surface emissivity
-              UR              => noahmp%energy%state%UR              ,& ! out,   wind speed (m/s) at reference height
-              Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
-              Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
-              TAUXB           => noahmp%energy%state%TAUXB           ,& ! out,   wind stress: east-west (n/m2) bare ground
-              TAUYB           => noahmp%energy%state%TAUYB           ,& ! out,   wind stress: north-south (n/m2) bare ground
-              Q2B             => noahmp%energy%state%Q2B             ,& ! out,   bare ground 2-m water vapor mixing ratio
-              Q2E             => noahmp%energy%state%Q2E             ,& ! out,   grid mean 2-m water vapor mixing ratio
-              TGB             => noahmp%energy%state%TGB             ,& ! out,   bare ground temperature (K)
-              CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
-              CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
-              ALBEDO          => noahmp%energy%state%ALBEDO          ,& ! out,   total shortwave surface albedo
+              RoughLenMomSfcToAtm           => noahmp%energy%state%RoughLenMomSfcToAtm           ,& ! out,   roughness length, momentum, surface, sent to coupled model
+              WindStressEwTot            => noahmp%energy%state%WindStressEwTot            ,& ! out,   wind stress: east-west (n/m2) grid mean
+              WindStressNsTot            => noahmp%energy%state%WindStressNsTot            ,& ! out,   wind stress: north-south (n/m2) grid mean
+              TemperatureRadSfc            => noahmp%energy%state%TemperatureRadSfc            ,& ! out,   radiative temperature (K)
+              TemperatureAir2m             => noahmp%energy%state%TemperatureAir2m             ,& ! out,   grid mean 2-m air temperature (K)
+              TemperatureAir2mBare            => noahmp%energy%state%TemperatureAir2mBare            ,& ! out,   2 m height air temperature (k) bare ground
+              EmissivitySfc          => noahmp%energy%state%EmissivitySfc          ,& ! out,   surface emissivity
+              WindSpdRefHeight              => noahmp%energy%state%WindSpdRefHeight              ,& ! out,   wind speed (m/s) at reference height
+              RoughLenMomGrd            => noahmp%energy%state%RoughLenMomGrd            ,& ! out,   roughness length, momentum, ground (m)
+              WindStressEwBare           => noahmp%energy%state%WindStressEwBare           ,& ! out,   wind stress: east-west (n/m2) bare ground
+              WindStressNsBare           => noahmp%energy%state%WindStressNsBare           ,& ! out,   wind stress: north-south (n/m2) bare ground
+              SpecHumidity2mBare             => noahmp%energy%state%SpecHumidity2mBare             ,& ! out,   bare ground 2-m water vapor mixing ratio
+              SpecHumidity2m             => noahmp%energy%state%SpecHumidity2m             ,& ! out,   grid mean 2-m water vapor mixing ratio
+              TemperatureGrdBare             => noahmp%energy%state%TemperatureGrdBare             ,& ! out,   bare ground temperature (K)
+              CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDisp, bare ground
+              CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZeroPlaneDisp, bare ground
+              AlbedoSfc          => noahmp%energy%state%AlbedoSfc          ,& ! out,   total shortwave surface albedo
               RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
               RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
               HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! out,   total sensible heat (w/m2) [+ to atm]
@@ -84,7 +83,7 @@ contains
 ! ----------------------------------------------------------------------
 
     ! wind speed at reference height: ur >= 1
-    UR = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
+    WindSpdRefHeight = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
 
     ! glaicer snow cover fraction
     call SnowCoverGlacier(noahmp)
@@ -111,28 +110,28 @@ contains
     call PsychrometricVariableGlacier(noahmp)
 
     ! temperatures and energy fluxes of glacier ground
-    TGB = TG
+    TemperatureGrdBare = TemperatureGrd
     CMB = CM
     CHB = CH
     call SurfaceEnergyFluxGlacier(noahmp)
 
     ! assign glacier bare ground quantity to grid-level quantity
     ! Energy balance at glacier (bare) ground: RadSwAbsGrd+HeatPrecipAdvBareGrd=RadLwNetBareGrd+HeatSensibleBareGrd+HeatLatentBareGrd+HeatGroundBareGrd
-    TAUX  = TAUXB
-    TAUY  = TAUYB
+    WindStressEwTot  = WindStressEwBare
+    WindStressNsTot  = WindStressNsBare
     RadLwNetTot  = RadLwNetBareGrd
     HeatSensibleTot   = HeatSensibleBareGrd
     HeatLatentGrdTot  = HeatLatentBareGrd
     HeatGroundTot = HeatGroundBareGrd
-    TG    = TGB
-    T2M   = T2MB
+    TemperatureGrd    = TemperatureGrdBare
+    TemperatureAir2m   = TemperatureAir2mBare
     HeatPrecipAdvTot   = HeatPrecipAdvBareGrd
-    TS    = TG
+    TemperatureSfc    = TemperatureGrd
     CM    = CMB
     CH    = CHB
-    Q1    = QSFC
-    Q2E   = Q2B
-    Z0WRF = Z0MG
+    SpecHumiditySfc    = SpecHumiditySfcBare
+    SpecHumidity2m   = SpecHumidity2mBare
+    RoughLenMomSfcToAtm = RoughLenMomGrd
 
     ! emitted longwave radiation and physical check
     RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
@@ -146,19 +145,19 @@ contains
     ! radiative temperature: subtract from the emitted IR the
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the ground system.
-    ! Old TRAD calculation not taking into account Emissivity:
-    ! TRAD = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
-    TRAD = ( (RadLwEmitTot - (1.0 - EMISSI)*RadLwDownRefHeight) / (EMISSI * ConstStefanBoltzmann) ) ** 0.25
+    ! Old TemperatureRadSfc calculation not taking into account Emissivity:
+    ! TemperatureRadSfc = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
+    TemperatureRadSfc = ( (RadLwEmitTot - (1.0 - EmissivitySfc)*RadLwDownRefHeight) / (EmissivitySfc * ConstStefanBoltzmann) ) ** 0.25
 
     ! compute snow and glacier ice temperature
     call GlacierTemperatureMain(noahmp)
 
     ! adjusting suface temperature based on snow condition
     if ( OptSnowSoilTempTime == 2 ) then
-       if ( (SnowDepth > 0.05) .and. (TG > ConstFreezePoint) ) then
-          TGB = ConstFreezePoint
-          TG = TGB
-          TS = TGB
+       if ( (SnowDepth > 0.05) .and. (TemperatureGrd > ConstFreezePoint) ) then
+          TemperatureGrdBare = ConstFreezePoint
+          TemperatureGrd = TemperatureGrdBare
+          TemperatureSfc = TemperatureGrdBare
        endif
     endif
 
@@ -167,9 +166,9 @@ contains
 
     ! update total surface albedo
     if ( RadSwDownRefHeight > 0.0 ) then
-       ALBEDO = RadSwReflTot / RadSwDownRefHeight
+       AlbedoSfc = RadSwReflTot / RadSwDownRefHeight
     else
-       ALBEDO = -999.9
+       AlbedoSfc = -999.9
     endif
 
     end associate

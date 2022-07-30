@@ -18,15 +18,15 @@ module ConfigVarType
   type :: namelist_type
 
     integer :: OptDynamicVeg               ! options for dynamic vegetation
-                                              ! 1 -> off (use table LAI; use FVEG = VegFracGreen from input)
+                                              ! 1 -> off (use table LeafAreaIndex; use VegFrac = VegFracGreen from input)
                                               ! 2 -> on  (together with OptStomataResistance = 1)
-                                              ! 3 -> off (use table LAI; calculate FVEG)
-                                              ! 4 -> off (use table LAI; use maximum vegetation fraction) (default)
+                                              ! 3 -> off (use table LeafAreaIndex; calculate VegFrac)
+                                              ! 4 -> off (use table LeafAreaIndex; use maximum vegetation fraction) (default)
                                               ! 5 -> on  (use maximum vegetation fraction)
-                                              ! 6 -> on  (use FVEG = VegFracGreen from input)
-                                              ! 7 -> off (use input LAI; use FVEG = VegFracGreen from input)
-                                              ! 8 -> off (use input LAI; calculate FVEG)
-                                              ! 9 -> off (use input LAI; use maximum vegetation fraction)
+                                              ! 6 -> on  (use VegFrac = VegFracGreen from input)
+                                              ! 7 -> off (use input LeafAreaIndex; use VegFrac = VegFracGreen from input)
+                                              ! 8 -> off (use input LeafAreaIndex; calculate VegFrac)
+                                              ! 9 -> off (use input LeafAreaIndex; use maximum vegetation fraction)
     integer :: OptRainSnowPartition        ! options for partitioning  precipitation into rainfall & snowfall
                                               ! 1 -> Jordan (1991) scheme (default)
                                               ! 2 -> BATS: when TemperatureAirRefHeight < freezing point+2.2 
@@ -52,9 +52,9 @@ module ConfigVarType
                                               ! 1 -> BATS snow albedo scheme (default)
                                               ! 2 -> CLASS snow albedo scheme
     integer :: OptCanopyRadiationTransfer  ! options for canopy radiation transfer
-                                              ! 1 -> modified two-stream (gap=F(solar angle,3D structure, etc)<1-FVEG)
+                                              ! 1 -> modified two-stream (gap=F(solar angle,3D structure, etc)<1-VegFrac)
                                               ! 2 -> two-stream applied to grid-cell (gap = 0)
-                                              ! 3 -> two-stream applied to vegetated fraction (gap=1-FVEG) (default)
+                                              ! 3 -> two-stream applied to vegetated fraction (gap=1-VegFrac) (default)
     integer :: OptSnowSoilTempTime         ! options for snow/soil temperature time scheme (only layer 1)
                                               ! 1 -> semi-implicit; flux top boundary condition (default)
                                               ! 2 -> full implicit (original Noah); temperature top boundary condition
@@ -99,7 +99,7 @@ module ConfigVarType
                                               ! 0 -> No irrigation (default)
                                               ! 1 -> Irrigation ON
                                               ! 2 -> irrigation trigger based on crop season Planting and harvesting dates
-                                              ! 3 -> irrigation trigger based on LAI threshold
+                                              ! 3 -> irrigation trigger based on LeafAreaIndex threshold
     integer :: OptIrrigationMethod         ! options for irrigation method
                                               ! only works when OptIrrigation > 0
                                               ! 0 -> method based on geo_em fractions (default)

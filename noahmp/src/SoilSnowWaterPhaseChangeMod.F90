@@ -51,8 +51,8 @@ contains
               SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,    soil B parameter
               SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,    saturated soil matric potential (m)
               SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,    saturated value of soil moisture [m3/m3]
-              FACT            => noahmp%energy%state%FACT            ,& ! in,    energy factor for soil & snow phase change
-              STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [K]
+              PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! in,    energy factor for soil & snow phase change
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [K]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout, total soil moisture [m3/m3]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
@@ -105,14 +105,14 @@ contains
     if ( SurfaceType == 1 ) then ! land points
        do J = 1, NumSoilLayer
           if ( OptSoilSupercoolWater == 1 ) then
-             if ( STC(J) < ConstFreezePoint ) then
-                SMP          = ConstLatHeatFusion * (ConstFreezePoint - STC(J)) / (ConstGravityAcc * STC(J)) !(m)
+             if ( TemperatureSoilSnow(J) < ConstFreezePoint ) then
+                SMP          = ConstLatHeatFusion * (ConstFreezePoint - TemperatureSoilSnow(J)) / (ConstGravityAcc * TemperatureSoilSnow(J)) !(m)
                 SoilSupercoolWater(J) = SoilMoistureSat(J) * (SMP / SoilMatPotentialSat(J)) ** (-1.0 / SoilExpCoeffB(J))
                 SoilSupercoolWater(J) = SoilSupercoolWater(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
              endif
           endif
           if ( OptSoilSupercoolWater == 2 ) then
-               call SoilWaterSupercoolLiquid(noahmp, J, SoilSupercoolWater(J), STC(J), SoilMoisture(J), SoilLiqWater(J))
+               call SoilWaterSupercoolLiquid(noahmp, J, SoilSupercoolWater(J), TemperatureSoilSnow(J), SoilMoisture(J), SoilLiqWater(J))
                SoilSupercoolWater(J) = SoilSupercoolWater(J) * ThicknessSnowSoilLayer(J) * 1000.0        !(mm)
           endif
        enddo
@@ -120,15 +120,15 @@ contains
 
     !--- determine melting or freezing state
     do J = NumSnowLayerNeg+1, NumSoilLayer
-       if ( (MICE(J) > 0.0) .and. (STC(J) >= ConstFreezePoint) ) then
+       if ( (MICE(J) > 0.0) .and. (TemperatureSoilSnow(J) >= ConstFreezePoint) ) then
           IndexPhaseChange(J) = 1  ! melting
        endif
-       if ( (MLIQ(J) > SoilSupercoolWater(J)) .and. (STC(J) < ConstFreezePoint) ) then
+       if ( (MLIQ(J) > SoilSupercoolWater(J)) .and. (TemperatureSoilSnow(J) < ConstFreezePoint) ) then
           IndexPhaseChange(J) = 2  ! freezing
        endif
        ! If snow exists, but its thickness is not enough to create a layer
        if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (J == 1) ) then
-          if ( STC(J) >= ConstFreezePoint ) then
+          if ( TemperatureSoilSnow(J) >= ConstFreezePoint ) then
              IndexPhaseChange(J) = 1
           endif
        endif
@@ -137,8 +137,8 @@ contains
     !--- Calculate the energy surplus and loss for melting and freezing
     do J = NumSnowLayerNeg+1, NumSoilLayer
        if ( IndexPhaseChange(J) > 0 ) then
-          HM(J)  = (STC(J) - ConstFreezePoint) / FACT(J)
-          STC(J) = ConstFreezePoint
+          HM(J)  = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
+          TemperatureSoilSnow(J) = ConstFreezePoint
        endif
        if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
           HM(J)    = 0.0
@@ -195,11 +195,11 @@ contains
 
           ! update soil/snow temperature and energy surplus/loss
           if ( abs(HEATR) > 0.0 ) then
-             STC(J) = STC(J) + FACT(J) * HEATR
+             TemperatureSoilSnow(J) = TemperatureSoilSnow(J) + PhaseChgFacSoilSnow(J) * HEATR
              if ( J <= 0 ) then  ! snow
-                if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = ConstFreezePoint
+                if ( (MLIQ(J)*MICE(J)) > 0.0 ) TemperatureSoilSnow(J) = ConstFreezePoint
                 if ( MICE(J) == 0.0 ) then         ! BARLAGE
-                   STC(J)  = ConstFreezePoint      ! BARLAGE
+                   TemperatureSoilSnow(J)  = ConstFreezePoint      ! BARLAGE
                    HM(J+1) = HM(J+1) + HEATR       ! BARLAGE
                    XM(J+1) = HM(J+1) * MainTimeStep / ConstLatHeatFusion   ! BARLAGE
                 endif

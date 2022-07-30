@@ -74,19 +74,19 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Calculate roughness length of heat
-              RefHeightAboveGround             => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
-              THLM            => noahmp%energy%state%THAIR           ,& ! in,    potential temp at reference height (k)
-              SFCSPD          => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
-              Z0              => noahmp%energy%state%Z0M             ,& ! in,    roughness length, momentum, (m), surface
-              THZ0            => noahmp%energy%state%TAH             ,& ! in,    canopy air temperature (K)
-              AKMS            => noahmp%energy%state%CMV             ,& ! inout, drag coefficient for momentum, above ZPD, vegetated
-              AKHS            => noahmp%energy%state%CHV             ,& ! inout, drag coefficient for heat, above ZPD, vegetated
-              RLMO            => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, vegetated
+              RefHeightAboveGrd             => noahmp%energy%state%RefHeightAboveGrd            ,& ! in,    reference height [m] above ground
+              TemperaturePotRefHeight            => noahmp%energy%state%TemperaturePotRefHeight           ,& ! in,    potential temp at reference height (k)
+              WindSpdRefHeight          => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
+              RoughLenMomSfc              => noahmp%energy%state%RoughLenMomSfc             ,& ! in,    roughness length, momentum, (m), surface
+              TemperatureCanopyAir            => noahmp%energy%state%TemperatureCanopyAir             ,& ! in,    canopy air temperature (K)
+              AKMS            => noahmp%energy%state%CMV             ,& ! inout, drag coefficient for momentum, above ZeroPlaneDispSfc, vegetated
+              AKHS            => noahmp%energy%state%CHV             ,& ! inout, drag coefficient for heat, above ZeroPlaneDispSfc, vegetated
+              RLMO            => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
               WSTAR2          => noahmp%energy%state%WSTARV          ,& ! inout, friction velocity in vertical direction (m/s), vegetated
               USTAR           => noahmp%energy%state%FVV             ,& ! inout, friction velocity (m/s), vegetated
-              RAMC            => noahmp%energy%state%RAMC            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
-              RAHC            => noahmp%energy%state%RAHC            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
-              RAWC            => noahmp%energy%state%RAWC             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
+              ResistanceMomAbvCan            => noahmp%energy%state%ResistanceMomAbvCan            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
+              ResistanceShAbvCan            => noahmp%energy%state%ResistanceShAbvCan            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
+              ResistanceLhAbvCan            => noahmp%energy%state%ResistanceLhAbvCan             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
              )
 ! ----------------------------------------------------------------------
 
@@ -95,13 +95,13 @@ contains
     ! ZilitinkevichCoeff: CONSTANT C IN Zilitinkevich, S. S.1995,:NOTE ABOUT ZT
     ILECH = 0
     ZILFC = -ZilitinkevichCoeff * VKRM * SQVISC
-    ZU    = Z0
-    RDZ   = 1.0 / RefHeightAboveGround
+    ZU    = RoughLenMomSfc
+    RDZ   = 1.0 / RefHeightAboveGrd
     CXCH  = EXCM * RDZ
-    DTHV  = THLM - THZ0
+    DTHV  = TemperaturePotRefHeight - TemperatureCanopyAir
 
     ! BELJARS correction of friction velocity u*
-    DU2   = max( SFCSPD*SFCSPD, EPSU2 )
+    DU2   = max( WindSpdRefHeight*WindSpdRefHeight, EPSU2 )
     BTGH  = BTG * HPBL
     if ( ITER == 1 ) then
        if ( BTGH*AKHS*DTHV /= 0.0 ) then
@@ -114,9 +114,9 @@ contains
     endif
 
     ! ZILITINKEVITCH approach for ZT
-    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*Z0)) * Z0 )
-    ZSLU  = RefHeightAboveGround + ZU
-    ZSLT  = RefHeightAboveGround + ZT
+    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*RoughLenMomSfc)) * RoughLenMomSfc )
+    ZSLU  = RefHeightAboveGrd + ZU
+    ZSLT  = RefHeightAboveGrd + ZT
     RLOGU = log(ZSLU / ZU)
     RLOGT = log(ZSLT / ZT)
 
@@ -170,8 +170,8 @@ contains
     USTAR = max( sqrt(AKMS * sqrt(DU2+ WSTAR2)), EPSUST )
 
     ! ZILITINKEVITCH fix for ZT
-    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * Z0)) * Z0 )
-    ZSLT   = RefHeightAboveGround + ZT
+    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * RoughLenMomSfc)) * RoughLenMomSfc )
+    ZSLT   = RefHeightAboveGrd + ZT
     RLOGT  = log(ZSLT / ZT)
     USTARK = USTAR * VKRM
 
@@ -194,13 +194,13 @@ contains
     RLMO = RLMA
 
     ! Undo the multiplication by windspeed that applies to drag coeff CH & CM
-    AKHS = AKHS / SFCSPD
-    AKMS = AKMS / SFCSPD
+    AKHS = AKHS / WindSpdRefHeight
+    AKMS = AKMS / WindSpdRefHeight
 
     ! compute aerodynamic resistance
-    RAMC = max( 1.0, 1.0 / (AKMS*SFCSPD) )
-    RAHC = max( 1.0, 1.0 / (AKHS*SFCSPD) )
-    RAWC = RAHC
+    ResistanceMomAbvCan = max( 1.0, 1.0 / (AKMS*WindSpdRefHeight) )
+    ResistanceShAbvCan = max( 1.0, 1.0 / (AKHS*WindSpdRefHeight) )
+    ResistanceLhAbvCan = ResistanceShAbvCan
 
     end associate
 

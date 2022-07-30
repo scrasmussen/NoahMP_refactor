@@ -41,7 +41,7 @@ contains
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight ,& ! in,    air temperature [K] at reference height
               WindEastwardRefHeight   => noahmp%forcing%WindEastwardRefHeight   ,& ! in,    wind speed [m/s] in eastward direction at reference height
               WindNorthwardRefHeight  => noahmp%forcing%WindNorthwardRefHeight  ,& ! in,    wind speed [m/s] in northward direction at reference height
-              EAIR            => noahmp%energy%state%EAIR            ,& ! in,     vapor pressure air (pa)
+              PressureVaporRefHeight            => noahmp%energy%state%PressureVaporRefHeight            ,& ! in,     vapor pressure air (pa)
               IrriSprinklerRate      => noahmp%water%param%IrriSprinklerRate       ,& ! in,     sprinkler irrigation rate (mm/h)
               IrrigationFracSprinkler           => noahmp%water%state%IrrigationFracSprinkler            ,& ! in,     sprinkler irrigation fraction (0 to 1)
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
@@ -73,9 +73,9 @@ contains
     ESAT1     = 610.8 * exp( (17.27*(TemperatureAirRefHeight-273.15)) / (237.3+(TemperatureAirRefHeight-273.15)) )  ! [Pa]
 
     if ( TemperatureAirRefHeight > 273.15 ) then ! Equation (3)
-       IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.092) ) * ( (TemperatureAirRefHeight-273.15)**(-0.102) ) ! [%]
+       IRRLOSS = 4.375 * ( exp(0.106*WINDSPEED) ) * ( ((ESAT1-PressureVaporRefHeight)*0.01)**(-0.092) ) * ( (TemperatureAirRefHeight-273.15)**(-0.102) ) ! [%]
     else ! Equation (4)
-       IRRLOSS = 4.337 * ( exp(0.077*WINDSPEED) ) * ( ((ESAT1-EAIR)*0.01)**(-0.098) ) ! [%]
+       IRRLOSS = 4.337 * ( exp(0.077*WINDSPEED) ) * ( ((ESAT1-PressureVaporRefHeight)*0.01)**(-0.098) ) ! [%]
     endif
     ! Old PGI Fortran compiler does not support ISNAN
     call CheckRealNaN(IRRLOSS, NaNInd)

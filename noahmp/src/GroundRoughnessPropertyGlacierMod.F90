@@ -27,25 +27,25 @@ contains
     associate(                                                        &
               RefHeightAboveSfc => noahmp%config%domain%RefHeightAboveSfc ,& ! in,    reference height [m] above surface zero plane
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
-              RoughLenMomSno           => noahmp%energy%param%RoughLenMomSno           ,& ! in,    snow surface roughness length (m)
-              Z0M             => noahmp%energy%state%Z0M             ,& ! out,   roughness length, momentum, (m), surface
-              Z0MG            => noahmp%energy%state%Z0MG            ,& ! out,   roughness length, momentum, ground (m)
-              ZPD             => noahmp%energy%state%ZPD             ,& ! out,   surface zero plane displacement (m)
-              ZPDG            => noahmp%energy%state%ZPDG            ,& ! out,   ground zero plane displacement (m)
-              RefHeightAboveGround => noahmp%energy%state%RefHeightAboveGround & ! out, reference height [m] above ground
+              RoughLenMomSnow           => noahmp%energy%param%RoughLenMomSnow           ,& ! in,    snow surface roughness length (m)
+              RoughLenMomSfc             => noahmp%energy%state%RoughLenMomSfc             ,& ! out,   roughness length, momentum, (m), surface
+              RoughLenMomGrd            => noahmp%energy%state%RoughLenMomGrd            ,& ! out,   roughness length, momentum, ground (m)
+              ZeroPlaneDispSfc             => noahmp%energy%state%ZeroPlaneDispSfc             ,& ! out,   surface zero plane displacement (m)
+              ZeroPlaneDispGrd            => noahmp%energy%state%ZeroPlaneDispGrd            ,& ! out,   ground zero plane displacement (m)
+              RefHeightAboveGrd => noahmp%energy%state%RefHeightAboveGrd & ! out, reference height [m] above ground
              )
 ! ----------------------------------------------------------------------
 
     ! ground roughness length
-    Z0MG = RoughLenMomSno
-    Z0M = Z0MG
+    RoughLenMomGrd = RoughLenMomSnow
+    RoughLenMomSfc = RoughLenMomGrd
 
     ! surface roughness length and displacement height
-    ZPDG = SnowDepth
-    ZPD = ZPDG
+    ZeroPlaneDispGrd = SnowDepth
+    ZeroPlaneDispSfc = ZeroPlaneDispGrd
 
     ! reference height above ground
-    RefHeightAboveGround = ZPD + RefHeightAboveSfc
+    RefHeightAboveGrd = ZeroPlaneDispSfc + RefHeightAboveSfc
 
     end associate
 

@@ -26,8 +26,8 @@ contains
 ! local variable
     integer                :: J       ! snow layer index
     real(kind=kind_noahmp) :: BURDEN  ! pressure of overlying snow [kg/m2]
-    real(kind=kind_noahmp) :: DEXPF   ! EXPF=exp(-c4*(273.15-STC))
-    real(kind=kind_noahmp) :: TD      ! STC - ConstFreezePoint [K]
+    real(kind=kind_noahmp) :: DEXPF   ! EXPF=exp(-c4*(273.15-TemperatureSoilSnow))
+    real(kind=kind_noahmp) :: TD      ! TemperatureSoilSnow - ConstFreezePoint [K]
     real(kind=kind_noahmp) :: VOID    ! void (1 - SnowIce - SnowLiqWater)
     real(kind=kind_noahmp) :: WX      ! water mass (ice + liquid) [kg/m2]
     real(kind=kind_noahmp) :: BI      ! partial density of ice [kg/m3]
@@ -35,7 +35,7 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
-              STC             => noahmp%energy%state%STC             ,& ! in,     snow and soil layer temperature [k]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,     snow and soil layer temperature [k]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! in,     snow layer ice [mm]
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! in,     snow layer liquid water [mm]
               IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! in,     phase change index [0-none;1-melt;2-refreeze]
@@ -73,7 +73,7 @@ contains
        ! Allow compaction only for non-saturated node and higher ice lens node.
        if ( (VOID > 0.001) .and. (SnowIce(J) > 0.1) ) then
           BI    = SnowIce(J) / ThicknessSnowSoilLayer(J)
-          TD    = max( 0.0, ConstFreezePoint-STC(J) )
+          TD    = max( 0.0, ConstFreezePoint-TemperatureSoilSnow(J) )
 
           ! Settling/compaction as a result of destructive metamorphism
           DEXPF   = exp( -SnowCompactAgingFac2 * TD )

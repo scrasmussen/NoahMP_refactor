@@ -160,12 +160,12 @@ contains
           !  Call 1D Noah-MP LSM  
           !------------------------------------------------------------------------
           
-          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%FVEG = 0.0  ! Set playa, lava, sand to bare
-          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%LAI  = 0.0 
-          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%FVEG = 0.0  ! hard coded for USGS
-          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%LAI  = 0.0
-          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%FVEG = 0.0
-          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%LAI  = 0.0
+          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%VegFrac = 0.0  ! Set playa, lava, sand to bare
+          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%LeafAreaIndex  = 0.0 
+          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%VegFrac = 0.0  ! hard coded for USGS
+          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%LeafAreaIndex  = 0.0
+          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%VegFrac = 0.0
+          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%LeafAreaIndex  = 0.0
 
           if (noahmp%config%domain%VegType == noahmp%config%domain%IndexIcePoint ) then
               noahmp%config%domain%IndicatorIceSfc = -1                          ! Land-ice point      
@@ -182,9 +182,9 @@ contains
               !---------------------------------------------------------------------
               
               noahmp%water%state%SnowCoverFrac   = 1.0  
-              noahmp%energy%state%FVEG  = 0.0
-              noahmp%energy%state%Z0WRF = 0.002 
-              noahmp%energy%state%TGB   = noahmp%energy%state%TG   
+              noahmp%energy%state%VegFrac  = 0.0
+              noahmp%energy%state%RoughLenMomSfcToAtm = 0.002 
+              noahmp%energy%state%TemperatureGrdBare   = noahmp%energy%state%TG   
               noahmp%energy%state%CHB   = noahmp%energy%state%CH 
               noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetTot
               noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleTot

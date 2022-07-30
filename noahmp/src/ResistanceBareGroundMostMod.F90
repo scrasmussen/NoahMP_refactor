@@ -46,44 +46,44 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               TemperatureAirRefHeight => noahmp%forcing%TemperatureAirRefHeight,& ! in,    air temperature [K] at reference height
-              RefHeightAboveGround            => noahmp%energy%state%RefHeightAboveGround            ,& ! in,    reference height [m] above ground
-              RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,    density air (kg/m3)
+              RefHeightAboveGrd            => noahmp%energy%state%RefHeightAboveGrd            ,& ! in,    reference height [m] above ground
+              DensityAirRefHeight          => noahmp%energy%state%DensityAirRefHeight          ,& ! in,    density air (kg/m3)
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight ,& ! in,    specific humidity (kg/kg) at reference height
-              UR              => noahmp%energy%state%UR              ,& ! in,    wind speed (m/s) at reference height
-              ZPD             => noahmp%energy%state%ZPDG            ,& ! in,    ground zero plane displacement (m)
-              Z0H             => noahmp%energy%state%Z0HB            ,& ! in,    roughness length, sensible heat (m), bare ground
-              Z0M             => noahmp%energy%state%Z0MG            ,& ! in,    roughness length, momentum, (m), ground
-              FM              => noahmp%energy%state%FMB             ,& ! inout, M-O momentum stability correction, above ZPDG, bare ground
-              FH              => noahmp%energy%state%FHB             ,& ! inout, M-O sen heat stability correction, above ZPDG, bare ground
+              WindSpdRefHeight              => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
+              ZeroPlaneDispGrd             => noahmp%energy%state%ZeroPlaneDispGrd            ,& ! in,    ground zero plane displacement (m)
+              RoughLenShBareGrd             => noahmp%energy%state%RoughLenShBareGrd            ,& ! in,    roughness length, sensible heat (m), bare ground
+              RoughLenMomGrd             => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, (m), ground
+              FM              => noahmp%energy%state%FMB             ,& ! inout, M-O momentum stability correction, above ZeroPlaneDispGrd, bare ground
+              FH              => noahmp%energy%state%FHB             ,& ! inout, M-O sen heat stability correction, above ZeroPlaneDispGrd, bare ground
               FM2             => noahmp%energy%state%FM2B            ,& ! inout, M-O momentum stability correction, 2m, bare ground
               FH2             => noahmp%energy%state%FH2B            ,& ! inout, M-O sen heat stability correction, 2m, bare ground
               FV              => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
-              MOZ             => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZPD, bare ground
+              MOZ             => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispGrd, bare ground
               MOZ2            => noahmp%energy%state%MOZ2B           ,& ! out,   Monin-Obukhov stability (2/L), 2m, bare ground
-              MOL             => noahmp%energy%state%MOLB            ,& ! out,   Monin-Obukhov length (m), above ZPD, bare ground
-              CM              => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZPD, bare ground
-              CH              => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZPD, bare ground
+              MOL             => noahmp%energy%state%MOLB            ,& ! out,   Monin-Obukhov length (m), above ZeroPlaneDispGrd, bare ground
+              CM              => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDispGrd, bare ground
+              CH              => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZeroPlaneDispGrd, bare ground
               CH2             => noahmp%energy%state%CH2B            ,& ! out,   drag coefficient for heat, 2m, bare ground
-              RAMB            => noahmp%energy%state%RAMB            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
-              RAHB            => noahmp%energy%state%RAHB            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
-              RAWB            => noahmp%energy%state%RAWB             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
+              ResistanceMomBareGrd            => noahmp%energy%state%ResistanceMomBareGrd            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
+              ResistanceShBareGrd            => noahmp%energy%state%ResistanceShBareGrd            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
+              ResistanceLhBareGrd            => noahmp%energy%state%ResistanceLhBareGrd             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
     MPE = 1.0e-6
     MOZOLD = MOZ  ! M-O stability parameter for next iteration
-    if ( RefHeightAboveGround <= ZPD ) then
-       write(*,*) 'WARNING: critical problem: RefHeightAboveGround <= ZPD; model stops'
+    if ( RefHeightAboveGrd <= ZeroPlaneDispGrd ) then
+       write(*,*) 'WARNING: critical problem: RefHeightAboveGrd <= ZeroPlaneDispGrd; model stops'
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
     ! temporary drag coefficients
-    TMPCM  = log( (RefHeightAboveGround - ZPD) / Z0M )
-    TMPCH  = log( (RefHeightAboveGround - ZPD) / Z0H )
-    TMPCM2 = log( (2.0 + Z0M) / Z0M )
-    TMPCH2 = log( (2.0 + Z0H) / Z0H )
+    TMPCM  = log( (RefHeightAboveGrd - ZeroPlaneDispGrd) / RoughLenMomGrd )
+    TMPCH  = log( (RefHeightAboveGrd - ZeroPlaneDispGrd) / RoughLenShBareGrd )
+    TMPCM2 = log( (2.0 + RoughLenMomGrd) / RoughLenMomGrd )
+    TMPCH2 = log( (2.0 + RoughLenShBareGrd) / RoughLenShBareGrd )
 
     ! compute M-O stability parameter
     if ( ITER == 1 ) then
@@ -93,11 +93,11 @@ contains
        MOZ2 = 0.0
     else
        TVIR = (1.0 + 0.61 * SpecHumidityRefHeight) * TemperatureAirRefHeight
-       TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (RHOAIR * ConstHeatCapacAir)
+       TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (DensityAirRefHeight * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
        MOL  = -1.0 * FV**3 / TMP1
-       MOZ  = min( (RefHeightAboveGround - ZPD) / MOL, 1.0 )
-       MOZ2 = min( (2.0 + Z0H) / MOL, 1.0 )
+       MOZ  = min( (RefHeightAboveGrd - ZeroPlaneDispGrd) / MOL, 1.0 )
+       MOZ2 = min( (2.0 + RoughLenShBareGrd) / MOL, 1.0 )
     endif
 
     ! accumulate number of times moz changes sign.
@@ -163,13 +163,13 @@ contains
     CH2 = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
 
     ! friction velocity
-    FV  = UR * sqrt(CM)
+    FV  = WindSpdRefHeight * sqrt(CM)
     CH2 = ConstVonKarman * FV / CH2FH2
 
     ! aerodynamic resistance
-    RAMB = max( 1.0, 1.0 / (CM*UR) )
-    RAHB = max( 1.0, 1.0 / (CH*UR) )
-    RAWB = RAHB
+    ResistanceMomBareGrd = max( 1.0, 1.0 / (CM*WindSpdRefHeight) )
+    ResistanceShBareGrd = max( 1.0, 1.0 / (CH*WindSpdRefHeight) )
+    ResistanceLhBareGrd = ResistanceShBareGrd
 
     end associate
 

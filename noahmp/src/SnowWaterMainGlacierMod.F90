@@ -46,7 +46,7 @@ contains
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
               SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
-              STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [k]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [k]
               GlacierExcessFlow         => noahmp%water%flux%GlacierExcessFlow           ,& ! out,   glacier excess flow [mm/s]
               PondSfcThinSnwComb        => noahmp%water%state%PondSfcThinSnwComb         ,& ! out,   surface ponding [mm] from liquid in thin snow layer combination
               PondSfcThinSnwTrans        => noahmp%water%state%PondSfcThinSnwTrans          & ! out,  surface ponding [mm] from thin snow liquid during transition from multilayer to no layer
@@ -79,7 +79,7 @@ contains
     do IZ = -NumSnowLayerMax+1, NumSnowLayerNeg
        SnowIce(IZ)  = 0.0
        SnowLiqWater(IZ)  = 0.0
-       STC(IZ)    = 0.0
+       TemperatureSoilSnow(IZ)    = 0.0
        ThicknessSnowSoilLayer(IZ) = 0.0
        DepthSnowSoilLayer(IZ)  = 0.0
     enddo

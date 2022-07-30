@@ -47,7 +47,6 @@ contains
     real(kind=kind_noahmp)           :: PHI1,PHI2,SIGMA           ! temporary vars
     real(kind=kind_noahmp)           :: FTDS,FTIS,FRES            ! temporary vars
     real(kind=kind_noahmp)           :: DENFVEG                   ! temporary vars
-    real(kind=kind_noahmp)           :: VAI_SPREAD                ! temporary vars
     real(kind=kind_noahmp)           :: FREVEG,FREBAR,FTDVEG      ! temporary vars
     real(kind=kind_noahmp)           :: FTIVEG,FTDBAR,FTIBAR      ! temporary vars
     real(kind=kind_noahmp)           :: THETAZ                    ! temporary vars
@@ -55,7 +54,7 @@ contains
     real(kind=kind_noahmp)           :: BB                        ! vertical crown radius (m)
     real(kind=kind_noahmp)           :: THETAP                    ! angle conversion from SZA 
     real(kind=kind_noahmp)           :: FA                        ! foliage volume density (m-1)
-    real(kind=kind_noahmp)           :: NEWVAI                    ! effective LSAI (-)
+    real(kind=kind_noahmp)           :: NEWVAI                    ! effective VAI (-)
 
 ! --------------------------------------------------------------------
     associate(                                                        &
@@ -70,20 +69,20 @@ contains
               ScatterCoeffSnow          => noahmp%energy%param%ScatterCoeffSnow          ,& ! in,    Scattering coefficient for snow
               UpscatterCoeffSnowDir          => noahmp%energy%param%UpscatterCoeffSnowDir          ,& ! in,    Upscattering parameters for snow for direct radiation
               UpscatterCoeffSnowDif          => noahmp%energy%param%UpscatterCoeffSnowDif          ,& ! in,    Upscattering parameters for snow for diffuse radiation
-              VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! in,    ground albedo (direct beam: vis, nir)
-              ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! in,    ground albedo (diffuse: vis, nir)
-              RHO             => noahmp%energy%state%RHO             ,& ! in,    leaf/stem reflectance weighted by fraction LAI and SAI
-              TAU             => noahmp%energy%state%TAU             ,& ! in,    leaf/stem transmittance weighted by fraction LAI and SAI
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              ALBD            => noahmp%energy%state%ALBD            ,& ! out,   surface albedo (direct)
-              ALBI            => noahmp%energy%state%ALBI            ,& ! out,   surface albedo (diffuse)
-              GDIR            => noahmp%energy%state%GDIR            ,& ! out,   projected leaf+stem area in solar direction
-              BGAP            => noahmp%energy%state%BGAP            ,& ! out,   between canopy gap fraction for beam
-              WGAP            => noahmp%energy%state%WGAP            ,& ! out,   within canopy gap fraction for beam
-              KOPEN           => noahmp%energy%state%KOPEN           ,& ! out,   gap fraction for diffue light
-              GAP             => noahmp%energy%state%GAP             ,& ! out,   total gap fraction for beam ( <=1-shafac )
+              VegAreaIndEff             => noahmp%energy%state%VegAreaIndEff             ,& ! in,    one-sided leaf+stem area index (m2/m2)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! in,    ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! in,    ground albedo (diffuse: vis, nir)
+              ReflectanceVeg             => noahmp%energy%state%ReflectanceVeg             ,& ! in,    leaf/stem reflectance weighted by fraction LeafAreaIndex and StemAreaIndex
+              TransmittanceVeg             => noahmp%energy%state%TransmittanceVeg             ,& ! in,    leaf/stem transmittance weighted by fraction LeafAreaIndex and StemAreaIndex
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,    greeness vegetation fraction (-)
+              AlbedoSfcDir            => noahmp%energy%state%AlbedoSfcDir            ,& ! out,   surface albedo (direct)
+              AlbedoSfcDif            => noahmp%energy%state%AlbedoSfcDif            ,& ! out,   surface albedo (diffuse)
+              VegAreaProjDir            => noahmp%energy%state%VegAreaProjDir            ,& ! out,   projected leaf+stem area in solar direction
+              GapBtwCanopy            => noahmp%energy%state%GapBtwCanopy            ,& ! out,   between canopy gap fraction for beam
+              GapInCanopy            => noahmp%energy%state%GapInCanopy            ,& ! out,   within canopy gap fraction for beam
+              GapCanopyDif           => noahmp%energy%state%GapCanopyDif           ,& ! out,   gap fraction for diffue light
+              GapCanopyDir             => noahmp%energy%state%GapCanopyDir             ,& ! out,   total gap fraction for beam ( <=1-shafac )
               RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! out,   flux abs by veg (per unit direct flux)
               RadSwAbsVegDif            => noahmp%energy%flux%RadSwAbsVegDif             ,& ! out,   flux abs by veg (per unit diffuse flux)
               RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! out,   down direct flux below veg (per unit dir flux)
@@ -98,39 +97,38 @@ contains
 ! ----------------------------------------------------------------------
 
     ! compute within and between gaps
-    VAI_SPREAD = VAI
-    if ( VAI == 0.0 ) then
-       GAP   = 1.0
-       KOPEN = 1.0
+    if ( VegAreaIndEff == 0.0 ) then
+       GapCanopyDir   = 1.0
+       GapCanopyDif = 1.0
     else
        if ( OptCanopyRadiationTransfer == 1 ) then
-          DENFVEG = -log( max(1.0-FVEG, 0.01) ) / (ConstPI * TreeCrownRadius**2)
+          DENFVEG = -log( max(1.0-VegFrac, 0.01) ) / (ConstPI * TreeCrownRadius**2)
           HD      = HeightCanopyTop - HeightCanopyBot
           BB      = 0.5 * HD
           THETAP  = atan( BB / TreeCrownRadius * tan(acos(max(0.01, CosSolarZenithAngle))) )
-         !BGAP    = exp( TreeDensity * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
-          BGAP    = exp( -DENFVEG * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
-          FA      = VAI / ( 1.33 * ConstPI * TreeCrownRadius**3.0 * (BB/TreeCrownRadius) * DENFVEG )
+         !GapBtwCanopy    = exp( TreeDensity * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
+          GapBtwCanopy    = exp( -DENFVEG * ConstPI * TreeCrownRadius**2 / cos(THETAP) )
+          FA      = VegAreaIndEff / ( 1.33 * ConstPI * TreeCrownRadius**3.0 * (BB/TreeCrownRadius) * DENFVEG )
           NEWVAI  = HD * FA
-          WGAP    = (1.0 - BGAP) * exp(-0.5 * NEWVAI / CosSolarZenithAngle)
-          GAP     = min( 1.0-FVEG, BGAP+WGAP )
-          KOPEN   = 0.05
+          GapInCanopy    = (1.0 - GapBtwCanopy) * exp(-0.5 * NEWVAI / CosSolarZenithAngle)
+          GapCanopyDir     = min( 1.0-VegFrac, GapBtwCanopy+GapInCanopy )
+          GapCanopyDif   = 0.05
        endif
        if ( OptCanopyRadiationTransfer == 2 ) then
-          GAP     = 0.0
-          KOPEN   = 0.0
+          GapCanopyDir     = 0.0
+          GapCanopyDif   = 0.0
        endif
        if ( OptCanopyRadiationTransfer == 3 ) then
-          GAP     = 1.0 - FVEG
-          KOPEN   = 1.0 - FVEG
+          GapCanopyDir     = 1.0 - VegFrac
+          GapCanopyDif   = 1.0 - VegFrac
        endif
     endif
 
-    ! calculate two-stream parameters OMEGA, BETAD, BETAI, AVMU, GDIR, EXT.
+    ! calculate two-stream parameters OMEGA, BETAD, BETAI, AVMU, VegAreaProjDir, EXT.
     ! OMEGA, BETAD, BETAI are adjusted for snow. values for OMEGA*BETAD
     ! and OMEGA*BETAI are calculated and then divided by the new OMEGA
     ! because the product OMEGA*BETAI, OMEGA*BETAD is used in solution.
-    ! also, the transmittances and reflectances (TAU, RHO) are linear
+    ! also, the transmittances and reflectances are linear
     ! weights of leaf and stem values.
 
     COSZI  = max( 0.001, CosSolarZenithAngle )
@@ -138,18 +136,18 @@ contains
     if ( abs(CHIL) <= 0.01 ) CHIL = 0.01
     PHI1   = 0.5 - 0.633 * CHIL - 0.330 * CHIL * CHIL
     PHI2   = 0.877 * (1.0 - 2.0 * PHI1)
-    GDIR   = PHI1 + PHI2 * COSZI
-    EXT    = GDIR / COSZI
+    VegAreaProjDir   = PHI1 + PHI2 * COSZI
+    EXT    = VegAreaProjDir / COSZI
     AVMU   = (1.0 - PHI1/PHI2 * log( (PHI1+PHI2) / PHI1 )) / PHI2
-    OMEGAL = RHO(IB) + TAU(IB)
-    TMP0   = GDIR + PHI2 * COSZI
+    OMEGAL = ReflectanceVeg(IB) + TransmittanceVeg(IB)
+    TMP0   = VegAreaProjDir + PHI2 * COSZI
     TMP1   = PHI1 * COSZI
-    ASU    = 0.5 * OMEGAL * GDIR / TMP0 * (1.0 - TMP1/TMP0 * log((TMP1+TMP0)/TMP1) )
+    ASU    = 0.5 * OMEGAL * VegAreaProjDir / TMP0 * (1.0 - TMP1/TMP0 * log((TMP1+TMP0)/TMP1) )
     BETADL = (1.0 + AVMU * EXT) / (OMEGAL * AVMU * EXT) * ASU
-    BETAIL = 0.5 * ( RHO(IB) + TAU(IB) + (RHO(IB)-TAU(IB)) * ((1.0+CHIL)/2.0)**2 ) / OMEGAL
+    BETAIL = 0.5 * ( ReflectanceVeg(IB) + TransmittanceVeg(IB) + (ReflectanceVeg(IB)-TransmittanceVeg(IB)) * ((1.0+CHIL)/2.0)**2 ) / OMEGAL
 
     ! adjust omega, betad, and betai for intercepted snow
-    if ( TV > ConstFreezePoint ) then  !no snow
+    if ( TemperatureCanopy > ConstFreezePoint ) then  !no snow
        TMP0 = OMEGAL
        TMP1 = BETADL
        TMP2 = BETAIL
@@ -176,16 +174,16 @@ contains
     P2    = B - AVMU * H
     P3    = B + TMP0
     P4    = B - TMP0
-    S1    = exp( -H * VAI )
-    S2    = exp( -EXT * VAI )
+    S1    = exp( -H * VegAreaIndEff )
+    S2    = exp( -EXT * VegAreaIndEff )
     if ( IC == 0 ) then  ! direct
-       U1 = B - C / ALBGRD(IB)
-       U2 = B - C * ALBGRD(IB)
-       U3 = F + C * ALBGRD(IB)
+       U1 = B - C / AlbedoGrdDir(IB)
+       U2 = B - C * AlbedoGrdDir(IB)
+       U3 = F + C * AlbedoGrdDir(IB)
     else   ! diffuse
-       U1 = B - C / ALBGRI(IB)
-       U2 = B - C * ALBGRI(IB)
-       U3 = F + C * ALBGRI(IB)
+       U1 = B - C / AlbedoGrdDif(IB)
+       U2 = B - C * AlbedoGrdDif(IB)
+       U3 = F + C * AlbedoGrdDif(IB)
     endif
     TMP2  = U1 - AVMU * H
     TMP3  = U1 + AVMU * H
@@ -210,11 +208,11 @@ contains
 
     ! downward direct and diffuse fluxes below vegetation Niu and Yang (2004), JGR.
     if ( IC == 0 ) then  ! direct
-       FTDS = S2 * (1.0 - GAP) + GAP
-       FTIS = (H4 * S2 / SIGMA + H5 * S1 + H6 / S1) * (1.0 - GAP)
+       FTDS = S2 * (1.0 - GapCanopyDir) + GapCanopyDir
+       FTIS = (H4 * S2 / SIGMA + H5 * S1 + H6 / S1) * (1.0 - GapCanopyDir)
     else  ! diffuse
        FTDS = 0.0
-       FTIS = (H9 * S1 + H10 / S1) * (1.0 - KOPEN) + KOPEN
+       FTIS = (H9 * S1 + H10 / S1) * (1.0 - GapCanopyDif) + GapCanopyDif
     endif
     if ( IC == 0 ) then  ! direct
        RadSwDirTranGrdDir(IB) = FTDS
@@ -226,29 +224,29 @@ contains
 
     ! flux reflected by the surface (veg. and ground)
     if ( IC == 0 ) then ! direct
-       FRES   = (H1 / SIGMA + H2 + H3) * (1.0 - GAP) + ALBGRD(IB) * GAP
-       FREVEG = (H1 / SIGMA + H2 + H3) * (1.0 - GAP)
-       FREBAR = ALBGRD(IB) * GAP    ! separate veg. and ground reflection
+       FRES   = (H1 / SIGMA + H2 + H3) * (1.0 - GapCanopyDir) + AlbedoGrdDir(IB) * GapCanopyDir
+       FREVEG = (H1 / SIGMA + H2 + H3) * (1.0 - GapCanopyDir)
+       FREBAR = AlbedoGrdDir(IB) * GapCanopyDir    ! separate veg. and ground reflection
     else   ! diffuse
-       FRES   = (H7 + H8) * (1.0 - KOPEN) + ALBGRI(IB) * KOPEN
-       FREVEG = (H7 + H8) * (1.0 - KOPEN) + ALBGRI(IB) * KOPEN
+       FRES   = (H7 + H8) * (1.0 - GapCanopyDif) + AlbedoGrdDif(IB) * GapCanopyDif
+       FREVEG = (H7 + H8) * (1.0 - GapCanopyDif) + AlbedoGrdDif(IB) * GapCanopyDif
        FREBAR = 0                   ! separate veg. and ground reflection
     endif
     if ( IC == 0 ) then ! direct
-       ALBD(IB)  = FRES
+       AlbedoSfcDir(IB)  = FRES
        RadSwReflVegDir(IB) = FREVEG
        RadSwReflGrdDir(IB) = FREBAR
     else   ! diffuse
-       ALBI(IB)  = FRES
+       AlbedoSfcDif(IB)  = FRES
        RadSwReflVegDif(IB) = FREVEG
        RadSwReflGrdDif(IB) = FREBAR
     endif
 
     ! flux absorbed by vegetation
     if ( IC == 0 ) then ! direct
-       RadSwAbsVegDir(IB) = 1.0 - ALBD(IB) - (1.0 - ALBGRD(IB)) * RadSwDirTranGrdDir(IB) - (1.0 - ALBGRI(IB)) * RadSwDifTranGrdDir(IB)
+       RadSwAbsVegDir(IB) = 1.0 - AlbedoSfcDir(IB) - (1.0 - AlbedoGrdDir(IB)) * RadSwDirTranGrdDir(IB) - (1.0 - AlbedoGrdDif(IB)) * RadSwDifTranGrdDir(IB)
     else   ! diffuse
-       RadSwAbsVegDif(IB) = 1.0 - ALBI(IB) - (1.0 - ALBGRD(IB)) * RadSwDirTranGrdDif(IB) - (1.0 - ALBGRI(IB)) * RadSwDifTranGrdDif(IB)
+       RadSwAbsVegDif(IB) = 1.0 - AlbedoSfcDif(IB) - (1.0 - AlbedoGrdDir(IB)) * RadSwDirTranGrdDif(IB) - (1.0 - AlbedoGrdDif(IB)) * RadSwDifTranGrdDif(IB)
     endif
 
     end associate

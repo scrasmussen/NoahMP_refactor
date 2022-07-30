@@ -32,7 +32,7 @@ contains
     associate(                                                       &
               MainTimeStep     => noahmp%config%domain%MainTimeStep ,& ! in,    main noahmp timestep (s)
               DayJulianInYear           => noahmp%config%domain%DayJulianInYear       ,& ! in,    Julian day of year
-              T2M              => noahmp%energy%state%T2M           ,& ! in,    2-m air temperature (K)
+              TemperatureAir2m              => noahmp%energy%state%TemperatureAir2m           ,& ! in,    2-m air temperature (K)
               DatePlanting           => noahmp%biochem%param%DatePlanting       ,& ! in,    Planting day (day of year)
               DateHarvest            => noahmp%biochem%param%DateHarvest        ,& ! in,    Harvest date (day of year)
               TempBaseGrowDegDay         => noahmp%biochem%param%TempBaseGrowDegDay     ,& ! in,    Base temperature for grow degree day accumulation [C]
@@ -50,7 +50,7 @@ contains
 !------------------------------------------------------------------------
 
     ! initialize
-    TC = T2M - 273.15
+    TC = TemperatureAir2m - 273.15
 
     ! Planting and Havest index
     IndexPlanting = 1  ! on

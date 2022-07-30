@@ -46,8 +46,8 @@ contains
               SoilQuartzFrac          => noahmp%energy%param%SoilQuartzFrac          ,& ! in,     soil quartz content
               SoilMoisture            => noahmp%water%state%SoilMoisture       ,& ! in,     total soil moisture [m3/m3]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3] 
-              CVSOIL          => noahmp%energy%state%CVSOIL          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
-              TKSOIL          => noahmp%energy%state%TKSOIL           & ! out,    soil layer thermal conductivity (w/m/k)
+              HeatCapacVolSoil          => noahmp%energy%state%HeatCapacVolSoil          ,& ! out,    soil layer volumetric specific heat (j/m3/k)
+              ThermConductSoil          => noahmp%energy%state%ThermConductSoil           & ! out,    soil layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ contains
        ! ==== soil heat capacity
 
        SoilIceTmp(ISOIL) = SoilMoisture(ISOIL) - SoilLiqWater(ISOIL)
-       CVSOIL(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SoilMoistureSat(ISOIL)) * SoilHeatCapacity + &
+       HeatCapacVolSoil(ISOIL)   = SoilLiqWater(ISOIL) * ConstHeatCapacWater + (1.0 - SoilMoistureSat(ISOIL)) * SoilHeatCapacity + &
                          (SoilMoistureSat(ISOIL) - SoilMoisture(ISOIL)) * ConstHeatCapacAir + &
                          SoilIceTmp(ISOIL) * ConstHeatCapacIce
 
@@ -96,7 +96,7 @@ contains
        endif
 
        !  THERMAL CONDUCTIVITY
-       TKSOIL(ISOIL) = AKE * (THKSAT - THKDRY) + THKDRY
+       ThermConductSoil(ISOIL) = AKE * (THKSAT - THKDRY) + THKDRY
 
     enddo ! ISOIL
 

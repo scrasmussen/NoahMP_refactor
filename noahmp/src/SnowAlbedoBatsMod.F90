@@ -41,15 +41,15 @@ contains
               SnoAgeFacDifNirBats    => noahmp%energy%param%SnoAgeFacDifNirBats    ,& ! in,     age factor for diffuse NIR snow albedo
               SzaFacDirVisBats    => noahmp%energy%param%SzaFacDirVisBats    ,& ! in,     cosz factor for direct visible snow albedo
               SzaFacDirNirBats    => noahmp%energy%param%SzaFacDirNirBats    ,& ! in,     cosz factor for direct NIR snow albedo
-              FAGE            => noahmp%energy%state%FAGE            ,& ! in,     snow age factor
-              ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
-              ALBSNI          => noahmp%energy%state%ALBSNI           & ! out,    snow albedo for diffuse(1=vis, 2=nir)
+              SnowAgeFac            => noahmp%energy%state%SnowAgeFac            ,& ! in,     snow age factor
+              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif           & ! out,    snow albedo for diffuse(1=vis, 2=nir)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    ALBSND(1: NumSWRadBand) = 0.0
-    ALBSNI(1: NumSWRadBand) = 0.0
+    AlbedoSnowDir(1: NumSWRadBand) = 0.0
+    AlbedoSnowDif(1: NumSWRadBand) = 0.0
 
     ! when CosSolarZenithAngle > 0
     SL        = SolarZenithAdjBats
@@ -57,10 +57,10 @@ contains
     SL2       = 2.0 * SL
     CF1       = ( (1.0 + SL1) / (1.0 + SL2*CosSolarZenithAngle) - SL1 )
     FZEN      = amax1( CF1, 0.0 )
-    ALBSNI(1) = FreshSnoAlbVisBats * ( 1.0 - SnoAgeFacDifVisBats * FAGE )           ! vis diffuse
-    ALBSNI(2) = FreshSnoAlbNirBats * ( 1.0 - SnoAgeFacDifNirBats * FAGE )           ! nir diffuse
-    ALBSND(1) = ALBSNI(1) + SzaFacDirVisBats * FZEN * (1.0 - ALBSNI(1))    ! vis direct
-    ALBSND(2) = ALBSNI(2) + SzaFacDirNirBats * FZEN * (1.0 - ALBSNI(2))    ! nir direct
+    AlbedoSnowDif(1) = FreshSnoAlbVisBats * ( 1.0 - SnoAgeFacDifVisBats * SnowAgeFac )           ! vis diffuse
+    AlbedoSnowDif(2) = FreshSnoAlbNirBats * ( 1.0 - SnoAgeFacDifNirBats * SnowAgeFac )           ! nir diffuse
+    AlbedoSnowDir(1) = AlbedoSnowDif(1) + SzaFacDirVisBats * FZEN * (1.0 - AlbedoSnowDif(1))    ! vis direct
+    AlbedoSnowDir(2) = AlbedoSnowDif(2) + SzaFacDirNirBats * FZEN * (1.0 - AlbedoSnowDif(2))    ! nir direct
 
     end associate
 

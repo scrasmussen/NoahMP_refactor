@@ -40,7 +40,7 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,& ! in,    number of soil layers
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,    maximum number of snow layers
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! in,    actual number of snow layers (negative)
-              STC             => noahmp%energy%state%STC              & ! inout, snow and soil layer temperature [K]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow              & ! inout, snow and soil layer temperature [K]
              )
 ! ----------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ contains
 
     ! update snow & soil temperature
     do K = NumSnowLayerNeg+1, NumSoilLayer
-       STC(K) = STC(K) + CI(K)
+       TemperatureSoilSnow(K) = TemperatureSoilSnow(K) + CI(K)
     enddo
 
     end associate

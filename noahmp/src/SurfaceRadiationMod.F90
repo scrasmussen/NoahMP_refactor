@@ -37,12 +37,12 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
-              ELAI            => noahmp%energy%state%ELAI            ,& ! in,    leaf area index, after burying by snow
-              VAI             => noahmp%energy%state%VAI             ,& ! in,    one-sided leaf+stem area index (m2/m2)
-              FSUN            => noahmp%energy%state%FSUN            ,& ! in,    sunlit fraction of canopy
-              FSHA            => noahmp%energy%state%FSHA            ,& ! in,    shaded fraction of canopy
-              LAISUN          => noahmp%energy%state%LAISUN          ,& ! in,    sunlit leaf area
-              LAISHA          => noahmp%energy%state%LAISHA          ,& ! in,    shaded leaf area
+              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff            ,& ! in,    leaf area index, after burying by snow
+              VegAreaIndEff             => noahmp%energy%state%VegAreaIndEff             ,& ! in,    one-sided leaf+stem area index (m2/m2)
+              CanopySunlitFrac            => noahmp%energy%state%CanopySunlitFrac            ,& ! in,    sunlit fraction of canopy
+              CanopyShadeFrac            => noahmp%energy%state%CanopyShadeFrac            ,& ! in,    shaded fraction of canopy
+              LeafAreaIndSunlit          => noahmp%energy%state%LeafAreaIndSunlit          ,& ! in,    sunlit leaf area
+              LeafAreaIndShade          => noahmp%energy%state%LeafAreaIndShade          ,& ! in,    shaded leaf area
               RadSwDownDir           => noahmp%energy%flux%RadSwDownDir            ,& ! in,    incoming direct solar radiation (w/m2)
               RadSwDownDif           => noahmp%energy%flux%RadSwDownDif            ,& ! in,    incoming diffuse solar radiation (w/m2)
               RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! in,    flux abs by veg (per unit direct flux)
@@ -50,10 +50,10 @@ contains
               RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! in,    down direct flux below veg (per unit dir flux)
               RadSwDifTranGrdDir            => noahmp%energy%flux%RadSwDifTranGrdDir             ,& ! in,    down diffuse flux below veg (per unit dir flux)
               RadSwDifTranGrdDif            => noahmp%energy%flux%RadSwDifTranGrdDif             ,& ! in,    down diffuse flux below veg (per unit dif flux)
-              ALBGRD          => noahmp%energy%state%ALBGRD          ,& ! in,    ground albedo (direct beam: vis, nir)
-              ALBGRI          => noahmp%energy%state%ALBGRI          ,& ! in,    ground albedo (diffuse: vis, nir)
-              ALBD            => noahmp%energy%state%ALBD            ,& ! in,    surface albedo (direct)
-              ALBI            => noahmp%energy%state%ALBI            ,& ! in,    surface albedo (diffuse)
+              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! in,    ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! in,    ground albedo (diffuse: vis, nir)
+              AlbedoSfcDir            => noahmp%energy%state%AlbedoSfcDir            ,& ! in,    surface albedo (direct)
+              AlbedoSfcDif            => noahmp%energy%state%AlbedoSfcDif            ,& ! in,    surface albedo (diffuse)
               RadSwReflVegDir           => noahmp%energy%flux%RadSwReflVegDir            ,& ! in,    flux reflected by veg layer (per unit direct flux)
               RadSwReflVegDif           => noahmp%energy%flux%RadSwReflVegDif            ,& ! in,    flux reflected by veg layer (per unit diffuse flux)
               RadSwReflGrdDir           => noahmp%energy%flux%RadSwReflGrdDir            ,& ! in,    flux reflected by ground (per unit direct flux)
@@ -92,25 +92,25 @@ contains
        TRD = RadSwDownDir(IB) * RadSwDirTranGrdDir(IB)
        TRI = RadSwDownDir(IB) * RadSwDifTranGrdDir(IB) + RadSwDownDif(IB) * RadSwDifTranGrdDif(IB)
        ! solar radiation absorbed by ground surface
-       ABSG = TRD * (1.0 - ALBGRD(IB)) + TRI * (1.0 - ALBGRI(IB))
+       ABSG = TRD * (1.0 - AlbedoGrdDir(IB)) + TRI * (1.0 - AlbedoGrdDif(IB))
        RadSwAbsGrd  = RadSwAbsGrd + ABSG
        RadSwAbsTot  = RadSwAbsTot + ABSG
     enddo
 
     ! partition visible canopy absorption to sunlit and shaded fractions
     ! to get average absorbed par for sunlit and shaded leaves
-    LAIFRA = ELAI / max(VAI, MPE)
-    if ( FSUN > 0.0 ) then
-       RadPhotoActAbsSunlit = ( CAD(1) + FSUN * CAI(1) ) * LAIFRA / max(LAISUN, MPE)
-       RadPhotoActAbsShade = ( FSHA * CAI(1) ) * LAIFRA / max(LAISHA, MPE)
+    LAIFRA = LeafAreaIndEff / max(VegAreaIndEff, MPE)
+    if ( CanopySunlitFrac > 0.0 ) then
+       RadPhotoActAbsSunlit = ( CAD(1) + CanopySunlitFrac * CAI(1) ) * LAIFRA / max(LeafAreaIndSunlit, MPE)
+       RadPhotoActAbsShade = ( CanopyShadeFrac * CAI(1) ) * LAIFRA / max(LeafAreaIndShade, MPE)
     else
        RadPhotoActAbsSunlit = 0.0
-       RadPhotoActAbsShade = ( CAD(1) + CAI(1) ) * LAIFRA / max(LAISHA, MPE)
+       RadPhotoActAbsShade = ( CAD(1) + CAI(1) ) * LAIFRA / max(LeafAreaIndShade, MPE)
     endif
 
     ! reflected solar radiation
-    RVIS = ALBD(1) * RadSwDownDir(1) + ALBI(1) * RadSwDownDif(1)
-    RNIR = ALBD(2) * RadSwDownDir(2) + ALBI(2) * RadSwDownDif(2)
+    RVIS = AlbedoSfcDir(1) * RadSwDownDir(1) + AlbedoSfcDif(1) * RadSwDownDif(1)
+    RNIR = AlbedoSfcDir(2) * RadSwDownDir(2) + AlbedoSfcDif(2) * RadSwDownDif(2)
     RadSwReflTot  = RVIS + RNIR
 
     ! reflected solar radiation of veg. and ground (combined ground)

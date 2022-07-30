@@ -43,9 +43,9 @@ contains
               SoilTranspFac          => noahmp%water%state%SoilTranspFac           ,& ! in,     soil water transpiration factor (0 to 1)
               WaterStorageLakeMax          => noahmp%water%param%WaterStorageLakeMax           ,& ! in,     maximum lake water storage (mm)
               NumSoilLayerRoot           => noahmp%water%param%NumSoilLayerRoot            ,& ! in,     number of soil layers with root present
-              FROZEN_GROUND   => noahmp%energy%state%FROZEN_GROUND   ,& ! in,     frozen ground (logical) to define latent heat pathway
+              FlagFrozenGround   => noahmp%energy%state%FlagFrozenGround   ,& ! in,     frozen ground (logical) to define latent heat pathway
               LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
-              RHOAIR          => noahmp%energy%state%RHOAIR          ,& ! in,     density air (kg/m3)
+              DensityAirRefHeight          => noahmp%energy%state%DensityAirRefHeight          ,& ! in,     density air (kg/m3)
               CH              => noahmp%energy%state%CH              ,& ! in,     exchange coefficient (m/s) for heat, surface, grid mean
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,     specific humidity (kg/kg) at reference height
               HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! in,     total ground latent heat (w/m2) [+ to atm]
@@ -68,8 +68,8 @@ contains
               SublimSnowSfcIce          => noahmp%water%flux%SublimSnowSfcIce            ,& ! inout,  snow surface sublimation rate[mm/s]
               TranspWatLossSoil          => noahmp%water%flux%TranspWatLossSoil            ,& ! inout,  transpiration water loss from soil layers [mm/s]
               GlacierExcessFlow         => noahmp%water%flux%GlacierExcessFlow           ,& ! inout,  glacier excess flow [mm/s]
-              Q2B             => noahmp%energy%state%Q2B             ,& ! out,    bare ground 2-m water vapor mixing ratio
-              QSFC            => noahmp%energy%state%QSFC            ,& ! out,    water vapor mixing ratio bare ground
+              SpecHumidity2mBare             => noahmp%energy%state%SpecHumidity2mBare             ,& ! out,    bare ground 2-m specific humidity
+              SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! out,    specific humidity at bare surface
               EvapSoilNet            => noahmp%water%flux%EvapSoilNet              ,& ! out,    net direct soil evaporation (mm/s)
               Transpiration           => noahmp%water%flux%Transpiration             ,& ! out,    transpiration rate [mm/s]
               EvapCanopyNet            => noahmp%water%flux%EvapCanopyNet              ,& ! out,    evaporation of intercepted water [mm/s]
@@ -117,7 +117,7 @@ contains
     call SnowWaterMain(noahmp)
 
     ! treat frozen ground/soil
-    if ( FROZEN_GROUND .eqv. .true. ) then
+    if ( FlagFrozenGround .eqv. .true. ) then
        SoilIce(1) =  SoilIce(1) + (DewSoilSfcLiq-EvapSoilSfcLiq) * MainTimeStep / (ThicknessSnowSoilLayer(1)*1000.0)
        DewSoilSfcLiq = 0.0
        EvapSoilSfcLiq = 0.0
@@ -168,8 +168,8 @@ contains
     ! update surface water vapor flux ! urban - jref
     WaterToAtmosTotal = Transpiration + EvapCanopyNet + EvapSoilNet
     if ( (FlagUrban .eqv. .true.) ) then
-       QSFC = WaterToAtmosTotal / (RHOAIR * CH) + SpecHumidityRefHeight
-       Q2B  = QSFC
+       SpecHumiditySfcBare = WaterToAtmosTotal / (DensityAirRefHeight * CH) + SpecHumidityRefHeight
+       SpecHumidity2mBare  = SpecHumiditySfcBare
     endif
 
     end associate

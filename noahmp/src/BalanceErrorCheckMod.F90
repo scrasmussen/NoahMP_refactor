@@ -171,7 +171,7 @@ contains
     associate(                                                        &
               GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
               GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
+              VegFrac            => noahmp%energy%state%VegFrac            ,& ! in,    greeness vegetation fraction (-)
               RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
               RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! in,    total absorbed solar radiation (w/m2)
               RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! in,    total reflected solar radiation (w/m2)
@@ -202,13 +202,13 @@ contains
        write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
        write(*,*) 'ERRSW =',  ERRSW
        write(*,*) "VEGETATION!"
-       write(*,*) "RadSwDownRefHeight*FVEG =",RadSwDownRefHeight * FVEG
-       write(*,*) "FVEG*RadSwAbsVeg + RadSwAbsGrd =",   FVEG * RadSwAbsVeg + RadSwAbsGrd
-       write(*,*) "FVEG*RadSwReflVeg + RadSwReflGrd =", FVEG * RadSwReflVeg + RadSwReflGrd
+       write(*,*) "RadSwDownRefHeight*VegFrac =",RadSwDownRefHeight * VegFrac
+       write(*,*) "VegFrac*RadSwAbsVeg + RadSwAbsGrd =",   VegFrac * RadSwAbsVeg + RadSwAbsGrd
+       write(*,*) "VegFrac*RadSwReflVeg + RadSwReflGrd =", VegFrac * RadSwReflVeg + RadSwReflGrd
        write(*,*) "GROUND!"
-       write(*,*) "(1.-FVEG)*RadSwDownRefHeight =", (1.0-FVEG)*RadSwDownRefHeight
-       write(*,*) "(1.-FVEG)*RadSwAbsGrd =",    (1.0-FVEG) * RadSwAbsGrd
-       write(*,*) "(1.-FVEG)*RadSwReflGrd=",    (1.0-FVEG) * RadSwReflGrd
+       write(*,*) "(1.-VegFrac)*RadSwDownRefHeight =", (1.0-VegFrac)*RadSwDownRefHeight
+       write(*,*) "(1.-VegFrac)*RadSwAbsGrd =",    (1.0-VegFrac) * RadSwAbsGrd
+       write(*,*) "(1.-VegFrac)*RadSwReflGrd=",    (1.0-VegFrac) * RadSwReflGrd
        write(*,*) "RadSwReflVeg   =", RadSwReflVeg
        write(*,*) "RadSwReflGrd   =", RadSwReflGrd
        write(*,*) "RadSwReflTot    =", RadSwReflTot
@@ -246,7 +246,7 @@ contains
        !call wrf_message(trim(message))
        write(*,'(a17,4F10.4)') "Precip advected: ",HeatPrecipAdvTot,HeatPrecipAdvCanopy,HeatPrecipAdvVegGrd,HeatPrecipAdvBareGrd
        !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Veg fraction:     ",FVEG
+       write(*,'(a17,F10.4)') "Veg fraction:     ",VegFrac
        !call wrf_message(trim(message))
        !call wrf_error_fatal("Energy budget problem in NOAHMP LSM")
        stop "Error"

@@ -45,8 +45,8 @@ contains
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers [m]
-              FACT            => noahmp%energy%state%FACT            ,& ! in,    energy factor for soil & snow phase change
-              STC             => noahmp%energy%state%STC             ,& ! inout, snow and soil layer temperature [K]
+              PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! in,    energy factor for soil & snow phase change
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [K]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
               SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout, total soil moisture [m3/m3]
               SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
@@ -93,10 +93,10 @@ contains
 
     ! determine melting or freezing state
     do J = NumSnowLayerNeg+1, 0
-       if ( (MICE(J) > 0.0) .and. (STC(J) >= ConstFreezePoint) ) then
+       if ( (MICE(J) > 0.0) .and. (TemperatureSoilSnow(J) >= ConstFreezePoint) ) then
           IndexPhaseChange(J) = 1  ! melting
        endif
-       if ( (MLIQ(J) > 0.0) .and. (STC(J) < ConstFreezePoint) ) then
+       if ( (MLIQ(J) > 0.0) .and. (TemperatureSoilSnow(J) < ConstFreezePoint) ) then
           IndexPhaseChange(J) = 2  ! freezing
        endif
     enddo
@@ -104,8 +104,8 @@ contains
     ! Calculate the energy surplus and loss for melting and freezing
     do J = NumSnowLayerNeg+1, 0
        if ( IndexPhaseChange(J) > 0 ) then
-          HM(J)  = (STC(J) - ConstFreezePoint) / FACT(J)
-          STC(J) = ConstFreezePoint
+          HM(J)  = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
+          TemperatureSoilSnow(J) = ConstFreezePoint
        endif
        if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
           HM(J)    = 0.0
@@ -120,9 +120,9 @@ contains
 
     ! The rate of melting and freezing for snow without a layer, needs more work.
     if ( OptGlacierTreatment == 2 ) then
-       if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (STC(1) > ConstFreezePoint) ) then
-          HM(1)    = (STC(1) - ConstFreezePoint) / FACT(1)                  ! available heat
-          STC(1)   = ConstFreezePoint                                       ! set T to freezing
+       if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (TemperatureSoilSnow(1) > ConstFreezePoint) ) then
+          HM(1)    = (TemperatureSoilSnow(1) - ConstFreezePoint) / PhaseChgFacSoilSnow(1)                  ! available heat
+          TemperatureSoilSnow(1)   = ConstFreezePoint                                       ! set T to freezing
           XM(1)    = HM(1) * MainTimeStep / ConstLatHeatFusion                          ! total snow melt possible
           TEMP1    = SnowWaterEquiv
           SnowWaterEquiv    = max( 0.0, TEMP1-XM(1) )                    ! snow remaining
@@ -132,7 +132,7 @@ contains
           HEATR(1) = HM(1) - ConstLatHeatFusion * (TEMP1 - SnowWaterEquiv) / MainTimeStep        ! excess heat
           if ( HEATR(1) > 0.0 ) then
              XM(1) = HEATR(1) * MainTimeStep / ConstLatHeatFusion
-             STC(1)= STC(1) + FACT(1) * HEATR(1)                ! re-heat ice
+             TemperatureSoilSnow(1)= TemperatureSoilSnow(1) + PhaseChgFacSoilSnow(1) * HEATR(1)                ! re-heat ice
           else
              XM(1) = 0.0
              HM(1) = 0.0
@@ -158,8 +158,8 @@ contains
 
           ! update snow temperature and energy surplus/loss
           if ( abs(HEATR(J)) > 0.0 ) then
-             STC(J) = STC(J) + FACT(J) * HEATR(J)
-             if ( (MLIQ(J)*MICE(J)) > 0.0 ) STC(J) = ConstFreezePoint
+             TemperatureSoilSnow(J) = TemperatureSoilSnow(J) + PhaseChgFacSoilSnow(J) * HEATR(J)
+             if ( (MLIQ(J)*MICE(J)) > 0.0 ) TemperatureSoilSnow(J) = ConstFreezePoint
           endif
           XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
 
@@ -191,15 +191,15 @@ contains
 
        ! determine melting or freezing state
        do J = 1, NumSoilLayer
-          if ( (MICE(J) > 0.0) .and. (STC(J) >= ConstFreezePoint) ) then
+          if ( (MICE(J) > 0.0) .and. (TemperatureSoilSnow(J) >= ConstFreezePoint) ) then
              IndexPhaseChange(J) = 1  ! melting
           endif
-          if ( (MLIQ(J) > 0.0) .and. (STC(J) < ConstFreezePoint) ) then
+          if ( (MLIQ(J) > 0.0) .and. (TemperatureSoilSnow(J) < ConstFreezePoint) ) then
              IndexPhaseChange(J) = 2  ! freezing
           endif
           ! If snow exists, but its thickness is not enough to create a layer
           if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (J == 1) ) then
-             if ( STC(J) >= ConstFreezePoint ) then
+             if ( TemperatureSoilSnow(J) >= ConstFreezePoint ) then
                 IndexPhaseChange(J) = 1
              endif
           endif
@@ -208,8 +208,8 @@ contains
        ! Calculate the energy surplus and loss for melting and freezing
        do J = 1, NumSoilLayer
           if ( IndexPhaseChange(J) > 0 ) then
-             HM(J)  = (STC(J) - ConstFreezePoint) / FACT(J)
-             STC(J) = ConstFreezePoint
+             HM(J)  = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
+             TemperatureSoilSnow(J) = ConstFreezePoint
           endif
           if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
              HM(J)    = 0.0
@@ -259,7 +259,7 @@ contains
 
              ! update ice temperature and energy surplus/loss
              if ( abs(HEATR(J)) > 0.0 ) then
-                STC(J) = STC(J) + FACT(J) * HEATR(J)
+                TemperatureSoilSnow(J) = TemperatureSoilSnow(J) + PhaseChgFacSoilSnow(J) * HEATR(J)
              endif
              XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
           endif
@@ -270,105 +270,105 @@ contains
        !--- Deal with residuals in ice/soil
 
        ! first remove excess heat by reducing layer temperature
-       if ( any(STC(1:NumSoilLayer) > ConstFreezePoint) .and. any(STC(1:NumSoilLayer) < ConstFreezePoint) ) then
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
           do J = 1, NumSoilLayer
-             if ( STC(J) > ConstFreezePoint ) then
-                HEATR(J) = (STC(J) - ConstFreezePoint) / FACT(J)
+             if ( TemperatureSoilSnow(J) > ConstFreezePoint ) then
+                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
                 do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (STC(K) < ConstFreezePoint) .and. (HEATR(J) > 0.1) ) then
-                      HEATR(K) = (STC(K) - ConstFreezePoint) / FACT(K)
+                   if ( (J /= K) .and. (TemperatureSoilSnow(K) < ConstFreezePoint) .and. (HEATR(J) > 0.1) ) then
+                      HEATR(K) = (TemperatureSoilSnow(K) - ConstFreezePoint) / PhaseChgFacSoilSnow(K)
                       if ( abs(HEATR(K)) > HEATR(J) ) then ! LAYER ABSORBS ALL
                          HEATR(K) = HEATR(K) + HEATR(J)
-                         STC(K)   = ConstFreezePoint + HEATR(K) * FACT(K)
+                         TemperatureSoilSnow(K)   = ConstFreezePoint + HEATR(K) * PhaseChgFacSoilSnow(K)
                          HEATR(J) = 0.0
                       else
                          HEATR(J) = HEATR(J) + HEATR(K)
                          HEATR(K) = 0.0
-                         STC(K)   = ConstFreezePoint
+                         TemperatureSoilSnow(K)   = ConstFreezePoint
                       endif
                    endif
                 enddo
-                STC(J) = ConstFreezePoint + HEATR(J) * FACT(J)
+                TemperatureSoilSnow(J) = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
              endif
           enddo
        endif
 
        ! now remove excess cold by increasing temperture (may not be necessary with above loop)
-       if ( any(STC(1:NumSoilLayer) > ConstFreezePoint) .and. any(STC(1:NumSoilLayer) < ConstFreezePoint) ) then
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
           do J = 1, NumSoilLayer
-             if ( STC(J) < ConstFreezePoint ) then
-                HEATR(J) = (STC(J) - ConstFreezePoint) / FACT(J)
+             if ( TemperatureSoilSnow(J) < ConstFreezePoint ) then
+                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
                 do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (STC(K) > ConstFreezePoint) .and. (HEATR(J) < -0.1) ) then
-                      HEATR(K) = (STC(K) - ConstFreezePoint) / FACT(K)
+                   if ( (J /= K) .and. (TemperatureSoilSnow(K) > ConstFreezePoint) .and. (HEATR(J) < -0.1) ) then
+                      HEATR(K) = (TemperatureSoilSnow(K) - ConstFreezePoint) / PhaseChgFacSoilSnow(K)
                       if ( HEATR(K) > abs(HEATR(J)) ) then  ! LAYER ABSORBS ALL
                          HEATR(K) = HEATR(K) + HEATR(J)
-                         STC(K)   = ConstFreezePoint + HEATR(K) * FACT(K)
+                         TemperatureSoilSnow(K)   = ConstFreezePoint + HEATR(K) * PhaseChgFacSoilSnow(K)
                          HEATR(J) = 0.0
                       else
                          HEATR(J) = HEATR(J) + HEATR(K)
                          HEATR(K) = 0.0
-                         STC(K)   = ConstFreezePoint
+                         TemperatureSoilSnow(K)   = ConstFreezePoint
                       endif
                    endif
                 enddo
-                STC(J) = ConstFreezePoint + HEATR(J) * FACT(J)
+                TemperatureSoilSnow(J) = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
              endif
           enddo
        endif
 
        ! now remove excess heat by melting ice
-       if ( any(STC(1:NumSoilLayer) > ConstFreezePoint) .and. any(MICE(1:NumSoilLayer) > 0.0) ) then
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(MICE(1:NumSoilLayer) > 0.0) ) then
           do J = 1, NumSoilLayer
-             if ( STC(J) > ConstFreezePoint ) then
-                HEATR(J) = (STC(J) - ConstFreezePoint) / FACT(J)
+             if ( TemperatureSoilSnow(J) > ConstFreezePoint ) then
+                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
                 XM(J)    = HEATR(J) * MainTimeStep / ConstLatHeatFusion
                 do K = 1, NumSoilLayer
                    if ( (J /= K) .and. (MICE(K) > 0.0) .and. (XM(J) > 0.1) ) then
                       if ( MICE(K) > XM(J) ) then  ! LAYER ABSORBS ALL
                          MICE(K) = MICE(K) - XM(J)
                          XMF     = XMF + ConstLatHeatFusion * XM(J)/MainTimeStep
-                         STC(K)  = ConstFreezePoint
+                         TemperatureSoilSnow(K)  = ConstFreezePoint
                          XM(J)   = 0.0
                       else
                          XM(J)   = XM(J) - MICE(K)
                          XMF     = XMF + ConstLatHeatFusion * MICE(K) / MainTimeStep
                          MICE(K) = 0.0
-                         STC(K)  = ConstFreezePoint
+                         TemperatureSoilSnow(K)  = ConstFreezePoint
                       endif
                       MLIQ(K) = max( 0.0, WMASS0(K)-MICE(K) )
                    endif
                 enddo
                 HEATR(J) = XM(J) * ConstLatHeatFusion / MainTimeStep
-                STC(J)   = ConstFreezePoint + HEATR(J) * FACT(J)
+                TemperatureSoilSnow(J)   = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
              endif
           enddo
        endif
 
        ! snow remove excess cold by refreezing liquid (may not be necessary with above loop)
-       if ( any(STC(1:NumSoilLayer) < ConstFreezePoint) .and. any(MLIQ(1:NumSoilLayer) > 0.0) ) then
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) .and. any(MLIQ(1:NumSoilLayer) > 0.0) ) then
           do J = 1, NumSoilLayer
-             if ( STC(J) < ConstFreezePoint ) then
-                HEATR(J) = (STC(J) - ConstFreezePoint) / FACT(J)
+             if ( TemperatureSoilSnow(J) < ConstFreezePoint ) then
+                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
                 XM(J)    = HEATR(J) * MainTimeStep / ConstLatHeatFusion
                 do K = 1, NumSoilLayer
                    if ( (J /= K) .and. (MLIQ(K) > 0.0) .and. (XM(J) < -0.1) ) then
                       if ( MLIQ(K) > abs(XM(J)) ) then  ! LAYER ABSORBS ALL
                          MICE(K) = MICE(K) - XM(J)
                          XMF     = XMF + ConstLatHeatFusion * XM(J) / MainTimeStep
-                         STC(K)  = ConstFreezePoint
+                         TemperatureSoilSnow(K)  = ConstFreezePoint
                          XM(J)   = 0.0
                       else
                          XM(J)   = XM(J) + MLIQ(K)
                          XMF     = XMF - ConstLatHeatFusion * MLIQ(K) / MainTimeStep
                          MICE(K) = WMASS0(K)
-                         STC(K)  = ConstFreezePoint
+                         TemperatureSoilSnow(K)  = ConstFreezePoint
                       endif
                       MLIQ(K) = max( 0.0, WMASS0(K)-MICE(K) )
                    endif
                 enddo
                 HEATR(J) = XM(J) * ConstLatHeatFusion / MainTimeStep
-                STC(J)   = ConstFreezePoint + HEATR(J) * FACT(J)
+                TemperatureSoilSnow(J)   = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
              endif
           enddo
        endif

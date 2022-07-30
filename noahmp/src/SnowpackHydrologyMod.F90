@@ -52,7 +52,6 @@ contains
               SnowLiqWater   => noahmp%water%state%SnowLiqWater   ,& ! inout,  snow layer liquid water [mm]
               SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout,  soil liquid moisture (m3/m3)
               SoilIce            => noahmp%water%state%SoilIce             ,& ! inout,  soil ice moisture (m3/m3)
-              STC             => noahmp%energy%state%STC             ,& ! inout,  snow and soil layer temperature [k]
               SnowEffPorosity           => noahmp%water%state%SnowEffPorosity       ,& ! out,    snow effective porosity (m3/m3)
               SnowBotOutflow          => noahmp%water%flux%SnowBotOutflow             & ! out,   total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
              )

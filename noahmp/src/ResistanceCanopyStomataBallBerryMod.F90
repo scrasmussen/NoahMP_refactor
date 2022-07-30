@@ -73,16 +73,16 @@ contains
               Co2MmConstQ10             => noahmp%energy%param%Co2MmConstQ10             ,& ! in,    q10 for Co2MmConst25C
               O2MmConstQ10             => noahmp%energy%param%O2MmConstQ10             ,& ! in,    q10 for ko25
               ConductanceLeafMin              => noahmp%energy%param%ConductanceLeafMin              ,& ! in,    minimum leaf conductance (umol/m**2/s)
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              ESTV            => noahmp%energy%state%ESTV            ,& ! in,    saturation vapor pressure at TV (pa)
-              EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
-              O2              => noahmp%energy%state%O2AIR           ,& ! in,    atmospheric o2 concentration (pa)
-              CO2             => noahmp%energy%state%CO2AIR          ,& ! in,    atmospheric co2 concentration (pa)
-              RB              => noahmp%energy%state%RB              ,& ! in,    leaf boundary layer resistance (s/m)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              VapPresSatCanopy            => noahmp%energy%state%VapPresSatCanopy            ,& ! in,    canopy saturation vapor pressure at TV (pa)
+              PressureVaporCanAir             => noahmp%energy%state%PressureVaporCanAir             ,& ! in,    canopy air vapor pressure (pa)
+              PressureAtmosO2              => noahmp%energy%state%PressureAtmosO2           ,& ! in,    atmospheric o2 pressure (pa)
+              PressureAtmosCO2             => noahmp%energy%state%PressureAtmosCO2          ,& ! in,    atmospheric co2 pressure (pa)
+              ResistanceLeafBoundary              => noahmp%energy%state%ResistanceLeafBoundary              ,& ! in,    leaf boundary layer resistance (s/m)
               RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
               RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! in,    average absorbed par for shaded leaves (w/m2)
-              RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
-              RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
+              ResistanceStomataSunlit           => noahmp%energy%state%ResistanceStomataSunlit           ,& ! out,   sunlit leaf stomatal resistance (s/m)
+              ResistanceStomataShade           => noahmp%energy%state%ResistanceStomataShade           ,& ! out,   shaded leaf stomatal resistance (s/m)
               PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
               PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
              )
@@ -97,25 +97,25 @@ contains
        ! initialize RS=maximum value and photosynthesis=0 because will only do calculations
        ! for RadPhotoActAbsSunlit  > 0, in which case RS <= maximum value and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
-       RSSUN  = 1.0 / ConductanceLeafMin * CF  
+       ResistanceStomataSunlit  = 1.0 / ConductanceLeafMin * CF  
        PhotosynLeafSunlit = 0.0           
 
        if ( RadPhotoActAbsSunlit > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
-          TC   = TV - ConstFreezePoint
+          TC   = TemperatureCanopy - ConstFreezePoint
           PPF  = 4.6 * RadPhotoActAbsSunlit
           J    = PPF * QuantumEfficiency25C
           KC   = Co2MmConst25C * F1(Co2MmConstQ10, TC)
           KO   = O2MmConst25C * F1(O2MmConstQ10, TC)
-          AWC  = KC * ( 1.0 + O2 / KO )
-          CP   = 0.5 * KC / KO * O2 * 0.21
+          AWC  = KC * ( 1.0 + PressureAtmosO2 / KO )
+          CP   = 0.5 * KC / KO * PressureAtmosO2 * 0.21
           VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
-          CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
+          CI = 0.7 * PressureAtmosCO2 * PhotosynPathC3 + 0.4 * PressureAtmosCO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol
-          RLB = RB / CF
-          ! constrain EAH
-          CEA = max( 0.25*ESTV*PhotosynPathC3 + 0.40*ESTV*(1.0-PhotosynPathC3), min(EAH,ESTV) )
+          RLB = ResistanceLeafBoundary / CF
+          ! constrain PressureVaporCanAir
+          CEA = max( 0.25*VapPresSatCanopy*PhotosynPathC3 + 0.40*VapPresSatCanopy*(1.0-PhotosynPathC3), min(PressureVaporCanAir,VapPresSatCanopy) )
 
           ! ci iteration
           do ITER = 1, NITER
@@ -123,8 +123,8 @@ contains
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * PhotosynPathC3 + VCMX * (1.0 - PhotosynPathC3)
              WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafSunlit = min( WJ, WC, WE ) * IndexGrowSeason
-             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafSunlit, MPE )
-             A      = SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * ESTV) + ConductanceLeafMin
+             CS     = max( PressureAtmosCO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafSunlit, MPE )
+             A      = SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight * CEA / (CS * VapPresSatCanopy) + ConductanceLeafMin
              B      = (SlopeConductToPhotosyn * PhotosynLeafSunlit * PressureAirRefHeight / CS + ConductanceLeafMin) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
@@ -134,12 +134,12 @@ contains
              endif
              R1     = Q / A
              R2     = C / Q
-             RSSUN  = max(R1, R2)
-             CI     = max( CS - PhotosynLeafSunlit*PressureAirRefHeight*1.65*RSSUN, 0.0 )
+             ResistanceStomataSunlit  = max(R1, R2)
+             CI     = max( CS - PhotosynLeafSunlit*PressureAirRefHeight*1.65*ResistanceStomataSunlit, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m
-          RSSUN = RSSUN * CF
+          ResistanceStomataSunlit = ResistanceStomataSunlit * CF
        endif ! RadPhotoActAbsSunlit > 0.0
 
     endif ! IndexShade == 0
@@ -151,25 +151,25 @@ contains
        ! initialize RS=maximum value and photosynthesis=0 because will only do calculations
        ! for RadPhotoActAbsShade  > 0, in which case RS <= maximum value and photosynthesis >= 0
        CF = PressureAirRefHeight / (8.314 * TemperatureAirRefHeight) * 1.0e06  ! unit conversion factor
-       RSSHA  = 1.0 / ConductanceLeafMin * CF
+       ResistanceStomataShade  = 1.0 / ConductanceLeafMin * CF
        PhotosynLeafShade = 0.0
 
        if ( RadPhotoActAbsShade > 0.0 ) then
           NitrogenFoliageFac  = min( NitrogenConcFoliage / max(MPE, NitrogenConcFoliageMax), 1.0 )
-          TC   = TV - ConstFreezePoint
+          TC   = TemperatureCanopy - ConstFreezePoint
           PPF  = 4.6 * RadPhotoActAbsShade
           J    = PPF * QuantumEfficiency25C
           KC   = Co2MmConst25C * F1(Co2MmConstQ10, TC)
           KO   = O2MmConst25C * F1(O2MmConstQ10, TC)
-          AWC  = KC * ( 1.0 + O2 / KO )
-          CP   = 0.5 * KC / KO * O2 * 0.21
+          AWC  = KC * ( 1.0 + PressureAtmosO2 / KO )
+          CP   = 0.5 * KC / KO * PressureAtmosO2 * 0.21
           VCMX = CarboxylRateMax25C / F2(TC) * NitrogenFoliageFac * SoilTranspFacAcc * F1(CarboxylRateMaxQ10, TC)
           ! first guess ci
-          CI = 0.7 * CO2 * PhotosynPathC3 + 0.4 * CO2 * (1.0 - PhotosynPathC3)
+          CI = 0.7 * PressureAtmosCO2 * PhotosynPathC3 + 0.4 * PressureAtmosCO2 * (1.0 - PhotosynPathC3)
           ! rb: s/m -> s m**2 / umol
-          RLB = RB / CF
-          ! constrain EAH
-          CEA = max( 0.25*ESTV*PhotosynPathC3 + 0.40*ESTV*(1.0-PhotosynPathC3), min(EAH,ESTV) )
+          RLB = ResistanceLeafBoundary / CF
+          ! constrain PressureVaporCanAir
+          CEA = max( 0.25*VapPresSatCanopy*PhotosynPathC3 + 0.40*VapPresSatCanopy*(1.0-PhotosynPathC3), min(PressureVaporCanAir,VapPresSatCanopy) )
 
           ! ci iteration
           do ITER = 1, NITER
@@ -177,8 +177,8 @@ contains
              WC     = max(CI-CP, 0.0) * VCMX / (CI + AWC) * PhotosynPathC3 + VCMX * (1.0 - PhotosynPathC3)
              WE     = 0.5 * VCMX * PhotosynPathC3 + 4000.0 * VCMX * CI / PressureAirRefHeight * (1.0 - PhotosynPathC3)
              PhotosynLeafShade = min( WJ, WC, WE ) * IndexGrowSeason
-             CS     = max( CO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafShade, MPE )
-             A      = SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * ESTV) + ConductanceLeafMin
+             CS     = max( PressureAtmosCO2 - 1.37*RLB*PressureAirRefHeight*PhotosynLeafShade, MPE )
+             A      = SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight * CEA / (CS * VapPresSatCanopy) + ConductanceLeafMin
              B      = (SlopeConductToPhotosyn * PhotosynLeafShade * PressureAirRefHeight / CS + ConductanceLeafMin) * RLB - 1.0
              C      = -RLB
              if ( B >= 0.0 ) then
@@ -188,12 +188,12 @@ contains
              endif
              R1     = Q / A
              R2     = C / Q
-             RSSHA  = max(R1, R2)
-             CI     = max( CS - PhotosynLeafShade*PressureAirRefHeight*1.65*RSSHA, 0.0 )
+             ResistanceStomataShade  = max(R1, R2)
+             CI     = max( CS - PhotosynLeafShade*PressureAirRefHeight*1.65*ResistanceStomataShade, 0.0 )
           enddo
 
           ! rs, rb:  s m**2 / umol -> s/m
-          RSSHA = RSSHA * CF
+          ResistanceStomataShade = ResistanceStomataShade * CF
        endif ! RadPhotoActAbsShade > 0.0
 
     endif ! IndexShade == 1

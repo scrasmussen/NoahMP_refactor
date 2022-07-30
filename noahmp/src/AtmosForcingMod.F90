@@ -29,7 +29,7 @@ contains
     real(kind=kind_noahmp)             :: vis_frac               ! visible band solar radiation fraction
     real(kind=kind_noahmp)             :: ESATAIR                ! saturated vapor pressure of air
     real(kind=kind_noahmp)             :: LATHEA                 ! latent heat of vapor/sublimation
-    real(kind=kind_noahmp)             :: GAMMA_b                ! (cp*p)/(eps*L)
+    real(kind=kind_noahmp)             :: GAMMA_b                ! (cp*p)/(eps*L), psychrometric coefficient
     real(kind=kind_noahmp)             :: TDC                    ! air temperature [C]
     real(kind=kind_noahmp)             :: TWET                   ! wetbulb temperature
     integer                            :: ITER                   ! loop index
@@ -50,9 +50,9 @@ contains
               PrecipHailRefHeight     => noahmp%forcing%PrecipHailRefHeight        ,& ! in,  hail rate [mm/s] at reference height
               RadSwDownRefHeight      => noahmp%forcing%RadSwDownRefHeight         ,& ! in,  downward shortwave radiation (W/m2) at reference height
               SnowfallDensityMax      => noahmp%water%param%SnowfallDensityMax     ,& ! in,  maximum fresh snowfall density [kg/m3]
-              THAIR                 => noahmp%energy%state%THAIR        ,& ! out,  surface potential temperature (k)
-              EAIR                  => noahmp%energy%state%EAIR         ,& ! out,  vapor pressure air (pa)
-              RHOAIR                => noahmp%energy%state%RHOAIR       ,& ! out,  density air (kg/m3)
+              TemperaturePotRefHeight                 => noahmp%energy%state%TemperaturePotRefHeight        ,& ! out,  surface potential temperature (k)
+              PressureVaporRefHeight                  => noahmp%energy%state%PressureVaporRefHeight         ,& ! out,  vapor pressure air [Pa] at reference height
+              DensityAirRefHeight                => noahmp%energy%state%DensityAirRefHeight       ,& ! out,  density air (kg/m3)
               RadSwDownDir                 => noahmp%energy%flux%RadSwDownDir         ,& ! out,  incoming direct solar radiation (w/m2)
               RadSwDownDif                 => noahmp%energy%flux%RadSwDownDif         ,& ! out,  incoming diffuse solar radiation (w/m2)
               RainfallRefHeight                  => noahmp%water%flux%RainfallRefHeight           ,& ! out,  rainfall [mm/s] at reference height
@@ -68,9 +68,9 @@ contains
 
     ! surface air quantities
     PAIR   = PressureAirRefHeight  ! to be consistent with resistanceChen97 calculation (based on ground reference level)
-    THAIR  = TemperatureAirRefHeight * (PressureAirRefHeight/PAIR)**(ConstGasDryAir/ConstHeatCapacAir) 
-    EAIR   = SpecHumidityRefHeight * PressureAirRefHeight / (0.622+0.378*SpecHumidityRefHeight)
-    RHOAIR = (PressureAirRefHeight - 0.378*EAIR) / (ConstGasDryAir * TemperatureAirRefHeight)
+    TemperaturePotRefHeight  = TemperatureAirRefHeight * (PressureAirRefHeight/PAIR)**(ConstGasDryAir/ConstHeatCapacAir) 
+    PressureVaporRefHeight   = SpecHumidityRefHeight * PressureAirRefHeight / (0.622+0.378*SpecHumidityRefHeight)
+    DensityAirRefHeight = (PressureAirRefHeight - 0.378*PressureVaporRefHeight) / (ConstGasDryAir * TemperatureAirRefHeight)
 
     ! downward solar radiation
     dir_frac = 0.7
@@ -160,7 +160,7 @@ contains
        TWET    = TDC - 5.0                                     ! first guess wetbulb temperature
        do ITER = 1, NITER
           ESATAIR = 610.8 * exp( (17.27*TWET) / (237.3+TWET) )
-          TWET    = TWET - (ESATAIR - EAIR) / GAMMA_b          ! Wang et al., 2019 GRL Eq.2
+          TWET    = TWET - (ESATAIR - PressureVaporRefHeight) / GAMMA_b          ! Wang et al., 2019 GRL Eq.2
        enddo
        FrozenPrecipFrac = 1.0 / (1.0 + 6.99e-5 * exp(2.0*(TWET+3.97)))    ! Wang et al., 2019 GRL Eq. 1
     endif

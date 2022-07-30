@@ -47,12 +47,12 @@ contains
               ResistanceStomataMax           => noahmp%energy%param%ResistanceStomataMax           ,& ! in,    Maximal stomatal resistance [s m-1]
               AirTempOptimTransp            => noahmp%energy%param%AirTempOptimTransp            ,& ! in,    Optimum transpiration air temperature [K]
               VaporPresDeficitFac              => noahmp%energy%param%VaporPresDeficitFac              ,& ! in,    Parameter used in vapor pressure deficit function
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              EAH             => noahmp%energy%state%EAH             ,& ! in,    canopy air vapor pressure (pa)
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              PressureVaporCanAir             => noahmp%energy%state%PressureVaporCanAir             ,& ! in,    canopy air vapor pressure (pa)
               RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
               RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! in,    average absorbed par for shaded leaves (w/m2)
-              RSSUN           => noahmp%energy%state%RSSUN           ,& ! out,   sunlit leaf stomatal resistance (s/m)
-              RSSHA           => noahmp%energy%state%RSSHA           ,& ! out,   shaded leaf stomatal resistance (s/m)
+              ResistanceStomataSunlit           => noahmp%energy%state%ResistanceStomataSunlit           ,& ! out,   sunlit leaf stomatal resistance (s/m)
+              ResistanceStomataShade           => noahmp%energy%state%ResistanceStomataShade           ,& ! out,   shaded leaf stomatal resistance (s/m)
               PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
               PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
              )
@@ -65,12 +65,12 @@ contains
 
     ! Sunlit case
     if ( IndexShade == 0 ) then
-       RSSUN  = 0.0
+       ResistanceStomataSunlit  = 0.0
 
        ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  EAH  / (PressureAirRefHeight - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = 0.622 *  PressureVaporCanAir  / (PressureAirRefHeight - 0.378 * PressureVaporCanAir) ! specific humidity [kg/kg]
        Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
+       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
        FF  = 2.0 * RadPhotoActAbsSunlit / RadiationStressFac
@@ -78,7 +78,7 @@ contains
        RCS = max( RCS, 0.0001 )
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TV)**2.0 )
+       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TemperatureCanopy)**2.0 )
        RCT = max( RCT, 0.0001 )
 
        ! contribution due to vapor pressure deficit
@@ -86,7 +86,7 @@ contains
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSUN  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
+       ResistanceStomataSunlit  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafSunlit = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 0
@@ -94,12 +94,12 @@ contains
     ! Shaded case
     ! same as Sunlit case but using shaded input and output
     if ( IndexShade == 1 ) then
-       RSSHA  = 0.0
+       ResistanceStomataShade  = 0.0
        
        ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  EAH  / (PressureAirRefHeight - 0.378 * EAH) ! specific humidity [kg/kg]
+       Q2 = 0.622 *  PressureVaporCanAir  / (PressureAirRefHeight - 0.378 * PressureVaporCanAir) ! specific humidity [kg/kg]
        Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TV, PressureAirRefHeight, Q2SAT, DQSDT2)
+       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, Q2SAT, DQSDT2)
 
        ! contribution due to incoming solar radiation
        FF  = 2.0 * RadPhotoActAbsShade / RadiationStressFac
@@ -107,7 +107,7 @@ contains
        RCS = max( RCS, 0.0001 )
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TV)**2.0 )
+       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TemperatureCanopy)**2.0 )
        RCT = max( RCT, 0.0001 )
 
        ! contribution due to vapor pressure deficit
@@ -115,7 +115,7 @@ contains
        RCQ = max( RCQ, 0.01 )
 
        ! determine canopy resistance due to all factors
-       RSSHA  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
+       ResistanceStomataShade  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
        PhotosynLeafShade = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 1

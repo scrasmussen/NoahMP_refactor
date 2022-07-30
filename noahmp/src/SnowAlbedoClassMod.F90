@@ -35,18 +35,18 @@ contains
               SnowAlbRefClass   => noahmp%energy%param%SnowAlbRefClass   ,& ! in,     reference snow albedo in CLASS scheme
               SnowAgeFacClass   => noahmp%energy%param%SnowAgeFacClass   ,& ! in,     snow aging e-folding time (s)
               SnowAlbFreshClass   => noahmp%energy%param%SnowAlbFreshClass   ,& ! in,     fresh snow albedo
-              ALBOLD          => noahmp%energy%state%ALBOLD          ,& ! in,     snow albedo at last time step
-              ALBSND          => noahmp%energy%state%ALBSND          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
-              ALBSNI          => noahmp%energy%state%ALBSNI           & ! out,    snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoSnowPrev          => noahmp%energy%state%AlbedoSnowPrev          ,& ! in,     snow albedo at last time step
+              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! out,    snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif           & ! out,    snow albedo for diffuse(1=vis, 2=nir)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    ALBSND(1: NumSWRadBand) = 0.0
-    ALBSNI(1: NumSWRadBand) = 0.0
+    AlbedoSnowDir(1: NumSWRadBand) = 0.0
+    AlbedoSnowDif(1: NumSWRadBand) = 0.0
 
     ! when CosSolarZenithAngle > 0
-    ALB = SnowAlbRefClass + (ALBOLD - SnowAlbRefClass) * exp( -0.01 * MainTimeStep / SnowAgeFacClass )
+    ALB = SnowAlbRefClass + (AlbedoSnowPrev - SnowAlbRefClass) * exp( -0.01 * MainTimeStep / SnowAgeFacClass )
 
     ! 1 mm fresh snow(SWE) -- 10mm snow depth, assumed the fresh snow density 100kg/m3
     ! here assume 1cm snow depth will fully cover the old snow
@@ -55,12 +55,12 @@ contains
                    (SnowAlbFreshClass - ALB) / (SnowMassFullCoverOld/MainTimeStep)
     endif
 
-    ALBSNI(1)= ALB         ! vis diffuse
-    ALBSNI(2)= ALB         ! nir diffuse
-    ALBSND(1)= ALB         ! vis direct
-    ALBSND(2)= ALB         ! nir direct
+    AlbedoSnowDif(1)= ALB         ! vis diffuse
+    AlbedoSnowDif(2)= ALB         ! nir diffuse
+    AlbedoSnowDir(1)= ALB         ! vis direct
+    AlbedoSnowDir(2)= ALB         ! nir direct
 
-    ALBOLD = ALB
+    AlbedoSnowPrev = ALB
 
     end associate
 

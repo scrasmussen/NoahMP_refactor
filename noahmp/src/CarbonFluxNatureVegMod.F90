@@ -63,12 +63,10 @@ contains
               PhotosynTotal             => noahmp%biochem%flux%PhotosynTotal             ,& ! in,    total leaf photosynthesis (umol co2 /m2 /s)
               SoilWaterRootZone           => noahmp%water%state%SoilWaterRootZone            ,& ! in,    root zone soil water [-]
               SoilWaterStress          => noahmp%water%state%SoilWaterStress           ,& ! in,    water stress coeficient [-]  (1. for wilting)
-              STC             => noahmp%energy%state%STC             ,& ! in,    snow and soil layer temperature [K]
-              TROOT           => noahmp%energy%state%TROOT           ,& ! in,    root-zone averaged temperature (k)
-              TV              => noahmp%energy%state%TV              ,& ! in,    vegetation temperature (k)
-              FVEG            => noahmp%energy%state%FVEG            ,& ! in,    greeness vegetation fraction (-)
-              XLAI            => noahmp%energy%state%LAI             ,& ! inout, leaf area index [-]
-              XSAI            => noahmp%energy%state%SAI             ,& ! inout, stem area index [-]
+              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [K]
+              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
+              LeafAreaIndex            => noahmp%energy%state%LeafAreaIndex             ,& ! inout, leaf area index [-]
+              StemAreaIndex            => noahmp%energy%state%StemAreaIndex             ,& ! inout, stem area index [-]
               LeafMass          => noahmp%biochem%state%LeafMass         ,& ! inout, leaf mass [g/m2]
               RootMass          => noahmp%biochem%state%RootMass         ,& ! inout, mass of fine roots [g/m2]
               StemMass          => noahmp%biochem%state%StemMass         ,& ! inout, stem mass [g/m2]
@@ -136,24 +134,24 @@ contains
        RespReductionFac = 1.0
     endif             
     RespFacNitrogenFoliage    = min( NitrogenConcFoliage / max(1.0e-06,NitrogenConcFoliageMax), 1.0 )
-    RespFacTemperature     = RespMaintQ10**((TV - 298.16) / 10.0)
+    RespFacTemperature     = RespMaintQ10**((TemperatureCanopy - 298.16) / 10.0)
     RespirationLeaf   = RespMaintLeaf25C * RespFacTemperature * RespFacNitrogenFoliage * &
-                        XLAI * RespReductionFac * (1.0 - SoilWaterStress)           ! umol CO2/m2/s
+                        LeafAreaIndex * RespReductionFac * (1.0 - SoilWaterStress)           ! umol CO2/m2/s
     RespirationLeafMaint = min( (LeafMass-LeafMassMin)/MainTimeStep, RespirationLeaf*12.0e-6 )                 ! g/m2/s
     RespirationRoot = RespMaintRoot25C * (RootMass*1.0e-3) * RespFacTemperature * RespReductionFac * 12.0e-6             ! g/m2/s
     RespirationStem = RespMaintStem25C * ((StemMass-StemMassMin) * 1.0e-3) * &
                       RespFacTemperature * RespReductionFac * 12.0e-6  ! g/m2/s
-    RespirationWood = WoodRespCoeff * r(TV) * WoodMass * WoodPoolIndex
+    RespirationWood = WoodRespCoeff * r(TemperatureCanopy) * WoodMass * WoodPoolIndex
     
     !!! carbon assimilation start
     ! 1 mole -> 12 g carbon or 44 g CO2; 1 umol -> 12.e-6 g carbon;   
     CarbonAssim  = PhotosynTotal * 12.0e-6      ! umol co2 /m2/ s -> g/m2/s carbon
 
     ! fraction of carbon into leaf versus nonleaf
-    CarbonFracToLeaf = exp(0.01 * (1.0 - exp(0.75*XLAI)) * XLAI)
-    if ( VegType == IndexEBLForest ) CarbonFracToLeaf = exp(0.01 * (1.0 - exp(0.50*XLAI)) * XLAI)
+    CarbonFracToLeaf = exp(0.01 * (1.0 - exp(0.75*LeafAreaIndex)) * LeafAreaIndex)
+    if ( VegType == IndexEBLForest ) CarbonFracToLeaf = exp(0.01 * (1.0 - exp(0.50*LeafAreaIndex)) * LeafAreaIndex)
     CarbonFracToWoodRoot = 1.0 - CarbonFracToLeaf
-    CarbonFracToStem = XLAI / 10.0 * CarbonFracToLeaf
+    CarbonFracToStem = LeafAreaIndex / 10.0 * CarbonFracToLeaf
     CarbonFracToLeaf = CarbonFracToLeaf - CarbonFracToStem
       
     !  fraction of carbon into wood versus root 
@@ -173,7 +171,7 @@ contains
        
     ! seasonal leaf die rate dependent on temp and water stress
     ! water stress is set to 1 at permanent wilting point      
-    SC    = exp(-0.3 * max(0.0, TV-TemperaureLeafFreeze)) * (LeafMass / 120.0) 
+    SC    = exp(-0.3 * max(0.0, TemperatureCanopy-TemperaureLeafFreeze)) * (LeafMass / 120.0) 
     SD    = exp((SoilWaterStress - 1.0) * WaterStressCoeff)
     DeathLeaf = LeafMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
     DeathStem = StemMass * 1.0e-6 * (LeafDeathWaterCoeffVeg * SD + LeafDeathTempCoeffVeg * SC)
@@ -189,8 +187,8 @@ contains
     ADDNPPST = max( 0.0, CarbonFracToStem*CarbonAssim - GrowthRespStem - RespirationStem )
     !ADDNPPLF = CarbonFracToLeaf*CarbonAssim - GrowthRespLeaf - RespirationLeafMaint  ! MB: test Kjetil 
     !ADDNPPST = CarbonFracToStem*CarbonAssim - GrowthRespStem - RespirationStem  ! MB: test Kjetil 
-    if ( TV < TemperatureMinPhotosyn ) ADDNPPLF = 0.0
-    if ( TV < TemperatureMinPhotosyn ) ADDNPPST = 0.0
+    if ( TemperatureCanopy < TemperatureMinPhotosyn ) ADDNPPLF = 0.0
+    if ( TemperatureCanopy < TemperatureMinPhotosyn ) ADDNPPST = 0.0
      
     ! update leaf, root, and wood carbon
     ! avoid reducing leaf mass below its minimum value but conserve mass
@@ -218,7 +216,7 @@ contains
     ! soil carbon budgets 
     CarbonMassShallowSoil = CarbonMassShallowSoil + &
           (TurnoverRoot+TurnoverLeaf+TurnoverStem+TurnoverWood+DeathLeaf+DeathStem) * MainTimeStep  ! MB: add DeathStem v3.7
-    MicroRespFactorSoilTemp    = 2.0**( (STC(1) - 283.16) / 10.0 )
+    MicroRespFactorSoilTemp    = 2.0**( (TemperatureSoilSnow(1) - 283.16) / 10.0 )
     MicroRespFactorSoilWater    = SoilWaterRootZone / (0.20 + SoilWaterRootZone) * 0.23 / (0.23 + SoilWaterRootZone)
     RespirationSoil = MicroRespFactorSoilWater * MicroRespFactorSoilTemp * &
                       MicroRespCoeff * max(0.0, CarbonMassShallowSoil*1.0e-3) * 12.0e-6
@@ -241,8 +239,8 @@ contains
     CarbonMassLiveTot  = LeafMass + RootMass + StemMass + WoodMass      !g/m2   C  MB: add StemMass v3.7
     
     ! leaf area index and stem area index
-    XLAI   = max( LeafMass*LeafAreaPerMass, LeafAreaIndexMin )
-    XSAI   = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
+    LeafAreaIndex   = max( LeafMass*LeafAreaPerMass, LeafAreaIndexMin )
+    StemAreaIndex   = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
 
     end associate
 
