@@ -71,9 +71,9 @@ contains
 
     ! canopy evaporation, transpiration, and dew
     if ( FlagFrozenCanopy .eqv. .false. ) then    ! Barlage: change to FlagFrozenCanopy
-       Transpiration = max( HeatLatentTransp/ConstLatHeatVapor, 0.0 )
-       EvapCanopyLiq = max( HeatLatentCanopy/ConstLatHeatVapor, 0.0 )
-       DewCanopyLiq = abs( min( HeatLatentCanopy/ConstLatHeatVapor, 0.0 ) )
+       Transpiration = max( HeatLatentTransp/ConstLatHeatEvap, 0.0 )
+       EvapCanopyLiq = max( HeatLatentCanopy/ConstLatHeatEvap, 0.0 )
+       DewCanopyLiq = abs( min( HeatLatentCanopy/ConstLatHeatEvap, 0.0 ) )
        SublimCanopyIce = 0.0
        FrostCanopyIce = 0.0
     else

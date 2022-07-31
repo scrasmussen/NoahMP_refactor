@@ -35,7 +35,7 @@ contains
 ! local variable
     integer                               :: ITER         ! iteration index
     integer                               :: LITER        ! Last iteration
-    integer                               :: MOZSGN       ! number of times MOZ changes sign
+    integer                               :: MOZSGN       ! number of times MoStabParaAbvCan changes sign
     integer                               :: IndexShade   ! index for sunlit/shaded (0=sunlit;1=shaded)
     integer, parameter                    :: NITERC = 20  ! number of iterations for surface temperature (5~20)
     integer, parameter                    :: NITERG = 5   ! number of iterations for ground temperature (3~5)
@@ -112,29 +112,28 @@ contains
               EmissivityGrd             => noahmp%energy%state%EmissivityGrd             ,& ! in,    ground emissivity
               TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [k]
               ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
-              RSURF           => noahmp%energy%state%RSURF           ,& ! in,    ground surface resistance (s/m)
-              GAMMAV          => noahmp%energy%state%GAMMAV          ,& ! in,    psychrometric constant (pa/K), canopy
-              LATHEAV         => noahmp%energy%state%LATHEAV         ,& ! in,    latent heat of vaporization/subli (j/kg), canopy
-              GAMMAG          => noahmp%energy%state%GAMMAG          ,& ! in,    psychrometric constant (pa/K), ground
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,    latent heat of vaporization/subli (j/kg), ground
-              RHSUR           => noahmp%energy%state%RHSUR           ,& ! in,    raltive humidity in surface soil/snow air space (-)
+              ResistanceGrdEvap           => noahmp%energy%state%ResistanceGrdEvap           ,& ! in,    ground surface resistance (s/m) to evaporation
+              PsychConstCanopy          => noahmp%energy%state%PsychConstCanopy          ,& ! in,    psychrometric constant (pa/K), canopy
+              LatHeatVapCanopy         => noahmp%energy%state%LatHeatVapCanopy         ,& ! in,    latent heat of vaporization/subli (j/kg), canopy
+              PsychConstGrd          => noahmp%energy%state%PsychConstGrd          ,& ! in,    psychrometric constant (pa/K), ground
+              RelHumidityGrd           => noahmp%energy%state%RelHumidityGrd           ,& ! in,    raltive humidity in surface soil/snow air space (-)
               SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! inout, specific humidity at bare surface
               PressureVaporCanAir             => noahmp%energy%state%PressureVaporCanAir             ,& ! inout, canopy air vapor pressure (pa)
               TemperatureCanopyAir             => noahmp%energy%state%TemperatureCanopyAir             ,& ! inout, canopy air temperature (K)
               TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! inout, vegetation temperature (K)
               TemperatureGrdVeg             => noahmp%energy%state%TemperatureGrdVeg             ,& ! inout, vegetated ground (below-canopy) temperature (K)
-              CM              => noahmp%energy%state%CMV             ,& ! inout, momentum exchange coefficient (m/s), above ZeroPlaneDispSfc, vegetated
-              CH              => noahmp%energy%state%CHV             ,& ! inout, heat exchange coefficient (m/s), above ZeroPlaneDispSfc, vegetated
+              ExchCoeffMomAbvCan              => noahmp%energy%state%ExchCoeffMomAbvCan             ,& ! inout, momentum exchange coefficient (m/s), above ZeroPlaneDisp, vegetated
+              ExchCoeffShAbvCan              => noahmp%energy%state%ExchCoeffShAbvCan             ,& ! inout, heat exchange coefficient (m/s), above ZeroPlaneDisp, vegetated
               WindStressEwVeg           => noahmp%energy%state%WindStressEwVeg           ,& ! out,   wind stress: east-west (n/m2) above canopy
               WindStressNsVeg           => noahmp%energy%state%WindStressNsVeg           ,& ! out,   wind stress: north-south (n/m2) above canopy
               TemperatureAir2mVeg            => noahmp%energy%state%TemperatureAir2mVeg            ,& ! out,   2 m height air temperature (k), vegetated
-              CHLEAF          => noahmp%energy%state%CHLEAF          ,& ! out,   leaf sensible heat exchange coefficient (m/s),leaf surface to canopy air
-              CHUC            => noahmp%energy%state%CHUC            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
-              CAH2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s)
+              ExchCoeffShLeaf          => noahmp%energy%state%ExchCoeffShLeaf          ,& ! out,   leaf sensible heat exchange coefficient (m/s),leaf surface to canopy air
+              ExchCoeffShUndCan            => noahmp%energy%state%ExchCoeffShUndCan            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
+              ExchCoeffSh2mVeg            => noahmp%energy%state%ExchCoeffSh2mVeg            ,& ! out,   2m sensible heat exchange coefficient (m/s)
               SpecHumidity2mVeg             => noahmp%energy%state%SpecHumidity2mVeg            ,& ! out,   specific humidity at 2m vegetated
               ResistanceStomataSunlit           => noahmp%energy%state%ResistanceStomataSunlit           ,& ! out,   sunlit leaf stomatal resistance (s/m)
               ResistanceStomataShade           => noahmp%energy%state%ResistanceStomataShade           ,& ! out,   shaded leaf stomatal resistance (s/m)
-              FV              => noahmp%energy%state%FVV             ,& ! out,   friction velocity (m/s), vegetated
+              FrictionVelVeg              => noahmp%energy%state%FrictionVelVeg             ,& ! out,   friction velocity (m/s), vegetated
               RoughLenShCanopy             => noahmp%energy%state%RoughLenShCanopy            ,& ! out,   roughness length, sensible heat (m), vegetated
               RoughLenShVegGrd            => noahmp%energy%state%RoughLenShVegGrd            ,& ! out,   roughness length, sensible heat ground (m), below canopy
               ResistanceLeafBoundary              => noahmp%energy%state%ResistanceLeafBoundary              ,& ! out,   bulk leaf boundary layer resistance (s/m)
@@ -142,18 +141,18 @@ contains
               ResistanceLhAbvCan            => noahmp%energy%state%ResistanceLhAbvCan            ,& ! out,   aerodynamic resistance for water vapor (s/m), above canopy
               ResistanceShUndCan            => noahmp%energy%state%ResistanceShUndCan            ,& ! out,   ground aerodynamic resistance for sensible heat (s/m)
               ResistanceLhUndCan            => noahmp%energy%state%ResistanceLhUndCan            ,& ! out,   ground aerodynamic resistance for water vapor (s/m)
-              CAW             => noahmp%energy%state%CAW             ,& ! out,   latent heat conductance, canopy air to reference height air (m/s)
-              CTW             => noahmp%energy%state%CTW             ,& ! out,   transpiration conductance, leaf to canopy air (m/s)
-              CEW             => noahmp%energy%state%CEW             ,& ! out,   evaporation conductance, leaf to canopy air (m/s)
-              CGW             => noahmp%energy%state%CGW             ,& ! out,   latent heat conductance, ground to canopy air (m/s)
+              ExchCoeffLhAbvCan             => noahmp%energy%state%ExchCoeffLhAbvCan             ,& ! out,   latent heat conductance, canopy air to reference height air (m/s)
+              ExchCoeffLhTransp             => noahmp%energy%state%ExchCoeffLhTransp             ,& ! out,   transpiration conductance, leaf to canopy air (m/s)
+              ExchCoeffLhEvap             => noahmp%energy%state%ExchCoeffLhEvap             ,& ! out,   evaporation conductance, leaf to canopy air (m/s)
+              ExchCoeffLhUndCan             => noahmp%energy%state%ExchCoeffLhUndCan             ,& ! out,   latent heat conductance, ground to canopy air (m/s)
               VapPresSatCanopy            => noahmp%energy%state%VapPresSatCanopy            ,& ! out,   saturation vapor pressure at TemperatureCanopy (pa)
               VapPresSatGrdVeg            => noahmp%energy%state%VapPresSatGrdVeg            ,& ! out,   saturation vapor pressure at TemperatureGrd (pa)
               VapPresSatCanTempD           => noahmp%energy%state%VapPresSatCanTempD           ,& ! out,   d(VapPresSatCanopy)/dt at TemperatureCanopy (pa/k)
               VapPresSatGrdVegTempD           => noahmp%energy%state%VapPresSatGrdVegTempD           ,& ! out,   d(VapPresSatGrdVeg)/dt at TemperatureGrd (pa/k)
               CanopyHeight            => noahmp%energy%state%CanopyHeight            ,& ! out,   canopy height (m)
               WindSpdCanopyTop              => noahmp%energy%state%WindSpdCanopyTop             ,& ! out,   wind speed at top of canopy (m/s)
-              MOZ             => noahmp%energy%state%MOZV            ,& ! out,   Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
-              FH2             => noahmp%energy%state%FH2V            ,& ! out,   M-O sen heat stability correction, 2m, vegetated
+              MoStabParaAbvCan           => noahmp%energy%state%MoStabParaAbvCan          ,& ! out,   Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
+              MoStabCorrShVeg2m             => noahmp%energy%state%MoStabCorrShVeg2m            ,& ! out,   M-O sen heat stability correction, 2m, vegetated
               RadLwNetCanopy             => noahmp%energy%flux%RadLwNetCanopy              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
               HeatSensibleCanopy             => noahmp%energy%flux%HeatSensibleCanopy              ,& ! out,   canopy sensible heat flux (w/m2)     [+= to atm]
               HeatLatentCanEvap             => noahmp%energy%flux%HeatLatentCanEvap              ,& ! out,   canopy evaporation heat flux (w/m2)  [+= to atm]
@@ -167,12 +166,12 @@ contains
 
     ! initialization (including variables that do not depend on stability iteration)
     LITER   = 0
-    FV      = 0.1
+    FrictionVelVeg      = 0.1
     DTV     = 0.0
     DTG     = 0.0
-    MOZ     = 0.0
+    MoStabParaAbvCan     = 0.0
     MOZSGN  = 0
-    FH2     = 0.0
+    MoStabCorrShVeg2m     = 0.0
     HG      = 0.0
     H       = 0.0
     MoistureFluxSfc     = 0.0
@@ -219,8 +218,8 @@ contains
           RoughLenShCanopy  = RoughLenMomSfc
           RoughLenShVegGrd = RoughLenMomGrd
        else
-          RoughLenShCanopy  = RoughLenMomSfc    !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FV*RoughLenMomSfc))
-          RoughLenShVegGrd = RoughLenMomGrd   !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FV*RoughLenMomGrd))
+          RoughLenShCanopy  = RoughLenMomSfc    !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FrictionVelVeg*RoughLenMomSfc))
+          RoughLenShVegGrd = RoughLenMomGrd   !* exp(-ZilitinkevichCoeff * 0.4 * 258.2 * sqrt(FrictionVelVeg*RoughLenMomGrd))
        endif
 
        ! aerodyn resistances between RefHeightAboveGrd and d+z0v
@@ -267,27 +266,27 @@ contains
        CSH  = (1.0 - BTA) * DensityAirRefHeight * ConstHeatCapacAir * CVH
 
        ! latent heat conductance and coeff above veg.
-       CAW  = 1.0 / ResistanceLhAbvCan
-       CEW  = CanopyWetFrac * VegAreaIndTmp / ResistanceLeafBoundary
-       CTW  = (1.0 - CanopyWetFrac) * ( LAISUNE/(ResistanceLeafBoundary+ResistanceStomataSunlit) + LAISHAE/(ResistanceLeafBoundary+ResistanceStomataShade) )
-       CGW  = 1.0 / (ResistanceLhUndCan + RSURF)
-       COND = CAW + CEW + CTW + CGW
-       AEA  = ( PressureVaporRefHeight*CAW + VapPresSatGrdVeg*CGW ) / COND
-       BEA  = (CEW + CTW) / COND
-       CEV  = (1.0 - BEA) * CEW * DensityAirRefHeight * ConstHeatCapacAir / GAMMAV   ! Barlage: change to vegetation v3.6
-       CTR  = (1.0 - BEA) * CTW * DensityAirRefHeight * ConstHeatCapacAir / GAMMAV
+       ExchCoeffLhAbvCan  = 1.0 / ResistanceLhAbvCan
+       ExchCoeffLhEvap  = CanopyWetFrac * VegAreaIndTmp / ResistanceLeafBoundary
+       ExchCoeffLhTransp  = (1.0 - CanopyWetFrac) * ( LAISUNE/(ResistanceLeafBoundary+ResistanceStomataSunlit) + LAISHAE/(ResistanceLeafBoundary+ResistanceStomataShade) )
+       ExchCoeffLhUndCan  = 1.0 / (ResistanceLhUndCan + ResistanceGrdEvap)
+       COND = ExchCoeffLhAbvCan + ExchCoeffLhEvap + ExchCoeffLhTransp + ExchCoeffLhUndCan
+       AEA  = ( PressureVaporRefHeight*ExchCoeffLhAbvCan + VapPresSatGrdVeg*ExchCoeffLhUndCan ) / COND
+       BEA  = (ExchCoeffLhEvap + ExchCoeffLhTransp) / COND
+       CEV  = (1.0 - BEA) * ExchCoeffLhEvap * DensityAirRefHeight * ConstHeatCapacAir / PsychConstCanopy   ! Barlage: change to vegetation v3.6
+       CTR  = (1.0 - BEA) * ExchCoeffLhTransp * DensityAirRefHeight * ConstHeatCapacAir / PsychConstCanopy
 
        ! evaluate surface fluxes with current temperature and solve for dts
        TemperatureCanopyAir  = ATA + BTA * TemperatureCanopy               ! canopy air T.
        PressureVaporCanAir  = AEA + BEA * VapPresSatCanopy             ! canopy air e
        RadLwNetCanopy  = VegFrac * (AIR + CIR * TemperatureCanopy**4)
        HeatSensibleCanopy  = VegFrac * DensityAirRefHeight * ConstHeatCapacAir * CVH * (TemperatureCanopy - TemperatureCanopyAir)
-       HeatLatentCanEvap  = VegFrac * DensityAirRefHeight * ConstHeatCapacAir * CEW * (VapPresSatCanopy - PressureVaporCanAir) / GAMMAV ! Barlage: change to v in v3.6
-       HeatLatentCanTransp   = VegFrac * DensityAirRefHeight * ConstHeatCapacAir * CTW * (VapPresSatCanopy - PressureVaporCanAir) / GAMMAV
+       HeatLatentCanEvap  = VegFrac * DensityAirRefHeight * ConstHeatCapacAir * ExchCoeffLhEvap * (VapPresSatCanopy - PressureVaporCanAir) / PsychConstCanopy ! Barlage: change to v in v3.6
+       HeatLatentCanTransp   = VegFrac * DensityAirRefHeight * ConstHeatCapacAir * ExchCoeffLhTransp * (VapPresSatCanopy - PressureVaporCanAir) / PsychConstCanopy
        if ( TemperatureCanopy > ConstFreezePoint ) then
-          HeatLatentCanEvap = min( CanopyLiqWater*LATHEAV/MainTimeStep, HeatLatentCanEvap )    ! Barlage: add if block for canopy ice in v3.6
+          HeatLatentCanEvap = min( CanopyLiqWater*LatHeatVapCanopy/MainTimeStep, HeatLatentCanEvap )    ! Barlage: add if block for canopy ice in v3.6
        else
-          HeatLatentCanEvap = min( CanopyIce*LATHEAV/MainTimeStep, HeatLatentCanEvap )
+          HeatLatentCanEvap = min( CanopyIce*LatHeatVapCanopy/MainTimeStep, HeatLatentCanEvap )
        endif
        B    = RadSwAbsVeg - RadLwNetCanopy - HeatSensibleCanopy - &
               HeatLatentCanEvap - HeatLatentCanTransp + HeatPrecipAdvCanopy  ! additional w/m2
@@ -318,7 +317,7 @@ contains
     AIR = -EmissivityGrd * (1.0 - EmissivityVeg) * RadLwDownRefHeight - EmissivityGrd * EmissivityVeg * ConstStefanBoltzmann * TemperatureCanopy**4
     CIR = EmissivityGrd * ConstStefanBoltzmann
     CSH = DensityAirRefHeight * ConstHeatCapacAir / ResistanceShUndCan
-    CEV = DensityAirRefHeight * ConstHeatCapacAir / (GAMMAG * (ResistanceLhUndCan+RSURF))  ! Barlage: change to ground v3.6
+    CEV = DensityAirRefHeight * ConstHeatCapacAir / (PsychConstGrd * (ResistanceLhUndCan+ResistanceGrdEvap))  ! Barlage: change to ground v3.6
     CGH = 2.0 * ThermConductSoilSnow(NumSnowLayerNeg+1) / ThicknessSnowSoilLayer(NumSnowLayerNeg+1)
     ! begin stability iteration
     loop2: do ITER = 1, NITERG
@@ -333,7 +332,7 @@ contains
        endif
        RadLwNetVegGrd = CIR * TemperatureGrdVeg**4 + AIR
        HeatSensibleVegGrd = CSH * (TemperatureGrdVeg        - TemperatureCanopyAir         )
-       HeatLatentVegGrd = CEV * (VapPresSatGrdVeg*RHSUR - PressureVaporCanAir         )
+       HeatLatentVegGrd = CEV * (VapPresSatGrdVeg*RelHumidityGrd - PressureVaporCanAir         )
        HeatGroundVegGrd  = CGH * (TemperatureGrdVeg        - TemperatureSoilSnow(NumSnowLayerNeg+1))
        B   = RadSwAbsGrd - RadLwNetVegGrd - HeatSensibleVegGrd - HeatLatentVegGrd - HeatGroundVegGrd + HeatPrecipAdvVegGrd
        A   = 4.0 * CIR * TemperatureGrdVeg**3 + CSH + CEV*VapPresSatGrdVegTempD + CGH
@@ -353,43 +352,43 @@ contains
           if ( OptSnowSoilTempTime == 3 ) TemperatureGrdVeg = (1.0 - SnowCoverFrac) * TemperatureGrdVeg + SnowCoverFrac * ConstFreezePoint   ! MB: allow TemperatureGrdVeg>0C during melt v3.7
           RadLwNetVegGrd = CIR * TemperatureGrdVeg**4 - EmissivityGrd * (1.0-EmissivityVeg) * RadLwDownRefHeight - EmissivityGrd * EmissivityVeg * ConstStefanBoltzmann * TemperatureCanopy**4
           HeatSensibleVegGrd = CSH * (TemperatureGrdVeg        - TemperatureCanopyAir)
-          HeatLatentVegGrd = CEV * (VapPresSatGrdVeg*RHSUR - PressureVaporCanAir)
+          HeatLatentVegGrd = CEV * (VapPresSatGrdVeg*RelHumidityGrd - PressureVaporCanAir)
           HeatGroundVegGrd  = RadSwAbsGrd + HeatPrecipAdvVegGrd - (RadLwNetVegGrd + HeatSensibleVegGrd + HeatLatentVegGrd)
        endif
     endif
 
     ! wind stresses
-    WindStressEwVeg = -DensityAirRefHeight * CM * WindSpdRefHeight * WindEastwardRefHeight
-    WindStressNsVeg = -DensityAirRefHeight * CM * WindSpdRefHeight * WindNorthwardRefHeight
+    WindStressEwVeg = -DensityAirRefHeight * ExchCoeffMomAbvCan * WindSpdRefHeight * WindEastwardRefHeight
+    WindStressNsVeg = -DensityAirRefHeight * ExchCoeffMomAbvCan * WindSpdRefHeight * WindNorthwardRefHeight
 
     ! consistent vegetation air temperature and vapor pressure since TemperatureGrdVeg is not consistent with the TemperatureCanopyAir/PressureVaporCanAir calculation.
     ! TemperatureCanopyAir = TemperatureAirRefHeight + (HeatSensibleVegGrd+HeatSensibleCanopy) / (DensityAirRefHeight*ConstHeatCapacAir*CAH) 
     ! TemperatureCanopyAir = TemperatureAirRefHeight + (HeatSensibleVegGrd*VegFrac+HeatSensibleCanopy) / (DensityAirRefHeight*ConstHeatCapacAir*CAH) ! ground flux need fveg
-    ! PressureVaporCanAir = PressureVaporRefHeight + (HeatLatentCanEvap+VegFrac*(HeatLatentCanTransp+HeatLatentVegGrd)) / (DensityAirRefHeight*CAW*ConstHeatCapacAir/GAMMAG)
-    ! MoistureFluxSfc = (SpecHumiditySfcBare-SpecHumidityRefHeight) * DensityAirRefHeight * CAW !*ConstHeatCapacAir/GAMMAG
+    ! PressureVaporCanAir = PressureVaporRefHeight + (HeatLatentCanEvap+VegFrac*(HeatLatentCanTransp+HeatLatentVegGrd)) / (DensityAirRefHeight*ExchCoeffLhAbvCan*ConstHeatCapacAir/PsychConstGrd)
+    ! MoistureFluxSfc = (SpecHumiditySfcBare-SpecHumidityRefHeight) * DensityAirRefHeight * ExchCoeffLhAbvCan !*ConstHeatCapacAir/PsychConstGrd
 
     ! 2m temperature over vegetation ( corrected for low CQ2V values )
     if ( (OptSurfaceDrag == 1) .or. (OptSurfaceDrag == 2) ) then
-       ! CAH2 = FV * 1.0 / ConstVonKarman * log((2.0+RoughLenShCanopy)/RoughLenShCanopy)
-       ! CAH2 = FV * ConstVonKarman / log((2.0+RoughLenShCanopy)/RoughLenShCanopy)
-       CAH2 = FV * ConstVonKarman / ( log((2.0+RoughLenShCanopy)/RoughLenShCanopy) - FH2 )
-       CQ2V = CAH2
-       if ( CAH2 < 1.0e-5 ) then
+       ! ExchCoeffSh2mVeg = FrictionVelVeg * 1.0 / ConstVonKarman * log((2.0+RoughLenShCanopy)/RoughLenShCanopy)
+       ! ExchCoeffSh2mVeg = FrictionVelVeg * ConstVonKarman / log((2.0+RoughLenShCanopy)/RoughLenShCanopy)
+       ExchCoeffSh2mVeg = FrictionVelVeg * ConstVonKarman / ( log((2.0+RoughLenShCanopy)/RoughLenShCanopy) - MoStabCorrShVeg2m )
+       CQ2V = ExchCoeffSh2mVeg
+       if ( ExchCoeffSh2mVeg < 1.0e-5 ) then
           TemperatureAir2mVeg = TemperatureCanopyAir
           !SpecHumidity2mVeg  = (PressureVaporCanAir*0.622/(PressureAirRefHeight - 0.378*PressureVaporCanAir))
           SpecHumidity2mVeg  = SpecHumiditySfcBare
        else
           TemperatureAir2mVeg = TemperatureCanopyAir - (HeatSensibleVegGrd + HeatSensibleCanopy/VegFrac) / &
-                                (DensityAirRefHeight * ConstHeatCapacAir) * 1.0 / CAH2
-          !SpecHumidity2mVeg = (PressureVaporCanAir*0.622/(PressureAirRefHeight - 0.378*PressureVaporCanAir))- MoistureFluxSfc/(DensityAirRefHeight*FV)* 1./ConstVonKarman * LOG((2.+RoughLenShCanopy)/RoughLenShCanopy)
-          SpecHumidity2mVeg  = SpecHumiditySfcBare - ( (HeatLatentCanEvap+HeatLatentCanTransp)/VegFrac + HeatLatentVegGrd ) / (LATHEAV * DensityAirRefHeight) * 1.0 / CQ2V
+                                (DensityAirRefHeight * ConstHeatCapacAir) * 1.0 / ExchCoeffSh2mVeg
+          !SpecHumidity2mVeg = (PressureVaporCanAir*0.622/(PressureAirRefHeight - 0.378*PressureVaporCanAir))- MoistureFluxSfc/(DensityAirRefHeight*FrictionVelVeg)* 1./ConstVonKarman * LOG((2.+RoughLenShCanopy)/RoughLenShCanopy)
+          SpecHumidity2mVeg  = SpecHumiditySfcBare - ( (HeatLatentCanEvap+HeatLatentCanTransp)/VegFrac + HeatLatentVegGrd ) / (LatHeatVapCanopy * DensityAirRefHeight) * 1.0 / CQ2V
        endif
     endif
 
-    ! update CH for output
-    CH     = CAH
-    CHLEAF = CVH
-    CHUC   = 1.0 / ResistanceShUndCan
+    ! update ExchCoeffSh for output
+    ExchCoeffShAbvCan     = CAH
+    ExchCoeffShLeaf = CVH
+    ExchCoeffShUndCan   = 1.0 / ResistanceShUndCan
 
     end associate
 

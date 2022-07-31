@@ -37,7 +37,7 @@ contains
              )
 
              NoahmpIO%TSK      (I,J)         = noahmp%energy%state%TemperatureRadSfc
-             NoahmpIO%HFX      (I,J)         = noahmp%energy%flux%HeatSensibleTot
+             NoahmpIO%HFX      (I,J)         = noahmp%energy%flux%HeatSensibleSfc
              NoahmpIO%GRDFLX   (I,J)         = noahmp%energy%flux%HeatGroundTot
 
              if ( noahmp%energy%state%AlbedoSfc > -999 ) then
@@ -52,8 +52,8 @@ contains
              NoahmpIO%TGXY     (I,J)         = noahmp%energy%state%TemperatureGrd
              NoahmpIO%EAHXY    (I,J)         = noahmp%energy%state%PressureVaporCanAir
              NoahmpIO%TAHXY    (I,J)         = noahmp%energy%state%TemperatureCanopyAir
-             NoahmpIO%CMXY     (I,J)         = noahmp%energy%state%CM
-             NoahmpIO%CHXY     (I,J)         = noahmp%energy%state%CH
+             NoahmpIO%CMXY     (I,J)         = noahmp%energy%state%ExchCoeffMomSfc
+             NoahmpIO%CHXY     (I,J)         = noahmp%energy%state%ExchCoeffShSfc
              NoahmpIO%ALBOLDXY (I,J)         = noahmp%energy%state%AlbedoSnowPrev
              NoahmpIO%LAI      (I,J)         = noahmp%energy%state%LeafAreaIndex
              NoahmpIO%XSAIXY   (I,J)         = noahmp%energy%state%StemAreaIndex
@@ -66,8 +66,8 @@ contains
              NoahmpIO%Q2MBXY   (I,J)         = noahmp%energy%state%SpecHumidity2mBare/(1.0 - noahmp%energy%state%SpecHumidity2mBare)  ! consistent with registry def of Q2
              NoahmpIO%TRADXY   (I,J)         = noahmp%energy%state%TemperatureRadSfc
              NoahmpIO%FVEGXY   (I,J)         = noahmp%energy%state%VegFrac
-             NoahmpIO%FSAXY    (I,J)         = noahmp%energy%flux%RadSwAbsTot
-             NoahmpIO%FIRAXY   (I,J)         = noahmp%energy%flux%RadLwNetTot
+             NoahmpIO%FSAXY    (I,J)         = noahmp%energy%flux%RadSwAbsSfc
+             NoahmpIO%FIRAXY   (I,J)         = noahmp%energy%flux%RadLwNetSfc
              NoahmpIO%APARXY   (I,J)         = noahmp%energy%flux%RadPhotoActAbsCan
              NoahmpIO%SAVXY    (I,J)         = noahmp%energy%flux%RadSwAbsVeg
              NoahmpIO%SAGXY    (I,J)         = noahmp%energy%flux%RadSwAbsGrd
@@ -94,8 +94,8 @@ contains
              NoahmpIO%WGAPXY   (I,J)   = noahmp%energy%state%GapInCanopy
              NoahmpIO%TGVXY    (I,J)   = noahmp%energy%state%TemperatureGrdVeg
              NoahmpIO%TGBXY    (I,J)   = noahmp%energy%state%TemperatureGrdBare
-             NoahmpIO%CHVXY    (I,J)   = noahmp%energy%state%CHV
-             NoahmpIO%CHBXY    (I,J)   = noahmp%energy%state%CHB
+             NoahmpIO%CHVXY    (I,J)   = noahmp%energy%state%ExchCoeffShAbvCan
+             NoahmpIO%CHBXY    (I,J)   = noahmp%energy%state%ExchCoeffShBare
              NoahmpIO%IRCXY    (I,J)   = noahmp%energy%flux%RadLwNetCanopy
              NoahmpIO%IRGXY    (I,J)   = noahmp%energy%flux%RadLwNetVegGrd
              NoahmpIO%SHCXY    (I,J)   = noahmp%energy%flux%HeatSensibleCanopy
@@ -108,10 +108,10 @@ contains
              NoahmpIO%GHBXY    (I,J)   = noahmp%energy%flux%HeatGroundBareGrd
              NoahmpIO%TRXY     (I,J)   = noahmp%energy%flux%HeatLatentCanTransp
              NoahmpIO%EVCXY    (I,J)   = noahmp%energy%flux%HeatLatentCanEvap
-             NoahmpIO%CHLEAFXY (I,J)   = noahmp%energy%state%CHLEAF
-             NoahmpIO%CHUCXY   (I,J)   = noahmp%energy%state%CHUC
-             NoahmpIO%CHV2XY   (I,J)   = noahmp%energy%state%CHV2
-             NoahmpIO%CHB2XY   (I,J)   = noahmp%energy%state%EHB2
+             NoahmpIO%CHLEAFXY (I,J)   = noahmp%energy%state%ExchCoeffShLeaf
+             NoahmpIO%CHUCXY   (I,J)   = noahmp%energy%state%ExchCoeffShUndCan
+             NoahmpIO%CHV2XY   (I,J)   = noahmp%energy%state%ExchCoeffSh2mVeg
+             NoahmpIO%CHB2XY   (I,J)   = noahmp%energy%state%ExchCoeffSh2mBare
              NoahmpIO%IRRSPLH  (I,J)   = NoahmpIO%IRRSPLH(I,J) + &
                                          (noahmp%energy%flux%HeatLatentIrriEvap*noahmp%config%domain%MainTimeStep) ! Joules/m^2
 

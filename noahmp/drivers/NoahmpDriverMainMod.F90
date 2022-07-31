@@ -185,13 +185,13 @@ contains
               noahmp%energy%state%VegFrac  = 0.0
               noahmp%energy%state%RoughLenMomSfcToAtm = 0.002 
               noahmp%energy%state%TemperatureGrdBare   = noahmp%energy%state%TG   
-              noahmp%energy%state%CHB   = noahmp%energy%state%CH 
-              noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetTot
-              noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleTot
-              noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrdTot
+              noahmp%energy%state%ExchCoeffShBare   = noahmp%energy%state%ExchCoeffShSfc 
+              noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetSfc
+              noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleSfc
+              noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrd
               noahmp%energy%flux%HeatGroundBareGrd    = noahmp%energy%flux%HeatGroundTot 
               NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapSoilNet
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrdTot         
+              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrd         
           else
 
               !---------------------------------------------------------------------
@@ -211,7 +211,7 @@ contains
                                           noahmp%water%flux%Transpiration + &
                                           noahmp%water%flux%EvapIrriSprinkler
                                      
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrdTot + &
+              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrd + &
                                           noahmp%energy%flux%HeatLatentCanopy + &
                                           noahmp%energy%flux%HeatLatentTransp + &
                                           noahmp%energy%flux%HeatLatentIrriEvap                                     

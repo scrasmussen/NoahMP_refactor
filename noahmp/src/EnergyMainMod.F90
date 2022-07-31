@@ -96,12 +96,12 @@ contains
               SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! inout, specific humidity at bare surface
               SpecHumiditySfc              => noahmp%energy%state%SpecHumiditySfc              ,& ! inout, specific humidity at surface grid mean
               PressureVaporCanAir             => noahmp%energy%state%PressureVaporCanAir             ,& ! inout, canopy air vapor pressure (pa)
-              CM              => noahmp%energy%state%CM              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
-              CH              => noahmp%energy%state%CH              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
+              ExchCoeffMomSfc              => noahmp%energy%state%ExchCoeffMomSfc              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
+              ExchCoeffShSfc              => noahmp%energy%state%ExchCoeffShSfc              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
               RoughLenMomSfcToAtm           => noahmp%energy%state%RoughLenMomSfcToAtm           ,& ! out,   roughness length, momentum, surface, sent to coupled model
-              WindStressEwTot            => noahmp%energy%state%WindStressEwTot            ,& ! out,   wind stress: east-west (n/m2) grid mean
-              WindStressNsTot            => noahmp%energy%state%WindStressNsTot            ,& ! out,   wind stress: north-south (n/m2) grid mean
+              WindStressEwSfc            => noahmp%energy%state%WindStressEwSfc            ,& ! out,   wind stress: east-west (n/m2) grid mean
+              WindStressNsSfc            => noahmp%energy%state%WindStressNsSfc            ,& ! out,   wind stress: north-south (n/m2) grid mean
               TemperatureRadSfc            => noahmp%energy%state%TemperatureRadSfc            ,& ! out,   surface radiative temperature (K)
               TemperatureAir2m             => noahmp%energy%state%TemperatureAir2m             ,& ! out,   grid mean 2-m air temperature (K)
               ResistanceStomataSunlit           => noahmp%energy%state%ResistanceStomataSunlit           ,& ! out,   sunlit leaf stomatal resistance (s/m)
@@ -124,26 +124,26 @@ contains
               SpecHumidity2m             => noahmp%energy%state%SpecHumidity2m             ,& ! out,   grid mean 2-m water vapor mixing ratio
               TemperatureGrdVeg             => noahmp%energy%state%TemperatureGrdVeg             ,& ! out,   vegetated ground (below-canopy) temperature (K)
               TemperatureGrdBare             => noahmp%energy%state%TemperatureGrdBare             ,& ! out,   bare ground temperature (K)
-              CMV             => noahmp%energy%state%CMV             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDisp, vegetated
-              CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDisp, bare ground
-              CHV             => noahmp%energy%state%CHV             ,& ! out,   drag coefficient for heat, above ZeroPlaneDisp, vegetated
-              CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZeroPlaneDisp, bare ground
-              CHLEAF          => noahmp%energy%state%CHLEAF          ,& ! out,   leaf sensible heat exchange coeff (m/s), leaf to canopy air
-              CHUC            => noahmp%energy%state%CHUC            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
-              CHV2            => noahmp%energy%state%CHV2            ,& ! out,   2m sensible heat exchange coefficient (m/s) vegetated
+              ExchCoeffMomAbvCan             => noahmp%energy%state%ExchCoeffMomAbvCan             ,& ! out,   exchange coefficient for momentum, above ZeroPlaneDisp, vegetated
+              ExchCoeffMomBare             => noahmp%energy%state%ExchCoeffMomBare             ,& ! out,   exchange coefficient for momentum, above ZeroPlaneDisp, bare ground
+              ExchCoeffShAbvCan             => noahmp%energy%state%ExchCoeffShAbvCan             ,& ! out,   exchange coefficient for heat, above ZeroPlaneDisp, vegetated
+              ExchCoeffShBare             => noahmp%energy%state%ExchCoeffShBare             ,& ! out,   exchange coefficient for heat, above ZeroPlaneDisp, bare ground
+              ExchCoeffShLeaf          => noahmp%energy%state%ExchCoeffShLeaf          ,& ! out,   leaf sensible heat exchange coeff (m/s), leaf to canopy air
+              ExchCoeffShUndCan            => noahmp%energy%state%ExchCoeffShUndCan            ,& ! out,   under canopy sensible heat exchange coefficient (m/s)
+              ExchCoeffSh2mVeg            => noahmp%energy%state%ExchCoeffSh2mVeg            ,& ! out,   2m sensible heat exchange coefficient (m/s) vegetated
               AlbedoSfc          => noahmp%energy%state%AlbedoSfc          ,& ! out,   total shortwave surface albedo
-              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
-              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
-              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! out,   total sensible heat (w/m2) [+ to atm]
-              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
+              RadSwReflSfc             => noahmp%energy%flux%RadSwReflSfc              ,& ! out,   total reflected solar radiation (w/m2)
+              RadLwNetSfc            => noahmp%energy%flux%RadLwNetSfc             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleSfc             => noahmp%energy%flux%HeatSensibleSfc              ,& ! out,   total sensible heat (w/m2) [+ to atm]
+              HeatLatentGrd            => noahmp%energy%flux%HeatLatentGrd             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
               HeatLatentCanopy            => noahmp%energy%flux%HeatLatentCanopy             ,& ! out,   canopy latent heat flux (w/m2) [+ to atm]
               HeatLatentTransp            => noahmp%energy%flux%HeatLatentTransp             ,& ! out,   latent heat flux from transpiration (w/m2) [+ to atm]
               RadPhotoActAbsCan            => noahmp%energy%flux%RadPhotoActAbsCan             ,& ! out,   total photosyn. active energy (w/m2) absorbed by canopy
               RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! out,   average absorbed par for sunlit leaves (w/m2)
               RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! out,   average absorbed par for shaded leaves (w/m2)
               HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! out,   total ground heat flux (w/m2) [+ to soil/snow]
-              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! out,   precipitation advected heat - total (W/m2)
-              RadLwEmitTot            => noahmp%energy%flux%RadLwEmitTot             ,& ! out,   emitted outgoing IR (w/m2)
+              HeatPrecipAdvSfc             => noahmp%energy%flux%HeatPrecipAdvSfc              ,& ! out,   precipitation advected heat - total (W/m2)
+              RadLwEmitSfc            => noahmp%energy%flux%RadLwEmitSfc             ,& ! out,   emitted outgoing IR (w/m2)
               RadLwNetCanopy             => noahmp%energy%flux%RadLwNetCanopy              ,& ! out,   canopy net longwave radiation (w/m2) [+= to atm]
               RadLwNetVegGrd             => noahmp%energy%flux%RadLwNetVegGrd              ,& ! out,   ground net longwave radiation (w/m2) [+= to atm]
               RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
@@ -177,11 +177,11 @@ contains
     PhotosynLeafShade  = 0.0
     TemperatureAir2mVeg    = 0.0
     SpecHumidity2mVeg     = 0.0
-    CHV     = 0.0
-    CHLEAF  = 0.0
-    CHUC    = 0.0
-    CHV2    = 0.0
-    HeatPrecipAdvTot     = 0.0
+    ExchCoeffShAbvCan     = 0.0
+    ExchCoeffShLeaf  = 0.0
+    ExchCoeffShUndCan    = 0.0
+    ExchCoeffSh2mVeg    = 0.0
+    HeatPrecipAdvSfc     = 0.0
 
     ! wind speed at reference height: ur >= 1
     WindSpdRefHeight = max( sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0 )
@@ -221,15 +221,15 @@ contains
     ! temperatures and energy fluxes of canopy and below-canopy ground
     if ( (VEG .eqv. .true.) .and. (VegFrac > 0) ) then ! vegetated portion of the grid
        TemperatureGrdVeg = TemperatureGrd
-       CMV = CM
-       CHV = CH
+       ExchCoeffMomAbvCan = ExchCoeffMomSfc
+       ExchCoeffShAbvCan = ExchCoeffShSfc
        call SurfaceEnergyFluxVegetated(noahmp)
     endif
 
     ! temperatures and energy fluxes of bare ground
     TemperatureGrdBare = TemperatureGrd
-    CMB = CM
-    CHB = CH
+    ExchCoeffMomBare = ExchCoeffMomSfc
+    ExchCoeffShBare = ExchCoeffShSfc
     call SurfaceEnergyFluxBareGround(noahmp)
 
     ! compute grid mean quantities by weighting vegetated and bare portions
@@ -237,54 +237,54 @@ contains
     ! Energy balance at vege ground: RadSwAbsGrd*    VegFrac =(RadLwNetVegGrd+HeatSensibleVegGrd+HeatLatentVegGrd+HeatGroundVegGrd)    *VegFrac  at   VegFrac
     ! Energy balance at bare ground: RadSwAbsGrd*(1.-VegFrac)=(RadLwNetBareGrd+HeatSensibleBareGrd+HeatLatentBareGrd+HeatGroundBareGrd)*(1.-VegFrac) at 1-VegFrac
     if ( (VEG .eqv. .true.) .and. (VegFrac > 0) ) then
-       WindStressEwTot  = VegFrac * WindStressEwVeg + (1.0 - VegFrac) * WindStressEwBare
-       WindStressNsTot  = VegFrac * WindStressNsVeg + (1.0 - VegFrac) * WindStressNsBare
-       RadLwNetTot  = VegFrac * RadLwNetVegGrd   + (1.0 - VegFrac) * RadLwNetBareGrd   + RadLwNetCanopy
-       HeatSensibleTot   = VegFrac * HeatSensibleVegGrd   + (1.0 - VegFrac) * HeatSensibleBareGrd   + HeatSensibleCanopy
-       HeatLatentGrdTot  = VegFrac * HeatLatentVegGrd   + (1.0 - VegFrac) * HeatLatentBareGrd
+       WindStressEwSfc  = VegFrac * WindStressEwVeg + (1.0 - VegFrac) * WindStressEwBare
+       WindStressNsSfc  = VegFrac * WindStressNsVeg + (1.0 - VegFrac) * WindStressNsBare
+       RadLwNetSfc  = VegFrac * RadLwNetVegGrd   + (1.0 - VegFrac) * RadLwNetBareGrd   + RadLwNetCanopy
+       HeatSensibleSfc   = VegFrac * HeatSensibleVegGrd   + (1.0 - VegFrac) * HeatSensibleBareGrd   + HeatSensibleCanopy
+       HeatLatentGrd  = VegFrac * HeatLatentVegGrd   + (1.0 - VegFrac) * HeatLatentBareGrd
        HeatGroundTot = VegFrac * HeatGroundVegGrd   + (1.0 - VegFrac) * HeatGroundBareGrd
        HeatLatentCanopy  = HeatLatentCanEvap
        HeatLatentTransp  = HeatLatentCanTransp
-       HeatPrecipAdvTot   = VegFrac * HeatPrecipAdvVegGrd  + (1.0 - VegFrac) * HeatPrecipAdvBareGrd  + HeatPrecipAdvCanopy
+       HeatPrecipAdvSfc   = VegFrac * HeatPrecipAdvVegGrd  + (1.0 - VegFrac) * HeatPrecipAdvBareGrd  + HeatPrecipAdvCanopy
        TemperatureGrd    = VegFrac * TemperatureGrdVeg   + (1.0 - VegFrac) * TemperatureGrdBare
        TemperatureAir2m   = VegFrac * TemperatureAir2mVeg  + (1.0 - VegFrac) * TemperatureAir2mBare
        TemperatureSfc    = VegFrac * TemperatureCanopy    + (1.0 - VegFrac) * TemperatureGrdBare
-       CM    = VegFrac * CMV   + (1.0 - VegFrac) * CMB     ! better way to average?
-       CH    = VegFrac * CHV   + (1.0 - VegFrac) * CHB
+       ExchCoeffMomSfc    = VegFrac * ExchCoeffMomAbvCan   + (1.0 - VegFrac) * ExchCoeffMomBare     ! better way to average?
+       ExchCoeffShSfc    = VegFrac * ExchCoeffShAbvCan   + (1.0 - VegFrac) * ExchCoeffShBare
        SpecHumidity2m   = VegFrac * SpecHumidity2mVeg   + (1.0 - VegFrac) * SpecHumidity2mBare 
        RoughLenMomSfcToAtm = RoughLenMomSfc
        SpecHumiditySfc    = VegFrac * (PressureVaporCanAir*0.622/(PressureAirRefHeight-0.378*PressureVaporCanAir)) + (1.0 - VegFrac) * SpecHumiditySfcBare
     else
-       WindStressEwTot  = WindStressEwBare
-       WindStressNsTot  = WindStressNsBare
-       RadLwNetTot  = RadLwNetBareGrd
-       HeatSensibleTot   = HeatSensibleBareGrd
-       HeatLatentGrdTot  = HeatLatentBareGrd
+       WindStressEwSfc  = WindStressEwBare
+       WindStressNsSfc  = WindStressNsBare
+       RadLwNetSfc  = RadLwNetBareGrd
+       HeatSensibleSfc   = HeatSensibleBareGrd
+       HeatLatentGrd  = HeatLatentBareGrd
        HeatGroundTot = HeatGroundBareGrd
        TemperatureGrd    = TemperatureGrdBare
        TemperatureAir2m   = TemperatureAir2mBare
        HeatLatentCanopy  = 0.0
        HeatLatentTransp  = 0.0
-       HeatPrecipAdvTot   = HeatPrecipAdvBareGrd
+       HeatPrecipAdvSfc   = HeatPrecipAdvBareGrd
        TemperatureSfc    = TemperatureGrd
-       CM    = CMB
-       CH    = CHB
+       ExchCoeffMomSfc    = ExchCoeffMomBare
+       ExchCoeffShSfc    = ExchCoeffShBare
        SpecHumiditySfc    = SpecHumiditySfcBare
        SpecHumidity2m   = SpecHumidity2mBare
        ResistanceStomataSunlit = 0.0
        ResistanceStomataShade = 0.0
        TemperatureGrdVeg   = TemperatureGrdBare
-       CHV   = CHB
+       ExchCoeffShAbvCan   = ExchCoeffShBare
        RoughLenMomSfcToAtm = RoughLenMomGrd
     endif
 
     ! emitted longwave radiation and physical check
-    RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
-    if ( RadLwEmitTot <= 0.0 ) then
+    RadLwEmitSfc = RadLwDownRefHeight + RadLwNetSfc
+    if ( RadLwEmitSfc <= 0.0 ) then
        write(6,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
        write(6,*) 'input of VegFracGreen with LeafAreaIndex'
        write(6,*) 'VegFrac=',VegFrac,'VegAreaIndEff=',VegAreaIndEff,'TemperatureCanopy=',TemperatureCanopy,'TemperatureGrd=',TemperatureGrd
-       write(6,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetTot=',RadLwNetTot,'SnowDepth=',SnowDepth
+       write(6,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetSfc=',RadLwNetSfc,'SnowDepth=',SnowDepth
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
 
@@ -292,8 +292,8 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the canopy/ground system.
     ! Old TemperatureRadSfc calculation not taking into account Emissivity:
-    ! TemperatureRadSfc = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
-    TemperatureRadSfc = ( (RadLwEmitTot - (1.0 - EmissivitySfc)*RadLwDownRefHeight) / (EmissivitySfc * ConstStefanBoltzmann) )**0.25
+    ! TemperatureRadSfc = (RadLwEmitSfc/ConstStefanBoltzmann)**0.25
+    TemperatureRadSfc = ( (RadLwEmitSfc - (1.0 - EmissivitySfc)*RadLwDownRefHeight) / (EmissivitySfc * ConstStefanBoltzmann) )**0.25
 
     ! other photosynthesis related quantities for biochem process
     RadPhotoActAbsCan = RadPhotoActAbsSunlit * LeafAreaIndSunlit + RadPhotoActAbsShade * LeafAreaIndShade
@@ -322,11 +322,11 @@ contains
 
     ! update sensible heat flux due to sprinkler irrigation evaporation
     if ( (FlagCropland .eqv. .true.) .and. (IrrigationFracGrid >= IrriFracThreshold) ) &
-       HeatSensibleTot = HeatSensibleTot - HeatLatentIrriEvap
+       HeatSensibleSfc = HeatSensibleSfc - HeatLatentIrriEvap
 
     ! update total surface albedo
     if ( RadSwDownRefHeight > 0.0 ) then
-       AlbedoSfc = RadSwReflTot / RadSwDownRefHeight
+       AlbedoSfc = RadSwReflSfc / RadSwDownRefHeight
     else
        AlbedoSfc = -999.9
     endif

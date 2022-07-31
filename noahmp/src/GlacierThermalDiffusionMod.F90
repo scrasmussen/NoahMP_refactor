@@ -49,7 +49,7 @@ contains
               OptSoilTemperatureBottom => noahmp%config%nmlist%OptSoilTemperatureBottom,& ! in,    options for lower boundary condition of soil temperature
               OptSnowSoilTempTime => noahmp%config%nmlist%OptSnowSoilTempTime,& ! in,    options for snow/soil temperature time scheme
               TemperatureSoilBottom => noahmp%forcing%TemperatureSoilBottom,& ! in,    bottom boundary soil temperature [K]
-              ZBOT            => noahmp%energy%state%ZBOTSNO         ,& ! in,    depth of lower boundary condition (m) from snow surface
+              DepthSoilTempBotToSno            => noahmp%energy%state%DepthSoilTempBotToSno         ,& ! in,    depth of lower boundary condition (m) from snow surface
               TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! in,    snow and soil layer temperature [K]
               ThermConductSoilSnow              => noahmp%energy%state%ThermConductSoilSnow              ,& ! in,    thermal conductivity [w/m/k] for all soil & snow
               HeatCapacSoilSnow           => noahmp%energy%state%HeatCapacSoilSnow           ,& ! in,    heat capacity [j/m3/k] for all soil & snow
@@ -96,7 +96,7 @@ contains
              HeatFromSoilBot = 0.0
           endif
           if ( OptSoilTemperatureBottom == 2 ) then
-             DTSDZ(K) = (TemperatureSoilSnow(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - ZBOT)
+             DTSDZ(K) = (TemperatureSoilSnow(K) - TemperatureSoilBottom) / (0.5 * (DepthSnowSoilLayer(K-1)+DepthSnowSoilLayer(K)) - DepthSoilTempBotToSno)
              HeatFromSoilBot   = -ThermConductSoilSnow(K) * DTSDZ(K)
           endif
           EFLUX(K) = ( -HeatFromSoilBot - ThermConductSoilSnow(K-1)*DTSDZ(K-1) ) - RadSwPenetrateGrd(K)

@@ -28,7 +28,7 @@ contains
 
 ! local variable
     real(kind=kind_noahmp)                :: MPE                         ! prevents overflow for division by zero
-    real(kind=kind_noahmp)                :: TMPCM                       ! temporary calculation for CM
+    real(kind=kind_noahmp)                :: TMPCM                       ! temporary calculation for ExchCoeffMomAbvCan
     real(kind=kind_noahmp)                :: TMPCH                       ! temporary calculation for CH
     real(kind=kind_noahmp)                :: FMNEW                       ! stability correction factor, momentum, for current moz
     real(kind=kind_noahmp)                :: FHNEW                       ! stability correction factor, sen heat, for current moz
@@ -52,17 +52,17 @@ contains
               ZeroPlaneDispSfc             => noahmp%energy%state%ZeroPlaneDispSfc             ,& ! in,    zero plane displacement (m)
               RoughLenShCanopy             => noahmp%energy%state%RoughLenShCanopy            ,& ! in,    roughness length, sensible heat (m), vegetated
               RoughLenMomSfc             => noahmp%energy%state%RoughLenMomSfc             ,& ! in,    roughness length, momentum, (m), surface
-              FM              => noahmp%energy%state%FMV             ,& ! inout, M-O momentum stability correction, above ZeroPlaneDispSfc, vegetated
-              FH              => noahmp%energy%state%FHV             ,& ! inout, M-O sen heat stability correction, above ZeroPlaneDispSfc, vegetated
-              FM2             => noahmp%energy%state%FM2V            ,& ! inout, M-O momentum stability correction, 2m, vegetated
-              FH2             => noahmp%energy%state%FH2V            ,& ! inout, M-O sen heat stability correction, 2m, vegetated
-              MOZ             => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
-              FV              => noahmp%energy%state%FVV             ,& ! inout, friction velocity (m/s), vegetated
-              MOZ2            => noahmp%energy%state%MOZ2V           ,& ! out,   Monin-Obukhov stability (2/L), 2m, vegetated
-              MOL             => noahmp%energy%state%MOLV            ,& ! out,   Monin-Obukhov length (m), above ZeroPlaneDispSfc, vegetated
-              CM              => noahmp%energy%state%CMV             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDispSfc, vegetated
-              CH              => noahmp%energy%state%CHV             ,& ! out,   drag coefficient for heat, above ZeroPlaneDispSfc, vegetated
-              CH2             => noahmp%energy%state%CH2V            ,& ! out,   drag coefficient for heat, 2m, vegetated
+              MoStabCorrMomAbvCan              => noahmp%energy%state%MoStabCorrMomAbvCan             ,& ! inout, M-O momentum stability correction, above ZeroPlaneDispSfc, vegetated
+              MoStabCorrShAbvCan              => noahmp%energy%state%MoStabCorrShAbvCan             ,& ! inout, M-O sen heat stability correction, above ZeroPlaneDispSfc, vegetated
+              MoStabCorrMomVeg2m             => noahmp%energy%state%MoStabCorrMomVeg2m            ,& ! inout, M-O momentum stability correction, 2m, vegetated
+              MoStabCorrShVeg2m             => noahmp%energy%state%MoStabCorrShVeg2m            ,& ! inout, M-O sen heat stability correction, 2m, vegetated
+              MoStabParaAbvCan             => noahmp%energy%state%MoStabParaAbvCan           ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
+              FrictionVelVeg              => noahmp%energy%state%FrictionVelVeg             ,& ! inout, friction velocity (m/s), vegetated
+              MoStabParaVeg2m            => noahmp%energy%state%MoStabParaVeg2m           ,& ! out,   Monin-Obukhov stability (2/L), 2m, vegetated
+              MoLengthAbvCan             => noahmp%energy%state%MoLengthAbvCan            ,& ! out,   Monin-Obukhov length (m), above ZeroPlaneDispSfc, vegetated
+              ExchCoeffMomAbvCan              => noahmp%energy%state%ExchCoeffMomAbvCan             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDispSfc, vegetated
+              ExchCoeffShAbvCan              => noahmp%energy%state%ExchCoeffShAbvCan             ,& ! out,   exchange coefficient for heat, above ZeroPlaneDispSfc, vegetated
+              ExchCoeffSh2mVegMo             => noahmp%energy%state%ExchCoeffSh2mVegMo            ,& ! out,   exchange coefficient for heat, 2m, vegetated
               ResistanceMomAbvCan            => noahmp%energy%state%ResistanceMomAbvCan            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
               ResistanceShAbvCan            => noahmp%energy%state%ResistanceShAbvCan            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
               ResistanceLhAbvCan            => noahmp%energy%state%ResistanceLhAbvCan             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
@@ -71,7 +71,7 @@ contains
 
     ! initialization
     MPE = 1.0e-6
-    MOZOLD = MOZ  ! M-O stability parameter for next iteration
+    MOZOLD = MoStabParaAbvCan  ! M-O stability parameter for next iteration
     if ( RefHeightAboveGrd <= ZeroPlaneDispSfc ) then
        write(*,*) 'WARNING: critical problem: RefHeightAboveGrd <= ZeroPlaneDispSfc; model stops'
        stop 'error'
@@ -86,88 +86,88 @@ contains
 
     ! compute M-O stability parameter
     if ( ITER == 1 ) then
-       FV   = 0.0
-       MOZ  = 0.0
-       MOL  = 0.0
-       MOZ2 = 0.0
+       FrictionVelVeg   = 0.0
+       MoStabParaAbvCan  = 0.0
+       MoLengthAbvCan  = 0.0
+       MoStabParaVeg2m = 0.0
     else
        TVIR = (1.0 + 0.61 * SpecHumidityRefHeight) * TemperatureAirRefHeight
        TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (DensityAirRefHeight * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
-       MOL  = -1.0 * FV**3 / TMP1
-       MOZ  = min( (RefHeightAboveGrd - ZeroPlaneDispSfc) / MOL, 1.0 )
-       MOZ2 = min( (2.0 + RoughLenShCanopy) / MOL, 1.0 )
+       MoLengthAbvCan  = -1.0 * FrictionVelVeg**3 / TMP1
+       MoStabParaAbvCan  = min( (RefHeightAboveGrd - ZeroPlaneDispSfc) / MoLengthAbvCan, 1.0 )
+       MoStabParaVeg2m = min( (2.0 + RoughLenShCanopy) / MoLengthAbvCan, 1.0 )
     endif
 
     ! accumulate number of times moz changes sign.
-    if ( MOZOLD*MOZ < 0.0 ) MOZSGN = MOZSGN + 1
+    if ( MOZOLD*MoStabParaAbvCan < 0.0 ) MOZSGN = MOZSGN + 1
     if ( MOZSGN >= 2 ) then
-       MOZ  = 0.0
-       FM   = 0.0
-       FH   = 0.0
-       MOZ2 = 0.0
-       FM2  = 0.0
-       FH2  = 0.0
+       MoStabParaAbvCan  = 0.0
+       MoStabCorrMomAbvCan   = 0.0
+       MoStabCorrShAbvCan   = 0.0
+       MoStabParaVeg2m = 0.0
+       MoStabCorrMomVeg2m  = 0.0
+       MoStabCorrShVeg2m  = 0.0
     endif
 
     ! evaluate stability-dependent variables using moz from prior iteration
-    if ( MOZ < 0.0 ) then
-       TMP1   = (1.0 - 16.0 * MOZ)**0.25
+    if ( MoStabParaAbvCan < 0.0 ) then
+       TMP1   = (1.0 - 16.0 * MoStabParaAbvCan)**0.25
        TMP2   = log( (1.0 + TMP1*TMP1) / 2.0 )
        TMP3   = log( (1.0 + TMP1) / 2.0 )
        FMNEW  = 2.0 * TMP3 + TMP2 - 2.0 * atan(TMP1) + 1.5707963
        FHNEW  = 2 * TMP2
        ! 2-meter quantities
-       TMP12  = (1.0 - 16.0 * MOZ2)**0.25
+       TMP12  = (1.0 - 16.0 * MoStabParaVeg2m)**0.25
        TMP22  = log( (1.0 + TMP12*TMP12) / 2.0 )
        TMP32  = log( (1.0 + TMP12) / 2.0 )
        FM2NEW = 2.0 * TMP32 + TMP22 - 2.0 * atan(TMP12) + 1.5707963
        FH2NEW = 2 * TMP22
     else
-       FMNEW  = -5.0 * MOZ
+       FMNEW  = -5.0 * MoStabParaAbvCan
        FHNEW  = FMNEW
-       FM2NEW = -5.0 * MOZ2
+       FM2NEW = -5.0 * MoStabParaVeg2m
        FH2NEW = FM2NEW
     endif
 
     ! except for first iteration, weight stability factors for previous
     ! iteration to help avoid flip-flops from one iteration to the next
     if ( ITER == 1 ) then
-       FM  = FMNEW
-       FH  = FHNEW
-       FM2 = FM2NEW
-       FH2 = FH2NEW
+       MoStabCorrMomAbvCan  = FMNEW
+       MoStabCorrShAbvCan  = FHNEW
+       MoStabCorrMomVeg2m = FM2NEW
+       MoStabCorrShVeg2m = FH2NEW
     else
-       FM  = 0.5 * (FM + FMNEW)
-       FH  = 0.5 * (FH + FHNEW)
-       FM2 = 0.5 * (FM2 + FM2NEW)
-       FH2 = 0.5 * (FH2 + FH2NEW)
+       MoStabCorrMomAbvCan = 0.5 * (MoStabCorrMomAbvCan + FMNEW)
+       MoStabCorrShAbvCan  = 0.5 * (MoStabCorrShAbvCan + FHNEW)
+       MoStabCorrMomVeg2m = 0.5 * (MoStabCorrMomVeg2m + FM2NEW)
+       MoStabCorrShVeg2m = 0.5 * (MoStabCorrShVeg2m + FH2NEW)
     endif
 
     ! exchange coefficients
-    FH     = min( FH, 0.9*TMPCH )
-    FM     = min( FM, 0.9*TMPCM )
-    FH2    = min( FH2, 0.9*TMPCH2 )
-    FM2    = min( FM2, 0.9*TMPCM2 )
-    CMFM   = TMPCM - FM
-    CHFH   = TMPCH - FH
-    CM2FM2 = TMPCM2 - FM2
-    CH2FH2 = TMPCH2 - FH2
+    MoStabCorrShAbvCan     = min( MoStabCorrShAbvCan, 0.9*TMPCH )
+    MoStabCorrMomAbvCan     = min( MoStabCorrMomAbvCan, 0.9*TMPCM )
+    MoStabCorrShVeg2m    = min( MoStabCorrShVeg2m, 0.9*TMPCH2 )
+    MoStabCorrMomVeg2m    = min( MoStabCorrMomVeg2m, 0.9*TMPCM2 )
+    CMFM   = TMPCM - MoStabCorrMomAbvCan
+    CHFH   = TMPCH - MoStabCorrShAbvCan
+    CM2FM2 = TMPCM2 - MoStabCorrMomVeg2m
+    CH2FH2 = TMPCH2 - MoStabCorrShVeg2m
     if ( abs(CMFM) <= MPE ) CMFM = MPE
     if ( abs(CHFH) <= MPE ) CHFH = MPE
     if ( abs(CM2FM2) <= MPE ) CM2FM2 = MPE
     if ( abs(CH2FH2) <= MPE ) CH2FH2 = MPE
-    CM  = ConstVonKarman * ConstVonKarman / (CMFM * CMFM)
-    CH  = ConstVonKarman * ConstVonKarman / (CMFM * CHFH)
-    CH2 = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
+    ExchCoeffMomAbvCan  = ConstVonKarman * ConstVonKarman / (CMFM * CMFM)
+    ExchCoeffShAbvCan  = ConstVonKarman * ConstVonKarman / (CMFM * CHFH)
+    ExchCoeffSh2mVegMo = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
 
     ! friction velocity
-    FV  = WindSpdRefHeight * sqrt(CM)
-    CH2 = ConstVonKarman * FV / CH2FH2
+    FrictionVelVeg  = WindSpdRefHeight * sqrt(ExchCoeffMomAbvCan)
+    ExchCoeffSh2mVegMo = ConstVonKarman * FrictionVelVeg / CH2FH2
 
     ! aerodynamic resistance
-    ResistanceMomAbvCan = max( 1.0, 1.0 / (CM*WindSpdRefHeight) )
-    ResistanceShAbvCan = max( 1.0, 1.0 / (CH*WindSpdRefHeight) )
+    ResistanceMomAbvCan = max( 1.0, 1.0 / (ExchCoeffMomAbvCan*WindSpdRefHeight) )
+    ResistanceShAbvCan = max( 1.0, 1.0 / (ExchCoeffShAbvCan*WindSpdRefHeight) )
     ResistanceLhAbvCan = ResistanceShAbvCan
 
     end associate

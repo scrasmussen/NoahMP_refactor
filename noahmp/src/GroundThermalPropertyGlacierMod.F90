@@ -39,8 +39,8 @@ contains
               PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! out,    energy factor for soil & snow phase change
               HeatCapacVolSnow           => noahmp%energy%state%HeatCapacVolSnow           ,& ! out,    snow layer volumetric specific heat (j/m3/k)
               ThermConductSnow           => noahmp%energy%state%ThermConductSnow           ,& ! out,    snow layer thermal conductivity (w/m/k)
-              CVGLAICE        => noahmp%energy%state%CVGLAICE        ,& ! out,    glacier ice layer volumetric specific heat (j/m3/k)
-              TKGLAICE        => noahmp%energy%state%TKGLAICE         & ! out,    glacier ice layer thermal conductivity (w/m/k)
+              HeatCapacGlaIce        => noahmp%energy%state%HeatCapacGlaIce        ,& ! out,    glacier ice layer volumetric specific heat (j/m3/k)
+              ThermConductGlaIce        => noahmp%energy%state%ThermConductGlaIce         & ! out,    glacier ice layer thermal conductivity (w/m/k)
              )
 ! ----------------------------------------------------------------------
 
@@ -54,8 +54,8 @@ contains
     ! compute glacier ice thermal properties (using Noah glacial ice approximations)
     call GlacierIceThermalProperty(noahmp)
     do IZ = 1, NumSoilLayer
-       ThermConductSoilSnow   (IZ) = TKGLAICE(IZ)
-       HeatCapacSoilSnow(IZ) = CVGLAICE(IZ)
+       ThermConductSoilSnow   (IZ) = ThermConductGlaIce(IZ)
+       HeatCapacSoilSnow(IZ) = HeatCapacGlaIce(IZ)
     enddo
 
     ! combine a temporary variable used for melting/freezing of snow and glacier ice

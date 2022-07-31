@@ -1,6 +1,6 @@
 module ResistanceBareGroundChen97Mod
 
-!!! Compute bare ground resistance and drag coefficient CM for momentum and CH for heat
+!!! Compute bare ground resistance and exchange coefficient for momentum and heat
 !!! based on Chen et al. (1997, BLM)
 !!! This scheme can handle both over open water and over solid surface
 
@@ -81,11 +81,11 @@ contains
               WindSpdRefHeight          => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
               RoughLenMomGrd              => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, (m), ground
               TemperatureGrdBare            => noahmp%energy%state%TemperatureGrdBare             ,& ! in,    bare ground temperature (K)
-              AKMS            => noahmp%energy%state%CMB             ,& ! inout, drag coefficient for momentum, above ZeroPlaneDisp, bare ground
-              AKHS            => noahmp%energy%state%CHB             ,& ! inout, drag coefficient for heat, above ZeroPlaneDisp, bare ground
-              RLMO            => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, bare ground
-              WSTAR2          => noahmp%energy%state%WSTARB          ,& ! inout, friction velocity in vertical direction (m/s), bare ground
-              USTAR           => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
+              ExchCoeffMomBare            => noahmp%energy%state%ExchCoeffMomBare             ,& ! inout, drag coefficient for momentum, above ZeroPlaneDisp, bare ground
+              ExchCoeffShBare            => noahmp%energy%state%ExchCoeffShBare             ,& ! inout, drag coefficient for heat, above ZeroPlaneDisp, bare ground
+              MoStabParaBare            => noahmp%energy%state%MoStabParaBare            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, bare ground
+              FrictionVelVertBare          => noahmp%energy%state%FrictionVelVertBare          ,& ! inout, friction velocity in vertical direction (m/s), bare ground
+              FrictionVelBare           => noahmp%energy%state%FrictionVelBare             ,& ! inout, friction velocity (m/s), bare ground
               ResistanceMomBareGrd            => noahmp%energy%state%ResistanceMomBareGrd            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
               ResistanceShBareGrd            => noahmp%energy%state%ResistanceShBareGrd            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
               ResistanceLhBareGrd            => noahmp%energy%state%ResistanceLhBareGrd             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
@@ -106,30 +106,30 @@ contains
     DU2   = max( WindSpdRefHeight*WindSpdRefHeight, EPSU2 )
     BTGH  = BTG * HPBL
     if ( ITER == 1 ) then
-       if ( BTGH*AKHS*DTHV /= 0.0 ) then
-          WSTAR2 = WWST2 * abs(BTGH * AKHS * DTHV)**(2.0/3.0)
+       if ( BTGH*ExchCoeffShBare*DTHV /= 0.0 ) then
+          FrictionVelVertBare = WWST2 * abs(BTGH * ExchCoeffShBare * DTHV)**(2.0/3.0)
        else
-          WSTAR2 = 0.0
+          FrictionVelVertBare = 0.0
        endif
-       USTAR = max( sqrt(AKMS * sqrt(DU2+WSTAR2)), EPSUST )
-       RLMO  = ELFC * AKHS * DTHV / USTAR**3
+       FrictionVelBare = max( sqrt(ExchCoeffMomBare * sqrt(DU2+FrictionVelVertBare)), EPSUST )
+       MoStabParaBare  = ELFC * ExchCoeffShBare * DTHV / FrictionVelBare**3
     endif
 
     ! ZILITINKEVITCH approach for ZT
-    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*RoughLenMomGrd)) * RoughLenMomGrd )
+    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelBare*RoughLenMomGrd)) * RoughLenMomGrd )
     ZSLU  = RefHeightAboveGrd + ZU
     ZSLT  = RefHeightAboveGrd + ZT
     RLOGU = log(ZSLU / ZU)
     RLOGT = log(ZSLT / ZT)
 
     ! Monin-Obukhov length scale
-    ZETALT = max( ZSLT*RLMO, ZTMIN )
-    RLMO   = ZETALT / ZSLT
-    ZETALU = ZSLU * RLMO
-    ZETAU  = ZU * RLMO
-    ZETAT  = ZT * RLMO
+    ZETALT = max( ZSLT*MoStabParaBare, ZTMIN )
+    MoStabParaBare   = ZETALT / ZSLT
+    ZETALU = ZSLU * MoStabParaBare
+    ZETAU  = ZU * MoStabParaBare
+    ZETAT  = ZT * MoStabParaBare
     if ( ILECH == 0 ) then
-       if ( RLMO < 0.0 ) then
+       if ( MoStabParaBare < 0.0 ) then
           XLU4 = 1.0 - 16.0 * ZETALU
           XLT4 = 1.0 - 16.0 * ZETALT
           XU4  = 1.0 - 16.0 * ZETAU
@@ -153,7 +153,7 @@ contains
           SIMH   = PSPHS(ZETALT) - PSHZ + RLOGT
        endif
     else ! LECH's functions
-       if ( RLMO < 0.0 ) then
+       if ( MoStabParaBare < 0.0 ) then
           PSMZ = PSLMU(ZETAU)
           SIMM = PSLMU(ZETALU) - PSMZ + RLOGU
           PSHZ = PSLHU(ZETAT)
@@ -169,43 +169,43 @@ contains
     endif
 
     ! BELJARS correction of friction velocity u*
-    USTAR = max( sqrt(AKMS * sqrt(DU2+ WSTAR2)), EPSUST )
+    FrictionVelBare = max( sqrt(ExchCoeffMomBare * sqrt(DU2+ FrictionVelVertBare)), EPSUST )
 
     ! ZILITINKEVITCH fix for ZT
-    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * RoughLenMomGrd)) * RoughLenMomGrd )
+    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelBare * RoughLenMomGrd)) * RoughLenMomGrd )
     ZSLT   = RefHeightAboveGrd + ZT
     RLOGT  = log(ZSLT / ZT)
-    USTARK = USTAR * VKRM
+    USTARK = FrictionVelBare * VKRM
 
     ! avoid tangent linear problems near zero
     if ( SIMM < 1.0e-6 ) SIMM = 1.0e-6   ! Limit stability function
-    AKMS = max( USTARK/SIMM, CXCH )
+    ExchCoeffMomBare = max( USTARK/SIMM, CXCH )
     if ( SIMH < 1.0e-6 ) SIMH = 1.0e-6   ! Limit stability function
-    AKHS = max( USTARK/SIMH, CXCH )
+    ExchCoeffShBare = max( USTARK/SIMH, CXCH )
 
     ! update vertical friction velocity w*
-    if ( BTGH*AKHS*DTHV /= 0.0 ) then
-       WSTAR2 = WWST2 * abs(BTGH * AKHS * DTHV)**(2.0/3.0)
+    if ( BTGH*ExchCoeffShBare*DTHV /= 0.0 ) then
+       FrictionVelVertBare = WWST2 * abs(BTGH * ExchCoeffShBare * DTHV)**(2.0/3.0)
     else
-       WSTAR2 = 0.0
+       FrictionVelVertBare = 0.0
     endif
 
     ! update M-O stability parameter
-    RLMN = ELFC * AKHS * DTHV / USTAR**3
-    RLMA = RLMO * WOLD + RLMN * WNEW
-    RLMO = RLMA
+    RLMN = ELFC * ExchCoeffShBare * DTHV / FrictionVelBare**3
+    RLMA = MoStabParaBare * WOLD + RLMN * WNEW
+    MoStabParaBare = RLMA
 
-    ! Undo the multiplication by windspeed that applies to drag coeff CH & CM
-    AKHS = AKHS / WindSpdRefHeight
-    AKMS = AKMS / WindSpdRefHeight
+    ! Undo the multiplication by windspeed that applies to exchange coeff
+    ExchCoeffShBare = ExchCoeffShBare / WindSpdRefHeight
+    ExchCoeffMomBare = ExchCoeffMomBare / WindSpdRefHeight
     if ( SnowDepth > 0.0 ) then
-       AKMS = min( 0.01, AKMS )   ! CM & CH are too large, causing
-       AKHS = min( 0.01, AKHS )   ! computational instability
+       ExchCoeffMomBare = min( 0.01, ExchCoeffMomBare )   ! exch coeff is too large, causing
+       ExchCoeffShBare = min( 0.01, ExchCoeffShBare )     ! computational instability
     endif
 
     ! compute aerodynamic resistance
-    ResistanceMomBareGrd = max( 1.0, 1.0 / (AKMS*WindSpdRefHeight) )
-    ResistanceShBareGrd = max( 1.0, 1.0 / (AKHS*WindSpdRefHeight) )
+    ResistanceMomBareGrd = max( 1.0, 1.0 / (ExchCoeffMomBare*WindSpdRefHeight) )
+    ResistanceShBareGrd = max( 1.0, 1.0 / (ExchCoeffShBare*WindSpdRefHeight) )
     ResistanceLhBareGrd = ResistanceShBareGrd
 
     end associate

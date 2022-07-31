@@ -19,26 +19,26 @@ module EnergyVarType
 
     real(kind=kind_noahmp) :: HeatLatentCanopy            ! canopy latent heat flux [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentTransp            ! latent heat flux from transpiration [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentGrdTot            ! total ground latent heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentGrd               ! total ground latent heat [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentIrriEvap          ! latent heating due to sprinkler irrigation evaporation [W/m2]
     real(kind=kind_noahmp) :: HeatPrecipAdvCanopy         ! precipitation advected heat - canopy net [W/m2]
     real(kind=kind_noahmp) :: HeatPrecipAdvVegGrd         ! precipitation advected heat - vegetated ground net [W/m2]
     real(kind=kind_noahmp) :: HeatPrecipAdvBareGrd        ! precipitation advected heat - bare ground net [W/m2]
-    real(kind=kind_noahmp) :: HeatPrecipAdvTot            ! precipitation advected heat - total [W/m2]
+    real(kind=kind_noahmp) :: HeatPrecipAdvSfc            ! precipitation advected heat - total [W/m2]
     real(kind=kind_noahmp) :: RadPhotoActAbsSunlit        ! absorbed photosyn. active radiation for sunlit leaves [W/m2]
     real(kind=kind_noahmp) :: RadPhotoActAbsShade         ! absorbed photosyn. active radiation  for shaded leaves [W/m2]
     real(kind=kind_noahmp) :: RadSwAbsVeg                 ! solar radiation absorbed by vegetation [W/m2]
     real(kind=kind_noahmp) :: RadSwAbsGrd                 ! solar radiation absorbed by ground [W/m2]
-    real(kind=kind_noahmp) :: RadSwAbsTot                 ! total absorbed solar radiation [W/m2]
-    real(kind=kind_noahmp) :: RadSwReflTot                ! total reflected solar radiation [W/m2]
+    real(kind=kind_noahmp) :: RadSwAbsSfc                 ! total absorbed solar radiation [W/m2]
+    real(kind=kind_noahmp) :: RadSwReflSfc                ! total reflected solar radiation [W/m2]
     real(kind=kind_noahmp) :: RadSwReflVeg                ! reflected solar radiation by vegetation [W/m2]
     real(kind=kind_noahmp) :: RadSwReflGrd                ! reflected solar radiation by ground [W/m2]
     real(kind=kind_noahmp) :: RadLwNetCanopy              ! canopy net longwave radiation [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatSensibleCanopy          ! canopy sensible heat flux [W/m2]     (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentCanEvap           ! canopy evaporation heat flux [W/m2]  (+ = to atm)
     real(kind=kind_noahmp) :: RadLwNetVegGrd              ! vegetated ground net longwave radiation [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleVegGrd          ! vegetated ground sensible heat flux [W/m2]     (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentVegGrd            ! vegetated ground latent heat flux [W/m2]  (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleVegGrd          ! vegetated ground sensible heat flux [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentVegGrd            ! vegetated ground latent heat flux [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatLatentCanTransp         ! canopy transpiration latent heat flux [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: HeatGroundVegGrd            ! vegetated ground heat flux [W/m2] (+ = to soil/snow)
     real(kind=kind_noahmp) :: RadLwNetBareGrd             ! bare ground net longwave rad [W/m2] (+ = to atm)
@@ -47,10 +47,10 @@ module EnergyVarType
     real(kind=kind_noahmp) :: HeatGroundBareGrd           ! bare ground heat flux [W/m2] (+ = to soil/snow)
     real(kind=kind_noahmp) :: HeatGroundTot               ! total ground heat flux [W/m2] (+ = to soil/snow)
     real(kind=kind_noahmp) :: HeatFromSoilBot             ! energy influx from soil bottom [W/m2]
-    real(kind=kind_noahmp) :: RadLwNetTot                 ! total net longwave radiation [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleTot             ! total sensible heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: RadLwNetSfc                 ! total net longwave radiation [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatSensibleSfc             ! total sensible heat [W/m2] (+ = to atm)
     real(kind=kind_noahmp) :: RadPhotoActAbsCan           ! total photosyn. active energy [W/m2] absorbed by canopy
-    real(kind=kind_noahmp) :: RadLwEmitTot                ! emitted outgoing longwave radiation [W/m2]
+    real(kind=kind_noahmp) :: RadLwEmitSfc                ! emitted outgoing longwave radiation [W/m2]
 
     real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwAbsVegDir        ! solar flux absorbed by veg per unit direct flux
     real(kind=kind_noahmp), allocatable, dimension(:) :: RadSwAbsVegDif        ! solar flux absorbed by veg per unit diffuse flux
@@ -72,159 +72,157 @@ module EnergyVarType
 !=== define "state" sub-type of energy (energy%state%variable)
   type :: state_type
 
-    logical                :: FlagFrozenCanopy   ! frozen canopy flag used to define latent heat pathway
-    logical                :: FlagFrozenGround   ! frozen ground flag used to define latent heat pathway
-    real(kind=kind_noahmp) :: LeafAreaIndEff            ! effective leaf area index, after burying by snow
-    real(kind=kind_noahmp) :: StemAreaIndEff            ! effective stem area index, after burying by snow
-    real(kind=kind_noahmp) :: LeafAreaIndex             ! leaf area index
-    real(kind=kind_noahmp) :: StemAreaIndex             ! stem area index
-    real(kind=kind_noahmp) :: VegAreaIndEff             ! one-sided leaf+stem area index (m2/m2), after burying by snow
-    real(kind=kind_noahmp) :: VegFrac            ! greeness vegetation fraction
-    real(kind=kind_noahmp) :: TemperatureGrd              ! ground temperature (k)
-    real(kind=kind_noahmp) :: TemperatureCanopy              ! vegetation/canopy temperature (k)
-    real(kind=kind_noahmp) :: TemperatureSfc              ! surface temperature (K)
-    real(kind=kind_noahmp) :: TemperatureRootZone           ! root-zone averaged temperature (k)
-    real(kind=kind_noahmp) :: PressureVaporRefHeight            ! vapor pressure air (pa)
-    real(kind=kind_noahmp) :: SnowAgeFac            ! snow age factor
-    real(kind=kind_noahmp) :: SnowAgeNondim           ! non-dimensional snow age
-    real(kind=kind_noahmp) :: AlbedoSnowPrev          ! snow albedo at last time step
-    real(kind=kind_noahmp) :: VegAreaProjDir            ! projected leaf+stem area in solar direction
-    real(kind=kind_noahmp) :: GapBtwCanopy            ! between canopy gap fraction for beam
-    real(kind=kind_noahmp) :: GapInCanopy            ! within canopy gap fraction for beam
-    real(kind=kind_noahmp) :: GapCanopyDif           ! gap fraction for diffue light
-    real(kind=kind_noahmp) :: GapCanopyDir             ! total gap fraction for beam (<=1-shafac)
+    logical                :: FlagFrozenCanopy            ! frozen canopy flag used to define latent heat pathway
+    logical                :: FlagFrozenGround            ! frozen ground flag used to define latent heat pathway
+    real(kind=kind_noahmp) :: LeafAreaIndEff              ! effective leaf area index, after burying by snow
+    real(kind=kind_noahmp) :: StemAreaIndEff              ! effective stem area index, after burying by snow
+    real(kind=kind_noahmp) :: LeafAreaIndex               ! leaf area index
+    real(kind=kind_noahmp) :: StemAreaIndex               ! stem area index
+    real(kind=kind_noahmp) :: VegAreaIndEff               ! one-sided leaf+stem area index [m2/m2], after burying by snow
+    real(kind=kind_noahmp) :: VegFrac                     ! greeness vegetation fraction
+    real(kind=kind_noahmp) :: TemperatureGrd              ! ground temperature [K]
+    real(kind=kind_noahmp) :: TemperatureCanopy           ! vegetation/canopy temperature [K]
+    real(kind=kind_noahmp) :: TemperatureSfc              ! surface temperature [K]
+    real(kind=kind_noahmp) :: TemperatureRootZone         ! root-zone averaged temperature [K]
+    real(kind=kind_noahmp) :: PressureVaporRefHeight      ! vapor pressure air [Pa]
+    real(kind=kind_noahmp) :: SnowAgeFac                  ! snow age factor
+    real(kind=kind_noahmp) :: SnowAgeNondim               ! non-dimensional snow age
+    real(kind=kind_noahmp) :: AlbedoSnowPrev              ! snow albedo at last time step
+    real(kind=kind_noahmp) :: VegAreaProjDir              ! projected leaf+stem area in solar direction
+    real(kind=kind_noahmp) :: GapBtwCanopy                ! between canopy gap fraction for beam
+    real(kind=kind_noahmp) :: GapInCanopy                 ! within canopy gap fraction for beam
+    real(kind=kind_noahmp) :: GapCanopyDif                ! gap fraction for diffue light
+    real(kind=kind_noahmp) :: GapCanopyDir                ! total gap fraction for beam (<=1-shafac)
     real(kind=kind_noahmp) :: CanopySunlitFrac            ! sunlit fraction of canopy
-    real(kind=kind_noahmp) :: CanopyShadeFrac            ! shaded fraction of canopy
-    real(kind=kind_noahmp) :: LeafAreaIndSunlit          ! sunlit leaf area
-    real(kind=kind_noahmp) :: LeafAreaIndShade          ! shaded leaf area
-    real(kind=kind_noahmp) :: VapPresSatCanopy            ! canopy saturation vapor pressure at veg temp. (pa)
-    real(kind=kind_noahmp) :: VapPresSatGrdVeg            ! below-canopy saturation vapor pressure at ground temp. (pa)
-    real(kind=kind_noahmp) :: VapPresSatGrdBare            ! bare ground saturation vapor pressure at ground temp. (pa)
-    real(kind=kind_noahmp) :: VapPresSatCanTempD           ! canopy saturation vapor pressure derivative with temperature at veg temp. (pa/k)
-    real(kind=kind_noahmp) :: VapPresSatGrdVegTempD           ! below-canopy saturation vapor pressure derivative with temperature at ground temp. (pa/k)
-    real(kind=kind_noahmp) :: VapPresSatGrdBareTempD           ! bare ground saturation vapor pressure derivative with temperature at ground temp. (pa/k)
-    real(kind=kind_noahmp) :: PressureVaporCanAir            ! canopy air vapor pressure (pa)
-    real(kind=kind_noahmp) :: PressureAtmosCO2          ! atmospheric co2 partial pressure (pa)
-    real(kind=kind_noahmp) :: PressureAtmosO2           ! atmospheric o2 partial pressure (pa)
-    real(kind=kind_noahmp) :: ResistanceStomataSunlit           ! sunlit leaf stomatal resistance (s/m)
-    real(kind=kind_noahmp) :: ResistanceStomataShade           ! shaded leaf stomatal resistance (s/m)
-    real(kind=kind_noahmp) :: DensityAirRefHeight          ! density air (kg/m3) at reference height
-    real(kind=kind_noahmp) :: TemperatureCanopyAir             ! canopy air temperature (K)
-    real(kind=kind_noahmp) :: ZeroPlaneDispSfc             ! surface zero plane displacement (m)
-    real(kind=kind_noahmp) :: ZeroPlaneDispGrd            ! ground zero plane displacement (m)
-    real(kind=kind_noahmp) :: RoughLenMomGrd            ! roughness length, momentum, ground (m)
-    real(kind=kind_noahmp) :: RoughLenMomSfc             ! roughness length, momentum, surface (m)
-    real(kind=kind_noahmp) :: RoughLenShCanopy            ! roughness length, sensible heat (m), canopy
-    real(kind=kind_noahmp) :: RoughLenShVegGrd            ! roughness length, sensible heat, ground (m), below canopy
-    real(kind=kind_noahmp) :: RoughLenShBareGrd            ! roughness length, sensible heat, bare ground (m)
-    real(kind=kind_noahmp) :: CanopyHeight            ! canopy height (m)
-    real(kind=kind_noahmp) :: WindSpdCanopyTop              ! wind speed at top of canopy (m/s)
-    real(kind=kind_noahmp) :: FVV             ! friction velocity (m/s), vegetated
-    real(kind=kind_noahmp) :: FVB             ! friction velocity (m/s), bare ground
-    real(kind=kind_noahmp) :: WindExtCoeffCanopy            ! canopy wind extinction coefficient
-    real(kind=kind_noahmp) :: MOZG            ! M-O stability parameter ground, below canopy
-    real(kind=kind_noahmp) :: MOZV            ! M-O stability parameter (z/L), above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: MOZB            ! M-O stability parameter (z/L), above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: MOZ2V           ! M-O stability (2/L), 2m, vegetated
-    real(kind=kind_noahmp) :: MOZ2B           ! M-O stability (2/L), 2m, bare ground
-    real(kind=kind_noahmp) :: MOLG            ! M-O length (m), ground, below canopy
-    real(kind=kind_noahmp) :: MOLV            ! M-O length (m), above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: MOLB            ! M-O length (m), above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: FHG             ! M-O stability correction ground, below canopy
-    real(kind=kind_noahmp) :: FMV             ! M-O momentum stability correction, above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: FHV             ! M-O sen heat stability correction, above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: FM2V            ! M-O momentum stability correction, 2m, vegetated
-    real(kind=kind_noahmp) :: FH2V            ! M-O sen heat stability correction, 2m, vegetated
-    real(kind=kind_noahmp) :: FMB             ! M-O momentum stability correction, above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: FHB             ! M-O sen heat stability correction, above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: FM2B            ! M-O momentum stability correction, 2m, bare ground
-    real(kind=kind_noahmp) :: FH2B            ! M-O sen heat stability correction, 2m, bare ground
-    real(kind=kind_noahmp) :: CM              ! exchange coefficient (m/s) for momentum, surface, grid mean
-    real(kind=kind_noahmp) :: CMV             ! exchange coefficient (m/s) for momentum, above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: CMB             ! exchange coefficient (m/s) for momentum, above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: CH              ! exchange coefficient (m/s) for heat, surface, grid mean
-    real(kind=kind_noahmp) :: CHV             ! exchange coefficient (m/s) for heat, above ZeroPlaneDisp, vegetated
-    real(kind=kind_noahmp) :: CHB             ! exchange coefficient (m/s) for heat, above ZeroPlaneDisp, bare ground
-    real(kind=kind_noahmp) :: CH2V            ! exchange coefficient (m/s) for heat, 2m, vegetated from MOST scheme
-    real(kind=kind_noahmp) :: CH2B            ! exchange coefficient (m/s) for heat, 2m, bare ground from MOST scheme
-    real(kind=kind_noahmp) :: CHV2            ! exchange coefficient (m/s) for heat, 2m, vegetated from vege_flux
-    real(kind=kind_noahmp) :: CAW             ! latent heat conductance/exchange coeff, canopy air (m/s)
-    real(kind=kind_noahmp) :: CTW             ! transpiration conductance, leaf to canopy air (m/s)
-    real(kind=kind_noahmp) :: CEW             ! evaporation conductance, leaf to canopy air (m/s)
-    real(kind=kind_noahmp) :: CGW             ! latent heat conductance, ground to canopy air (m/s)
-    real(kind=kind_noahmp) :: ResistanceMomUndCan            ! aerodynamic resistance for momentum (s/m), ground, below canopy
-    real(kind=kind_noahmp) :: ResistanceShUndCan            ! aerodynamic resistance for sensible heat (s/m), ground, below canopy
-    real(kind=kind_noahmp) :: ResistanceLhUndCan            ! aerodynamic resistance for water vapor (s/m), ground, below canopy
-    real(kind=kind_noahmp) :: ResistanceMomAbvCan            ! aerodynamic resistance for momentum (s/m), above canopy
-    real(kind=kind_noahmp) :: ResistanceShAbvCan            ! aerodynamic resistance for sensible heat (s/m), above canopy
-    real(kind=kind_noahmp) :: ResistanceLhAbvCan            ! aerodynamic resistance for water vapor (s/m), above canopy
-    real(kind=kind_noahmp) :: ResistanceMomBareGrd            ! aerodynamic resistance for momentum (s/m), bare ground
-    real(kind=kind_noahmp) :: ResistanceShBareGrd            ! aerodynamic resistance for sensible heat (s/m), bare ground
-    real(kind=kind_noahmp) :: ResistanceLhBareGrd            ! aerodynamic resistance for water vapor (s/m), bare ground
-    real(kind=kind_noahmp) :: ResistanceLeafBoundary              ! bulk leaf boundary layer resistance (s/m)
-    real(kind=kind_noahmp) :: TemperaturePotRefHeight           ! potential temp at reference height (K)
-    real(kind=kind_noahmp) :: WindSpdRefHeight              ! wind speed (m/s) at reference height
-    real(kind=kind_noahmp) :: WSTARV          ! friction velocity in vertical direction (m/s), vegetated (only for Chen97)
-    real(kind=kind_noahmp) :: WSTARB          ! friction velocity in vertical direction (m/s), bare ground (only for Chen97)
-    real(kind=kind_noahmp) :: EmissivityVeg             ! vegetation emissivity
-    real(kind=kind_noahmp) :: EmissivityGrd             ! ground emissivity
-    real(kind=kind_noahmp) :: RSURF           ! ground surface resistance (s/m)
-    real(kind=kind_noahmp) :: GAMMAV          ! psychrometric constant (pa/K), canopy
-    real(kind=kind_noahmp) :: LATHEAV         ! latent heat of vaporization/subli (j/kg), canopy
-    real(kind=kind_noahmp) :: GAMMAG          ! psychrometric constant (pa/K), ground
-    real(kind=kind_noahmp) :: LATHEAG         ! latent heat of vaporization/subli (j/kg), ground
-    real(kind=kind_noahmp) :: RHSUR           ! raltive humidity in surface soil/snow air space (-)
-    real(kind=kind_noahmp) :: SpecHumiditySfcBare            ! specific humidity at bare surface
-    real(kind=kind_noahmp) :: SpecHumiditySfc              ! specific humidity at surface grid mean
-    real(kind=kind_noahmp) :: SpecHumidity2mVeg             ! specific humidity at 2m vegetated
-    real(kind=kind_noahmp) :: SpecHumidity2mBare             ! specific humidity at 2m bare ground
-    real(kind=kind_noahmp) :: SpecHumidity2m           ! specific humidity at 2m grid mean
-    real(kind=kind_noahmp) :: TemperatureGrdVeg             ! vegetated ground (below-canopy) temperature (K)
-    real(kind=kind_noahmp) :: TemperatureGrdBare             ! bare ground temperature (K)
-    real(kind=kind_noahmp) :: WindStressEwVeg           ! wind stress: east-west (n/m2) above canopy
-    real(kind=kind_noahmp) :: WindStressNsVeg           ! wind stress: north-south (n/m2) above canopy
-    real(kind=kind_noahmp) :: WindStressEwBare           ! wind stress: east-west (n/m2) bare ground
-    real(kind=kind_noahmp) :: WindStressNsBare           ! wind stress: north-south (n/m2) bare ground
-    real(kind=kind_noahmp) :: WindStressEwTot            ! wind stress: east-west (n/m2) grid mean
-    real(kind=kind_noahmp) :: WindStressNsTot            ! wind stress: north-south (n/m2) grid mean
-    real(kind=kind_noahmp) :: TemperatureAir2mVeg            ! 2 m height air temperature (k), vegetated
-    real(kind=kind_noahmp) :: TemperatureAir2mBare            ! 2 m height air temperature (k), bare ground
-    real(kind=kind_noahmp) :: TemperatureAir2m             ! 2 m height air temperature (k), grid mean
-    real(kind=kind_noahmp) :: CHLEAF          ! leaf sensible heat exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: CHUC            ! under canopy sensible heat exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: EHB             ! bare ground sensible heat exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: EHB2            ! bare ground 2-m sensible heat exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: EMB             ! bare ground momentum exchange coefficient (m/s)
-    real(kind=kind_noahmp) :: RefHeightAboveGrd    ! reference height [m] above ground
-    real(kind=kind_noahmp) :: CanopyFracSnowBury         ! fraction of canopy buried by snow
-    real(kind=kind_noahmp) :: ZBOTSNO         ! depth of lower boundary condition (m) from snow surface
-    real(kind=kind_noahmp) :: RoughLenMomSfcToAtm           ! roughness length, momentum, surface, sent to coupled atmos model
-    real(kind=kind_noahmp) :: TemperatureRadSfc            ! radiative temperature (K)
-    real(kind=kind_noahmp) :: EmissivitySfc          ! surface emissivity
-    real(kind=kind_noahmp) :: AlbedoSfc          ! total surface albedo
-    real(kind=kind_noahmp) :: ERRENG          ! error in surface energy balance [w/m2]
-    real(kind=kind_noahmp) :: ERRSW           ! error in shortwave radiation balance [w/m2]
+    real(kind=kind_noahmp) :: CanopyShadeFrac             ! shaded fraction of canopy
+    real(kind=kind_noahmp) :: LeafAreaIndSunlit           ! sunlit leaf area
+    real(kind=kind_noahmp) :: LeafAreaIndShade            ! shaded leaf area
+    real(kind=kind_noahmp) :: VapPresSatCanopy            ! canopy saturation vapor pressure at veg temperature [Pa]
+    real(kind=kind_noahmp) :: VapPresSatGrdVeg            ! below-canopy saturation vapor pressure at ground temperature [Pa]
+    real(kind=kind_noahmp) :: VapPresSatGrdBare           ! bare ground saturation vapor pressure at ground temperature [Pa]
+    real(kind=kind_noahmp) :: VapPresSatCanTempD          ! canopy saturation vapor pressure derivative with temperature at veg temp. [Pa/K]
+    real(kind=kind_noahmp) :: VapPresSatGrdVegTempD       ! below-canopy saturation vapor pressure derivative with temperature at ground temp. [Pa/K]
+    real(kind=kind_noahmp) :: VapPresSatGrdBareTempD      ! bare ground saturation vapor pressure derivative with temperature at ground temp. [Pa/K]
+    real(kind=kind_noahmp) :: PressureVaporCanAir         ! canopy air vapor pressure [Pa]
+    real(kind=kind_noahmp) :: PressureAtmosCO2            ! atmospheric co2 partial pressure [Pa]
+    real(kind=kind_noahmp) :: PressureAtmosO2             ! atmospheric o2 partial pressure [Pa]
+    real(kind=kind_noahmp) :: ResistanceStomataSunlit     ! sunlit leaf stomatal resistance [s/m]
+    real(kind=kind_noahmp) :: ResistanceStomataShade      ! shaded leaf stomatal resistance [s/m]
+    real(kind=kind_noahmp) :: DensityAirRefHeight         ! density air [kg/m3] at reference height
+    real(kind=kind_noahmp) :: TemperatureCanopyAir        ! canopy air temperature [K]
+    real(kind=kind_noahmp) :: ZeroPlaneDispSfc            ! surface zero plane displacement [m]
+    real(kind=kind_noahmp) :: ZeroPlaneDispGrd            ! ground zero plane displacement [m]
+    real(kind=kind_noahmp) :: RoughLenMomGrd              ! roughness length, momentum, ground [m]
+    real(kind=kind_noahmp) :: RoughLenMomSfc              ! roughness length, momentum, surface [m]
+    real(kind=kind_noahmp) :: RoughLenShCanopy            ! roughness length, sensible heat, canopy [m]
+    real(kind=kind_noahmp) :: RoughLenShVegGrd            ! roughness length, sensible heat, ground, below canopy [m]
+    real(kind=kind_noahmp) :: RoughLenShBareGrd           ! roughness length, sensible heat, bare ground [m]
+    real(kind=kind_noahmp) :: CanopyHeight                ! canopy height [m]
+    real(kind=kind_noahmp) :: WindSpdCanopyTop            ! wind speed at top of canopy [m/s]
+    real(kind=kind_noahmp) :: FrictionVelVeg              ! friction velocity [m/s], vegetated
+    real(kind=kind_noahmp) :: FrictionVelBare             ! friction velocity [m/s], bare ground
+    real(kind=kind_noahmp) :: WindExtCoeffCanopy          ! canopy wind extinction coefficient
+    real(kind=kind_noahmp) :: MoStabParaUndCan            ! M-O stability parameter ground, below canopy
+    real(kind=kind_noahmp) :: MoStabParaAbvCan            ! M-O stability parameter (z/L), above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: MoStabParaBare              ! M-O stability parameter (z/L), above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: MoStabParaVeg2m             ! M-O stability parameter (2/L), 2m, vegetated
+    real(kind=kind_noahmp) :: MoStabParaBare2m            ! M-O stability parameter (2/L), 2m, bare ground
+    real(kind=kind_noahmp) :: MoLengthUndCan              ! M-O length [m], ground, below canopy
+    real(kind=kind_noahmp) :: MoLengthAbvCan              ! M-O length [m], above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: MoLengthBare                ! M-O length [m], above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: MoStabCorrShUndCan          ! M-O stability correction ground, below canopy
+    real(kind=kind_noahmp) :: MoStabCorrMomAbvCan         ! M-O momentum stability correction, above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: MoStabCorrShAbvCan          ! M-O sensible heat stability correction, above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: MoStabCorrMomVeg2m          ! M-O momentum stability correction, 2m, vegetated
+    real(kind=kind_noahmp) :: MoStabCorrShVeg2m           ! M-O sensible heat stability correction, 2m, vegetated
+    real(kind=kind_noahmp) :: MoStabCorrShBare            ! M-O sensible heat stability correction, above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: MoStabCorrMomBare           ! M-O momentum stability correction, above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: MoStabCorrMomBare2m         ! M-O momentum stability correction, 2m, bare ground
+    real(kind=kind_noahmp) :: MoStabCorrShBare2m          ! M-O sensible heat stability correction, 2m, bare ground
+    real(kind=kind_noahmp) :: ExchCoeffMomSfc             ! exchange coefficient [m/s] for momentum, surface, grid mean
+    real(kind=kind_noahmp) :: ExchCoeffMomAbvCan          ! exchange coefficient [m/s] for momentum, above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: ExchCoeffMomBare            ! exchange coefficient [m/s] for momentum, above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: ExchCoeffShSfc              ! exchange coefficient [m/s] for sensible heat, surface, grid mean
+    real(kind=kind_noahmp) :: ExchCoeffShAbvCan           ! exchange coefficient [m/s] for sensible heat, above ZeroPlaneDisp, vegetated
+    real(kind=kind_noahmp) :: ExchCoeffShBare             ! exchange coefficient [m/s] for sensible heat, above ZeroPlaneDisp, bare ground
+    real(kind=kind_noahmp) :: ExchCoeffSh2mVegMo          ! exchange coefficient [m/s] for sensible heat, 2m, vegetated (M-O)
+    real(kind=kind_noahmp) :: ExchCoeffSh2mBareMo         ! exchange coefficient [m/s] for sensible heat, 2m, bare ground (M-O)
+    real(kind=kind_noahmp) :: ExchCoeffSh2mVeg            ! exchange coefficient [m/s] for sensible heat, 2m, vegetated (diagnostic)
+    real(kind=kind_noahmp) :: ExchCoeffLhAbvCan           ! exchange coefficient [m/s] for latent heat, canopy air to ref height
+    real(kind=kind_noahmp) :: ExchCoeffLhTransp           ! exchange coefficient [m/s] for transpiration, leaf to canopy air
+    real(kind=kind_noahmp) :: ExchCoeffLhEvap             ! exchange coefficient [m/s] for leaf evaporation, leaf to canopy air
+    real(kind=kind_noahmp) :: ExchCoeffLhUndCan           ! exchange coefficient [m/s] for latent heat, ground to canopy air
+    real(kind=kind_noahmp) :: ResistanceMomUndCan         ! aerodynamic resistance [s/m] for momentum, ground, below canopy
+    real(kind=kind_noahmp) :: ResistanceShUndCan          ! aerodynamic resistance [s/m] for sensible heat, ground, below canopy
+    real(kind=kind_noahmp) :: ResistanceLhUndCan          ! aerodynamic resistance [s/m] for water vapor, ground, below canopy
+    real(kind=kind_noahmp) :: ResistanceMomAbvCan         ! aerodynamic resistance [s/m] for momentum, above canopy
+    real(kind=kind_noahmp) :: ResistanceShAbvCan          ! aerodynamic resistance [s/m] for sensible heat, above canopy
+    real(kind=kind_noahmp) :: ResistanceLhAbvCan          ! aerodynamic resistance [s/m] for water vapor, above canopy
+    real(kind=kind_noahmp) :: ResistanceMomBareGrd        ! aerodynamic resistance [s/m] for momentum, bare ground
+    real(kind=kind_noahmp) :: ResistanceShBareGrd         ! aerodynamic resistance [s/m] for sensible heat, bare ground
+    real(kind=kind_noahmp) :: ResistanceLhBareGrd         ! aerodynamic resistance [s/m] for water vapor, bare ground
+    real(kind=kind_noahmp) :: ResistanceLeafBoundary      ! bulk leaf boundary layer resistance [s/m]
+    real(kind=kind_noahmp) :: TemperaturePotRefHeight     ! potential temp at reference height [K]
+    real(kind=kind_noahmp) :: WindSpdRefHeight            ! wind speed [m/s] at reference height
+    real(kind=kind_noahmp) :: FrictionVelVertVeg          ! friction velocity in vertical direction [m/s], vegetated (only for Chen97)
+    real(kind=kind_noahmp) :: FrictionVelVertBare         ! friction velocity in vertical direction [m/s], bare ground (only for Chen97)
+    real(kind=kind_noahmp) :: EmissivityVeg               ! vegetation emissivity
+    real(kind=kind_noahmp) :: EmissivityGrd               ! ground emissivity
+    real(kind=kind_noahmp) :: ResistanceGrdEvap           ! ground surface resistance [s/m] to evaporation/sublimation
+    real(kind=kind_noahmp) :: PsychConstCanopy            ! psychrometric constant [Pa/K], canopy
+    real(kind=kind_noahmp) :: LatHeatVapCanopy            ! latent heat of vaporization/subli [J/kg], canopy
+    real(kind=kind_noahmp) :: PsychConstGrd               ! psychrometric constant [Pa/K], ground
+    real(kind=kind_noahmp) :: LatHeatVapGrd               ! latent heat of vaporization/subli [J/kg], ground
+    real(kind=kind_noahmp) :: RelHumidityGrd              ! raltive humidity in surface soil/snow air space (-)
+    real(kind=kind_noahmp) :: SpecHumiditySfcBare         ! specific humidity at bare surface
+    real(kind=kind_noahmp) :: SpecHumiditySfc             ! specific humidity at surface grid mean
+    real(kind=kind_noahmp) :: SpecHumidity2mVeg           ! specific humidity at 2m vegetated
+    real(kind=kind_noahmp) :: SpecHumidity2mBare          ! specific humidity at 2m bare ground
+    real(kind=kind_noahmp) :: SpecHumidity2m              ! specific humidity at 2m grid mean
+    real(kind=kind_noahmp) :: TemperatureGrdVeg           ! vegetated ground (below-canopy) temperature [K]
+    real(kind=kind_noahmp) :: TemperatureGrdBare          ! bare ground temperature [K]
+    real(kind=kind_noahmp) :: WindStressEwVeg             ! wind stress [N/m2]: east-west above canopy
+    real(kind=kind_noahmp) :: WindStressNsVeg             ! wind stress [N/m2]: north-south above canopy
+    real(kind=kind_noahmp) :: WindStressEwBare            ! wind stress [N/m2]: east-west bare ground
+    real(kind=kind_noahmp) :: WindStressNsBare            ! wind stress [N/m2]: north-south bare ground
+    real(kind=kind_noahmp) :: WindStressEwSfc             ! wind stress [N/m2]: east-west grid mean
+    real(kind=kind_noahmp) :: WindStressNsSfc             ! wind stress [N/m2]: north-south grid mean
+    real(kind=kind_noahmp) :: TemperatureAir2mVeg         ! 2 m height air temperature [K], vegetated
+    real(kind=kind_noahmp) :: TemperatureAir2mBare        ! 2 m height air temperature [K], bare ground
+    real(kind=kind_noahmp) :: TemperatureAir2m            ! 2 m height air temperature [K], grid mean
+    real(kind=kind_noahmp) :: ExchCoeffShLeaf             ! leaf sensible heat exchange coefficient [m/s]
+    real(kind=kind_noahmp) :: ExchCoeffShUndCan           ! under canopy sensible heat exchange coefficient [m/s]
+    real(kind=kind_noahmp) :: ExchCoeffSh2mBare           ! bare ground 2-m sensible heat exchange coefficient [m/s] (diagnostic)
+    real(kind=kind_noahmp) :: RefHeightAboveGrd           ! reference height [m] above ground
+    real(kind=kind_noahmp) :: CanopyFracSnowBury          ! fraction of canopy buried by snow
+    real(kind=kind_noahmp) :: DepthSoilTempBotToSno       ! depth of soil temperature lower boundary condition from snow surface [m]
+    real(kind=kind_noahmp) :: RoughLenMomSfcToAtm         ! roughness length, momentum, surface, sent to coupled atmos model
+    real(kind=kind_noahmp) :: TemperatureRadSfc           ! radiative temperature [K]
+    real(kind=kind_noahmp) :: EmissivitySfc               ! surface emissivity
+    real(kind=kind_noahmp) :: AlbedoSfc                   ! total surface albedo
+    real(kind=kind_noahmp) :: EnergyBalanceError          ! error in surface energy balance [W/m2]
+    real(kind=kind_noahmp) :: RadSwBalanceError           ! error in shortwave radiation balance [W/m2]
 
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TemperatureSoilSnow         ! snow and soil layer temperature [k]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacVolSnow       ! snow layer volumetric specific heat capacity (j/m3/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSnow       ! snow layer thermal conductivity (w/m/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacVolSoil      ! soil layer volumetric specific heat capacity (j/m3/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSoil      ! soil layer thermal conductivity (w/m/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: CVGLAICE    ! glacier ice layer volumetric specific heat (j/m3/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TKGLAICE    ! glacier ice thermal conductivity (w/m/k)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSoilSnow          ! thermal conductivity [w/m/k] for all soil and snow layers
-    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacSoilSnow       ! heat capacity [j/m3/k] for all snow and soil layers
-    real(kind=kind_noahmp), allocatable, dimension(:) :: PhaseChgFacSoilSnow        ! energy factor for soil and snow phase change
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSnowDir      ! snow albedo for direct(1=vis, 2=nir)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSnowDif      ! snow albedo for diffuse(1=vis, 2=nir)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilDir      ! soil albedo (direct)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilDif      ! soil albedo (diffuse)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoGrdDir      ! ground albedo (direct beam: vis, nir)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoGrdDif      ! ground albedo (diffuse: vis, nir)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: ReflectanceVeg         ! leaf/stem reflectance weighted by LeafAreaIndex and StemAreaIndex
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TransmittanceVeg         ! leaf/stem transmittance weighted by LeafAreaIndex and StemAreaIndex
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSfcDir        ! surface albedo (direct)
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSfcDif        ! surface albedo (diffuse)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TemperatureSoilSnow   ! snow and soil layer temperature [K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacVolSnow      ! snow layer volumetric specific heat capacity [J/m3/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSnow      ! snow layer thermal conductivity [W/m/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacVolSoil      ! soil layer volumetric specific heat capacity [J/m3/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSoil      ! soil layer thermal conductivity [W/m/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacGlaIce       ! glacier ice layer volumetric specific heat [J/m3/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductGlaIce    ! glacier ice thermal conductivity [W/m/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThermConductSoilSnow  ! thermal conductivity for all soil and snow layers [W/m/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacSoilSnow     ! heat capacity for all snow and soil layers [J/m3/K]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: PhaseChgFacSoilSnow   ! energy factor for soil and snow phase change
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSnowDir         ! snow albedo for direct(1=vis, 2=nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSnowDif         ! snow albedo for diffuse(1=vis, 2=nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilDir         ! soil albedo (direct)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSoilDif         ! soil albedo (diffuse)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoGrdDir          ! ground albedo (direct beam: vis, nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoGrdDif          ! ground albedo (diffuse: vis, nir)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ReflectanceVeg        ! leaf/stem reflectance weighted by LeafAreaIndex and StemAreaIndex
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TransmittanceVeg      ! leaf/stem transmittance weighted by LeafAreaIndex and StemAreaIndex
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSfcDir          ! surface albedo (direct)
+    real(kind=kind_noahmp), allocatable, dimension(:) :: AlbedoSfcDif          ! surface albedo (diffuse)
 
   end type state_type
 
@@ -269,7 +267,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: ZilitinkevichCoeff          ! Zilitinkevich coefficient for heat exchange coefficient calculation
     real(kind=kind_noahmp) :: EmissivitySnow              ! snow emissivity
     real(kind=kind_noahmp) :: CanopyWindExtFac            ! empirical canopy wind extinction parameter
-    real(kind=kind_noahmp) :: RoughLenMomSnow              ! snow surface roughness length [m]
+    real(kind=kind_noahmp) :: RoughLenMomSnow             ! snow surface roughness length [m]
     real(kind=kind_noahmp) :: RoughLenMomSoil             ! Bare-soil roughness length [m]
     real(kind=kind_noahmp) :: RoughLenMomLake             ! lake surface roughness length [m]
     real(kind=kind_noahmp) :: EmissivityIceSfc            ! ice surface emissivity

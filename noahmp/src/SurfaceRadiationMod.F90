@@ -62,8 +62,8 @@ contains
               RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! out,   average absorbed par for shaded leaves (w/m2)
               RadSwAbsVeg             => noahmp%energy%flux%RadSwAbsVeg              ,& ! out,   solar radiation absorbed by vegetation (w/m2)
               RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! out,   solar radiation absorbed by ground (w/m2)
-              RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! out,   total absorbed solar radiation (w/m2)
-              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
+              RadSwAbsSfc             => noahmp%energy%flux%RadSwAbsSfc              ,& ! out,   total absorbed solar radiation (w/m2)
+              RadSwReflSfc             => noahmp%energy%flux%RadSwReflSfc              ,& ! out,   total reflected solar radiation (w/m2)
               RadSwReflVeg            => noahmp%energy%flux%RadSwReflVeg             ,& ! out,   reflected solar radiation by vegetation (w/m2)
               RadSwReflGrd            => noahmp%energy%flux%RadSwReflGrd              & ! out,   reflected solar radiation by ground (w/m2)
              )
@@ -75,8 +75,8 @@ contains
     MPE    = 1.0e-6
     RadSwAbsGrd    = 0.0
     RadSwAbsVeg    = 0.0
-    RadSwAbsTot    = 0.0
-    RadSwReflTot    = 0.0
+    RadSwAbsSfc    = 0.0
+    RadSwReflSfc    = 0.0
     RadSwReflVeg   = 0.0
     RadSwReflGrd   = 0.0
     RadPhotoActAbsSunlit = 0.0
@@ -87,14 +87,14 @@ contains
        CAD(IB) = RadSwDownDir(IB) * RadSwAbsVegDir(IB)
        CAI(IB) = RadSwDownDif(IB) * RadSwAbsVegDif(IB)
        RadSwAbsVeg     = RadSwAbsVeg + CAD(IB) + CAI(IB)
-       RadSwAbsTot     = RadSwAbsTot + CAD(IB) + CAI(IB)
+       RadSwAbsSfc     = RadSwAbsSfc + CAD(IB) + CAI(IB)
        ! transmitted solar fluxes incident on ground
        TRD = RadSwDownDir(IB) * RadSwDirTranGrdDir(IB)
        TRI = RadSwDownDir(IB) * RadSwDifTranGrdDir(IB) + RadSwDownDif(IB) * RadSwDifTranGrdDif(IB)
        ! solar radiation absorbed by ground surface
        ABSG = TRD * (1.0 - AlbedoGrdDir(IB)) + TRI * (1.0 - AlbedoGrdDif(IB))
        RadSwAbsGrd  = RadSwAbsGrd + ABSG
-       RadSwAbsTot  = RadSwAbsTot + ABSG
+       RadSwAbsSfc  = RadSwAbsSfc + ABSG
     enddo
 
     ! partition visible canopy absorption to sunlit and shaded fractions
@@ -111,7 +111,7 @@ contains
     ! reflected solar radiation
     RVIS = AlbedoSfcDir(1) * RadSwDownDir(1) + AlbedoSfcDif(1) * RadSwDownDif(1)
     RNIR = AlbedoSfcDir(2) * RadSwDownDir(2) + AlbedoSfcDif(2) * RadSwDownDif(2)
-    RadSwReflTot  = RVIS + RNIR
+    RadSwReflSfc  = RVIS + RNIR
 
     ! reflected solar radiation of veg. and ground (combined ground)
     RadSwReflVeg = RadSwReflVegDir(1)*RadSwDownDir(1) + RadSwReflVegDif(1)*RadSwDownDif(1) + &

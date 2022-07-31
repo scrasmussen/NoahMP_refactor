@@ -53,17 +53,17 @@ contains
               ZeroPlaneDispGrd             => noahmp%energy%state%ZeroPlaneDispGrd            ,& ! in,    ground zero plane displacement (m)
               RoughLenShBareGrd             => noahmp%energy%state%RoughLenShBareGrd            ,& ! in,    roughness length, sensible heat (m), bare ground
               RoughLenMomGrd             => noahmp%energy%state%RoughLenMomGrd            ,& ! in,    roughness length, momentum, (m), ground
-              FM              => noahmp%energy%state%FMB             ,& ! inout, M-O momentum stability correction, above ZeroPlaneDispGrd, bare ground
-              FH              => noahmp%energy%state%FHB             ,& ! inout, M-O sen heat stability correction, above ZeroPlaneDispGrd, bare ground
-              FM2             => noahmp%energy%state%FM2B            ,& ! inout, M-O momentum stability correction, 2m, bare ground
-              FH2             => noahmp%energy%state%FH2B            ,& ! inout, M-O sen heat stability correction, 2m, bare ground
-              FV              => noahmp%energy%state%FVB             ,& ! inout, friction velocity (m/s), bare ground
-              MOZ             => noahmp%energy%state%MOZB            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispGrd, bare ground
-              MOZ2            => noahmp%energy%state%MOZ2B           ,& ! out,   Monin-Obukhov stability (2/L), 2m, bare ground
-              MOL             => noahmp%energy%state%MOLB            ,& ! out,   Monin-Obukhov length (m), above ZeroPlaneDispGrd, bare ground
-              CM              => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDispGrd, bare ground
-              CH              => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZeroPlaneDispGrd, bare ground
-              CH2             => noahmp%energy%state%CH2B            ,& ! out,   drag coefficient for heat, 2m, bare ground
+              MoStabCorrMomBare              => noahmp%energy%state%MoStabCorrMomBare             ,& ! inout, M-O momentum stability correction, above ZeroPlaneDispGrd, bare ground
+              MoStabCorrShBare              => noahmp%energy%state%MoStabCorrShBare             ,& ! inout, M-O sen heat stability correction, above ZeroPlaneDispGrd, bare ground
+              MoStabCorrMomBare2m             => noahmp%energy%state%MoStabCorrMomBare2m            ,& ! inout, M-O momentum stability correction, 2m, bare ground
+              MoStabCorrShBare2m             => noahmp%energy%state%MoStabCorrShBare2m            ,& ! inout, M-O sen heat stability correction, 2m, bare ground
+              FrictionVelBare              => noahmp%energy%state%FrictionVelBare             ,& ! inout, friction velocity (m/s), bare ground
+              MoStabParaBare             => noahmp%energy%state%MoStabParaBare            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispGrd, bare ground
+              MoStabParaBare2m            => noahmp%energy%state%MoStabParaBare2m           ,& ! out,   Monin-Obukhov stability (2/L), 2m, bare ground
+              MoLengthBare             => noahmp%energy%state%MoLengthBare            ,& ! out,   Monin-Obukhov length (m), above ZeroPlaneDispGrd, bare ground
+              ExchCoeffMomBare              => noahmp%energy%state%ExchCoeffMomBare             ,& ! out,   exchange coefficient for momentum, above ZeroPlaneDispGrd, bare ground
+              ExchCoeffShBare              => noahmp%energy%state%ExchCoeffShBare             ,& ! out,   exchange coefficient for heat, above ZeroPlaneDispGrd, bare ground
+              ExchCoeffSh2mBareMo             => noahmp%energy%state%ExchCoeffSh2mBareMo            ,& ! out,   exchange coefficient for heat, 2m, bare ground
               ResistanceMomBareGrd            => noahmp%energy%state%ResistanceMomBareGrd            ,& ! out,   aerodynamic resistance for momentum (s/m), bare ground
               ResistanceShBareGrd            => noahmp%energy%state%ResistanceShBareGrd            ,& ! out,   aerodynamic resistance for sensible heat (s/m), bare ground
               ResistanceLhBareGrd            => noahmp%energy%state%ResistanceLhBareGrd             & ! out,   aerodynamic resistance for water vapor (s/m), bare ground
@@ -72,7 +72,7 @@ contains
 
     ! initialization
     MPE = 1.0e-6
-    MOZOLD = MOZ  ! M-O stability parameter for next iteration
+    MOZOLD = MoStabParaBare  ! M-O stability parameter for next iteration
     if ( RefHeightAboveGrd <= ZeroPlaneDispGrd ) then
        write(*,*) 'WARNING: critical problem: RefHeightAboveGrd <= ZeroPlaneDispGrd; model stops'
        stop 'error'
@@ -87,88 +87,88 @@ contains
 
     ! compute M-O stability parameter
     if ( ITER == 1 ) then
-       FV   = 0.0
-       MOZ  = 0.0
-       MOL  = 0.0
-       MOZ2 = 0.0
+       FrictionVelBare   = 0.0
+       MoStabParaBare  = 0.0
+       MoLengthBare  = 0.0
+       MoStabParaBare2m = 0.0
     else
        TVIR = (1.0 + 0.61 * SpecHumidityRefHeight) * TemperatureAirRefHeight
        TMP1 = ConstVonKarman * (ConstGravityAcc / TVIR) * H / (DensityAirRefHeight * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
-       MOL  = -1.0 * FV**3 / TMP1
-       MOZ  = min( (RefHeightAboveGrd - ZeroPlaneDispGrd) / MOL, 1.0 )
-       MOZ2 = min( (2.0 + RoughLenShBareGrd) / MOL, 1.0 )
+       MoLengthBare  = -1.0 * FrictionVelBare**3 / TMP1
+       MoStabParaBare  = min( (RefHeightAboveGrd - ZeroPlaneDispGrd) / MoLengthBare, 1.0 )
+       MoStabParaBare2m = min( (2.0 + RoughLenShBareGrd) / MoLengthBare, 1.0 )
     endif
 
     ! accumulate number of times moz changes sign.
-    if ( MOZOLD*MOZ < 0.0 ) MOZSGN = MOZSGN + 1
+    if ( MOZOLD*MoStabParaBare < 0.0 ) MOZSGN = MOZSGN + 1
     if ( MOZSGN >= 2 ) then
-       MOZ  = 0.0
-       FM   = 0.0
-       FH   = 0.0
-       MOZ2 = 0.0
-       FM2  = 0.0
-       FH2  = 0.0
+       MoStabParaBare  = 0.0
+       MoStabCorrMomBare   = 0.0
+       MoStabCorrShBare   = 0.0
+       MoStabParaBare2m = 0.0
+       MoStabCorrMomBare2m  = 0.0
+       MoStabCorrShBare2m  = 0.0
     endif
 
     ! evaluate stability-dependent variables using moz from prior iteration
-    if ( MOZ < 0.0 ) then
-       TMP1   = (1.0 - 16.0 * MOZ)**0.25
+    if ( MoStabParaBare < 0.0 ) then
+       TMP1   = (1.0 - 16.0 * MoStabParaBare)**0.25
        TMP2   = log( (1.0 + TMP1*TMP1) / 2.0 )
        TMP3   = log( (1.0 + TMP1) / 2.0 )
        FMNEW  = 2.0 * TMP3 + TMP2 - 2.0 * atan(TMP1) + 1.5707963
        FHNEW  = 2 * TMP2
        ! 2-meter quantities
-       TMP12  = (1.0 - 16.0 * MOZ2)**0.25
+       TMP12  = (1.0 - 16.0 * MoStabParaBare2m)**0.25
        TMP22  = log( (1.0 + TMP12*TMP12) / 2.0 )
        TMP32  = log( (1.0 + TMP12) / 2.0 )
        FM2NEW = 2.0 * TMP32 + TMP22 - 2.0 * atan(TMP12) + 1.5707963
        FH2NEW = 2 * TMP22
     else
-       FMNEW  = -5.0 * MOZ
+       FMNEW  = -5.0 * MoStabParaBare
        FHNEW  = FMNEW
-       FM2NEW = -5.0 * MOZ2
+       FM2NEW = -5.0 * MoStabParaBare2m
        FH2NEW = FM2NEW
     endif
 
     ! except for first iteration, weight stability factors for previous
     ! iteration to help avoid flip-flops from one iteration to the next
     if ( ITER == 1 ) then
-       FM  = FMNEW
-       FH  = FHNEW
-       FM2 = FM2NEW
-       FH2 = FH2NEW
+       MoStabCorrMomBare  = FMNEW
+       MoStabCorrShBare  = FHNEW
+       MoStabCorrMomBare2m = FM2NEW
+       MoStabCorrShBare2m = FH2NEW
     else
-       FM  = 0.5 * (FM + FMNEW)
-       FH  = 0.5 * (FH + FHNEW)
-       FM2 = 0.5 * (FM2 + FM2NEW)
-       FH2 = 0.5 * (FH2 + FH2NEW)
+       MoStabCorrMomBare  = 0.5 * (MoStabCorrMomBare + FMNEW)
+       MoStabCorrShBare  = 0.5 * (MoStabCorrShBare + FHNEW)
+       MoStabCorrMomBare2m = 0.5 * (MoStabCorrMomBare2m + FM2NEW)
+       MoStabCorrShBare2m = 0.5 * (MoStabCorrShBare2m + FH2NEW)
     endif
 
     ! exchange coefficients
-    FH     = min( FH, 0.9*TMPCH )
-    FM     = min( FM, 0.9*TMPCM )
-    FH2    = min( FH2, 0.9*TMPCH2 )
-    FM2    = min( FM2, 0.9*TMPCM2 )
-    CMFM   = TMPCM - FM
-    CHFH   = TMPCH - FH
-    CM2FM2 = TMPCM2 - FM2
-    CH2FH2 = TMPCH2 - FH2
+    MoStabCorrShBare     = min( MoStabCorrShBare, 0.9*TMPCH )
+    MoStabCorrMomBare     = min( MoStabCorrMomBare, 0.9*TMPCM )
+    MoStabCorrShBare2m    = min( MoStabCorrShBare2m, 0.9*TMPCH2 )
+    MoStabCorrMomBare2m    = min( MoStabCorrMomBare2m, 0.9*TMPCM2 )
+    CMFM   = TMPCM - MoStabCorrMomBare
+    CHFH   = TMPCH - MoStabCorrShBare
+    CM2FM2 = TMPCM2 - MoStabCorrMomBare2m
+    CH2FH2 = TMPCH2 - MoStabCorrShBare2m
     if ( abs(CMFM) <= MPE ) CMFM = MPE
     if ( abs(CHFH) <= MPE ) CHFH = MPE
     if ( abs(CM2FM2) <= MPE ) CM2FM2 = MPE
     if ( abs(CH2FH2) <= MPE ) CH2FH2 = MPE
-    CM  = ConstVonKarman * ConstVonKarman / (CMFM * CMFM)
-    CH  = ConstVonKarman * ConstVonKarman / (CMFM * CHFH)
-    CH2 = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
+    ExchCoeffMomBare  = ConstVonKarman * ConstVonKarman / (CMFM * CMFM)
+    ExchCoeffShBare  = ConstVonKarman * ConstVonKarman / (CMFM * CHFH)
+    ExchCoeffSh2mBareMo = ConstVonKarman * ConstVonKarman / (CM2FM2 * CH2FH2)
 
     ! friction velocity
-    FV  = WindSpdRefHeight * sqrt(CM)
-    CH2 = ConstVonKarman * FV / CH2FH2
+    FrictionVelBare  = WindSpdRefHeight * sqrt(ExchCoeffMomBare)
+    ExchCoeffSh2mBareMo = ConstVonKarman * FrictionVelBare / CH2FH2
 
     ! aerodynamic resistance
-    ResistanceMomBareGrd = max( 1.0, 1.0 / (CM*WindSpdRefHeight) )
-    ResistanceShBareGrd = max( 1.0, 1.0 / (CH*WindSpdRefHeight) )
+    ResistanceMomBareGrd = max( 1.0, 1.0 / (ExchCoeffMomBare*WindSpdRefHeight) )
+    ResistanceShBareGrd = max( 1.0, 1.0 / (ExchCoeffShBare*WindSpdRefHeight) )
     ResistanceLhBareGrd = ResistanceShBareGrd
 
     end associate

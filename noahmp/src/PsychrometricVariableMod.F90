@@ -27,34 +27,34 @@ contains
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
               TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (K)
               TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! in,    ground temperature (K)
-              LATHEAV         => noahmp%energy%state%LATHEAV         ,& ! out,   latent heat of vaporization/subli (j/kg), canopy
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
+              LatHeatVapCanopy         => noahmp%energy%state%LatHeatVapCanopy         ,& ! out,   latent heat of vaporization/subli (j/kg), canopy
+              LatHeatVapGrd         => noahmp%energy%state%LatHeatVapGrd         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
               FlagFrozenCanopy   => noahmp%energy%state%FlagFrozenCanopy   ,& ! out,   used to define latent heat pathway
               FlagFrozenGround   => noahmp%energy%state%FlagFrozenGround   ,& ! out,   frozen ground (logical) to define latent heat pathway
-              GAMMAV          => noahmp%energy%state%GAMMAV          ,& ! out,   psychrometric constant (pa/K), canopy
-              GAMMAG          => noahmp%energy%state%GAMMAG           & ! out,   psychrometric constant (pa/K), ground
+              PsychConstCanopy          => noahmp%energy%state%PsychConstCanopy          ,& ! out,   psychrometric constant (pa/K), canopy
+              PsychConstGrd          => noahmp%energy%state%PsychConstGrd           & ! out,   psychrometric constant (pa/K), ground
              )
 ! ----------------------------------------------------------------------
 
     ! for canopy
     if ( TemperatureCanopy > ConstFreezePoint ) then   ! Barlage: add distinction between ground and vegetation in v3.6
-       LATHEAV       = ConstLatHeatVapor
+       LatHeatVapCanopy       = ConstLatHeatEvap
        FlagFrozenCanopy = .false.
     else
-       LATHEAV       = ConstLatHeatSublim
+       LatHeatVapCanopy       = ConstLatHeatSublim
        FlagFrozenCanopy = .true.
     endif
-    GAMMAV = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAV)
+    PsychConstCanopy = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LatHeatVapCanopy)
 
     ! for ground
     if ( TemperatureGrd > ConstFreezePoint ) then
-       LATHEAG       = ConstLatHeatVapor
+       LatHeatVapGrd       = ConstLatHeatEvap
        FlagFrozenGround = .false.
     else
-       LATHEAG       = ConstLatHeatSublim
+       LatHeatVapGrd       = ConstLatHeatSublim
        FlagFrozenGround = .true.
     endif
-    GAMMAG = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAG)
+    PsychConstGrd = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LatHeatVapGrd)
 
     end associate
 

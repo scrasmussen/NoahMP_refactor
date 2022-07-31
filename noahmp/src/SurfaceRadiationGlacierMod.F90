@@ -35,25 +35,25 @@ contains
               AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! in,    ground albedo (direct beam: vis, nir)
               AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! in,    ground albedo (diffuse: vis, nir)
               RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! out,   solar radiation absorbed by ground (w/m2)
-              RadSwAbsTot             => noahmp%energy%flux%RadSwAbsTot              ,& ! out,   total absorbed solar radiation (w/m2)
-              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot               & ! out,   total reflected solar radiation (w/m2)
+              RadSwAbsSfc             => noahmp%energy%flux%RadSwAbsSfc              ,& ! out,   total absorbed solar radiation (w/m2)
+              RadSwReflSfc             => noahmp%energy%flux%RadSwReflSfc               & ! out,   total reflected solar radiation (w/m2)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
     RadSwAbsGrd    = 0.0
-    RadSwAbsTot    = 0.0
-    RadSwReflTot    = 0.0
+    RadSwAbsSfc    = 0.0
+    RadSwReflSfc    = 0.0
 
     do IB = 1, NumSWRadBand
        ! solar radiation absorbed by glacier surface
        ABSG = RadSwDownDir(IB) * (1.0 - AlbedoGrdDir(IB)) + RadSwDownDif(IB) * (1.0 - AlbedoGrdDif(IB))
        RadSwAbsGrd  = RadSwAbsGrd + ABSG
-       RadSwAbsTot  = RadSwAbsTot + ABSG
+       RadSwAbsSfc  = RadSwAbsSfc + ABSG
       
        ! solar radiation reflected by glacier surface
        REFG = RadSwDownDir(IB) * AlbedoGrdDir(IB) + RadSwDownDif(IB) * AlbedoGrdDif(IB)
-       RadSwReflTot  = RadSwReflTot + REFG
+       RadSwReflSfc  = RadSwReflSfc + REFG
     enddo
 
     end associate

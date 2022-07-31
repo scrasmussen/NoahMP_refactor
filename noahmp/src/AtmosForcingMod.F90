@@ -152,7 +152,7 @@ contains
     if ( OptRainSnowPartition == 5 ) then
        TDC = min( 50.0, max(-50.0,(TemperatureAirRefHeight - ConstFreezePoint)) )         ! Kelvin to degree Celsius with limit -50 to +50
        if ( TemperatureAirRefHeight > ConstFreezePoint ) then
-          LATHEA = ConstLatHeatVapor
+          LATHEA = ConstLatHeatEvap
        else
           LATHEA = ConstLatHeatSublim
        endif

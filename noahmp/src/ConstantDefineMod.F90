@@ -19,7 +19,7 @@ module ConstantDefineMod
   real(kind=kind_noahmp), public, parameter :: ConstVonKarman         = 0.40        ! von Karman constant
   real(kind=kind_noahmp), public, parameter :: ConstFreezePoint       = 273.16      ! freezing/melting temperature point [K]
   real(kind=kind_noahmp), public, parameter :: ConstLatHeatSublim     = 2.8440e06   ! latent heat of sublimation [J/kg]
-  real(kind=kind_noahmp), public, parameter :: ConstLatHeatVapor      = 2.5104e06   ! latent heat of vaporization [J/kg]
+  real(kind=kind_noahmp), public, parameter :: ConstLatHeatEvap       = 2.5104e06   ! latent heat of vaporization [J/kg]
   real(kind=kind_noahmp), public, parameter :: ConstLatHeatFusion     = 0.3336e06   ! latent heat of fusion of water [J/kg]
   real(kind=kind_noahmp), public, parameter :: ConstHeatCapacWater    = 4.188e06    ! specific heat capacity of water [J/m3/K]
   real(kind=kind_noahmp), public, parameter :: ConstHeatCapacIce      = 2.094e06    ! specific heat capacity of ice [J/m3/K]

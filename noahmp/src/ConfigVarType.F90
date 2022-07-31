@@ -40,7 +40,7 @@ module ConfigVarType
     integer :: OptGroundResistanceEvap     ! options for ground resistent to evaporation/sublimation
                                               ! 1 -> Sakaguchi and Zeng, 2009 (default)
                                               ! 2 -> Sellers (1992)
-                                              ! 3 -> adjusted Sellers to decrease RSURF for wet soil
+                                              ! 3 -> adjusted Sellers to decrease ResistanceGrdEvap for wet soil
                                               ! 4 -> option 1 for non-snow; rsurf = rsurf_snow for snow (set in table)
     integer :: OptSurfaceDrag              ! options for surface layer drag/exchange coefficient
                                               ! 1 -> Monin-Obukhov (M-O) Similarity Theory (MOST) (default)

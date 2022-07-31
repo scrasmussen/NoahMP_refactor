@@ -98,7 +98,7 @@ contains
     RainfallRefHeight = RainfallRefHeight + (IrrigationRateSprinkler * 1000.0 / MainTimeStep) ![mm/s]
 
     ! cooling and humidification due to sprinkler evaporation, per m^2 calculation 
-    HeatLatentIrriEvap = IrriEvapLossSprinkler * 1000.0 * ConstLatHeatVapor / MainTimeStep   ! heat used for evaporation (W/m2)
+    HeatLatentIrriEvap = IrriEvapLossSprinkler * 1000.0 * ConstLatHeatEvap / MainTimeStep   ! heat used for evaporation (W/m2)
     EvapIrriSprinkler = IrriEvapLossSprinkler * 1000.0 / MainTimeStep          ! sprinkler evaporation (mm/s)
 
     end associate

@@ -46,11 +46,11 @@ contains
               WindSpdCanopyTop              => noahmp%energy%state%WindSpdCanopyTop              ,& ! in,    wind speed at top of canopy (m/s)
               RoughLenShCanopy             => noahmp%energy%state%RoughLenShCanopy            ,& ! in,    roughness length, sensible heat (m), canopy
               RoughLenShVegGrd            => noahmp%energy%state%RoughLenShVegGrd            ,& ! in,    roughness length, sensible heat ground (m), below canopy
-              FV              => noahmp%energy%state%FVV             ,& ! in,    friction velocity (m/s), vegetated
-              FHG             => noahmp%energy%state%FHG             ,& ! inout, stability correction ground, below canopy
+              FrictionVelVeg              => noahmp%energy%state%FrictionVelVeg             ,& ! in,    friction velocity (m/s), vegetated
+              MoStabCorrShUndCan             => noahmp%energy%state%MoStabCorrShUndCan             ,& ! inout, stability correction ground, below canopy
               WindExtCoeffCanopy            => noahmp%energy%state%WindExtCoeffCanopy            ,& ! out,   canopy wind extinction coefficient
-              MOZG            => noahmp%energy%state%MOZG            ,& ! out,   Monin-Obukhov stability parameter ground, below canopy
-              MOLG            => noahmp%energy%state%MOLG            ,& ! out,   Monin-Obukhov length (m), ground, below canopy
+              MoStabParaUndCan            => noahmp%energy%state%MoStabParaUndCan            ,& ! out,   Monin-Obukhov stability parameter ground, below canopy
+              MoLengthUndCan            => noahmp%energy%state%MoLengthUndCan            ,& ! out,   Monin-Obukhov length (m), ground, below canopy
               ResistanceMomUndCan            => noahmp%energy%state%ResistanceMomUndCan            ,& ! out,   ground aerodynamic resistance for momentum (s/m)
               ResistanceShUndCan            => noahmp%energy%state%ResistanceShUndCan            ,& ! out,   ground aerodynamic resistance for sensible heat (s/m)
               ResistanceLhUndCan            => noahmp%energy%state%ResistanceLhUndCan            ,& ! out,   ground aerodynamic resistance for water vapor (s/m)
@@ -60,35 +60,35 @@ contains
 
     ! initialization
     MPE  = 1.0e-6
-    MOZG = 0.0
-    MOLG = 0.0
+    MoStabParaUndCan = 0.0
+    MoLengthUndCan = 0.0
 
     ! stability correction to below canopy resistance
     if ( ITER > 1 ) then
        TMP1 = ConstVonKarman * (ConstGravityAcc / TemperatureCanopyAir) * HG / (DensityAirRefHeight * ConstHeatCapacAir)
        if ( abs(TMP1) <= MPE ) TMP1 = MPE
-       MOLG = -1.0 * FV**3 / TMP1
-       MOZG = min( (ZeroPlaneDispSfc-RoughLenMomGrd)/MOLG, 1.0 )
+       MoLengthUndCan = -1.0 * FrictionVelVeg**3 / TMP1
+       MoStabParaUndCan = min( (ZeroPlaneDispSfc-RoughLenMomGrd)/MoLengthUndCan, 1.0 )
     endif
-    if ( MOZG < 0.0 ) then
-       FHGNEW = (1.0 - 15.0 * MOZG)**(-0.25)
+    if ( MoStabParaUndCan < 0.0 ) then
+       FHGNEW = (1.0 - 15.0 * MoStabParaUndCan)**(-0.25)
     else
-       FHGNEW = 1.0 + 4.7 * MOZG
+       FHGNEW = 1.0 + 4.7 * MoStabParaUndCan
     endif
     if ( ITER == 1 ) then
-       FHG = FHGNEW
+       MoStabCorrShUndCan = FHGNEW
     else
-       FHG = 0.5 * (FHG + FHGNEW)
+       MoStabCorrShUndCan = 0.5 * (MoStabCorrShUndCan + FHGNEW)
     endif
 
     ! wind attenuation within canopy
-    WindExtCoeffCanopy    = (CanopyWindExtFac * VegAreaIndEff * CanopyHeight * FHG)**0.5
+    WindExtCoeffCanopy    = (CanopyWindExtFac * VegAreaIndEff * CanopyHeight * MoStabCorrShUndCan)**0.5
     TMP1    = exp( -WindExtCoeffCanopy * RoughLenShVegGrd / CanopyHeight )
     TMP2    = exp( -WindExtCoeffCanopy * (RoughLenShCanopy + ZeroPlaneDispSfc) / CanopyHeight )
     TMPRAH2 = CanopyHeight * exp(WindExtCoeffCanopy) / WindExtCoeffCanopy * (TMP1-TMP2)
 
     ! aerodynamic resistances raw and rah between heights ZeroPlaneDisp+RoughLenShVegGrd and RoughLenShVegGrd.
-    KH   = max ( ConstVonKarman * FV * (CanopyHeight-ZeroPlaneDispSfc), MPE )
+    KH   = max ( ConstVonKarman * FrictionVelVeg * (CanopyHeight-ZeroPlaneDispSfc), MPE )
     ResistanceMomUndCan = 0.0
     ResistanceShUndCan = TMPRAH2 / KH
     ResistanceLhUndCan = ResistanceShUndCan

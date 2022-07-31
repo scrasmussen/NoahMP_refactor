@@ -42,8 +42,8 @@ contains
               RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! in,     ground surface rain rate[mm/s]
               SnowfallGround           => noahmp%water%flux%SnowfallGround             ,& ! in,     snowfall on the ground [mm/s]
               SnowfallDensity          => noahmp%water%state%SnowfallDensity           ,& ! in,     bulk density of snowfall (kg/m3)
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
-              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! inout,  total ground latent heat (w/m2) [+ to atm]
+              LatHeatVapGrd         => noahmp%energy%state%LatHeatVapGrd         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
+              HeatLatentGrd            => noahmp%energy%flux%HeatLatentGrd             ,& ! inout,  total ground latent heat (w/m2) [+ to atm]
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/glacier layers (m)
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout,  snow water equivalent [mm]
@@ -82,8 +82,8 @@ contains
     SnowWaterEquivPrev    = SnowWaterEquiv
 
     ! compute soil/snow surface evap/dew rate based on energy flux
-    VaporizeGrd      = max(HeatLatentGrdTot/LATHEAG, 0.0)       ! positive part of ground latent heat; Barlage change to ground v3.6
-    CondenseVapGrd      = abs(min(HeatLatentGrdTot/LATHEAG, 0.0))  ! negative part of ground latent heat
+    VaporizeGrd      = max(HeatLatentGrd/LatHeatVapGrd, 0.0)       ! positive part of ground latent heat; Barlage change to ground v3.6
+    CondenseVapGrd      = abs(min(HeatLatentGrd/LatHeatVapGrd, 0.0))  ! negative part of ground latent heat
     EvapSoilNet      = VaporizeGrd - CondenseVapGrd
 
     ! snow height increase
@@ -137,7 +137,7 @@ contains
 
     if ( OptGlacierTreatment == 2 ) then
        EvapSoilNet = VaporizeGrd - CondenseVapGrd
-       HeatLatentGrdTot = EvapSoilNet * LATHEAG
+       HeatLatentGrd = EvapSoilNet * LatHeatVapGrd
     endif
 
     if ( maxval(SoilIce) < 0.0001 ) then

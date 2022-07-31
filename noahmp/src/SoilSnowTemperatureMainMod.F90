@@ -43,7 +43,7 @@ contains
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,   main noahmp timestep (s)
               DepthSoilTempBottom => noahmp%config%domain%DepthSoilTempBottom ,& ! in,   depth [m] from soil surface for soil temperature lower boundary forcing
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,   snow depth [m]
-              ZBOTSNO         => noahmp%energy%state%ZBOTSNO         ,& ! out,  depth of lower boundary condition (m) from snow surface
+              DepthSoilTempBotToSno         => noahmp%energy%state%DepthSoilTempBotToSno         ,& ! out,  depth of soil temperature lower boundary condition (m) from snow surface
               RadSwPenetrateGrd             => noahmp%energy%flux%RadSwPenetrateGrd               & ! out,  light penetrating through soil/snow water (W/m2)
              )
 ! ----------------------------------------------------------------------
@@ -61,8 +61,8 @@ contains
     ! compute solar penetration through water, needs more work
     RadSwPenetrateGrd(NumSnowLayerNeg+1:NumSoilLayer) = 0.0
 
-    ! adjust DepthSoilTempBottom from soil surface to ZBOTSNO from snow surface
-    ZBOTSNO = DepthSoilTempBottom - SnowDepth
+    ! adjust DepthSoilTempBottom from soil surface to DepthSoilTempBotToSno from snow surface
+    DepthSoilTempBotToSno = DepthSoilTempBottom - SnowDepth
 
     ! compute soil temperatures
     call SoilSnowThermalDiffusion(noahmp, AI, BI, CI, RHSTS)

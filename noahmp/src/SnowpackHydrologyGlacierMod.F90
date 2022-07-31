@@ -39,7 +39,7 @@ contains
               OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,    option for glacier treatment
               NumSnowLayerMax     => noahmp%config%domain%NumSnowLayerMax     ,& ! in,    maximum number of snow layers
               MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,     noahmp main time step (s)
-              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! in,     total sensible heat (w/m2) [+ to atm]
+              HeatSensibleSfc             => noahmp%energy%flux%HeatSensibleSfc              ,& ! in,     total sensible heat (w/m2) [+ to atm]
               FrostSnowSfcIce          => noahmp%water%flux%FrostSnowSfcIce            ,& ! in,     snow surface frost rate [mm/s]
               SublimSnowSfcIce          => noahmp%water%flux%SublimSnowSfcIce            ,& ! in,     snow surface sublimation rate [mm/s]
               RainfallGround           => noahmp%water%flux%RainfallGround             ,& ! in,     ground surface rain rate [mm/s]
@@ -74,7 +74,7 @@ contains
        if ( OptGlacierTreatment == 1 ) then
           SoilIce(1) =  SoilIce(1) + (FrostSnowSfcIce - SublimSnowSfcIce) * MainTimeStep / (ThicknessSnowSoilLayer(1)*1000.0)  ! Barlage: SoilLiqWater->SoilIce v3.6
        elseif ( OptGlacierTreatment == 2 ) then
-          HeatSensibleTot    = HeatSensibleTot - (FrostSnowSfcIce - SublimSnowSfcIce) * ConstLatHeatSublim
+          HeatSensibleSfc    = HeatSensibleSfc - (FrostSnowSfcIce - SublimSnowSfcIce) * ConstLatHeatSublim
           FrostSnowSfcIce = 0.0
           SublimSnowSfcIce = 0.0
        endif
@@ -91,7 +91,7 @@ contains
           SnowDepth  = max( 0.0, PROPOR*SnowDepth )
           SnowDepth  = min( max(SnowDepth, SnowWaterEquiv/500.0), SnowWaterEquiv/50.0 )  ! limit adjustment to a reasonable density
        elseif ( OptGlacierTreatment == 2 ) then
-          HeatSensibleTot = HeatSensibleTot - (FrostSnowSfcIce - SublimSnowSfcIce) * ConstLatHeatSublim
+          HeatSensibleSfc = HeatSensibleSfc - (FrostSnowSfcIce - SublimSnowSfcIce) * ConstLatHeatSublim
           FrostSnowSfcIce = 0.0
           SublimSnowSfcIce = 0.0
        endif

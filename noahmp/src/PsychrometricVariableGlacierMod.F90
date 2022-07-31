@@ -25,13 +25,13 @@ contains
 ! --------------------------------------------------------------------
     associate(                                                        &
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
-              GAMMAG          => noahmp%energy%state%GAMMAG           & ! out,   psychrometric constant (pa/K), ground
+              LatHeatVapGrd         => noahmp%energy%state%LatHeatVapGrd         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
+              PsychConstGrd          => noahmp%energy%state%PsychConstGrd           & ! out,   psychrometric constant (pa/K), ground
              )
 ! ----------------------------------------------------------------------
 
-    LATHEAG = ConstLatHeatSublim
-    GAMMAG  = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LATHEAG)
+    LatHeatVapGrd = ConstLatHeatSublim
+    PsychConstGrd  = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LatHeatVapGrd)
 
     end associate
 

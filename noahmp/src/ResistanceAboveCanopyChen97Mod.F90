@@ -1,6 +1,6 @@
 module ResistanceAboveCanopyChen97Mod
 
-!!! Compute surface resistance and drag coefficient CM for momentum and CH for heat
+!!! Compute surface resistance and exchange coefficient for momentum and heat
 !!! based on Chen et al. (1997, BLM)
 !!! This scheme can handle both over open water and over solid surface
 
@@ -79,11 +79,11 @@ contains
               WindSpdRefHeight          => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
               RoughLenMomSfc              => noahmp%energy%state%RoughLenMomSfc             ,& ! in,    roughness length, momentum, (m), surface
               TemperatureCanopyAir            => noahmp%energy%state%TemperatureCanopyAir             ,& ! in,    canopy air temperature (K)
-              AKMS            => noahmp%energy%state%CMV             ,& ! inout, drag coefficient for momentum, above ZeroPlaneDispSfc, vegetated
-              AKHS            => noahmp%energy%state%CHV             ,& ! inout, drag coefficient for heat, above ZeroPlaneDispSfc, vegetated
-              RLMO            => noahmp%energy%state%MOZV            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDispSfc, vegetated
-              WSTAR2          => noahmp%energy%state%WSTARV          ,& ! inout, friction velocity in vertical direction (m/s), vegetated
-              USTAR           => noahmp%energy%state%FVV             ,& ! inout, friction velocity (m/s), vegetated
+              ExchCoeffMomAbvCan            => noahmp%energy%state%ExchCoeffMomAbvCan             ,& ! inout, exchange coefficient for momentum, above ZeroPlaneDisp, vegetated
+              ExchCoeffShAbvCan            => noahmp%energy%state%ExchCoeffShAbvCan             ,& ! inout, exchange coefficient for heat, above ZeroPlaneDisp, vegetated
+              MoStabParaAbvCan            => noahmp%energy%state%MoStabParaAbvCan            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, vegetated
+              FrictionVelVertVeg          => noahmp%energy%state%FrictionVelVertVeg          ,& ! inout, friction velocity in vertical direction (m/s), vegetated
+              FrictionVelVeg           => noahmp%energy%state%FrictionVelVeg             ,& ! inout, friction velocity (m/s), vegetated
               ResistanceMomAbvCan            => noahmp%energy%state%ResistanceMomAbvCan            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
               ResistanceShAbvCan            => noahmp%energy%state%ResistanceShAbvCan            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
               ResistanceLhAbvCan            => noahmp%energy%state%ResistanceLhAbvCan             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
@@ -104,30 +104,30 @@ contains
     DU2   = max( WindSpdRefHeight*WindSpdRefHeight, EPSU2 )
     BTGH  = BTG * HPBL
     if ( ITER == 1 ) then
-       if ( BTGH*AKHS*DTHV /= 0.0 ) then
-          WSTAR2 = WWST2 * abs(BTGH * AKHS * DTHV)**(2.0/3.0)
+       if ( BTGH*ExchCoeffShAbvCan*DTHV /= 0.0 ) then
+          FrictionVelVertVeg = WWST2 * abs(BTGH * ExchCoeffShAbvCan * DTHV)**(2.0/3.0)
        else
-          WSTAR2 = 0.0
+          FrictionVelVertVeg = 0.0
        endif
-       USTAR = max( sqrt(AKMS * sqrt(DU2+WSTAR2)), EPSUST )
-       RLMO  = ELFC * AKHS * DTHV / USTAR**3
+       FrictionVelVeg = max( sqrt(ExchCoeffMomAbvCan * sqrt(DU2+FrictionVelVertVeg)), EPSUST )
+       MoStabParaAbvCan  = ELFC * ExchCoeffShAbvCan * DTHV / FrictionVelVeg**3
     endif
 
     ! ZILITINKEVITCH approach for ZT
-    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(USTAR*RoughLenMomSfc)) * RoughLenMomSfc )
+    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelVeg*RoughLenMomSfc)) * RoughLenMomSfc )
     ZSLU  = RefHeightAboveGrd + ZU
     ZSLT  = RefHeightAboveGrd + ZT
     RLOGU = log(ZSLU / ZU)
     RLOGT = log(ZSLT / ZT)
 
     ! Monin-Obukhov length scale
-    ZETALT = max( ZSLT*RLMO, ZTMIN )
-    RLMO   = ZETALT / ZSLT
-    ZETALU = ZSLU * RLMO
-    ZETAU  = ZU * RLMO
-    ZETAT  = ZT * RLMO
+    ZETALT = max( ZSLT*MoStabParaAbvCan, ZTMIN )
+    MoStabParaAbvCan   = ZETALT / ZSLT
+    ZETALU = ZSLU * MoStabParaAbvCan
+    ZETAU  = ZU * MoStabParaAbvCan
+    ZETAT  = ZT * MoStabParaAbvCan
     if ( ILECH == 0 ) then
-       if ( RLMO < 0.0 ) then
+       if ( MoStabParaAbvCan < 0.0 ) then
           XLU4 = 1.0 - 16.0 * ZETALU
           XLT4 = 1.0 - 16.0 * ZETALT
           XU4  = 1.0 - 16.0 * ZETAU
@@ -151,7 +151,7 @@ contains
           SIMH   = PSPHS(ZETALT) - PSHZ + RLOGT
        endif
     else ! LECH's functions
-       if ( RLMO < 0.0 ) then
+       if ( MoStabParaAbvCan < 0.0 ) then
           PSMZ = PSLMU(ZETAU)
           SIMM = PSLMU(ZETALU) - PSMZ + RLOGU
           PSHZ = PSLHU(ZETAT)
@@ -167,39 +167,39 @@ contains
     endif
 
     ! BELJARS correction of friction velocity u*
-    USTAR = max( sqrt(AKMS * sqrt(DU2+ WSTAR2)), EPSUST )
+    FrictionVelVeg = max( sqrt(ExchCoeffMomAbvCan * sqrt(DU2+ FrictionVelVertVeg)), EPSUST )
 
     ! ZILITINKEVITCH fix for ZT
-    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(USTAR * RoughLenMomSfc)) * RoughLenMomSfc )
+    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelVeg * RoughLenMomSfc)) * RoughLenMomSfc )
     ZSLT   = RefHeightAboveGrd + ZT
     RLOGT  = log(ZSLT / ZT)
-    USTARK = USTAR * VKRM
+    USTARK = FrictionVelVeg * VKRM
 
     ! avoid tangent linear problems near zero
     if ( SIMM < 1.0e-6 ) SIMM = 1.0e-6   ! Limit stability function
-    AKMS = max( USTARK/SIMM, CXCH )
+    ExchCoeffMomAbvCan = max( USTARK/SIMM, CXCH )
     if ( SIMH < 1.0e-6 ) SIMH = 1.0e-6   ! Limit stability function
-    AKHS = max( USTARK/SIMH, CXCH )
+    ExchCoeffShAbvCan = max( USTARK/SIMH, CXCH )
 
     ! update vertical friction velocity w*
-    if ( BTGH*AKHS*DTHV /= 0.0 ) then
-       WSTAR2 = WWST2 * abs(BTGH * AKHS * DTHV)**(2.0/3.0)
+    if ( BTGH*ExchCoeffShAbvCan*DTHV /= 0.0 ) then
+       FrictionVelVertVeg = WWST2 * abs(BTGH * ExchCoeffShAbvCan * DTHV)**(2.0/3.0)
     else
-       WSTAR2 = 0.0
+       FrictionVelVertVeg = 0.0
     endif
 
     ! update M-O stability parameter
-    RLMN = ELFC * AKHS * DTHV / USTAR**3
-    RLMA = RLMO * WOLD + RLMN * WNEW
-    RLMO = RLMA
+    RLMN = ELFC * ExchCoeffShAbvCan * DTHV / FrictionVelVeg**3
+    RLMA = MoStabParaAbvCan * WOLD + RLMN * WNEW
+    MoStabParaAbvCan = RLMA
 
-    ! Undo the multiplication by windspeed that applies to drag coeff CH & CM
-    AKHS = AKHS / WindSpdRefHeight
-    AKMS = AKMS / WindSpdRefHeight
+    ! Undo the multiplication by windspeed that applies to exchange coeff
+    ExchCoeffShAbvCan = ExchCoeffShAbvCan / WindSpdRefHeight
+    ExchCoeffMomAbvCan = ExchCoeffMomAbvCan / WindSpdRefHeight
 
     ! compute aerodynamic resistance
-    ResistanceMomAbvCan = max( 1.0, 1.0 / (AKMS*WindSpdRefHeight) )
-    ResistanceShAbvCan = max( 1.0, 1.0 / (AKHS*WindSpdRefHeight) )
+    ResistanceMomAbvCan = max( 1.0, 1.0 / (ExchCoeffMomAbvCan*WindSpdRefHeight) )
+    ResistanceShAbvCan = max( 1.0, 1.0 / (ExchCoeffShAbvCan*WindSpdRefHeight) )
     ResistanceLhAbvCan = ResistanceShAbvCan
 
     end associate

@@ -44,11 +44,11 @@ contains
               WaterStorageLakeMax          => noahmp%water%param%WaterStorageLakeMax           ,& ! in,     maximum lake water storage (mm)
               NumSoilLayerRoot           => noahmp%water%param%NumSoilLayerRoot            ,& ! in,     number of soil layers with root present
               FlagFrozenGround   => noahmp%energy%state%FlagFrozenGround   ,& ! in,     frozen ground (logical) to define latent heat pathway
-              LATHEAG         => noahmp%energy%state%LATHEAG         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
+              LatHeatVapGrd         => noahmp%energy%state%LatHeatVapGrd         ,& ! in,     latent heat of vaporization/subli (j/kg), ground
               DensityAirRefHeight          => noahmp%energy%state%DensityAirRefHeight          ,& ! in,     density air (kg/m3)
-              CH              => noahmp%energy%state%CH              ,& ! in,     exchange coefficient (m/s) for heat, surface, grid mean
+              ExchCoeffShSfc              => noahmp%energy%state%ExchCoeffShSfc              ,& ! in,     exchange coefficient (m/s) for heat, surface, grid mean
               SpecHumidityRefHeight => noahmp%forcing%SpecHumidityRefHeight,& ! in,     specific humidity (kg/kg) at reference height
-              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! in,     total ground latent heat (w/m2) [+ to atm]
+              HeatLatentGrd            => noahmp%energy%flux%HeatLatentGrd             ,& ! in,     total ground latent heat (w/m2) [+ to atm]
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! inout,  actual number of snow layers (negative)
               ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! inout,  thickness of snow/soil layers (m)
               SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout,  snow water equivalent [mm]
@@ -92,8 +92,8 @@ contains
     SoilIce(:) = max(0.0, SoilMoisture(:)-SoilLiqWater(:))
     SnowWaterEquivPrev  = SnowWaterEquiv
     ! compute soil/snow surface evap/dew rate based on energy flux
-    VaporizeGrd    = max(HeatLatentGrdTot/LATHEAG, 0.0)       ! positive part of ground latent heat; Barlage change to ground v3.6
-    CondenseVapGrd    = abs(min(HeatLatentGrdTot/LATHEAG, 0.0))  ! negative part of ground latent heat
+    VaporizeGrd    = max(HeatLatentGrd/LatHeatVapGrd, 0.0)       ! positive part of ground latent heat; Barlage change to ground v3.6
+    CondenseVapGrd    = abs(min(HeatLatentGrd/LatHeatVapGrd, 0.0))  ! negative part of ground latent heat
     EvapSoilNet    = VaporizeGrd - CondenseVapGrd
 
     ! canopy-intercepted snowfall/rainfall, drips, and throughfall
@@ -168,7 +168,7 @@ contains
     ! update surface water vapor flux ! urban - jref
     WaterToAtmosTotal = Transpiration + EvapCanopyNet + EvapSoilNet
     if ( (FlagUrban .eqv. .true.) ) then
-       SpecHumiditySfcBare = WaterToAtmosTotal / (DensityAirRefHeight * CH) + SpecHumidityRefHeight
+       SpecHumiditySfcBare = WaterToAtmosTotal / (DensityAirRefHeight * ExchCoeffShSfc) + SpecHumidityRefHeight
        SpecHumidity2mBare  = SpecHumiditySfcBare
     endif
 

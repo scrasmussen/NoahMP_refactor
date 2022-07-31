@@ -29,13 +29,13 @@ contains
 
 ! --------------------------------------------------------------------
     associate(                                                        &
-              RSURF           => noahmp%energy%state%RSURF           ,& ! out,   ground surface resistance (s/m)
-              RHSUR           => noahmp%energy%state%RHSUR            & ! out,   raltive humidity in surface glacier/snow air space (-)
+              ResistanceGrdEvap           => noahmp%energy%state%ResistanceGrdEvap           ,& ! out,   ground surface resistance (s/m) to evaporation
+              RelHumidityGrd           => noahmp%energy%state%RelHumidityGrd            & ! out,   raltive humidity in surface glacier/snow air space (-)
              )
 ! ----------------------------------------------------------------------
 
-    RSURF = 1.0
-    RHSUR = 1.0
+    ResistanceGrdEvap = 1.0
+    RelHumidityGrd = 1.0
 
     end associate
 

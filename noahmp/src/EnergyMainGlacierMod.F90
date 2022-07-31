@@ -48,12 +48,12 @@ contains
               TemperatureGrd              => noahmp%energy%state%TemperatureGrd              ,& ! inout, ground temperature (K)
               SpecHumiditySfcBare            => noahmp%energy%state%SpecHumiditySfcBare            ,& ! inout, specific humidity at bare surface
               SpecHumiditySfc              => noahmp%energy%state%SpecHumiditySfc              ,& ! inout, specific humidity at surface grid mean
-              CM              => noahmp%energy%state%CM              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
-              CH              => noahmp%energy%state%CH              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
+              ExchCoeffMomSfc              => noahmp%energy%state%ExchCoeffMomSfc              ,& ! inout, exchange coefficient (m/s) for momentum, surface, grid mean
+              ExchCoeffShSfc              => noahmp%energy%state%ExchCoeffShSfc              ,& ! inout, exchange coefficient (m/s) for heat, surface, grid mean
               SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
               RoughLenMomSfcToAtm           => noahmp%energy%state%RoughLenMomSfcToAtm           ,& ! out,   roughness length, momentum, surface, sent to coupled model
-              WindStressEwTot            => noahmp%energy%state%WindStressEwTot            ,& ! out,   wind stress: east-west (n/m2) grid mean
-              WindStressNsTot            => noahmp%energy%state%WindStressNsTot            ,& ! out,   wind stress: north-south (n/m2) grid mean
+              WindStressEwSfc            => noahmp%energy%state%WindStressEwSfc            ,& ! out,   wind stress: east-west (n/m2) grid mean
+              WindStressNsSfc            => noahmp%energy%state%WindStressNsSfc            ,& ! out,   wind stress: north-south (n/m2) grid mean
               TemperatureRadSfc            => noahmp%energy%state%TemperatureRadSfc            ,& ! out,   radiative temperature (K)
               TemperatureAir2m             => noahmp%energy%state%TemperatureAir2m             ,& ! out,   grid mean 2-m air temperature (K)
               TemperatureAir2mBare            => noahmp%energy%state%TemperatureAir2mBare            ,& ! out,   2 m height air temperature (k) bare ground
@@ -65,16 +65,16 @@ contains
               SpecHumidity2mBare             => noahmp%energy%state%SpecHumidity2mBare             ,& ! out,   bare ground 2-m water vapor mixing ratio
               SpecHumidity2m             => noahmp%energy%state%SpecHumidity2m             ,& ! out,   grid mean 2-m water vapor mixing ratio
               TemperatureGrdBare             => noahmp%energy%state%TemperatureGrdBare             ,& ! out,   bare ground temperature (K)
-              CMB             => noahmp%energy%state%CMB             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDisp, bare ground
-              CHB             => noahmp%energy%state%CHB             ,& ! out,   drag coefficient for heat, above ZeroPlaneDisp, bare ground
+              ExchCoeffMomBare             => noahmp%energy%state%ExchCoeffMomBare             ,& ! out,   drag coefficient for momentum, above ZeroPlaneDisp, bare ground
+              ExchCoeffShBare             => noahmp%energy%state%ExchCoeffShBare             ,& ! out,   drag coefficient for heat, above ZeroPlaneDisp, bare ground
               AlbedoSfc          => noahmp%energy%state%AlbedoSfc          ,& ! out,   total shortwave surface albedo
-              RadSwReflTot             => noahmp%energy%flux%RadSwReflTot              ,& ! out,   total reflected solar radiation (w/m2)
-              RadLwNetTot            => noahmp%energy%flux%RadLwNetTot             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
-              HeatSensibleTot             => noahmp%energy%flux%HeatSensibleTot              ,& ! out,   total sensible heat (w/m2) [+ to atm]
-              HeatLatentGrdTot            => noahmp%energy%flux%HeatLatentGrdTot             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
+              RadSwReflSfc             => noahmp%energy%flux%RadSwReflSfc              ,& ! out,   total reflected solar radiation (w/m2)
+              RadLwNetSfc            => noahmp%energy%flux%RadLwNetSfc             ,& ! out,   total net LW. rad (w/m2)   [+ to atm]
+              HeatSensibleSfc             => noahmp%energy%flux%HeatSensibleSfc              ,& ! out,   total sensible heat (w/m2) [+ to atm]
+              HeatLatentGrd            => noahmp%energy%flux%HeatLatentGrd             ,& ! out,   total ground latent heat (w/m2) [+ to atm]
               HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! out,   total ground heat flux (w/m2) [+ to soil/snow]
-              HeatPrecipAdvTot             => noahmp%energy%flux%HeatPrecipAdvTot              ,& ! out,   precipitation advected heat - total (W/m2)
-              RadLwEmitTot            => noahmp%energy%flux%RadLwEmitTot             ,& ! out,   emitted outgoing IR (w/m2)
+              HeatPrecipAdvSfc             => noahmp%energy%flux%HeatPrecipAdvSfc              ,& ! out,   precipitation advected heat - total (W/m2)
+              RadLwEmitSfc            => noahmp%energy%flux%RadLwEmitSfc             ,& ! out,   emitted outgoing IR (w/m2)
               RadLwNetBareGrd             => noahmp%energy%flux%RadLwNetBareGrd              ,& ! out,   net longwave rad (w/m2) bare ground [+ to atm]
               HeatSensibleBareGrd             => noahmp%energy%flux%HeatSensibleBareGrd              ,& ! out,   sensible heat flux (w/m2) bare ground [+ to atm]
               HeatLatentBareGrd             => noahmp%energy%flux%HeatLatentBareGrd              ,& ! out,   latent heat flux (w/m2) bare ground [+ to atm]
@@ -111,33 +111,33 @@ contains
 
     ! temperatures and energy fluxes of glacier ground
     TemperatureGrdBare = TemperatureGrd
-    CMB = CM
-    CHB = CH
+    ExchCoeffMomBare = ExchCoeffMomSfc
+    ExchCoeffShBare = ExchCoeffShSfc
     call SurfaceEnergyFluxGlacier(noahmp)
 
     ! assign glacier bare ground quantity to grid-level quantity
     ! Energy balance at glacier (bare) ground: RadSwAbsGrd+HeatPrecipAdvBareGrd=RadLwNetBareGrd+HeatSensibleBareGrd+HeatLatentBareGrd+HeatGroundBareGrd
-    WindStressEwTot  = WindStressEwBare
-    WindStressNsTot  = WindStressNsBare
-    RadLwNetTot  = RadLwNetBareGrd
-    HeatSensibleTot   = HeatSensibleBareGrd
-    HeatLatentGrdTot  = HeatLatentBareGrd
+    WindStressEwSfc  = WindStressEwBare
+    WindStressNsSfc  = WindStressNsBare
+    RadLwNetSfc  = RadLwNetBareGrd
+    HeatSensibleSfc   = HeatSensibleBareGrd
+    HeatLatentGrd  = HeatLatentBareGrd
     HeatGroundTot = HeatGroundBareGrd
     TemperatureGrd    = TemperatureGrdBare
     TemperatureAir2m   = TemperatureAir2mBare
-    HeatPrecipAdvTot   = HeatPrecipAdvBareGrd
+    HeatPrecipAdvSfc   = HeatPrecipAdvBareGrd
     TemperatureSfc    = TemperatureGrd
-    CM    = CMB
-    CH    = CHB
+    ExchCoeffMomSfc    = ExchCoeffMomBare
+    ExchCoeffShSfc    = ExchCoeffShBare
     SpecHumiditySfc    = SpecHumiditySfcBare
     SpecHumidity2m   = SpecHumidity2mBare
     RoughLenMomSfcToAtm = RoughLenMomGrd
 
     ! emitted longwave radiation and physical check
-    RadLwEmitTot = RadLwDownRefHeight + RadLwNetTot
-    if ( RadLwEmitTot <= 0.0 ) then
+    RadLwEmitSfc = RadLwDownRefHeight + RadLwNetSfc
+    if ( RadLwEmitSfc <= 0.0 ) then
        write(*,*) 'emitted longwave <0; skin T may be wrong due to inconsistent'
-       write(*,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetTot=',RadLwNetTot,'SnowDepth=',SnowDepth
+       write(*,*) 'RadLwDownRefHeight=',RadLwDownRefHeight,'RadLwNetSfc=',RadLwNetSfc,'SnowDepth=',SnowDepth
        stop 'error'
        !call wrf_error_fatal("STOP in Noah-MP")
     endif
@@ -146,8 +146,8 @@ contains
     ! reflected portion of the incoming longwave radiation, so just
     ! considering the IR originating/emitted in the ground system.
     ! Old TemperatureRadSfc calculation not taking into account Emissivity:
-    ! TemperatureRadSfc = (RadLwEmitTot/ConstStefanBoltzmann)**0.25
-    TemperatureRadSfc = ( (RadLwEmitTot - (1.0 - EmissivitySfc)*RadLwDownRefHeight) / (EmissivitySfc * ConstStefanBoltzmann) ) ** 0.25
+    ! TemperatureRadSfc = (RadLwEmitSfc/ConstStefanBoltzmann)**0.25
+    TemperatureRadSfc = ( (RadLwEmitSfc - (1.0 - EmissivitySfc)*RadLwDownRefHeight) / (EmissivitySfc * ConstStefanBoltzmann) ) ** 0.25
 
     ! compute snow and glacier ice temperature
     call GlacierTemperatureMain(noahmp)
@@ -166,7 +166,7 @@ contains
 
     ! update total surface albedo
     if ( RadSwDownRefHeight > 0.0 ) then
-       AlbedoSfc = RadSwReflTot / RadSwDownRefHeight
+       AlbedoSfc = RadSwReflSfc / RadSwDownRefHeight
     else
        AlbedoSfc = -999.9
     endif
