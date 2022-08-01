@@ -16,20 +16,17 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: None (embedded in NOAHMP_GLACIER)
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
 
-! local variable
-    integer                      :: IZ      ! loop index
-
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
-              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg            & ! out,   total water storage at the beginning
+    associate(                                                             &
+              SnowWaterEquiv     => noahmp%water%state%SnowWaterEquiv     ,& ! in,  snow water equivalent [mm]
+              WaterStorageTotBeg => noahmp%water%state%WaterStorageTotBeg  & ! out, total water storage [mm] at the beginning
              )
 ! ----------------------------------------------------------------------
 
@@ -48,29 +45,26 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: ERROR_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
 
-! local variable
-    integer                      :: IZ      ! loop index
-
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
-              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
-              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
-              WaterStorageTotBeg          => noahmp%water%state%WaterStorageTotBeg           ,& ! in,    total water storage at the beginning
-              PrecipTotRefHeight            => noahmp%water%flux%PrecipTotRefHeight              ,& ! in,    total precipitation [mm/s] at reference height
-              EvapSoilNet            => noahmp%water%flux%EvapSoilNet              ,& ! in,    net direct soil evaporation (mm/s)
-              RunoffSurface          => noahmp%water%flux%RunoffSurface            ,& ! in,    surface runoff [mm/s]
-              RunoffSubsurface          => noahmp%water%flux%RunoffSubsurface            ,& ! in,    subsurface runoff [mm/s]
-              WaterStorageTotEnd          => noahmp%water%state%WaterStorageTotEnd           ,& ! out,   total water storage at the end
-              WaterBalanceError          => noahmp%water%state%WaterBalanceError            & ! out,   water balance error (mm) per time step
+    associate(                                                             &
+              GridIndexI         => noahmp%config%domain%GridIndexI       ,& ! in,  grid index in x-direction
+              GridIndexJ         => noahmp%config%domain%GridIndexJ       ,& ! in,  grid index in y-direction
+              MainTimeStep       => noahmp%config%domain%MainTimeStep     ,& ! in,  main noahmp timestep [s]
+              SnowWaterEquiv     => noahmp%water%state%SnowWaterEquiv     ,& ! in,  snow water equivalent [mm]
+              WaterStorageTotBeg => noahmp%water%state%WaterStorageTotBeg ,& ! in,  total water storage [mm] at the beginning
+              PrecipTotRefHeight => noahmp%water%flux%PrecipTotRefHeight  ,& ! in,  total precipitation [mm/s] at reference height
+              EvapSoilNet        => noahmp%water%flux%EvapSoilNet         ,& ! in,  net direct soil evaporation [mm/s]
+              RunoffSurface      => noahmp%water%flux%RunoffSurface       ,& ! in,  surface runoff [mm/s]
+              RunoffSubsurface   => noahmp%water%flux%RunoffSubsurface    ,& ! in,  subsurface runoff [mm/s]
+              WaterStorageTotEnd => noahmp%water%state%WaterStorageTotEnd ,& ! out, total water storage [mm] at the end
+              WaterBalanceError  => noahmp%water%state%WaterBalanceError   & ! out, water balance error [mm] per time step
              )
 ! ----------------------------------------------------------------------
 
@@ -78,30 +72,24 @@ contains
     ! compute total glacier water storage before NoahMP processes
     ! need more work on including glacier ice mass underneath snow
     WaterStorageTotEnd = SnowWaterEquiv
-    WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - &
-                       (PrecipTotRefHeight - EvapSoilNet - RunoffSurface - RunoffSubsurface) * MainTimeStep
+    WaterBalanceError  = WaterStorageTotEnd - WaterStorageTotBeg - &
+                         (PrecipTotRefHeight - EvapSoilNet - RunoffSurface - RunoffSubsurface) * MainTimeStep
 
 #ifndef WRF_HYDRO
     if ( abs(WaterBalanceError) > 0.1 ) then
        if ( WaterBalanceError > 0) then
-          !call wrf_message ('The model is gaining water (WaterBalanceError is positive)')
           write(*,*) "The model is gaining water (WaterBalanceError is positive)"
        else
-          !call wrf_message('The model is losing water (WaterBalanceError is negative)')
           write(*,*) "The model is losing water (WaterBalanceError is negative)"
        endif
-       write(*,*) 'WaterBalanceError =',WaterBalanceError, "kg m{-2} timestep{-1}"
-       !call wrf_message(trim(message))
+       write(*,*) "WaterBalanceError = ",WaterBalanceError, "kg m{-2} timestep{-1}"
        write(*, &
-           '("  GridIndexI   GridIndexJ   WaterStorageTotEnd   WaterStorageTotBeg     PrecipTotRefHeight  &
-                EvapSoilNet    RunoffSurface   RunoffSubsurface")')
-       !call wrf_message(trim(message))
-       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI,GridIndexJ,WaterStorageTotEnd,WaterStorageTotBeg,&
-                                              PrecipTotRefHeight*MainTimeStep,EvapSoilNet*MainTimeStep,&
-                                              RunoffSurface*MainTimeStep,RunoffSubsurface*MainTimeStep
-       !call wrf_message(trim(message))
-       !call wrf_error_fatal("Water budget problem in NOAHMP LSM")
-       stop "Error"
+           '("  GridIndexI   GridIndexJ     WaterStorageTotEnd  WaterStorageTotBeg  PrecipTotRefHeight  &
+                EvapSoilNet  RunoffSurface  RunoffSubsurface")')
+       write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI, GridIndexJ, WaterStorageTotEnd, WaterStorageTotBeg, &
+                                              PrecipTotRefHeight*MainTimeStep, EvapSoilNet*MainTimeStep,      &
+                                              RunoffSurface*MainTimeStep, RunoffSubsurface*MainTimeStep
+       stop "Error: Water budget problem in NoahMP LSM"
     endif
 #endif
 
@@ -116,69 +104,56 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: ERROR_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
 
-! local variable
-    integer                      :: IZ      ! loop index
-
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              GridIndexI      => noahmp%config%domain%GridIndexI     ,& ! in,    grid index in x-direction
-              GridIndexJ      => noahmp%config%domain%GridIndexJ     ,& ! in,    grid index in y-direction
-              RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight,& ! in,    downward shortwave radiation [W/m2] at reference height
-              RadSwAbsSfc             => noahmp%energy%flux%RadSwAbsSfc              ,& ! in,    total absorbed solar radiation (w/m2)
-              RadSwReflSfc             => noahmp%energy%flux%RadSwReflSfc              ,& ! in,    total reflected solar radiation (w/m2)
-              RadLwNetSfc            => noahmp%energy%flux%RadLwNetSfc             ,& ! in,    total net LW. rad (w/m2)   [+ to atm]
-              HeatSensibleSfc             => noahmp%energy%flux%HeatSensibleSfc              ,& ! in,    total sensible heat (w/m2) [+ to atm]
-              HeatLatentGrd            => noahmp%energy%flux%HeatLatentGrd             ,& ! in,    total ground latent heat (w/m2) [+ to atm]
-              HeatGroundTot           => noahmp%energy%flux%HeatGroundTot            ,& ! in,    total ground heat flux (w/m2) [+ to soil/snow]
-              RadSwAbsGrd             => noahmp%energy%flux%RadSwAbsGrd              ,& ! in,    solar radiation absorbed by ground (w/m2)
-              HeatPrecipAdvSfc             => noahmp%energy%flux%HeatPrecipAdvSfc              ,& ! in,    precipitation advected heat - total (W/m2)
-              EnergyBalanceError          => noahmp%energy%state%EnergyBalanceError          ,& ! out,   error in surface energy balance [w/m2]
-              RadSwBalanceError           => noahmp%energy%state%RadSwBalanceError            & ! out,   error in shortwave radiation balance [w/m2]
+    associate(                                                              &
+              GridIndexI         => noahmp%config%domain%GridIndexI        ,& ! in,  grid index in x-direction
+              GridIndexJ         => noahmp%config%domain%GridIndexJ        ,& ! in,  grid index in y-direction
+              RadSwDownRefHeight => noahmp%forcing%RadSwDownRefHeight      ,& ! in,  downward shortwave radiation [W/m2] at reference height
+              RadSwAbsSfc        => noahmp%energy%flux%RadSwAbsSfc         ,& ! in,  total absorbed solar radiation [W/m2]
+              RadSwReflSfc       => noahmp%energy%flux%RadSwReflSfc        ,& ! in,  total reflected solar radiation [W/m2]
+              RadLwNetSfc        => noahmp%energy%flux%RadLwNetSfc         ,& ! in,  total net longwave rad [W/m2] (+ to atm)
+              HeatSensibleSfc    => noahmp%energy%flux%HeatSensibleSfc     ,& ! in,  total sensible heat [W/m2] (+ to atm)
+              HeatLatentGrd      => noahmp%energy%flux%HeatLatentGrd       ,& ! in,  total ground latent heat [W/m2] (+ to atm)
+              HeatGroundTot      => noahmp%energy%flux%HeatGroundTot       ,& ! in,  total ground heat flux [W/m2] (+ to soil/snow)
+              RadSwAbsGrd        => noahmp%energy%flux%RadSwAbsGrd         ,& ! in,  solar radiation absorbed by ground [W/m2]
+              HeatPrecipAdvSfc   => noahmp%energy%flux%HeatPrecipAdvSfc    ,& ! in,  precipitation advected heat - total [W/m2]
+              EnergyBalanceError => noahmp%energy%state%EnergyBalanceError ,& ! out, error in surface energy balance [W/m2]
+              RadSwBalanceError  => noahmp%energy%state%RadSwBalanceError   & ! out, error in shortwave radiation balance [W/m2]
              )
 ! ----------------------------------------------------------------------
 
     ! error in shortwave radiation balance should be <0.01 W/m2
     RadSwBalanceError = RadSwDownRefHeight - (RadSwAbsSfc + RadSwReflSfc)
     ! print out diagnostics when error is large
-    if ( abs(RadSwBalanceError) > 0.01 ) then  ! w/m2
-       write(*,*) 'GridIndexI, GridIndexJ =', GridIndexI, GridIndexJ
-       write(*,*) 'RadSwBalanceError =',  RadSwBalanceError
-       write(*,*) "RadSwDownRefHeight =", RadSwDownRefHeight
-       write(*,*) "RadSwReflSfc    =", RadSwReflSfc
-       write(*,*) "RadSwAbsGrd    =", RadSwAbsGrd
-       write(*,*) "RadSwAbsSfc    =", RadSwAbsSfc
-       !call wrf_message(trim(message))
-       !call wrf_error_fatal("Stop in Noah-MP")
-       stop "Error"
+    if ( abs(RadSwBalanceError) > 0.01 ) then
+       write(*,*) "GridIndexI, GridIndexJ = ", GridIndexI, GridIndexJ
+       write(*,*) "RadSwBalanceError      = ", RadSwBalanceError
+       write(*,*) "RadSwDownRefHeight     = ", RadSwDownRefHeight
+       write(*,*) "RadSwReflSfc           = ", RadSwReflSfc
+       write(*,*) "RadSwAbsGrd            = ", RadSwAbsGrd
+       write(*,*) "RadSwAbsSfc            = ", RadSwAbsSfc
+       stop "Error: Solar radiation budget problem in NoahMP LSM"
     endif
 
     ! error in surface energy balance should be <0.01 W/m2
     EnergyBalanceError = RadSwAbsGrd + HeatPrecipAdvSfc - (RadLwNetSfc + HeatSensibleSfc + HeatLatentGrd + HeatGroundTot)
     ! print out diagnostics when error is large
     if ( abs(EnergyBalanceError) > 0.01 ) then
-       write(*,*) 'EnergyBalanceError =',EnergyBalanceError,' at GridIndexI,GridIndexJ: ',GridIndexI,GridIndexJ
-       !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Net longwave:     ",RadLwNetSfc
-       !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total sensible:   ",HeatSensibleSfc
-       !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Ground evap:      ",HeatLatentGrd
-       !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "Total ground:     ",HeatGroundTot
-       !call wrf_message(trim(message))
-       write(*,'(a17,4F10.4)') "Precip advected: ",HeatPrecipAdvSfc
-       !call wrf_message(trim(message))
-       write(*,'(a17,F10.4)') "absorbed shortwave: ",RadSwAbsGrd
-       !call wrf_message(trim(message))
-       !call wrf_error_fatal("Energy budget problem in NOAHMP LSM")
-       stop "Error"
+       write(*,*) 'EnergyBalanceError = ', EnergyBalanceError, ' at GridIndexI,GridIndexJ: ', GridIndexI, GridIndexJ
+       write(*,'(a17,F10.4)' ) "Net longwave:       ", RadLwNetSfc
+       write(*,'(a17,F10.4)' ) "Total sensible:     ", HeatSensibleSfc
+       write(*,'(a17,F10.4)' ) "Ground evap:        ", HeatLatentGrd
+       write(*,'(a17,F10.4)' ) "Total ground:       ", HeatGroundTot
+       write(*,'(a17,4F10.4)') "Precip advected:    ", HeatPrecipAdvSfc
+       write(*,'(a17,F10.4)' ) "absorbed shortwave: ", RadSwAbsGrd
+       stop "Error: Surface energy budget problem in NoahMP LSM"
     endif
 
     end associate

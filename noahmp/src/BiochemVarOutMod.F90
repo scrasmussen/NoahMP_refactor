@@ -2,7 +2,6 @@ module BiochemVarOutMod
 
 !!! Transfer column (1-D) Noah-MP biochemistry (carbon,nitrogen,etc) variables 
 !!! to 2D NoahmpIO for output
-!!! Biochemistry variables should be first defined in BiochemVarType.F90
 
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)

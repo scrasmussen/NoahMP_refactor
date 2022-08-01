@@ -84,12 +84,12 @@ module BiochemVarType
     real(kind=kind_noahmp) :: StemAreaPerMass            ! stem area per unit mass (m2/g)
     real(kind=kind_noahmp) :: LeafMassMin                ! minimum leaf mass [g/m2]
     real(kind=kind_noahmp) :: StemMassMin                ! minimum stem mass [g/m2]
-    real(kind=kind_noahmp) :: CarbonFracToLeaf           ! fraction of carbon flux allocated to leaves [-]
-    real(kind=kind_noahmp) :: CarbonFracToRoot           ! fraction of carbon flux allocated to roots [-]
-    real(kind=kind_noahmp) :: CarbonFracToWood           ! fraction of carbon flux allocated to wood [-]
-    real(kind=kind_noahmp) :: CarbonFracToStem           ! fraction of carbon flux allocated to stem [-]
-    real(kind=kind_noahmp) :: WoodCarbonFrac             ! wood carbon fraction in (root + wood) carbon [-]
-    real(kind=kind_noahmp) :: CarbonFracToWoodRoot       ! fraction of carbon to root and wood [-]
+    real(kind=kind_noahmp) :: CarbonFracToLeaf           ! fraction of carbon flux allocated to leaves
+    real(kind=kind_noahmp) :: CarbonFracToRoot           ! fraction of carbon flux allocated to roots
+    real(kind=kind_noahmp) :: CarbonFracToWood           ! fraction of carbon flux allocated to wood
+    real(kind=kind_noahmp) :: CarbonFracToStem           ! fraction of carbon flux allocated to stem
+    real(kind=kind_noahmp) :: WoodCarbonFrac             ! wood carbon fraction in (root + wood) carbon
+    real(kind=kind_noahmp) :: CarbonFracToWoodRoot       ! fraction of carbon to root and wood
     real(kind=kind_noahmp) :: MicroRespFactorSoilWater   ! soil water factor for microbial respiration
     real(kind=kind_noahmp) :: MicroRespFactorSoilTemp    ! soil temperature factor for microbial respiration
     real(kind=kind_noahmp) :: RespFacNitrogenFoliage     ! foliage nitrogen adjustemt factor to respiration (<= 1)
@@ -105,8 +105,8 @@ module BiochemVarType
 
     integer                :: DatePlanting               ! planting date
     integer                :: DateHarvest                ! harvest date
-    real(kind=kind_noahmp) :: QuantumEfficiency25C       ! quantum efficiency at 25c (umol co2 / umol photon)
-    real(kind=kind_noahmp) :: CarboxylRateMax25C         ! maximum rate of carboxylation at 25c (umol co2/m**2/s)
+    real(kind=kind_noahmp) :: QuantumEfficiency25C       ! quantum efficiency at 25c [umol co2 / umol photon]
+    real(kind=kind_noahmp) :: CarboxylRateMax25C         ! maximum rate of carboxylation at 25c [umol co2/m**2/s]
     real(kind=kind_noahmp) :: CarboxylRateMaxQ10         ! change in maximum rate of carboxylation for every 10-deg C temperature change
     real(kind=kind_noahmp) :: PhotosynPathC3             ! C3 photosynthetic pathway indicator: 0.0 = c4, 1.0 = c3
     real(kind=kind_noahmp) :: SlopeConductToPhotosyn     ! slope of conductance-to-photosynthesis relationship
@@ -114,11 +114,11 @@ module BiochemVarType
     real(kind=kind_noahmp) :: LeafAreaPerMass1side       ! single-side leaf area per mass [m2/kg] 
     real(kind=kind_noahmp) :: NitrogenConcFoliageMax     ! foliage nitrogen concentration when f(n)=1 (%)
     real(kind=kind_noahmp) :: WoodToRootRatio            ! wood to root ratio
-    real(kind=kind_noahmp) :: WoodPoolIndex              ! wood pool index (0~1) depending on woody or not [-]
+    real(kind=kind_noahmp) :: WoodPoolIndex              ! wood pool index (0~1) depending on woody or not
     real(kind=kind_noahmp) :: TurnoverCoeffLeafVeg       ! leaf turnover coefficient [1/s] for generic vegetation
     real(kind=kind_noahmp) :: LeafDeathWaterCoeffVeg     ! coeficient for leaf water stress death [1/s] for generic vegetation
     real(kind=kind_noahmp) :: LeafDeathTempCoeffVeg      ! coeficient for leaf temperature stress death [1/s] for generic vegetation
-    real(kind=kind_noahmp) :: MicroRespCoeff             ! microbial respiration coefficient (umol co2 /kg c/ s)
+    real(kind=kind_noahmp) :: MicroRespCoeff             ! microbial respiration coefficient [umol co2 /kg c/ s]
     real(kind=kind_noahmp) :: RespMaintQ10               ! change in maintenance respiration for every 10-deg C temperature change
     real(kind=kind_noahmp) :: RespMaintLeaf25C           ! leaf maintenance respiration at 25C [umol CO2/m**2  /s]
     real(kind=kind_noahmp) :: RespMaintStem25C           ! stem maintenance respiration at 25C [umol CO2/kg bio/s]
@@ -143,8 +143,8 @@ module BiochemVarType
     real(kind=kind_noahmp) :: LighUseEfficiency          ! initial light use efficiency 
     real(kind=kind_noahmp) :: CarbonAssimReducFac        ! CO2 assimilation reduction factor(0-1) (caused by non-modeling part,e.g.pest,weeds)
     real(kind=kind_noahmp) :: StemAreaIndexMin           ! minimum stem area index [m2/m2]
-    real(kind=kind_noahmp) :: WoodAllocFac               ! present wood allocation factor [-]
-    real(kind=kind_noahmp) :: WaterStressCoeff           ! water stress coeficient [-] 
+    real(kind=kind_noahmp) :: WoodAllocFac               ! present wood allocation factor
+    real(kind=kind_noahmp) :: WaterStressCoeff           ! water stress coeficient
     real(kind=kind_noahmp) :: LeafAreaIndexMin           ! minimum leaf area index [m2/m2] 
     real(kind=kind_noahmp) :: TurnoverCoeffRootVeg       ! root turnover coefficient [1/s] for generic vegetation
     real(kind=kind_noahmp) :: WoodRespCoeff              ! wood respiration coeficient [1/s]

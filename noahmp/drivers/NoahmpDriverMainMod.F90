@@ -184,7 +184,7 @@ contains
               noahmp%water%state%SnowCoverFrac   = 1.0  
               noahmp%energy%state%VegFrac  = 0.0
               noahmp%energy%state%RoughLenMomSfcToAtm = 0.002 
-              noahmp%energy%state%TemperatureGrdBare   = noahmp%energy%state%TG   
+              noahmp%energy%state%TemperatureGrdBare   = noahmp%energy%state%TemperatureGrd  
               noahmp%energy%state%ExchCoeffShBare   = noahmp%energy%state%ExchCoeffShSfc 
               noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetSfc
               noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleSfc
