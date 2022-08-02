@@ -17,9 +17,9 @@ module EnergyVarType
 !=== define "flux" sub-type of energy (energy%flux%variable)
   type :: flux_type
 
-    real(kind=kind_noahmp) :: HeatLatentCanopy            ! canopy latent heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentTransp            ! latent heat flux from transpiration [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentGrd               ! total ground latent heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: HeatLatentCanopy            ! canopy latent heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentTransp            ! latent heat flux from transpiration [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentGrd               ! total ground latent heat [W/m2] (+ to atm)
     real(kind=kind_noahmp) :: HeatLatentIrriEvap          ! latent heating due to sprinkler irrigation evaporation [W/m2]
     real(kind=kind_noahmp) :: HeatPrecipAdvCanopy         ! precipitation advected heat - canopy net [W/m2]
     real(kind=kind_noahmp) :: HeatPrecipAdvVegGrd         ! precipitation advected heat - vegetated ground net [W/m2]
@@ -33,22 +33,22 @@ module EnergyVarType
     real(kind=kind_noahmp) :: RadSwReflSfc                ! total reflected solar radiation [W/m2]
     real(kind=kind_noahmp) :: RadSwReflVeg                ! reflected solar radiation by vegetation [W/m2]
     real(kind=kind_noahmp) :: RadSwReflGrd                ! reflected solar radiation by ground [W/m2]
-    real(kind=kind_noahmp) :: RadLwNetCanopy              ! canopy net longwave radiation [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleCanopy          ! canopy sensible heat flux [W/m2]     (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentCanEvap           ! canopy evaporation heat flux [W/m2]  (+ = to atm)
-    real(kind=kind_noahmp) :: RadLwNetVegGrd              ! vegetated ground net longwave radiation [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleVegGrd          ! vegetated ground sensible heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentVegGrd            ! vegetated ground latent heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentCanTransp         ! canopy transpiration latent heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatGroundVegGrd            ! vegetated ground heat flux [W/m2] (+ = to soil/snow)
-    real(kind=kind_noahmp) :: RadLwNetBareGrd             ! bare ground net longwave rad [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleBareGrd         ! bare ground sensible heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatLatentBareGrd           ! bare ground latent heat flux [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatGroundBareGrd           ! bare ground heat flux [W/m2] (+ = to soil/snow)
-    real(kind=kind_noahmp) :: HeatGroundTot               ! total ground heat flux [W/m2] (+ = to soil/snow)
+    real(kind=kind_noahmp) :: RadLwNetCanopy              ! canopy net longwave radiation [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatSensibleCanopy          ! canopy sensible heat flux [W/m2]     (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentCanEvap           ! canopy evaporation heat flux [W/m2]  (+ to atm)
+    real(kind=kind_noahmp) :: RadLwNetVegGrd              ! vegetated ground net longwave radiation [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatSensibleVegGrd          ! vegetated ground sensible heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentVegGrd            ! vegetated ground latent heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentCanTransp         ! canopy transpiration latent heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatGroundVegGrd            ! vegetated ground heat flux [W/m2] (+ to soil/snow)
+    real(kind=kind_noahmp) :: RadLwNetBareGrd             ! bare ground net longwave rad [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatSensibleBareGrd         ! bare ground sensible heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatLatentBareGrd           ! bare ground latent heat flux [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatGroundBareGrd           ! bare ground heat flux [W/m2] (+ to soil/snow)
+    real(kind=kind_noahmp) :: HeatGroundTot               ! total ground heat flux [W/m2] (+ to soil/snow)
     real(kind=kind_noahmp) :: HeatFromSoilBot             ! energy influx from soil bottom [W/m2]
-    real(kind=kind_noahmp) :: RadLwNetSfc                 ! total net longwave radiation [W/m2] (+ = to atm)
-    real(kind=kind_noahmp) :: HeatSensibleSfc             ! total sensible heat [W/m2] (+ = to atm)
+    real(kind=kind_noahmp) :: RadLwNetSfc                 ! total net longwave radiation [W/m2] (+ to atm)
+    real(kind=kind_noahmp) :: HeatSensibleSfc             ! total sensible heat [W/m2] (+ to atm)
     real(kind=kind_noahmp) :: RadPhotoActAbsCan           ! total photosyn. active energy [W/m2] absorbed by canopy
     real(kind=kind_noahmp) :: RadLwEmitSfc                ! emitted outgoing longwave radiation [W/m2]
 
@@ -253,14 +253,14 @@ module EnergyVarType
     real(kind=kind_noahmp) :: SnowAlbRefClass             ! reference snow albedo in CLASS scheme
     real(kind=kind_noahmp) :: SnowAgeFacClass             ! snow aging e-folding time [s] in CLASS albedo scheme
     real(kind=kind_noahmp) :: SnowAlbFreshClass           ! fresh snow albedo in CLASS albedo scheme
-    real(kind=kind_noahmp) :: ConductanceLeafMin          ! minimum leaf conductance [umol/m**2/s]
+    real(kind=kind_noahmp) :: ConductanceLeafMin          ! minimum leaf conductance [umol/m2/s]
     real(kind=kind_noahmp) :: Co2MmConst25C               ! co2 michaelis-menten constant at 25c [Pa]
     real(kind=kind_noahmp) :: O2MmConst25C                ! o2 michaelis-menten constant at 25c [Pa]
     real(kind=kind_noahmp) :: Co2MmConstQ10               ! change in co2 Michaelis-Menten constant for every 10-deg C temperature change
     real(kind=kind_noahmp) :: O2MmConstQ10                ! change in o2 michaelis-menten constant for every 10-deg C temperature change
     real(kind=kind_noahmp) :: RadiationStressFac          ! Parameter used in radiation stress function in Jarvis scheme
-    real(kind=kind_noahmp) :: ResistanceStomataMin        ! Minimum stomatal resistance [s m-1] in Jarvis scheme
-    real(kind=kind_noahmp) :: ResistanceStomataMax        ! Maximal stomatal resistance [s m-1] in Jarvis scheme
+    real(kind=kind_noahmp) :: ResistanceStomataMin        ! Minimum stomatal resistance [s/m] in Jarvis scheme
+    real(kind=kind_noahmp) :: ResistanceStomataMax        ! Maximal stomatal resistance [s/m] in Jarvis scheme
     real(kind=kind_noahmp) :: AirTempOptimTransp          ! Optimum transpiration air temperature [K] in Jarvis scheme
     real(kind=kind_noahmp) :: VaporPresDeficitFac         ! Parameter used in vapor pressure deficit function in Jarvis scheme
     real(kind=kind_noahmp) :: LeafDimLength               ! characteristic leaf dimension [m]

@@ -432,7 +432,7 @@ contains
     noahmp%energy%state%TemperatureSoilSnow(-NumSnowLayerMax+1:0) = NoahmpIO%TSNOXY  (I,-NumSnowLayerMax+1:0,J)
     noahmp%energy%state%TemperatureSoilSnow(1:NumSoilLayer)       = NoahmpIO%TSLB    (I,1:NumSoilLayer,J)
     noahmp%energy%state%PressureAtmosCO2                          = NoahmpIO%CO2_TABLE * noahmp%forcing%PressureAirRefHeight
-    noahmp%energy%state%PressureAtmosO2                           = NoahmpIO%O2_TABLE * noahmp%forcing%PressureAirRefHeight
+    noahmp%energy%state%PressureAtmosO2                           = NoahmpIO%O2_TABLE  * noahmp%forcing%PressureAirRefHeight
 
     ! energy parameter variables
     noahmp%energy%param%SoilHeatCapacity                          = NoahmpIO%CSOIL_TABLE

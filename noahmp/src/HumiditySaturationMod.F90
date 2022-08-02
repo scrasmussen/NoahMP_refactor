@@ -2,7 +2,7 @@ module HumiditySaturationMod
 
 !!! Compute saturated surface specific humidity and changing rate to temperature
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -10,49 +10,53 @@ module HumiditySaturationMod
 
 contains
 
-  subroutine HumiditySaturation(AIRTMP, AIRPRS, Q2SAT, DQSDT2)
+  subroutine HumiditySaturation(TemperatureAir, PressureAir, SpecHumiditySat, SpecHumSatTempD)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: CALHUM
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
-    real(kind=kind_noahmp), intent(in)   :: AIRTMP    ! air temperature (K)
-    real(kind=kind_noahmp), intent(in)   :: AIRPRS    ! air pressure (pa)
-    real(kind=kind_noahmp), intent(out)  :: Q2SAT     ! saturation specific humidity (g/g)
-    real(kind=kind_noahmp), intent(out)  :: DQSDT2    ! d(Q2SAT)/d(T)
+    real(kind=kind_noahmp), intent(in)  :: TemperatureAir                                   ! air temperature (K)
+    real(kind=kind_noahmp), intent(in)  :: PressureAir                                      ! air pressure (pa)
+    real(kind=kind_noahmp), intent(out) :: SpecHumiditySat                                  ! saturation specific humidity (g/g)
+    real(kind=kind_noahmp), intent(out) :: SpecHumSatTempD                                  ! d(SpecHumiditySat)/d(T)
 
 ! local variable
-    real(kind=kind_noahmp), parameter    :: A2       = 17.67
-    real(kind=kind_noahmp), parameter    :: A3       = 273.15
-    real(kind=kind_noahmp), parameter    :: A4       = 29.65
-    real(kind=kind_noahmp), parameter    :: ELWV     = 2.501e6
-    real(kind=kind_noahmp), parameter    :: A23M4    = A2*(A3-A4)
-    real(kind=kind_noahmp), parameter    :: E0       = 0.611
-    real(kind=kind_noahmp), parameter    :: RV       = 461.0
-    real(kind=kind_noahmp), parameter    :: EPSILON0 = 0.622
-    real(kind=kind_noahmp)               :: ES, SFCPRSX  ! temporary vars
+    real(kind=kind_noahmp), parameter   :: Const1          = 17.67                          ! constant 1
+    real(kind=kind_noahmp), parameter   :: TemperatureFrz  = 273.15                         ! freezing temperature 0degC [K]
+    real(kind=kind_noahmp), parameter   :: Const2          = 29.65                          ! constant 2
+    real(kind=kind_noahmp), parameter   :: ConstLatHeatVap = 2.501e6                        ! latent heat of vaporization [J/kg]
+    real(kind=kind_noahmp), parameter   :: Const3          = Const1*(TemperatureFrz-Const2) ! constant 3
+    real(kind=kind_noahmp), parameter   :: VapPresSatFrz   = 0.611                          ! vapor pressure at 0 degC [Pa]
+    real(kind=kind_noahmp), parameter   :: GasConstWatVap  = 461.0                          ! specific gas constant for water vapor [J/kg/K]
+    real(kind=kind_noahmp), parameter   :: RatioGasConst   = 0.622                          ! ratio of gas constant of dry air to water vapor
+    real(kind=kind_noahmp)              :: VapPresSatTemp                                   ! saturated vapor pressure at air temperature [Pa]
+    real(kind=kind_noahmp)              :: PressureAirKpa                                   ! air pressure in KPa unit 
 
 ! ----------------------------------------------------------------------
 
-    ! Q2SAT: saturated mixing ratio
-    ES = E0 * exp( ELWV / RV * (1.0/A3 - 1.0/AIRTMP) )
+    ! calculated saturated vapor pressure at air temperature
+    VapPresSatTemp  = VapPresSatFrz * exp(ConstLatHeatVap / GasConstWatVap * &
+                                          (1.0/TemperatureFrz - 1.0/TemperatureAir))
 
-    ! convert AIRPRS from Pa to KPa
-    SFCPRSX = AIRPRS * 1.0e-3
-    Q2SAT   = EPSILON0 * ES / (SFCPRSX - ES)
+    ! convert PressureAir from Pa to KPa
+    PressureAirKpa  = PressureAir * 1.0e-3
+
+    ! calculate saturated mixing ratio ~ specific humidity
+    SpecHumiditySat = RatioGasConst * VapPresSatTemp / (PressureAirKpa - VapPresSatTemp)
 
     ! convert from  g/g to g/kg
-    Q2SAT = Q2SAT * 1.0e3
+    SpecHumiditySat = SpecHumiditySat * 1.0e3
 
-    ! DQSDT2 is calculated assuming Q2SAT is a specific humidity
-    DQSDT2 = ( Q2SAT / (1+Q2SAT) ) * A23M4 / (AIRTMP - A4)**2
+    ! SpecHumSatTempD is calculated assuming SpecHumiditySat is a specific humidity
+    SpecHumSatTempD = (SpecHumiditySat / (1+SpecHumiditySat)) * Const3 / (TemperatureAir-Const2)**2
 
-    ! DG Q2SAT needs to be in g/g when returned for SFLX
-    Q2SAT = Q2SAT / 1.0e3
+    ! SpecHumiditySat needs to be in g/g when returned for surface flux calculation
+    SpecHumiditySat = SpecHumiditySat / 1.0e3
 
   end subroutine HumiditySaturation
 

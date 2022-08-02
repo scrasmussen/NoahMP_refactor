@@ -241,8 +241,8 @@ contains
     CarbonMassLiveTot   = LeafMass + RootMass + GrainMass        
  
     ! leaf area index and stem area index
-    LeafAreaIndex = max( LeafMass*LeafAreaPerBiomass, LeafAreaIndexMin )
-    StemAreaIndex = max( StemMass*StemAreaPerMass, StemAreaIndexMin )
+    LeafAreaIndex = max(LeafMass*LeafAreaPerBiomass, LeafAreaIndexMin)
+    StemAreaIndex = max(StemMass*StemAreaPerMass, StemAreaIndexMin)
    
     ! After harversting
     !if ( PlantGrowStage == 8 ) then

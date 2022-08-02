@@ -29,12 +29,15 @@ contains
               J    => noahmp%config%domain%GridIndexJ  &
              )
 
+    ! biochem state variables
     NoahmpIO%LFMASSXY(I,J) = noahmp%biochem%state%LeafMass
     NoahmpIO%RTMASSXY(I,J) = noahmp%biochem%state%RootMass
     NoahmpIO%STMASSXY(I,J) = noahmp%biochem%state%StemMass
     NoahmpIO%WOODXY  (I,J) = noahmp%biochem%state%WoodMass
     NoahmpIO%STBLCPXY(I,J) = noahmp%biochem%state%CarbonMassDeepSoil
     NoahmpIO%FASTCPXY(I,J) = noahmp%biochem%state%CarbonMassShallowSoil
+
+    ! biochem flux variables
     NoahmpIO%NEEXY   (I,J) = noahmp%biochem%flux%NetEcoExchange
     NoahmpIO%GPPXY   (I,J) = noahmp%biochem%flux%GrossPriProduction
     NoahmpIO%NPPXY   (I,J) = noahmp%biochem%flux%NetPriProductionTot

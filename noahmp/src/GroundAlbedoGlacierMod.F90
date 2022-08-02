@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: RADIATION_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -23,23 +23,25 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    integer                          :: IB      ! waveband class
+    integer                          :: IndSwBnd      ! solar radiation band index
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,     number of solar radiation wave bands
-              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,     snow cover fraction [-]
-              AlbedoLandIce          => noahmp%energy%param%AlbedoLandIce          ,& ! in,     albedo land ice: 1=vis, 2=nir
-              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! in,     snow albedo for direct(1=vis, 2=nir)
-              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif          ,& ! in,     snow albedo for diffuse(1=vis, 2=nir)
-              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! out,    ground albedo (direct beam: vis, nir)
-              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif           & ! out,    ground albedo (diffuse: vis, nir)
+    associate(                                                    &
+              NumSWRadBand  => noahmp%config%domain%NumSWRadBand ,& ! in,  number of solar radiation wave bands
+              SnowCoverFrac => noahmp%water%state%SnowCoverFrac  ,& ! in,  snow cover fraction
+              AlbedoLandIce => noahmp%energy%param%AlbedoLandIce ,& ! in,  albedo land ice: 1=vis, 2=nir
+              AlbedoSnowDir => noahmp%energy%state%AlbedoSnowDir ,& ! in,  snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif => noahmp%energy%state%AlbedoSnowDif ,& ! in,  snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoGrdDir  => noahmp%energy%state%AlbedoGrdDir  ,& ! out, ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif  => noahmp%energy%state%AlbedoGrdDif   & ! out, ground albedo (diffuse: vis, nir)
              )
 ! ----------------------------------------------------------------------
 
-    do IB = 1, NumSWRadBand
-       AlbedoGrdDir(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + AlbedoSnowDir(IB) * SnowCoverFrac
-       AlbedoGrdDif(IB) = AlbedoLandIce(IB) * (1.0 - SnowCoverFrac) + AlbedoSnowDif(IB) * SnowCoverFrac
+    do IndSwBnd = 1, NumSWRadBand
+
+       AlbedoGrdDir(IndSwBnd) = AlbedoLandIce(IndSwBnd)*(1.0-SnowCoverFrac) + AlbedoSnowDir(IndSwBnd)*SnowCoverFrac
+       AlbedoGrdDif(IndSwBnd) = AlbedoLandIce(IndSwBnd)*(1.0-SnowCoverFrac) + AlbedoSnowDif(IndSwBnd)*SnowCoverFrac
+
     enddo
 
     end associate

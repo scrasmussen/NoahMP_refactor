@@ -217,8 +217,8 @@ contains
 
     ! correct inconsistent soil type
     if ( any(noahmp%config%domain%SoilType == 14) .and. (NoahmpIO%XICE(I,J) == 0.0) ) then
-       print *, 'SOIL TYPE FOUND TO BE WATER AT A LAND-POINT'
-       print *, I,J,'RESET SOIL type to SANDY CLAY LOAM'
+       write(*,*) "SOIL TYPE FOUND TO BE WATER AT A LAND-POINT"
+       write(*,*) "RESET SOIL type to SANDY CLAY LOAM at grid = ", I, J
        noahmp%config%domain%SoilType = 7
     endif
 

@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: PHASECHANGE_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
@@ -24,147 +24,152 @@ contains
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variable
-    integer                :: J, K      ! do loop index
-    real(kind=kind_noahmp) :: TEMP1     ! temporary variables [kg/m2]
-    real(kind=kind_noahmp) :: PROPOR    ! temporary variables 
-    real(kind=kind_noahmp) :: XMF       ! total latent heat of phase change
-    real(kind=kind_noahmp), allocatable, dimension(:) :: HM        ! energy residual [w/m2]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: XM        ! melting or freezing water [kg/m2]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WMASS0    ! temporary water mass
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WICE0     ! temporary ice content
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WLIQ0     ! temporary liquid content
-    real(kind=kind_noahmp), allocatable, dimension(:) :: MICE      ! soil/snow ice mass [mm]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: MLIQ      ! soil/snow liquid water mass [mm]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: HEATR     ! energy residual or loss after melting/freezing
+    integer                :: LoopInd1, LoopInd2                             ! loop index
+    real(kind=kind_noahmp) :: SnowWaterEquivPrev                             ! old/previous snow water equivalent [kg/m2]
+    real(kind=kind_noahmp) :: SnowWaterEquivRa                               ! ratio of previous vs updated snow water equivalent
+    real(kind=kind_noahmp) :: HeatLhTotPhsChg                                ! total latent heat of phase change
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EnergyRes           ! energy residual [W/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowWaterEquivChg   ! melting or freezing water [kg/m2]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MassWatTotInit      ! initial total water (ice + liq) mass
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MassWatIceInit      ! initial ice content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MassWatLiqInit      ! initial liquid content
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MassWatIceTmp       ! soil/snow ice mass [mm]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MassWatLiqTmp       ! soil/snow liquid water mass [mm]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: EnergyResLeft       ! energy residual or loss after melting/freezing
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              OptGlacierTreatment => noahmp%config%nmlist%OptGlacierTreatment ,& ! in,    options for glacier treatment
-              NumSoilLayer        => noahmp%config%domain%NumSoilLayer        ,& ! in,    number of soil layers
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax,& ! in,    maximum number of snow layers
-              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,    actual number of snow layers (negative)
-              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer         ,& ! in,    thickness of snow/soil layers [m]
-              PhaseChgFacSoilSnow            => noahmp%energy%state%PhaseChgFacSoilSnow            ,& ! in,    energy factor for soil & snow phase change
-              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [K]
-              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
-              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! inout, total soil moisture [m3/m3]
-              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
-              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
-              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! inout, snow depth [m]
-              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! inout, snow water equivalent [mm]
-              IndexPhaseChange           => noahmp%water%state%IndexPhaseChange            ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
-              MeltGroundSnow           => noahmp%water%flux%MeltGroundSnow             ,& ! out,   ground snowmelt rate [mm/s]
-              PondSfcThinSnwMelt         => noahmp%water%state%PondSfcThinSnwMelt           & ! out,   surface ponding [mm] from snowmelt when thin snow has no layer
+    associate(                                                                       &
+              OptGlacierTreatment    => noahmp%config%nmlist%OptGlacierTreatment    ,& ! in,    options for glacier treatment
+              NumSoilLayer           => noahmp%config%domain%NumSoilLayer           ,& ! in,    number of soil layers
+              NumSnowLayerMax        => noahmp%config%domain%NumSnowLayerMax        ,& ! in,    maximum number of snow layers
+              NumSnowLayerNeg        => noahmp%config%domain%NumSnowLayerNeg        ,& ! in,    actual number of snow layers (negative)
+              MainTimeStep           => noahmp%config%domain%MainTimeStep           ,& ! in,    main noahmp timestep [s]
+              ThicknessSnowSoilLayer => noahmp%config%domain%ThicknessSnowSoilLayer ,& ! in,    thickness of snow/soil layers [m]
+              PhaseChgFacSoilSnow    => noahmp%energy%state%PhaseChgFacSoilSnow     ,& ! in,    energy factor for soil & snow phase change
+              TemperatureSoilSnow    => noahmp%energy%state%TemperatureSoilSnow     ,& ! inout, snow and soil layer temperature [K]
+              SoilLiqWater           => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
+              SoilMoisture           => noahmp%water%state%SoilMoisture             ,& ! inout, total soil moisture [m3/m3]
+              SnowIce                => noahmp%water%state%SnowIce                  ,& ! inout, snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater             ,& ! inout, snow layer liquid water [mm]
+              SnowDepth              => noahmp%water%state%SnowDepth                ,& ! inout, snow depth [m]
+              SnowWaterEquiv         => noahmp%water%state%SnowWaterEquiv           ,& ! inout, snow water equivalent [mm]
+              IndexPhaseChange       => noahmp%water%state%IndexPhaseChange         ,& ! out,   phase change index [0-none;1-melt;2-refreeze]
+              MeltGroundSnow         => noahmp%water%flux%MeltGroundSnow            ,& ! out,   ground snowmelt rate [mm/s]
+              PondSfcThinSnwMelt     => noahmp%water%state%PondSfcThinSnwMelt        & ! out,   surface ponding [mm] from snowmelt when thin snow has no layer
              )
 ! ----------------------------------------------------------------------
 
     !--- Initialization
-    allocate( HM     (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( XM     (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( WMASS0 (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( WICE0  (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( WLIQ0  (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( MICE   (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( MLIQ   (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( HEATR  (-NumSnowLayerMax+1:NumSoilLayer) )
-    MeltGroundSnow   = 0.0
+    allocate( EnergyRes        (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( SnowWaterEquivChg(-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MassWatTotInit   (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MassWatIceInit   (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MassWatLiqInit   (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MassWatIceTmp    (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MassWatLiqTmp    (-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( EnergyResLeft    (-NumSnowLayerMax+1:NumSoilLayer) )
+    MeltGroundSnow     = 0.0
     PondSfcThinSnwMelt = 0.0
-    XMF     = 0.0
+    HeatLhTotPhsChg    = 0.0
 
     !--- treat snowpack over glacier ice first
 
     ! snow layer water mass
-    do J = NumSnowLayerNeg+1, 0
-       MICE(J) = SnowIce(J)
-       MLIQ(J) = SnowLiqWater(J)
+    do LoopInd1 = NumSnowLayerNeg+1, 0
+       MassWatIceTmp(LoopInd1) = SnowIce(LoopInd1)
+       MassWatLiqTmp(LoopInd1) = SnowLiqWater(LoopInd1)
     enddo
 
     ! other required variables
-    do J = NumSnowLayerNeg+1, 0
-       IndexPhaseChange(J)  = 0
-       HM(J)     = 0.0
-       XM(J)     = 0.0
-       HEATR(J)  = 0.0
-       WICE0(J)  = MICE(J)
-       WLIQ0(J)  = MLIQ(J)
-       WMASS0(J) = MICE(J) + MLIQ(J)
+    do LoopInd1 = NumSnowLayerNeg+1, 0
+       IndexPhaseChange (LoopInd1) = 0
+       EnergyRes        (LoopInd1) = 0.0
+       SnowWaterEquivChg(LoopInd1) = 0.0
+       EnergyResLeft    (LoopInd1) = 0.0
+       MassWatIceInit   (LoopInd1) = MassWatIceTmp(LoopInd1)
+       MassWatLiqInit   (LoopInd1) = MassWatLiqTmp(LoopInd1)
+       MassWatTotInit   (LoopInd1) = MassWatIceTmp(LoopInd1) + MassWatLiqTmp(LoopInd1)
     enddo
 
     ! determine melting or freezing state
-    do J = NumSnowLayerNeg+1, 0
-       if ( (MICE(J) > 0.0) .and. (TemperatureSoilSnow(J) >= ConstFreezePoint) ) then
-          IndexPhaseChange(J) = 1  ! melting
+    do LoopInd1 = NumSnowLayerNeg+1, 0
+       if ( (MassWatIceTmp(LoopInd1) > 0.0) .and. (TemperatureSoilSnow(LoopInd1) >= ConstFreezePoint) ) then
+          IndexPhaseChange(LoopInd1) = 1  ! melting
        endif
-       if ( (MLIQ(J) > 0.0) .and. (TemperatureSoilSnow(J) < ConstFreezePoint) ) then
-          IndexPhaseChange(J) = 2  ! freezing
+       if ( (MassWatLiqTmp(LoopInd1) > 0.0) .and. (TemperatureSoilSnow(LoopInd1) < ConstFreezePoint) ) then
+          IndexPhaseChange(LoopInd1) = 2  ! freezing
        endif
     enddo
 
     ! Calculate the energy surplus and loss for melting and freezing
-    do J = NumSnowLayerNeg+1, 0
-       if ( IndexPhaseChange(J) > 0 ) then
-          HM(J)  = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-          TemperatureSoilSnow(J) = ConstFreezePoint
+    do LoopInd1 = NumSnowLayerNeg+1, 0
+       if ( IndexPhaseChange(LoopInd1) > 0 ) then
+          EnergyRes(LoopInd1)           = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+          TemperatureSoilSnow(LoopInd1) = ConstFreezePoint
        endif
-       if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
-          HM(J)    = 0.0
-          IndexPhaseChange(J) = 0
+       if ( (IndexPhaseChange(LoopInd1) == 1) .and. (EnergyRes(LoopInd1) < 0.0) ) then
+          EnergyRes(LoopInd1)           = 0.0
+          IndexPhaseChange(LoopInd1)    = 0
        endif
-       if ( (IndexPhaseChange(J) == 2) .and. (HM(J) > 0.0) ) then
-          HM(J)    = 0.0
-          IndexPhaseChange(J) = 0
+       if ( (IndexPhaseChange(LoopInd1) == 2) .and. (EnergyRes(LoopInd1) > 0.0) ) then
+          EnergyRes(LoopInd1)           = 0.0
+          IndexPhaseChange(LoopInd1)    = 0
        endif
-       XM(J) = HM(J) * MainTimeStep / ConstLatHeatFusion
+       SnowWaterEquivChg(LoopInd1)      = EnergyRes(LoopInd1) * MainTimeStep / ConstLatHeatFusion
     enddo
 
     ! The rate of melting and freezing for snow without a layer, needs more work.
     if ( OptGlacierTreatment == 2 ) then
        if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (TemperatureSoilSnow(1) > ConstFreezePoint) ) then
-          HM(1)    = (TemperatureSoilSnow(1) - ConstFreezePoint) / PhaseChgFacSoilSnow(1)                  ! available heat
-          TemperatureSoilSnow(1)   = ConstFreezePoint                                       ! set T to freezing
-          XM(1)    = HM(1) * MainTimeStep / ConstLatHeatFusion                          ! total snow melt possible
-          TEMP1    = SnowWaterEquiv
-          SnowWaterEquiv    = max( 0.0, TEMP1-XM(1) )                    ! snow remaining
-          PROPOR   = SnowWaterEquiv / TEMP1                              ! fraction melted
-          SnowDepth    = max( 0.0, PROPOR*SnowDepth )                   ! new snow height
-          SnowDepth    = min( max(SnowDepth,SnowWaterEquiv/500.0), SnowWaterEquiv/50.0 )  ! limit adjustment to a reasonable density
-          HEATR(1) = HM(1) - ConstLatHeatFusion * (TEMP1 - SnowWaterEquiv) / MainTimeStep        ! excess heat
-          if ( HEATR(1) > 0.0 ) then
-             XM(1) = HEATR(1) * MainTimeStep / ConstLatHeatFusion
-             TemperatureSoilSnow(1)= TemperatureSoilSnow(1) + PhaseChgFacSoilSnow(1) * HEATR(1)                ! re-heat ice
+          EnergyRes(1)           = (TemperatureSoilSnow(1) - ConstFreezePoint) / PhaseChgFacSoilSnow(1)                     ! available heat
+          TemperatureSoilSnow(1) = ConstFreezePoint                                                                         ! set T to freezing
+          SnowWaterEquivChg(1)   = EnergyRes(1) * MainTimeStep / ConstLatHeatFusion                                         ! total snow melt possible
+          SnowWaterEquivPrev     = SnowWaterEquiv
+          SnowWaterEquiv         = max(0.0, SnowWaterEquivPrev-SnowWaterEquivChg(1))                                        ! snow remaining
+          SnowWaterEquivRa       = SnowWaterEquiv / SnowWaterEquivPrev                                                      ! fraction melted
+          SnowDepth              = max(0.0, SnowWaterEquivRa*SnowDepth)                                                     ! new snow height
+          SnowDepth              = min(max(SnowDepth,SnowWaterEquiv/500.0), SnowWaterEquiv/50.0 )                           ! limit to a reasonable snow density
+          EnergyResLeft(1)       = EnergyRes(1) - ConstLatHeatFusion * (SnowWaterEquivPrev - SnowWaterEquiv) / MainTimeStep ! excess heat
+          if ( EnergyResLeft(1) > 0.0 ) then
+             SnowWaterEquivChg(1)   = EnergyResLeft(1) * MainTimeStep / ConstLatHeatFusion
+             TemperatureSoilSnow(1) = TemperatureSoilSnow(1) + PhaseChgFacSoilSnow(1) * EnergyResLeft(1)                    ! re-heat ice
           else
-             XM(1) = 0.0
-             HM(1) = 0.0
+             SnowWaterEquivChg(1)   = 0.0
+             EnergyRes(1)           = 0.0
           endif
-          MeltGroundSnow    = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep             ! melted snow rate
-          XMF      = ConstLatHeatFusion * MeltGroundSnow                               ! melted snow energy
-          PondSfcThinSnwMelt  = TEMP1 - SnowWaterEquiv                              ! melt water
+          MeltGroundSnow            = max( 0.0, (SnowWaterEquivPrev-SnowWaterEquiv) ) / MainTimeStep                        ! melted snow rate
+          HeatLhTotPhsChg           = ConstLatHeatFusion * MeltGroundSnow                                                   ! melted snow energy
+          PondSfcThinSnwMelt        = SnowWaterEquivPrev - SnowWaterEquiv                                                   ! melt water
        endif
     endif ! OptGlacierTreatment==2
 
     ! The rate of melting and freezing for multi-layer snow
-    do J = NumSnowLayerNeg+1, 0
-       if ( (IndexPhaseChange(J) > 0) .and. (abs(HM(J)) > 0.0) ) then
-          HEATR(J) = 0.0
-          if ( XM(J) > 0.0 ) then
-             MICE(J)  = max( 0.0, WICE0(J)-XM(J) )
-             HEATR(J) = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
-          elseif ( XM(J) < 0.0 ) then
-             MICE(J)  = min( WMASS0(J), WICE0(J)-XM(J) )
-             HEATR(J) = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
+    do LoopInd1 = NumSnowLayerNeg+1, 0
+       if ( (IndexPhaseChange(LoopInd1) > 0) .and. (abs(EnergyRes(LoopInd1)) > 0.0) ) then
+          EnergyResLeft(LoopInd1)    = 0.0
+          if ( SnowWaterEquivChg(LoopInd1) > 0.0 ) then
+             MassWatIceTmp(LoopInd1) = max(0.0, MassWatIceInit(LoopInd1)-SnowWaterEquivChg(LoopInd1))
+             EnergyResLeft(LoopInd1) = EnergyRes(LoopInd1) - ConstLatHeatFusion * &
+                                       (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
+          elseif ( SnowWaterEquivChg(LoopInd1) < 0.0 ) then
+             MassWatIceTmp(LoopInd1) = min(MassWatTotInit(LoopInd1), MassWatIceInit(LoopInd1)-SnowWaterEquivChg(LoopInd1))
+             EnergyResLeft(LoopInd1) = EnergyRes(LoopInd1) - ConstLatHeatFusion * &
+                                       (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
           endif
-          MLIQ(J) = max( 0.0, WMASS0(J)-MICE(J) )               ! update liquid water mass
+          MassWatLiqTmp(LoopInd1)    = max(0.0, MassWatTotInit(LoopInd1)-MassWatIceTmp(LoopInd1))                           ! update liquid water mass
 
           ! update snow temperature and energy surplus/loss
-          if ( abs(HEATR(J)) > 0.0 ) then
-             TemperatureSoilSnow(J) = TemperatureSoilSnow(J) + PhaseChgFacSoilSnow(J) * HEATR(J)
-             if ( (MLIQ(J)*MICE(J)) > 0.0 ) TemperatureSoilSnow(J) = ConstFreezePoint
+          if ( abs(EnergyResLeft(LoopInd1)) > 0.0 ) then
+             TemperatureSoilSnow(LoopInd1) = TemperatureSoilSnow(LoopInd1) + &
+                                             PhaseChgFacSoilSnow(LoopInd1) * EnergyResLeft(LoopInd1)
+             if ( (MassWatLiqTmp(LoopInd1)*MassWatIceTmp(LoopInd1)) > 0.0 ) &
+                TemperatureSoilSnow(LoopInd1) = ConstFreezePoint
           endif
-          XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
+          HeatLhTotPhsChg = HeatLhTotPhsChg + &
+                            ConstLatHeatFusion * (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
 
           ! snow melting rate
-          MeltGroundSnow = MeltGroundSnow + max( 0.0, (WICE0(J)-MICE(J)) ) / MainTimeStep
+          MeltGroundSnow  = MeltGroundSnow + max(0.0, (MassWatIceInit(LoopInd1)-MassWatIceTmp(LoopInd1))) / MainTimeStep
        endif
     enddo
 
@@ -173,202 +178,222 @@ contains
     if ( OptGlacierTreatment == 1 ) then
 
        ! ice layer water mass
-       do J = 1, NumSoilLayer
-          MLIQ(J) = SoilLiqWater(J) * ThicknessSnowSoilLayer(J) * 1000.0
-          MICE(J) = (SoilMoisture(J) - SoilLiqWater(J)) * ThicknessSnowSoilLayer(J) * 1000.0
+       do LoopInd1 = 1, NumSoilLayer
+          MassWatLiqTmp(LoopInd1) = SoilLiqWater(LoopInd1) * ThicknessSnowSoilLayer(LoopInd1) * 1000.0
+          MassWatIceTmp(LoopInd1) = (SoilMoisture(LoopInd1) - SoilLiqWater(LoopInd1)) * ThicknessSnowSoilLayer(LoopInd1) * 1000.0
        enddo
 
        ! other required variables
-       do J = 1, NumSoilLayer
-          IndexPhaseChange(J)  = 0
-          HM(J)     = 0.0
-          XM(J)     = 0.0
-          HEATR(J)  = 0.0
-          WICE0(J)  = MICE(J)
-          WLIQ0(J)  = MLIQ(J)
-          WMASS0(J) = MICE(J) + MLIQ(J)
+       do LoopInd1 = 1, NumSoilLayer
+          IndexPhaseChange(LoopInd1)  = 0
+          EnergyRes(LoopInd1)         = 0.0
+          SnowWaterEquivChg(LoopInd1) = 0.0
+          EnergyResLeft(LoopInd1)     = 0.0
+          MassWatIceInit(LoopInd1)    = MassWatIceTmp(LoopInd1)
+          MassWatLiqInit(LoopInd1)    = MassWatLiqTmp(LoopInd1)
+          MassWatTotInit(LoopInd1)    = MassWatIceTmp(LoopInd1) + MassWatLiqTmp(LoopInd1)
        enddo
 
        ! determine melting or freezing state
-       do J = 1, NumSoilLayer
-          if ( (MICE(J) > 0.0) .and. (TemperatureSoilSnow(J) >= ConstFreezePoint) ) then
-             IndexPhaseChange(J) = 1  ! melting
+       do LoopInd1 = 1, NumSoilLayer
+          if ( (MassWatIceTmp(LoopInd1) > 0.0) .and. (TemperatureSoilSnow(LoopInd1) >= ConstFreezePoint) ) then
+             IndexPhaseChange(LoopInd1) = 1  ! melting
           endif
-          if ( (MLIQ(J) > 0.0) .and. (TemperatureSoilSnow(J) < ConstFreezePoint) ) then
-             IndexPhaseChange(J) = 2  ! freezing
+          if ( (MassWatLiqTmp(LoopInd1) > 0.0) .and. (TemperatureSoilSnow(LoopInd1) < ConstFreezePoint) ) then
+             IndexPhaseChange(LoopInd1) = 2  ! freezing
           endif
           ! If snow exists, but its thickness is not enough to create a layer
-          if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (J == 1) ) then
-             if ( TemperatureSoilSnow(J) >= ConstFreezePoint ) then
-                IndexPhaseChange(J) = 1
+          if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (LoopInd1 == 1) ) then
+             if ( TemperatureSoilSnow(LoopInd1) >= ConstFreezePoint ) then
+                IndexPhaseChange(LoopInd1) = 1
              endif
           endif
        enddo
 
        ! Calculate the energy surplus and loss for melting and freezing
-       do J = 1, NumSoilLayer
-          if ( IndexPhaseChange(J) > 0 ) then
-             HM(J)  = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-             TemperatureSoilSnow(J) = ConstFreezePoint
+       do LoopInd1 = 1, NumSoilLayer
+          if ( IndexPhaseChange(LoopInd1) > 0 ) then
+             EnergyRes(LoopInd1)           = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+             TemperatureSoilSnow(LoopInd1) = ConstFreezePoint
           endif
-          if ( (IndexPhaseChange(J) == 1) .and. (HM(J) < 0.0) ) then
-             HM(J)    = 0.0
-             IndexPhaseChange(J) = 0
+          if ( (IndexPhaseChange(LoopInd1) == 1) .and. (EnergyRes(LoopInd1) < 0.0) ) then
+             EnergyRes(LoopInd1)        = 0.0
+             IndexPhaseChange(LoopInd1) = 0
           endif
-          if ( (IndexPhaseChange(J) == 2) .and. (HM(J) > 0.0) ) then
-             HM(J)    = 0.0
-             IndexPhaseChange(J) = 0
+          if ( (IndexPhaseChange(LoopInd1) == 2) .and. (EnergyRes(LoopInd1) > 0.0) ) then
+             EnergyRes(LoopInd1)        = 0.0
+             IndexPhaseChange(LoopInd1) = 0
           endif
-          XM(J) = HM(J) * MainTimeStep / ConstLatHeatFusion
+          SnowWaterEquivChg(LoopInd1)   = EnergyRes(LoopInd1) * MainTimeStep / ConstLatHeatFusion
        enddo
 
        ! The rate of melting and freezing for snow without a layer, needs more work.
-       if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (XM(1) > 0.0) ) then
-          TEMP1    = SnowWaterEquiv
-          SnowWaterEquiv    = max( 0.0, TEMP1-XM(1) )
-          PROPOR   = SnowWaterEquiv / TEMP1
-          SnowDepth    = max( 0.0, PROPOR*SnowDepth )
-          SnowDepth    = min( max(SnowDepth,SnowWaterEquiv/500.0), SnowWaterEquiv/50.0 )  ! limit adjustment to a reasonable density
-          HEATR(1) = HM(1) - ConstLatHeatFusion * (TEMP1 - SnowWaterEquiv) / MainTimeStep
-          if ( HEATR(1) > 0.0 ) then
-             XM(1)    = HEATR(1) * MainTimeStep / ConstLatHeatFusion
-             HM(1)    = HEATR(1)
-             IndexPhaseChange(1) = 1
+       if ( (NumSnowLayerNeg == 0) .and. (SnowWaterEquiv > 0.0) .and. (SnowWaterEquivChg(1) > 0.0) ) then
+          SnowWaterEquivPrev = SnowWaterEquiv
+          SnowWaterEquiv     = max(0.0, SnowWaterEquivPrev-SnowWaterEquivChg(1))
+          SnowWaterEquivRa   = SnowWaterEquiv / SnowWaterEquivPrev
+          SnowDepth          = max(0.0, SnowWaterEquivRa*SnowDepth)
+          SnowDepth          = min(max(SnowDepth,SnowWaterEquiv/500.0), SnowWaterEquiv/50.0)  ! limit to a reasonable snow density
+          EnergyResLeft(1)   = EnergyRes(1) - ConstLatHeatFusion * (SnowWaterEquivPrev - SnowWaterEquiv) / MainTimeStep
+          if ( EnergyResLeft(1) > 0.0 ) then
+             SnowWaterEquivChg(1) = EnergyResLeft(1) * MainTimeStep / ConstLatHeatFusion
+             EnergyRes(1)         = EnergyResLeft(1)
+             IndexPhaseChange(1)  = 1
           else
-             XM(1)    = 0.0
-             HM(1)    = 0.0
-             IndexPhaseChange(1) = 0
+             SnowWaterEquivChg(1) = 0.0
+             EnergyRes(1)         = 0.0
+             IndexPhaseChange(1)  = 0
           endif
-          MeltGroundSnow   = max( 0.0, (TEMP1-SnowWaterEquiv) ) / MainTimeStep
-          XMF     = ConstLatHeatFusion * MeltGroundSnow
-          PondSfcThinSnwMelt = TEMP1 - SnowWaterEquiv
+          MeltGroundSnow          = max(0.0, (SnowWaterEquivPrev-SnowWaterEquiv)) / MainTimeStep
+          HeatLhTotPhsChg         = ConstLatHeatFusion * MeltGroundSnow
+          PondSfcThinSnwMelt      = SnowWaterEquivPrev - SnowWaterEquiv
        endif
 
        ! The rate of melting and freezing for glacier ice
-       do J = 1, NumSoilLayer
-          if ( (IndexPhaseChange(J) > 0) .and. (abs(HM(J)) > 0.0) ) then
-             HEATR(J) = 0.0
-             if ( XM(J) > 0.0 ) then
-                MICE(J)  = max( 0.0, WICE0(J)-XM(J) )
-                HEATR(J) = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
-             elseif ( XM(J) < 0.0 ) then
-                MICE(J)  = min( WMASS0(J), WICE0(J)-XM(J) )
-                HEATR(J) = HM(J) - ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
+       do LoopInd1 = 1, NumSoilLayer
+          if ( (IndexPhaseChange(LoopInd1) > 0) .and. (abs(EnergyRes(LoopInd1)) > 0.0) ) then
+             EnergyResLeft(LoopInd1)    = 0.0
+             if ( SnowWaterEquivChg(LoopInd1) > 0.0 ) then
+                MassWatIceTmp(LoopInd1) = max(0.0, MassWatIceInit(LoopInd1)-SnowWaterEquivChg(LoopInd1))
+                EnergyResLeft(LoopInd1) = EnergyRes(LoopInd1) - ConstLatHeatFusion * &
+                                          (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
+             elseif ( SnowWaterEquivChg(LoopInd1) < 0.0 ) then
+                MassWatIceTmp(LoopInd1) = min(MassWatTotInit(LoopInd1), MassWatIceInit(LoopInd1)-SnowWaterEquivChg(LoopInd1))
+                EnergyResLeft(LoopInd1) = EnergyRes(LoopInd1) - ConstLatHeatFusion * &
+                                          (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
              endif
-             MLIQ(J) = max( 0.0, WMASS0(J)-MICE(J) ) ! update liquid water mass
+             MassWatLiqTmp(LoopInd1)    = max(0.0, MassWatTotInit(LoopInd1)-MassWatIceTmp(LoopInd1)) ! update liquid water mass
 
              ! update ice temperature and energy surplus/loss
-             if ( abs(HEATR(J)) > 0.0 ) then
-                TemperatureSoilSnow(J) = TemperatureSoilSnow(J) + PhaseChgFacSoilSnow(J) * HEATR(J)
+             if ( abs(EnergyResLeft(LoopInd1)) > 0.0 ) then
+                TemperatureSoilSnow(LoopInd1) = TemperatureSoilSnow(LoopInd1) + &
+                                                PhaseChgFacSoilSnow(LoopInd1) * EnergyResLeft(LoopInd1)
              endif
-             XMF = XMF + ConstLatHeatFusion * (WICE0(J) - MICE(J)) / MainTimeStep
+             HeatLhTotPhsChg = HeatLhTotPhsChg + &
+                               ConstLatHeatFusion * (MassWatIceInit(LoopInd1) - MassWatIceTmp(LoopInd1)) / MainTimeStep
           endif
        enddo
-       HEATR = 0.0
-       XM    = 0.0
+       EnergyResLeft     = 0.0
+       SnowWaterEquivChg = 0.0
 
        !--- Deal with residuals in ice/soil
 
        ! first remove excess heat by reducing layer temperature
-       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
-          do J = 1, NumSoilLayer
-             if ( TemperatureSoilSnow(J) > ConstFreezePoint ) then
-                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-                do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (TemperatureSoilSnow(K) < ConstFreezePoint) .and. (HEATR(J) > 0.1) ) then
-                      HEATR(K) = (TemperatureSoilSnow(K) - ConstFreezePoint) / PhaseChgFacSoilSnow(K)
-                      if ( abs(HEATR(K)) > HEATR(J) ) then ! LAYER ABSORBS ALL
-                         HEATR(K) = HEATR(K) + HEATR(J)
-                         TemperatureSoilSnow(K)   = ConstFreezePoint + HEATR(K) * PhaseChgFacSoilSnow(K)
-                         HEATR(J) = 0.0
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. &
+            any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
+          do LoopInd1 = 1, NumSoilLayer
+             if ( TemperatureSoilSnow(LoopInd1) > ConstFreezePoint ) then
+                EnergyResLeft(LoopInd1) = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+                do LoopInd2 = 1, NumSoilLayer
+                   if ( (LoopInd1 /= LoopInd2) .and. (TemperatureSoilSnow(LoopInd2) < ConstFreezePoint) .and. &
+                        (EnergyResLeft(LoopInd1) > 0.1) ) then
+                      EnergyResLeft(LoopInd2) = (TemperatureSoilSnow(LoopInd2) - ConstFreezePoint) / &
+                                                PhaseChgFacSoilSnow(LoopInd2)
+                      if ( abs(EnergyResLeft(LoopInd2)) > EnergyResLeft(LoopInd1) ) then ! LAYER ABSORBS ALL
+                         EnergyResLeft(LoopInd2)       = EnergyResLeft(LoopInd2) + EnergyResLeft(LoopInd1)
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint + &
+                                                         EnergyResLeft(LoopInd2) * PhaseChgFacSoilSnow(LoopInd2)
+                         EnergyResLeft(LoopInd1)       = 0.0
                       else
-                         HEATR(J) = HEATR(J) + HEATR(K)
-                         HEATR(K) = 0.0
-                         TemperatureSoilSnow(K)   = ConstFreezePoint
+                         EnergyResLeft(LoopInd1)       = EnergyResLeft(LoopInd1) + EnergyResLeft(LoopInd2)
+                         EnergyResLeft(LoopInd2)       = 0.0
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
                       endif
                    endif
                 enddo
-                TemperatureSoilSnow(J) = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
+                TemperatureSoilSnow(LoopInd1) = ConstFreezePoint + EnergyResLeft(LoopInd1) * PhaseChgFacSoilSnow(LoopInd1)
              endif
           enddo
        endif
 
        ! now remove excess cold by increasing temperture (may not be necessary with above loop)
-       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
-          do J = 1, NumSoilLayer
-             if ( TemperatureSoilSnow(J) < ConstFreezePoint ) then
-                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-                do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (TemperatureSoilSnow(K) > ConstFreezePoint) .and. (HEATR(J) < -0.1) ) then
-                      HEATR(K) = (TemperatureSoilSnow(K) - ConstFreezePoint) / PhaseChgFacSoilSnow(K)
-                      if ( HEATR(K) > abs(HEATR(J)) ) then  ! LAYER ABSORBS ALL
-                         HEATR(K) = HEATR(K) + HEATR(J)
-                         TemperatureSoilSnow(K)   = ConstFreezePoint + HEATR(K) * PhaseChgFacSoilSnow(K)
-                         HEATR(J) = 0.0
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. &
+            any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) ) then
+          do LoopInd1 = 1, NumSoilLayer
+             if ( TemperatureSoilSnow(LoopInd1) < ConstFreezePoint ) then
+                EnergyResLeft(LoopInd1) = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+                do LoopInd2 = 1, NumSoilLayer
+                   if ( (LoopInd1 /= LoopInd2) .and. (TemperatureSoilSnow(LoopInd2) > ConstFreezePoint) .and. &
+                        (EnergyResLeft(LoopInd1) < -0.1) ) then
+                      EnergyResLeft(LoopInd2) = (TemperatureSoilSnow(LoopInd2) - ConstFreezePoint) / &
+                                                PhaseChgFacSoilSnow(LoopInd2)
+                      if ( EnergyResLeft(LoopInd2) > abs(EnergyResLeft(LoopInd1)) ) then  ! LAYER ABSORBS ALL
+                         EnergyResLeft(LoopInd2)       = EnergyResLeft(LoopInd2) + EnergyResLeft(LoopInd1)
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint + &
+                                                         EnergyResLeft(LoopInd2) * PhaseChgFacSoilSnow(LoopInd2)
+                         EnergyResLeft(LoopInd1)       = 0.0
                       else
-                         HEATR(J) = HEATR(J) + HEATR(K)
-                         HEATR(K) = 0.0
-                         TemperatureSoilSnow(K)   = ConstFreezePoint
+                         EnergyResLeft(LoopInd1)       = EnergyResLeft(LoopInd1) + EnergyResLeft(LoopInd2)
+                         EnergyResLeft(LoopInd2)       = 0.0
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
                       endif
                    endif
                 enddo
-                TemperatureSoilSnow(J) = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
+                TemperatureSoilSnow(LoopInd1) = ConstFreezePoint + EnergyResLeft(LoopInd1) * PhaseChgFacSoilSnow(LoopInd1)
              endif
           enddo
        endif
 
        ! now remove excess heat by melting ice
-       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. any(MICE(1:NumSoilLayer) > 0.0) ) then
-          do J = 1, NumSoilLayer
-             if ( TemperatureSoilSnow(J) > ConstFreezePoint ) then
-                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-                XM(J)    = HEATR(J) * MainTimeStep / ConstLatHeatFusion
-                do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (MICE(K) > 0.0) .and. (XM(J) > 0.1) ) then
-                      if ( MICE(K) > XM(J) ) then  ! LAYER ABSORBS ALL
-                         MICE(K) = MICE(K) - XM(J)
-                         XMF     = XMF + ConstLatHeatFusion * XM(J)/MainTimeStep
-                         TemperatureSoilSnow(K)  = ConstFreezePoint
-                         XM(J)   = 0.0
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) > ConstFreezePoint) .and. &
+            any(MassWatIceTmp(1:NumSoilLayer) > 0.0) ) then
+          do LoopInd1 = 1, NumSoilLayer
+             if ( TemperatureSoilSnow(LoopInd1) > ConstFreezePoint ) then
+                EnergyResLeft(LoopInd1) = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+                SnowWaterEquivChg(LoopInd1) = EnergyResLeft(LoopInd1) * MainTimeStep / ConstLatHeatFusion
+                do LoopInd2 = 1, NumSoilLayer
+                   if ( (LoopInd1 /= LoopInd2) .and. (MassWatIceTmp(LoopInd2) > 0.0) .and. &
+                        (SnowWaterEquivChg(LoopInd1) > 0.1) ) then
+                      if ( MassWatIceTmp(LoopInd2) > SnowWaterEquivChg(LoopInd1) ) then  ! LAYER ABSORBS ALL
+                         MassWatIceTmp(LoopInd2)       = MassWatIceTmp(LoopInd2) - SnowWaterEquivChg(LoopInd1)
+                         HeatLhTotPhsChg               = HeatLhTotPhsChg + &
+                                                         ConstLatHeatFusion * SnowWaterEquivChg(LoopInd1)/MainTimeStep
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
+                         SnowWaterEquivChg(LoopInd1)   = 0.0
                       else
-                         XM(J)   = XM(J) - MICE(K)
-                         XMF     = XMF + ConstLatHeatFusion * MICE(K) / MainTimeStep
-                         MICE(K) = 0.0
-                         TemperatureSoilSnow(K)  = ConstFreezePoint
+                         SnowWaterEquivChg(LoopInd1)   = SnowWaterEquivChg(LoopInd1) - MassWatIceTmp(LoopInd2)
+                         HeatLhTotPhsChg               = HeatLhTotPhsChg + &
+                                                         ConstLatHeatFusion * MassWatIceTmp(LoopInd2) / MainTimeStep
+                         MassWatIceTmp(LoopInd2)       = 0.0
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
                       endif
-                      MLIQ(K) = max( 0.0, WMASS0(K)-MICE(K) )
+                      MassWatLiqTmp(LoopInd2) = max(0.0, MassWatTotInit(LoopInd2)-MassWatIceTmp(LoopInd2))
                    endif
                 enddo
-                HEATR(J) = XM(J) * ConstLatHeatFusion / MainTimeStep
-                TemperatureSoilSnow(J)   = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
+                EnergyResLeft(LoopInd1)       = SnowWaterEquivChg(LoopInd1) * ConstLatHeatFusion / MainTimeStep
+                TemperatureSoilSnow(LoopInd1) = ConstFreezePoint + EnergyResLeft(LoopInd1) * PhaseChgFacSoilSnow(LoopInd1)
              endif
           enddo
        endif
 
        ! snow remove excess cold by refreezing liquid (may not be necessary with above loop)
-       if ( any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) .and. any(MLIQ(1:NumSoilLayer) > 0.0) ) then
-          do J = 1, NumSoilLayer
-             if ( TemperatureSoilSnow(J) < ConstFreezePoint ) then
-                HEATR(J) = (TemperatureSoilSnow(J) - ConstFreezePoint) / PhaseChgFacSoilSnow(J)
-                XM(J)    = HEATR(J) * MainTimeStep / ConstLatHeatFusion
-                do K = 1, NumSoilLayer
-                   if ( (J /= K) .and. (MLIQ(K) > 0.0) .and. (XM(J) < -0.1) ) then
-                      if ( MLIQ(K) > abs(XM(J)) ) then  ! LAYER ABSORBS ALL
-                         MICE(K) = MICE(K) - XM(J)
-                         XMF     = XMF + ConstLatHeatFusion * XM(J) / MainTimeStep
-                         TemperatureSoilSnow(K)  = ConstFreezePoint
-                         XM(J)   = 0.0
+       if ( any(TemperatureSoilSnow(1:NumSoilLayer) < ConstFreezePoint) .and. &
+            any(MassWatLiqTmp(1:NumSoilLayer) > 0.0) ) then
+          do LoopInd1 = 1, NumSoilLayer
+             if ( TemperatureSoilSnow(LoopInd1) < ConstFreezePoint ) then
+                EnergyResLeft(LoopInd1) = (TemperatureSoilSnow(LoopInd1) - ConstFreezePoint) / PhaseChgFacSoilSnow(LoopInd1)
+                SnowWaterEquivChg(LoopInd1) = EnergyResLeft(LoopInd1) * MainTimeStep / ConstLatHeatFusion
+                do LoopInd2 = 1, NumSoilLayer
+                   if ( (LoopInd1 /= LoopInd2) .and. (MassWatLiqTmp(LoopInd2) > 0.0) .and. &
+                        (SnowWaterEquivChg(LoopInd1) < -0.1) ) then
+                      if ( MassWatLiqTmp(LoopInd2) > abs(SnowWaterEquivChg(LoopInd1)) ) then  ! LAYER ABSORBS ALL
+                         MassWatIceTmp(LoopInd2)       = MassWatIceTmp(LoopInd2) - SnowWaterEquivChg(LoopInd1)
+                         HeatLhTotPhsChg               = HeatLhTotPhsChg + &
+                                                         ConstLatHeatFusion * SnowWaterEquivChg(LoopInd1) / MainTimeStep
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
+                         SnowWaterEquivChg(LoopInd1)   = 0.0
                       else
-                         XM(J)   = XM(J) + MLIQ(K)
-                         XMF     = XMF - ConstLatHeatFusion * MLIQ(K) / MainTimeStep
-                         MICE(K) = WMASS0(K)
-                         TemperatureSoilSnow(K)  = ConstFreezePoint
+                         SnowWaterEquivChg(LoopInd1)   = SnowWaterEquivChg(LoopInd1) + MassWatLiqTmp(LoopInd2)
+                         HeatLhTotPhsChg               = HeatLhTotPhsChg - &
+                                                         ConstLatHeatFusion * MassWatLiqTmp(LoopInd2) / MainTimeStep
+                         MassWatIceTmp(LoopInd2)       = MassWatTotInit(LoopInd2)
+                         TemperatureSoilSnow(LoopInd2) = ConstFreezePoint
                       endif
-                      MLIQ(K) = max( 0.0, WMASS0(K)-MICE(K) )
+                      MassWatLiqTmp(LoopInd2) = max(0.0, MassWatTotInit(LoopInd2)-MassWatIceTmp(LoopInd2))
                    endif
                 enddo
-                HEATR(J) = XM(J) * ConstLatHeatFusion / MainTimeStep
-                TemperatureSoilSnow(J)   = ConstFreezePoint + HEATR(J) * PhaseChgFacSoilSnow(J)
+                EnergyResLeft(LoopInd1)       = SnowWaterEquivChg(LoopInd1) * ConstLatHeatFusion / MainTimeStep
+                TemperatureSoilSnow(LoopInd1) = ConstFreezePoint + EnergyResLeft(LoopInd1) * PhaseChgFacSoilSnow(LoopInd1)
              endif
           enddo
        endif
@@ -376,18 +401,18 @@ contains
     endif ! OptGlacierTreatment==1
 
     !--- update snow and soil ice and liquid content
-    do J = NumSnowLayerNeg+1, 0     ! snow
-       SnowLiqWater(J) = MLIQ(J)
-       SnowIce(J) = MICE(J)
+    do LoopInd1 = NumSnowLayerNeg+1, 0     ! snow
+       SnowLiqWater(LoopInd1) = MassWatLiqTmp(LoopInd1)
+       SnowIce(LoopInd1)      = MassWatIceTmp(LoopInd1)
     enddo
-    do J = 1, NumSoilLayer       ! glacier ice
+    do LoopInd1 = 1, NumSoilLayer       ! glacier ice
        if ( OptGlacierTreatment == 1 ) then
-          SoilLiqWater(J) = MLIQ(J) / (1000.0 * ThicknessSnowSoilLayer(J))
-          SoilLiqWater(J) = max( 0.0, min(1.0,SoilLiqWater(J)) )
+          SoilLiqWater(LoopInd1) = MassWatLiqTmp(LoopInd1) / (1000.0 * ThicknessSnowSoilLayer(LoopInd1))
+          SoilLiqWater(LoopInd1) = max(0.0, min(1.0,SoilLiqWater(LoopInd1)))
        elseif ( OptGlacierTreatment == 2 ) then
-          SoilLiqWater(J) = 0.0             ! ice, assume all frozen forever
+          SoilLiqWater(LoopInd1) = 0.0             ! ice, assume all frozen forever
        endif
-       SoilMoisture(J) = 1.0
+       SoilMoisture(LoopInd1)    = 1.0
     enddo
 
     end associate
