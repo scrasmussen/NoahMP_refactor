@@ -26,7 +26,7 @@ clean:
 NoahmpGroundwaterInitMod.o:../../hrldas/Utility_routines/module_domain.o \
                             ../utility/Machine.o \
                             ../src/NoahmpIOVarType.o \
-                            ../src/module_sf_noahmp_groundwater.o 
+                            ../src/GroundWaterMmfMod.o 
                              
 NoahmpSnowInitMod.o:../utility/Machine.o \
                     ../src/NoahmpIOVarType.o

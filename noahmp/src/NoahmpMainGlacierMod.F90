@@ -3,7 +3,7 @@ module NoahmpMainGlacierMod
 !!! Main NoahMP glacier module including all glacier processes
 !!! atmos forcing -> precip heat advect -> main energy -> main water -> balance check
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
   use AtmosForcingMod,                   only : ProcessAtmosForcing
@@ -11,7 +11,8 @@ module NoahmpMainGlacierMod
   use PrecipitationHeatAdvectGlacierMod, only : PrecipitationHeatAdvectGlacier
   use EnergyMainGlacierMod,              only : EnergyMainGlacier
   use WaterMainGlacierMod,               only : WaterMainGlacier
-  use BalanceErrorCheckGlacierMod,       only : BalanceWaterInitGlacier, BalanceWaterCheckGlacier, BalanceEnergyCheckGlacier 
+  use BalanceErrorCheckGlacierMod,       only : BalanceWaterInitGlacier, &
+                                                BalanceWaterCheckGlacier, BalanceEnergyCheckGlacier 
  
   implicit none
 
@@ -22,17 +23,12 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: NOAHMP_SFLX
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
     type(noahmp_type), intent(inout) :: noahmp
-
-! --------------------------------------------------------------------
-!    associate(                                                        &
-!             )
-! ----------------------------------------------------------------------
 
     !---------------------------------------------------------------------
     ! Atmospheric forcing processing
@@ -75,8 +71,6 @@ contains
     !---------------------------------------------------------------------
     ! End of all NoahMP glacier processes
     !--------------------------------------------------------------------- 
-
-!    end associate
 
   end subroutine NoahmpMainGlacier
 

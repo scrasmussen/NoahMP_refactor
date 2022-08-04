@@ -10,12 +10,12 @@ module MatrixSolverTriDiagonalMod
 
 contains
 
-  subroutine MatrixSolverTriDiagonal(P, A, B, C, D, DELTA, NTOP, NumSoilLayer, NumSnowLayerMax)
+  subroutine MatrixSolverTriDiagonal(P, A, B, C, D, Delta, IndTopLayer, NumSoilLayer, NumSnowLayerMax)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: ROSR12
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 ! INVERT (SOLVE) THE TRI-DIAGONAL MATRIX PROBLEM SHOWN BELOW:
 ! ###                                            ### ###  ###   ###  ###
@@ -36,11 +36,11 @@ contains
     implicit none
 
 ! in & out variables
-    integer               , intent(in)    :: NTOP          ! top layer index: soil layer starts from NTOP = 1
-    integer               , intent(in)    :: NumSoilLayer      ! number of soil layers
-    integer               , intent(in)    :: NumSnowLayerMax   ! maximum number of snow layers
-    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(in)    :: A, B, D
-    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(inout) :: C,P,DELTA
+    integer               , intent(in)    :: IndTopLayer          ! top layer index: soil layer starts from IndTopLayer = 1
+    integer               , intent(in)    :: NumSoilLayer         ! number of soil layers
+    integer               , intent(in)    :: NumSnowLayerMax      ! maximum number of snow layers
+    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(in)    :: A, B, D    ! Tri-diagonal matrix elements
+    real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(inout) :: C,P,Delta  ! Tri-diagonal matrix elements
 
 ! local variables
     integer  :: K, KK   ! loop indices
@@ -48,25 +48,24 @@ contains
 
     ! INITIALIZE EQN COEF C FOR THE LOWEST SOIL LAYER
     C (NumSoilLayer) = 0.0
-    P (NTOP) = - C (NTOP) / B (NTOP)
+    P (IndTopLayer)  = - C (IndTopLayer) / B (IndTopLayer)
 
     ! SOLVE THE COEFS FOR THE 1ST SOIL LAYER
-    DELTA (NTOP) = D (NTOP) / B (NTOP)
+    Delta (IndTopLayer) = D (IndTopLayer) / B (IndTopLayer)
 
     ! SOLVE THE COEFS FOR SOIL LAYERS 2 THRU NumSoilLayer
-    do K = NTOP+1, NumSoilLayer
+    do K = IndTopLayer+1, NumSoilLayer
        P (K)     = - C (K) * ( 1.0 / (B (K) + A (K) * P (K -1)) )
-       DELTA (K) = (D (K) - A (K) * DELTA (K -1)) * (1.0 / (B (K) + A (K) &
-                   * P (K -1)))
+       Delta (K) = (D (K) - A (K) * Delta (K -1)) * (1.0 / (B (K) + A (K) * P (K -1)))
     enddo
 
-    ! SET P TO DELTA FOR LOWEST SOIL LAYER
-    P (NumSoilLayer) = DELTA (NumSoilLayer)
+    ! SET P TO Delta FOR LOWEST SOIL LAYER
+    P (NumSoilLayer) = Delta (NumSoilLayer)
 
     ! ADJUST P FOR SOIL LAYERS 2 THRU NumSoilLayer
-    do K = NTOP+1, NumSoilLayer
-       KK     = NumSoilLayer - K + (NTOP-1) + 1
-       P (KK) = P (KK) * P (KK +1) + DELTA (KK)
+    do K = IndTopLayer+1, NumSoilLayer
+       KK     = NumSoilLayer - K + (IndTopLayer-1) + 1
+       P (KK) = P (KK) * P (KK +1) + Delta (KK)
     enddo
 
   end subroutine MatrixSolverTriDiagonal

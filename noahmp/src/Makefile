@@ -108,7 +108,7 @@ OBJS = ConstantDefineMod.o \
        IrrigationPrepareMod.o \
        BalanceErrorCheckMod.o \
        GeneralInitMod.o \
-       module_sf_noahmp_groundwater.o \
+       GroundWaterMmfMod.o \
        PedoTransferSR2006.o \
        BalanceErrorCheckGlacierMod.o \
        EnergyMainGlacierMod.o \
@@ -144,13 +144,13 @@ OBJS = ConstantDefineMod.o \
 
 all:	$(OBJS)
 
-module_sf_noahmp_groundwater.o: module_sf_noahmp_groundwater.F90
+GroundWaterMmfMod.o: GroundWaterMmfMod.F90
 	@echo ""
-	$(RM) module_sf_noahmp_groundwater.f90
+	$(RM) GroundWaterMmfMod.f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F90 > $(*).f90
 	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I ../../hrldas/MPP -I. \
 	-I../Utility_routines -I../utility $(NETCDFMOD) $(*).f90
-	$(RM) module_sf_noahmp_groundwater.f90
+	$(RM) GroundWaterMmfMod.f90
 	@echo ""
 
 .F90.o:
@@ -326,7 +326,7 @@ BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o C
 IrrigationPrepareMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o IrrigationTriggerMod.o
 BalanceErrorCheckMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GeneralInitMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-module_sf_noahmp_groundwater.o: ../utility/Machine.o NoahmpVarType.o
+GroundWaterMmfMod.o: ../utility/Machine.o NoahmpVarType.o
 BalanceErrorCheckGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 EnergyMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowCoverGlacierMod.o \
                         GroundRoughnessPropertyGlacierMod.o GroundThermalPropertyGlacierMod.o \

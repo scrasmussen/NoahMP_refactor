@@ -20,7 +20,7 @@ contains
 ! Refactered code: P. Valayamkunnath, C. He & refactor team (April 08 2022)
 ! ------------------------------------------------------------------------- 
 
-  use module_sf_noahmp_groundwater, only : LATERALFLOW
+  use GroundWaterMmfMod, only : LATERALFLOW
   use module_domain, only: domain
   
 #if (EM_CORE == 1)

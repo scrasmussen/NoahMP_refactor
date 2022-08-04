@@ -6,7 +6,7 @@ module module_NoahMP_hrldas_driver
   USE NoahmpInitMainMod
   USE NoahmpGroundwaterInitMod
   USE NoahmpDriverMainMod
-  USE module_sf_noahmp_groundwater, only : WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
+  USE GroundWaterMmfMod, only : WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
   USE NoahmpUrbanDriverMainMod, only : noahmp_urban
   USE module_sf_urban,     only : urban_param_init, urban_var_init
   USE module_date_utilities

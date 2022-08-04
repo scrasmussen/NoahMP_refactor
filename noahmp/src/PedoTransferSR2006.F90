@@ -10,7 +10,7 @@ module PedoTransferSR2006
 
 contains
 
-  subroutine PedoTransfer_SR2006(NoahmpIO, noahmp, sand, clay, orgm)
+  subroutine PedoTransfer_SR2006(NoahmpIO, noahmp, Sand, Clay, Orgm)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: PEDOTRANSFER_SR2006
@@ -23,12 +23,9 @@ contains
     type(NoahmpIO_type), intent(inout) :: NoahmpIO
     type(noahmp_type),   intent(inout) :: noahmp
 
-    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil) &
-                                        , intent(inout)     :: SAND
-    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil) &
-                                        , intent(inout)     :: CLAY
-    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil) &
-                                        , intent(inout)     :: ORGM
+    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil), intent(inout) :: Sand
+    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil), intent(inout) :: Clay
+    real(kind=kind_noahmp), dimension(1:NoahmpIO%nsoil), intent(inout) :: Orgm
 
     ! local
     integer                                                 :: k
@@ -107,31 +104,31 @@ contains
     quartz  = 0.0
     
     do k = 1,4
-      if(sand(k) <= 0 .or. clay(k) <= 0) then
-         sand(k) = 0.41
-         clay(k) = 0.18
+      if(Sand(k) <= 0 .or. Clay(k) <= 0) then
+         Sand(k) = 0.41
+         Clay(k) = 0.18
       end if
-      if(orgm(k) <= 0 ) orgm(k) = 0.0
+      if(Orgm(k) <= 0 ) Orgm(k) = 0.0
     end do
         
-    theta_1500t =   sr2006_theta_1500t_a*sand       &
-                  + sr2006_theta_1500t_b*clay       &
-                  + sr2006_theta_1500t_c*orgm       &
-                  + sr2006_theta_1500t_d*sand*orgm  &
-                  + sr2006_theta_1500t_e*clay*orgm  &
-                  + sr2006_theta_1500t_f*sand*clay  &
+    theta_1500t =   sr2006_theta_1500t_a*Sand       &
+                  + sr2006_theta_1500t_b*Clay       &
+                  + sr2006_theta_1500t_c*Orgm       &
+                  + sr2006_theta_1500t_d*Sand*Orgm  &
+                  + sr2006_theta_1500t_e*Clay*Orgm  &
+                  + sr2006_theta_1500t_f*Sand*Clay  &
                   + sr2006_theta_1500t_g
 
     theta_1500  =   theta_1500t                      &
                   + sr2006_theta_1500_a*theta_1500t  &
                   + sr2006_theta_1500_b
 
-    theta_33t   =   sr2006_theta_33t_a*sand       &
-                  + sr2006_theta_33t_b*clay       &
-                  + sr2006_theta_33t_c*orgm       &
-                  + sr2006_theta_33t_d*sand*orgm  &
-                  + sr2006_theta_33t_e*clay*orgm  &
-                  + sr2006_theta_33t_f*sand*clay  &
+    theta_33t   =   sr2006_theta_33t_a*Sand       &
+                  + sr2006_theta_33t_b*Clay       &
+                  + sr2006_theta_33t_c*Orgm       &
+                  + sr2006_theta_33t_d*Sand*Orgm  &
+                  + sr2006_theta_33t_e*Clay*Orgm  &
+                  + sr2006_theta_33t_f*Sand*Clay  &
                   + sr2006_theta_33t_g
 
     theta_33    =   theta_33t                              &
@@ -139,24 +136,24 @@ contains
                   + sr2006_theta_33_b*theta_33t            &
                   + sr2006_theta_33_c
 
-    theta_s33t  =   sr2006_theta_s33t_a*sand      &
-                  + sr2006_theta_s33t_b*clay      &
-                  + sr2006_theta_s33t_c*orgm      &
-                  + sr2006_theta_s33t_d*sand*orgm &
-                  + sr2006_theta_s33t_e*clay*orgm &
-                  + sr2006_theta_s33t_f*sand*clay &
+    theta_s33t  =   sr2006_theta_s33t_a*Sand      &
+                  + sr2006_theta_s33t_b*Clay      &
+                  + sr2006_theta_s33t_c*Orgm      &
+                  + sr2006_theta_s33t_d*Sand*Orgm &
+                  + sr2006_theta_s33t_e*Clay*Orgm &
+                  + sr2006_theta_s33t_f*Sand*Clay &
                   + sr2006_theta_s33t_g
 
     theta_s33   = theta_s33t                       &
                   + sr2006_theta_s33_a*theta_s33t  &
                   + sr2006_theta_s33_b
 
-    psi_et      =   sr2006_psi_et_a*sand           &
-                  + sr2006_psi_et_b*clay           &
+    psi_et      =   sr2006_psi_et_a*Sand           &
+                  + sr2006_psi_et_b*Clay           &
                   + sr2006_psi_et_c*theta_s33      &
-                  + sr2006_psi_et_d*sand*theta_s33 &
-                  + sr2006_psi_et_e*clay*theta_s33 &
-                  + sr2006_psi_et_f*sand*clay      &
+                  + sr2006_psi_et_d*Sand*theta_s33 &
+                  + sr2006_psi_et_e*Clay*theta_s33 &
+                  + sr2006_psi_et_f*Sand*Clay      &
                   + sr2006_psi_et_g
  
     psi_e       =   psi_et                        &
@@ -168,13 +165,13 @@ contains
     smcref = theta_33
     smcmax = theta_33                     &
              + theta_s33                  &
-             + sr2006_smcmax_a*sand &
+             + sr2006_smcmax_a*Sand &
              + sr2006_smcmax_b
 
     bexp   = 3.816712826 / (log(theta_33) - log(theta_1500) )
     psisat = psi_e
     dksat  = 1930.0 * (smcmax - theta_33) ** (3.0 - 1.0/bexp)
-    quartz = sand
+    quartz = Sand
     
 ! Units conversion
     
@@ -196,15 +193,15 @@ contains
     dwsat  = max(1.e-6,min(dwsat,   3.e-5))
     quartz = max(0.05 ,min(quartz,  0.95 ))
 
-    noahmp%water%param%SoilMoistureWilt = smcwlt  
-    noahmp%water%param%SoilMoistureFieldCap = smcref    
-    noahmp%water%param%SoilMoistureSat = smcmax    
-    noahmp%water%param%SoilMoistureDry = smcdry    
-    noahmp%water%param%SoilExpCoeffB   = bexp    
-    noahmp%water%param%SoilMatPotentialSat = psisat    
-    noahmp%water%param%SoilWatConductivitySat  = dksat     
-    noahmp%water%param%SoilWatDiffusivitySat = dwsat
-    noahmp%energy%param%SoilQuartzFrac = quartz     
+    noahmp%water%param%SoilMoistureWilt       = smcwlt  
+    noahmp%water%param%SoilMoistureFieldCap   = smcref    
+    noahmp%water%param%SoilMoistureSat        = smcmax    
+    noahmp%water%param%SoilMoistureDry        = smcdry    
+    noahmp%water%param%SoilExpCoeffB          = bexp    
+    noahmp%water%param%SoilMatPotentialSat    = psisat    
+    noahmp%water%param%SoilWatConductivitySat = dksat     
+    noahmp%water%param%SoilWatDiffusivitySat  = dwsat
+    noahmp%energy%param%SoilQuartzFrac        = quartz     
 
     end associate
 

@@ -12,17 +12,17 @@ module ResistanceAboveCanopyChen97Mod
 
 contains
 
-  subroutine ResistanceAboveCanopyChen97(noahmp, ITER)
+  subroutine ResistanceAboveCanopyChen97(noahmp, IterationInd)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: SFCDIF2 for vegetated portion
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
-    integer               , intent(in   ) :: ITER         ! iteration index
+    integer               , intent(in   ) :: IterationInd     ! iteration index
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variables
@@ -72,21 +72,21 @@ contains
     PSPHS(YY) = 5.0 * YY
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              ZilitinkevichCoeff            => noahmp%energy%param%ZilitinkevichCoeff            ,& ! in,    Calculate roughness length of heat
-              RefHeightAboveGrd             => noahmp%energy%state%RefHeightAboveGrd            ,& ! in,    reference height [m] above ground
-              TemperaturePotRefHeight            => noahmp%energy%state%TemperaturePotRefHeight           ,& ! in,    potential temp at reference height (k)
-              WindSpdRefHeight          => noahmp%energy%state%WindSpdRefHeight              ,& ! in,    wind speed (m/s) at reference height
-              RoughLenMomSfc              => noahmp%energy%state%RoughLenMomSfc             ,& ! in,    roughness length, momentum, (m), surface
-              TemperatureCanopyAir            => noahmp%energy%state%TemperatureCanopyAir             ,& ! in,    canopy air temperature (K)
-              ExchCoeffMomAbvCan            => noahmp%energy%state%ExchCoeffMomAbvCan             ,& ! inout, exchange coefficient for momentum, above ZeroPlaneDisp, vegetated
-              ExchCoeffShAbvCan            => noahmp%energy%state%ExchCoeffShAbvCan             ,& ! inout, exchange coefficient for heat, above ZeroPlaneDisp, vegetated
-              MoStabParaAbvCan            => noahmp%energy%state%MoStabParaAbvCan            ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, vegetated
-              FrictionVelVertVeg          => noahmp%energy%state%FrictionVelVertVeg          ,& ! inout, friction velocity in vertical direction (m/s), vegetated
-              FrictionVelVeg           => noahmp%energy%state%FrictionVelVeg             ,& ! inout, friction velocity (m/s), vegetated
-              ResistanceMomAbvCan            => noahmp%energy%state%ResistanceMomAbvCan            ,& ! out,   aerodynamic resistance for momentum (s/m), above canopy
-              ResistanceShAbvCan            => noahmp%energy%state%ResistanceShAbvCan            ,& ! out,   aerodynamic resistance for sensible heat (s/m), above canopy
-              ResistanceLhAbvCan            => noahmp%energy%state%ResistanceLhAbvCan             & ! out,   aerodynamic resistance for water vapor (s/m), above canopy
+    associate(                                                                        &
+              ZilitinkevichCoeff      => noahmp%energy%param%ZilitinkevichCoeff      ,& ! in,    Calculate roughness length of heat
+              RefHeightAboveGrd       => noahmp%energy%state%RefHeightAboveGrd       ,& ! in,    reference height [m] above ground
+              TemperaturePotRefHeight => noahmp%energy%state%TemperaturePotRefHeight ,& ! in,    potential temp at reference height [K]
+              WindSpdRefHeight        => noahmp%energy%state%WindSpdRefHeight        ,& ! in,    wind speed [m/s] at reference height
+              RoughLenMomSfc          => noahmp%energy%state%RoughLenMomSfc          ,& ! in,    roughness length [m], momentum, surface
+              TemperatureCanopyAir    => noahmp%energy%state%TemperatureCanopyAir    ,& ! in,    canopy air temperature [K]
+              ExchCoeffMomAbvCan      => noahmp%energy%state%ExchCoeffMomAbvCan      ,& ! inout, exchange coeff [m/s] for momentum, above ZeroPlaneDisp, vegetated
+              ExchCoeffShAbvCan       => noahmp%energy%state%ExchCoeffShAbvCan       ,& ! inout, exchange coeff [m/s] for heat, above ZeroPlaneDisp, vegetated
+              MoStabParaAbvCan        => noahmp%energy%state%MoStabParaAbvCan        ,& ! inout, Monin-Obukhov stability (z/L), above ZeroPlaneDisp, vegetated
+              FrictionVelVertVeg      => noahmp%energy%state%FrictionVelVertVeg      ,& ! inout, friction velocity [m/s] in vertical direction, vegetated
+              FrictionVelVeg          => noahmp%energy%state%FrictionVelVeg          ,& ! inout, friction velocity [m/s], vegetated
+              ResistanceMomAbvCan     => noahmp%energy%state%ResistanceMomAbvCan     ,& ! out,   aerodynamic resistance for momentum [s/m], above canopy
+              ResistanceShAbvCan      => noahmp%energy%state%ResistanceShAbvCan      ,& ! out,   aerodynamic resistance for sensible heat [s/m], above canopy
+              ResistanceLhAbvCan      => noahmp%energy%state%ResistanceLhAbvCan       & ! out,   aerodynamic resistance for water vapor [s/m], above canopy
              )
 ! ----------------------------------------------------------------------
 
@@ -101,50 +101,50 @@ contains
     DTHV  = TemperaturePotRefHeight - TemperatureCanopyAir
 
     ! BELJARS correction of friction velocity u*
-    DU2   = max( WindSpdRefHeight*WindSpdRefHeight, EPSU2 )
+    DU2   = max(WindSpdRefHeight*WindSpdRefHeight, EPSU2)
     BTGH  = BTG * HPBL
-    if ( ITER == 1 ) then
-       if ( BTGH*ExchCoeffShAbvCan*DTHV /= 0.0 ) then
-          FrictionVelVertVeg = WWST2 * abs(BTGH * ExchCoeffShAbvCan * DTHV)**(2.0/3.0)
+    if ( IterationInd == 1 ) then
+       if ( (BTGH*ExchCoeffShAbvCan*DTHV) /= 0.0 ) then
+          FrictionVelVertVeg = WWST2 * abs(BTGH*ExchCoeffShAbvCan*DTHV)**(2.0/3.0)
        else
           FrictionVelVertVeg = 0.0
        endif
-       FrictionVelVeg = max( sqrt(ExchCoeffMomAbvCan * sqrt(DU2+FrictionVelVertVeg)), EPSUST )
-       MoStabParaAbvCan  = ELFC * ExchCoeffShAbvCan * DTHV / FrictionVelVeg**3
+       FrictionVelVeg        = max(sqrt(ExchCoeffMomAbvCan*sqrt(DU2+FrictionVelVertVeg)), EPSUST)
+       MoStabParaAbvCan      = ELFC * ExchCoeffShAbvCan * DTHV / FrictionVelVeg**3
     endif
 
     ! ZILITINKEVITCH approach for ZT
-    ZT    = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelVeg*RoughLenMomSfc)) * RoughLenMomSfc )
+    ZT    = max(1.0e-6, exp(ZILFC*sqrt(FrictionVelVeg*RoughLenMomSfc))*RoughLenMomSfc)
     ZSLU  = RefHeightAboveGrd + ZU
     ZSLT  = RefHeightAboveGrd + ZT
-    RLOGU = log(ZSLU / ZU)
-    RLOGT = log(ZSLT / ZT)
+    RLOGU = log(ZSLU/ZU)
+    RLOGT = log(ZSLT/ZT)
 
     ! Monin-Obukhov length scale
-    ZETALT = max( ZSLT*MoStabParaAbvCan, ZTMIN )
-    MoStabParaAbvCan   = ZETALT / ZSLT
-    ZETALU = ZSLU * MoStabParaAbvCan
-    ZETAU  = ZU * MoStabParaAbvCan
-    ZETAT  = ZT * MoStabParaAbvCan
+    ZETALT           = max(ZSLT*MoStabParaAbvCan, ZTMIN)
+    MoStabParaAbvCan = ZETALT / ZSLT
+    ZETALU           = ZSLU * MoStabParaAbvCan
+    ZETAU            = ZU * MoStabParaAbvCan
+    ZETAT            = ZT * MoStabParaAbvCan
     if ( ILECH == 0 ) then
        if ( MoStabParaAbvCan < 0.0 ) then
           XLU4 = 1.0 - 16.0 * ZETALU
           XLT4 = 1.0 - 16.0 * ZETALT
           XU4  = 1.0 - 16.0 * ZETAU
           XT4  = 1.0 - 16.0 * ZETAT
-          XLU  = sqrt( sqrt(XLU4) )
-          XLT  = sqrt( sqrt(XLT4) )
-          XU   = sqrt( sqrt(XU4) )
-          XT   = sqrt( sqrt(XT4) )
+          XLU  = sqrt(sqrt(XLU4))
+          XLT  = sqrt(sqrt(XLT4))
+          XU   = sqrt(sqrt(XU4))
+          XT   = sqrt(sqrt(XT4))
           PSMZ = PSPMU(XU)
           SIMM = PSPMU(XLU) - PSMZ + RLOGU
           PSHZ = PSPHU(XT)
           SIMH = PSPHU(XLT) - PSHZ + RLOGT
        else
-          ZETALU = min( ZETALU, ZTMAX )
-          ZETALT = min( ZETALT, ZTMAX )
-          ZETAU  = min( ZETAU, ZTMAX/(ZSLU/ZU) )   ! Barlage: add limit on ZETAU/ZETAT
-          ZETAT  = min( ZETAT, ZTMAX/(ZSLT/ZT) )   ! Barlage: prevent SIMM/SIMH < 0
+          ZETALU = min(ZETALU, ZTMAX)
+          ZETALT = min(ZETALT, ZTMAX)
+          ZETAU  = min(ZETAU, ZTMAX/(ZSLU/ZU))   ! Barlage: add limit on ZETAU/ZETAT
+          ZETAT  = min(ZETAT, ZTMAX/(ZSLT/ZT))   ! Barlage: prevent SIMM/SIMH < 0
           PSMZ   = PSPMS(ZETAU)
           SIMM   = PSPMS(ZETALU) - PSMZ + RLOGU
           PSHZ   = PSPHS(ZETAT)
@@ -157,8 +157,8 @@ contains
           PSHZ = PSLHU(ZETAT)
           SIMH = PSLHU(ZETALT) - PSHZ + RLOGT
        else
-          ZETALU = min( ZETALU, ZTMAX )
-          ZETALT = min( ZETALT, ZTMAX )
+          ZETALU = min(ZETALU, ZTMAX)
+          ZETALT = min(ZETALT, ZTMAX)
           PSMZ   = PSLMS(ZETAU)
           SIMM   = PSLMS(ZETALU) - PSMZ + RLOGU
           PSHZ   = PSLHS(ZETAT)
@@ -167,23 +167,23 @@ contains
     endif
 
     ! BELJARS correction of friction velocity u*
-    FrictionVelVeg = max( sqrt(ExchCoeffMomAbvCan * sqrt(DU2+ FrictionVelVertVeg)), EPSUST )
+    FrictionVelVeg = max(sqrt(ExchCoeffMomAbvCan*sqrt(DU2+FrictionVelVertVeg)), EPSUST)
 
     ! ZILITINKEVITCH fix for ZT
-    ZT     = max( 1.0e-6, exp(ZILFC * sqrt(FrictionVelVeg * RoughLenMomSfc)) * RoughLenMomSfc )
+    ZT     = max(1.0e-6, exp(ZILFC*sqrt(FrictionVelVeg*RoughLenMomSfc))*RoughLenMomSfc)
     ZSLT   = RefHeightAboveGrd + ZT
-    RLOGT  = log(ZSLT / ZT)
+    RLOGT  = log(ZSLT/ZT)
     USTARK = FrictionVelVeg * VKRM
 
     ! avoid tangent linear problems near zero
     if ( SIMM < 1.0e-6 ) SIMM = 1.0e-6   ! Limit stability function
-    ExchCoeffMomAbvCan = max( USTARK/SIMM, CXCH )
+    ExchCoeffMomAbvCan = max(USTARK/SIMM, CXCH)
     if ( SIMH < 1.0e-6 ) SIMH = 1.0e-6   ! Limit stability function
-    ExchCoeffShAbvCan = max( USTARK/SIMH, CXCH )
+    ExchCoeffShAbvCan  = max(USTARK/SIMH, CXCH)
 
     ! update vertical friction velocity w*
-    if ( BTGH*ExchCoeffShAbvCan*DTHV /= 0.0 ) then
-       FrictionVelVertVeg = WWST2 * abs(BTGH * ExchCoeffShAbvCan * DTHV)**(2.0/3.0)
+    if ( (BTGH*ExchCoeffShAbvCan*DTHV) /= 0.0 ) then
+       FrictionVelVertVeg = WWST2 * abs(BTGH*ExchCoeffShAbvCan*DTHV)**(2.0/3.0)
     else
        FrictionVelVertVeg = 0.0
     endif
@@ -194,13 +194,13 @@ contains
     MoStabParaAbvCan = RLMA
 
     ! Undo the multiplication by windspeed that applies to exchange coeff
-    ExchCoeffShAbvCan = ExchCoeffShAbvCan / WindSpdRefHeight
-    ExchCoeffMomAbvCan = ExchCoeffMomAbvCan / WindSpdRefHeight
+    ExchCoeffShAbvCan   = ExchCoeffShAbvCan / WindSpdRefHeight
+    ExchCoeffMomAbvCan  = ExchCoeffMomAbvCan / WindSpdRefHeight
 
     ! compute aerodynamic resistance
-    ResistanceMomAbvCan = max( 1.0, 1.0 / (ExchCoeffMomAbvCan*WindSpdRefHeight) )
-    ResistanceShAbvCan = max( 1.0, 1.0 / (ExchCoeffShAbvCan*WindSpdRefHeight) )
-    ResistanceLhAbvCan = ResistanceShAbvCan
+    ResistanceMomAbvCan = max(1.0, 1.0/(ExchCoeffMomAbvCan*WindSpdRefHeight))
+    ResistanceShAbvCan  = max(1.0, 1.0/(ExchCoeffShAbvCan*WindSpdRefHeight))
+    ResistanceLhAbvCan  = ResistanceShAbvCan
 
     end associate
 

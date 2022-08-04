@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: None (embedded in ENERGY_GLACIER subroutine)
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -23,15 +23,15 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
+    associate(                                                             &
               PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight ,& ! in,  air pressure [Pa] at reference height
-              LatHeatVapGrd         => noahmp%energy%state%LatHeatVapGrd         ,& ! out,   latent heat of vaporization/subli (j/kg), ground
-              PsychConstGrd          => noahmp%energy%state%PsychConstGrd           & ! out,   psychrometric constant (pa/K), ground
+              LatHeatVapGrd        => noahmp%energy%state%LatHeatVapGrd   ,& ! out, latent heat of vaporization/subli [J/kg], ground
+              PsychConstGrd        => noahmp%energy%state%PsychConstGrd    & ! out, psychrometric constant [Pa/K], ground
              )
 ! ----------------------------------------------------------------------
 
     LatHeatVapGrd = ConstLatHeatSublim
-    PsychConstGrd  = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LatHeatVapGrd)
+    PsychConstGrd = ConstHeatCapacAir * PressureAirRefHeight / (0.622 * LatHeatVapGrd)
 
     end associate
 

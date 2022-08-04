@@ -1,4 +1,4 @@
-MODULE module_sf_noahmp_groundwater
+module GroundWaterMmfMod
 !===============================================================================
 ! Module to calculate lateral groundwater flow and the flux between groundwater and rivers
 ! plus the routine to update soil moisture and water table due to those two fluxes
@@ -13,9 +13,9 @@ MODULE module_sf_noahmp_groundwater
 
    implicit none
 
-CONTAINS
+contains
 
-  SUBROUTINE WTABLE_mmf_noahmp (NoahmpIO  ,NSOIL    ,XLAND   ,XICE    ,XICE_THRESHOLD,&
+  subroutine WTABLE_mmf_noahmp (NoahmpIO  ,NSOIL    ,XLAND   ,XICE    ,XICE_THRESHOLD,&
                                 ISICE     ,ISLTYP   ,SMOISEQ ,DZS     ,WTDDT         ,& !in
                                 FDEPTH    ,AREA     ,TOPO    ,ISURBAN ,IVGTYP        ,& !in
                                 RIVERCOND ,RIVERBED ,EQWTD   ,PEXP                   ,& !in
@@ -206,10 +206,12 @@ CONTAINS
        ENDDO
     ENDDO
 
-  END  SUBROUTINE WTABLE_mmf_noahmp
+  end subroutine WTABLE_mmf_noahmp
+
+
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
-  SUBROUTINE LATERALFLOW  (NoahmpIO, ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
+  subroutine LATERALFLOW  (NoahmpIO, ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA &
                            ,ids,ide,jds,jde,kds,kde                                   &
                            ,ims,ime,jms,jme,kms,kme                                   &
                            ,its,ite,jts,jte,kts,kte                                   )
@@ -363,10 +365,12 @@ CONTAINS
     qlat = qlat_h(ims:ime, jms:jme)
 #endif
  
-  END  SUBROUTINE LATERALFLOW
+  end subroutine LATERALFLOW
+
+
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
-  SUBROUTINE UPDATEWTD  (NSOIL,  DZS,  ZSOIL ,SMCEQ                ,& !in
+  subroutine UPDATEWTD  (NSOIL,  DZS,  ZSOIL ,SMCEQ                ,& !in
                          SMCMAX, SMCWLT, PSISAT, BEXP ,ILOC ,JLOC  ,& !in
                          TOTWATER, WTD ,SMC, SH2O ,SMCWTD          ,& !inout
                          QSPRING                                 )  !out
@@ -674,8 +678,8 @@ ENDIF
          SH2O = SMC - SICE
 
 
-END  SUBROUTINE UPDATEWTD
+  end subroutine UPDATEWTD
 
 ! ----------------------------------------------------------------------
 
-END MODULE module_sf_noahmp_groundwater
+END MODULE GroundWaterMmfMod

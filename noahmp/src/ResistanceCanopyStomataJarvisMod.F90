@@ -21,102 +21,104 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: CANRES
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
-    integer          , intent(in   ) :: IndexShade   ! index for sunlit/shaded (0=sunlit;1=shaded)
+    integer          , intent(in   ) :: IndexShade            ! index for sunlit/shaded (0=sunlit;1=shaded)
     type(noahmp_type), intent(inout) :: noahmp
 
-! local variable
-    real(kind=kind_noahmp)           :: RCQ          ! canopy resistance multiplier
-    real(kind=kind_noahmp)           :: RCS          ! canopy resistance multiplier
-    real(kind=kind_noahmp)           :: RCT          ! canopy resistance multiplier
-    real(kind=kind_noahmp)           :: FF
-    real(kind=kind_noahmp)           :: Q2           ! water vapor mixing ratio (kg/kg)
-    real(kind=kind_noahmp)           :: Q2SAT        ! saturation Q2
-    real(kind=kind_noahmp)           :: DQSDT2       ! d(Q2SAT)/d(T)
+! local variables
+    real(kind=kind_noahmp)           :: ResistanceVapDef      ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: ResistanceSolar       ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: ResistanceTemp        ! canopy resistance multiplier
+    real(kind=kind_noahmp)           :: RadFac                ! solar radiation factor for resistance
+    real(kind=kind_noahmp)           :: SpecHumidityTmp       ! specific humidity [kg/kg]
+    real(kind=kind_noahmp)           :: SpecHumiditySat       ! saturation SpecHumidityTmp
+    real(kind=kind_noahmp)           :: SpecHumSatTempD       ! d(SpecHumiditySat)/d(T)
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              PressureAirRefHeight => noahmp%forcing%PressureAirRefHeight,& ! in,  air pressure [Pa] at reference height
-              SoilTranspFacAcc           => noahmp%water%state%SoilTranspFacAcc            ,& ! in,    accumulated soil water transpiration factor (0 to 1)
-              RadiationStressFac             => noahmp%energy%param%RadiationStressFac             ,& ! in,    Parameter used in radiation stress function
-              ResistanceStomataMin           => noahmp%energy%param%ResistanceStomataMin           ,& ! in,    Minimum stomatal resistance [s m-1]
-              ResistanceStomataMax           => noahmp%energy%param%ResistanceStomataMax           ,& ! in,    Maximal stomatal resistance [s m-1]
-              AirTempOptimTransp            => noahmp%energy%param%AirTempOptimTransp            ,& ! in,    Optimum transpiration air temperature [K]
-              VaporPresDeficitFac              => noahmp%energy%param%VaporPresDeficitFac              ,& ! in,    Parameter used in vapor pressure deficit function
-              TemperatureCanopy              => noahmp%energy%state%TemperatureCanopy              ,& ! in,    vegetation temperature (k)
-              PressureVaporCanAir             => noahmp%energy%state%PressureVaporCanAir             ,& ! in,    canopy air vapor pressure (pa)
-              RadPhotoActAbsSunlit          => noahmp%energy%flux%RadPhotoActAbsSunlit           ,& ! in,    average absorbed par for sunlit leaves (w/m2)
-              RadPhotoActAbsShade          => noahmp%energy%flux%RadPhotoActAbsShade           ,& ! in,    average absorbed par for shaded leaves (w/m2)
-              ResistanceStomataSunlit           => noahmp%energy%state%ResistanceStomataSunlit           ,& ! out,   sunlit leaf stomatal resistance (s/m)
-              ResistanceStomataShade           => noahmp%energy%state%ResistanceStomataShade           ,& ! out,   shaded leaf stomatal resistance (s/m)
-              PhotosynLeafSunlit          => noahmp%biochem%flux%PhotosynLeafSunlit          ,& ! out,   sunlit leaf photosynthesis (umol co2 /m2 /s)
-              PhotosynLeafShade          => noahmp%biochem%flux%PhotosynLeafShade           & ! out,   shaded leaf photosynthesis (umol co2 /m2 /s)
+    associate(                                                                        &
+              PressureAirRefHeight    => noahmp%forcing%PressureAirRefHeight         ,& ! in,  air pressure [Pa] at reference height
+              SoilTranspFacAcc        => noahmp%water%state%SoilTranspFacAcc         ,& ! in,  accumulated soil water transpiration factor (0 to 1)
+              RadiationStressFac      => noahmp%energy%param%RadiationStressFac      ,& ! in,  Parameter used in radiation stress function
+              ResistanceStomataMin    => noahmp%energy%param%ResistanceStomataMin    ,& ! in,  Minimum stomatal resistance [s m-1]
+              ResistanceStomataMax    => noahmp%energy%param%ResistanceStomataMax    ,& ! in,  Maximal stomatal resistance [s m-1]
+              AirTempOptimTransp      => noahmp%energy%param%AirTempOptimTransp      ,& ! in,  Optimum transpiration air temperature [K]
+              VaporPresDeficitFac     => noahmp%energy%param%VaporPresDeficitFac     ,& ! in,  Parameter used in vapor pressure deficit function
+              TemperatureCanopy       => noahmp%energy%state%TemperatureCanopy       ,& ! in,  vegetation temperature [K]
+              PressureVaporCanAir     => noahmp%energy%state%PressureVaporCanAir     ,& ! in,  canopy air vapor pressure [Pa]
+              RadPhotoActAbsSunlit    => noahmp%energy%flux%RadPhotoActAbsSunlit     ,& ! in,  average absorbed par for sunlit leaves [W/m2]
+              RadPhotoActAbsShade     => noahmp%energy%flux%RadPhotoActAbsShade      ,& ! in,  average absorbed par for shaded leaves [W/m2]
+              ResistanceStomataSunlit => noahmp%energy%state%ResistanceStomataSunlit ,& ! out, sunlit leaf stomatal resistance [s/m]
+              ResistanceStomataShade  => noahmp%energy%state%ResistanceStomataShade  ,& ! out, shaded leaf stomatal resistance [s/m]
+              PhotosynLeafSunlit      => noahmp%biochem%flux%PhotosynLeafSunlit      ,& ! out, sunlit leaf photosynthesis [umol co2 /m2 /s]
+              PhotosynLeafShade       => noahmp%biochem%flux%PhotosynLeafShade        & ! out, shaded leaf photosynthesis [umol co2 /m2 /s]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    RCS    = 0.0
-    RCT    = 0.0
-    RCQ    = 0.0
+    ResistanceSolar  = 0.0
+    ResistanceTemp   = 0.0
+    ResistanceVapDef = 0.0
 
     ! Sunlit case
     if ( IndexShade == 0 ) then
-       ResistanceStomataSunlit  = 0.0
+       ResistanceStomataSunlit = 0.0
 
-       ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  PressureVaporCanAir  / (PressureAirRefHeight - 0.378 * PressureVaporCanAir) ! specific humidity [kg/kg]
-       Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, Q2SAT, DQSDT2)
+       ! compute SpecHumidityTmp and SpecHumiditySat
+       SpecHumidityTmp = 0.622 * PressureVaporCanAir / (PressureAirRefHeight - 0.378*PressureVaporCanAir)
+       SpecHumidityTmp = SpecHumidityTmp / (1.0 + SpecHumidityTmp)   ! convert to mixing ratio [kg/kg]
+       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, SpecHumiditySat, SpecHumSatTempD)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * RadPhotoActAbsSunlit / RadiationStressFac
-       RCS = (FF + ResistanceStomataMin / ResistanceStomataMax) / (1.0 + FF)
-       RCS = max( RCS, 0.0001 )
+       RadFac          = 2.0 * RadPhotoActAbsSunlit / RadiationStressFac
+       ResistanceSolar = (RadFac + ResistanceStomataMin/ResistanceStomataMax) / (1.0 + RadFac)
+       ResistanceSolar = max(ResistanceSolar, 0.0001)
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TemperatureCanopy)**2.0 )
-       RCT = max( RCT, 0.0001 )
+       ResistanceTemp = 1.0 - 0.0016 * ((AirTempOptimTransp - TemperatureCanopy)**2.0)
+       ResistanceTemp = max(ResistanceTemp, 0.0001)
 
        ! contribution due to vapor pressure deficit
-       RCQ = 1.0 / ( 1.0 + VaporPresDeficitFac * max(0.0, Q2SAT-Q2) )
-       RCQ = max( RCQ, 0.01 )
+       ResistanceVapDef = 1.0 / (1.0 + VaporPresDeficitFac * max(0.0, SpecHumiditySat-SpecHumidityTmp))
+       ResistanceVapDef = max(ResistanceVapDef, 0.01)
 
        ! determine canopy resistance due to all factors
-       ResistanceStomataSunlit  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
-       PhotosynLeafSunlit = -999.99       ! photosynthesis not applied for dynamic carbon
+       ResistanceStomataSunlit = ResistanceStomataMin / &
+                                (ResistanceSolar * ResistanceTemp * ResistanceVapDef * SoilTranspFacAcc)
+       PhotosynLeafSunlit      = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 0
 
     ! Shaded case
     ! same as Sunlit case but using shaded input and output
     if ( IndexShade == 1 ) then
-       ResistanceStomataShade  = 0.0
+       ResistanceStomataShade = 0.0
        
-       ! compute Q2 and Q2SAT
-       Q2 = 0.622 *  PressureVaporCanAir  / (PressureAirRefHeight - 0.378 * PressureVaporCanAir) ! specific humidity [kg/kg]
-       Q2 = Q2 / (1.0 + Q2)                        ! mixing ratio [kg/kg]
-       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, Q2SAT, DQSDT2)
+       ! compute SpecHumidityTmp and SpecHumiditySat
+       SpecHumidityTmp = 0.622 * PressureVaporCanAir / (PressureAirRefHeight - 0.378*PressureVaporCanAir)
+       SpecHumidityTmp = SpecHumidityTmp / (1.0 + SpecHumidityTmp)      ! convert to mixing ratio [kg/kg]
+       call HumiditySaturation(TemperatureCanopy, PressureAirRefHeight, SpecHumiditySat, SpecHumSatTempD)
 
        ! contribution due to incoming solar radiation
-       FF  = 2.0 * RadPhotoActAbsShade / RadiationStressFac
-       RCS = (FF + ResistanceStomataMin / ResistanceStomataMax) / (1.0 + FF)
-       RCS = max( RCS, 0.0001 )
+       RadFac          = 2.0 * RadPhotoActAbsShade / RadiationStressFac
+       ResistanceSolar = (RadFac + ResistanceStomataMin/ResistanceStomataMax) / (1.0 + RadFac)
+       ResistanceSolar = max(ResistanceSolar, 0.0001)
 
        ! contribution due to air temperature
-       RCT = 1.0 - 0.0016 * ( (AirTempOptimTransp - TemperatureCanopy)**2.0 )
-       RCT = max( RCT, 0.0001 )
+       ResistanceTemp = 1.0 - 0.0016 * ((AirTempOptimTransp - TemperatureCanopy)**2.0)
+       ResistanceTemp = max(ResistanceTemp, 0.0001)
 
        ! contribution due to vapor pressure deficit
-       RCQ = 1.0 / ( 1.0 + VaporPresDeficitFac * max(0.0, Q2SAT-Q2) )
-       RCQ = max( RCQ, 0.01 )
+       ResistanceVapDef = 1.0 / (1.0 + VaporPresDeficitFac * max(0.0, SpecHumiditySat-SpecHumidityTmp))
+       ResistanceVapDef = max(ResistanceVapDef, 0.01)
 
        ! determine canopy resistance due to all factors
-       ResistanceStomataShade  = ResistanceStomataMin / (RCS * RCT * RCQ * SoilTranspFacAcc)
-       PhotosynLeafShade = -999.99       ! photosynthesis not applied for dynamic carbon
+       ResistanceStomataShade = ResistanceStomataMin / &
+                               (ResistanceSolar * ResistanceTemp * ResistanceVapDef * SoilTranspFacAcc)
+       PhotosynLeafShade      = -999.99       ! photosynthesis not applied for dynamic carbon
 
     endif ! IndexShade == 1
 

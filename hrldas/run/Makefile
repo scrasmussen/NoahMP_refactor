@@ -145,7 +145,7 @@ OBJS = \
         ../../noahmp/src/BalanceErrorCheckMod.o \
         ../../noahmp/src/GeneralInitMod.o \
         ../../noahmp/src/PedoTransferSR2006.o \
-        ../../noahmp/src/module_sf_noahmp_groundwater.o \
+        ../../noahmp/src/GroundWaterMmfMod.o \
         ../../noahmp/src/BalanceErrorCheckGlacierMod.o \
         ../../noahmp/src/EnergyMainGlacierMod.o \
         ../../noahmp/src/GeneralInitGlacierMod.o \

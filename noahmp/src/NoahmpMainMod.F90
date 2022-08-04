@@ -28,7 +28,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: NOAHMP_SFLX
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 17, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -36,12 +36,12 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              FlagDynamicVeg     => noahmp%config%domain%FlagDynamicVeg    ,& ! in,     flag to activate dynamic vegetation model
-              FlagDynamicCrop     => noahmp%config%domain%FlagDynamicCrop    ,& ! in,     flag to activate dynamic crop model
-              OptCropModel    => noahmp%config%nmlist%OptCropModel   ,& ! in,     option for crop model
-              IrrigationAmtSprinkler         => noahmp%water%state%IrrigationAmtSprinkler          ,& ! inout,  irrigation water amount [m] for sprinkler
-              FlagCropland    => noahmp%config%domain%FlagCropland          & ! out,    flag to identify croplands
+    associate(                                                                     &
+              FlagDynamicVeg         => noahmp%config%domain%FlagDynamicVeg       ,& ! in,    flag to activate dynamic vegetation model
+              FlagDynamicCrop        => noahmp%config%domain%FlagDynamicCrop      ,& ! in,    flag to activate dynamic crop model
+              OptCropModel           => noahmp%config%nmlist%OptCropModel         ,& ! in,    option for crop model
+              IrrigationAmtSprinkler => noahmp%water%state%IrrigationAmtSprinkler ,& ! inout, irrigation water amount [m] for sprinkler
+              FlagCropland           => noahmp%config%domain%FlagCropland          & ! out,   flag to identify croplands
              )
 ! ----------------------------------------------------------------------
 
@@ -80,7 +80,8 @@ contains
     !--------------------------------------------------------------------- 
 
     ! call sprinkler irrigation before canopy process to have canopy interception
-    if ( (FlagCropland .eqv. .true.) .and. (IrrigationAmtSprinkler > 0.0) ) call IrrigationSprinkler(noahmp)
+    if ( (FlagCropland .eqv. .true.) .and. (IrrigationAmtSprinkler > 0.0) ) &
+       call IrrigationSprinkler(noahmp)
 
     !---------------------------------------------------------------------
     ! Canopy water interception and precip heat advection
@@ -105,8 +106,12 @@ contains
     ! Biochem processes (crop and carbon)
     !--------------------------------------------------------------------- 
 
-    if ( FlagDynamicVeg .eqv. .true. ) call BiochemNatureVegMain(noahmp)                          ! for generic vegetation
-    if ( (OptCropModel == 1) .and. (FlagDynamicCrop .eqv. .true.) ) call BiochemCropMain(noahmp)  ! for crop
+    ! for generic vegetation
+    if ( FlagDynamicVeg .eqv. .true. ) call BiochemNatureVegMain(noahmp)
+   
+    ! for explicit crop treatment
+    if ( (OptCropModel == 1) .and. (FlagDynamicCrop .eqv. .true.) ) &
+       call BiochemCropMain(noahmp)
 
     !---------------------------------------------------------------------
     ! Error check for energy and water balance
