@@ -32,8 +32,8 @@ contains
     real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: MatLeft3  ! left-hand side term of the matrix
 
 ! local variable
-    integer                :: LoopInd                                             ! loop index
-    real(kind=kind_noahmp) :: DepthSnowSoilTmp                                    ! temporary snow/soil layer depth [m]
+    integer                                           :: LoopInd                  ! loop index
+    real(kind=kind_noahmp)                            :: DepthSnowSoilTmp         ! temporary snow/soil layer depth [m]
     real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSnowSoilInv         ! inverse of snow/soil layer depth [1/m]
     real(kind=kind_noahmp), allocatable, dimension(:) :: HeatCapacPerArea         ! Heat capacity of soil/snow per area [J/m2/K]
     real(kind=kind_noahmp), allocatable, dimension(:) :: TempGradDepth            ! temperature gradient (derivative) with soil/snow depth [K/m]

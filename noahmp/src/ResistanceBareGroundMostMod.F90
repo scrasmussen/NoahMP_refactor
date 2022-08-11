@@ -11,7 +11,7 @@ module ResistanceBareGroundMostMod
 
 contains
 
-  subroutine ResistanceBareGroundMOST(noahmp, IterationInd, HeatSensibleTmp, MoStabParaSgn)
+  subroutine ResistanceBareGroundMOST(noahmp, IndIter, HeatSensibleTmp, MoStabParaSgn)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: SFCDIF1 for bare ground portion
@@ -22,7 +22,7 @@ contains
     implicit none
 
 ! in & out variables
-    integer               , intent(in   ) :: IterationInd                ! iteration index
+    integer               , intent(in   ) :: IndIter                     ! iteration index
     integer               , intent(inout) :: MoStabParaSgn               ! number of times moz changes sign
     real(kind=kind_noahmp), intent(in   ) :: HeatSensibleTmp             ! temporary sensible heat flux (w/m2) in each iteration
     type(noahmp_type)     , intent(inout) :: noahmp
@@ -85,7 +85,7 @@ contains
     TMPCH2 = log((2.0 + RoughLenShBareGrd) / RoughLenShBareGrd)
 
     ! compute M-O stability parameter
-    if ( IterationInd == 1 ) then
+    if ( IndIter == 1 ) then
        FrictionVelBare  = 0.0
        MoStabParaBare   = 0.0
        MoLengthBare     = 0.0
@@ -132,7 +132,7 @@ contains
 
     ! except for first iteration, weight stability factors for previous
     ! iteration to help avoid flip-flops from one iteration to the next
-    if ( IterationInd == 1 ) then
+    if ( IndIter == 1 ) then
        MoStabCorrMomBare   = FMNEW
        MoStabCorrShBare    = FHNEW
        MoStabCorrMomBare2m = FM2NEW

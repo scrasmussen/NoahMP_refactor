@@ -2,7 +2,7 @@ module SnowCoverGroundNiu07Mod
 
 !!! Compute ground snow cover fraction based on Niu and Yang (2007, JGR) scheme
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: None (embedded in ENERGY subroutine)
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -23,25 +23,25 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    real(kind=kind_noahmp)           :: BDSNO        ! bulk density of snow (kg/m3)
-    real(kind=kind_noahmp)           :: FMELT        ! melting factor for snow cover frac
+    real(kind=kind_noahmp)           :: SnowDensBulk   ! bulk density of snow [Kg/m3]
+    real(kind=kind_noahmp)           :: MeltFac        ! melting factor for snow cover frac
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SnowMeltFac           => noahmp%water%param%SnowMeltFac            ,& ! in,    snowmelt m parameter
-              SnowCoverFac          => noahmp%water%param%SnowCoverFac           ,& ! in,    snow cover factor (m) (originally hard-coded 2.5*z0)
-              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,    snow depth [m]
-              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
-              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac              & ! out,   snow cover fraction [-]
+    associate(                                                     &
+              SnowMeltFac    => noahmp%water%param%SnowMeltFac    ,& ! in,  snowmelt m parameter
+              SnowCoverFac   => noahmp%water%param%SnowCoverFac   ,& ! in,  snow cover factor [m]
+              SnowDepth      => noahmp%water%state%SnowDepth      ,& ! in,  snow depth [m]
+              SnowWaterEquiv => noahmp%water%state%SnowWaterEquiv ,& ! in,  snow water equivalent [mm]
+              SnowCoverFrac  => noahmp%water%state%SnowCoverFrac   & ! out, snow cover fraction
              )
 ! ----------------------------------------------------------------------
 
     SnowCoverFrac = 0.0
     if ( SnowDepth > 0.0 ) then
-         BDSNO = SnowWaterEquiv / SnowDepth
-         FMELT = (BDSNO / 100.0)**SnowMeltFac
-         !SnowCoverFrac = tanh( SnowDepth /(2.5 * Z0 * FMELT))
-         SnowCoverFrac  = tanh( SnowDepth /(SnowCoverFac * FMELT)) ! C.He: bring hard-coded 2.5*z0 to MPTABLE
+         SnowDensBulk  = SnowWaterEquiv / SnowDepth
+         MeltFac       = (SnowDensBulk / 100.0)**SnowMeltFac
+        !SnowCoverFrac = tanh( SnowDepth /(2.5 * Z0 * MeltFac))
+         SnowCoverFrac = tanh( SnowDepth /(SnowCoverFac * MeltFac)) ! C.He: bring hard-coded 2.5*z0 to MPTABLE
     endif
 
     end associate

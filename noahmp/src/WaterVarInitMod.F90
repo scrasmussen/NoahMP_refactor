@@ -24,9 +24,9 @@ contains
 
     type(noahmp_type), intent(inout) :: noahmp
 
-    associate(                                                          &
-              NumSnowLayerMax  => noahmp%config%domain%NumSnowLayerMax ,&
-              NumSoilLayer     => noahmp%config%domain%NumSoilLayer     &
+    associate(                                                         &
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer     &
              )
 
     ! water state variables
@@ -309,16 +309,16 @@ contains
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilClay
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilOrg
 
-    associate(                                                           &
-              I                => noahmp%config%domain%GridIndexI       ,&
-              J                => noahmp%config%domain%GridIndexJ       ,&
-              NumSnowLayerMax  => noahmp%config%domain%NumSnowLayerMax  ,&
-              NumSoilLayer     => noahmp%config%domain%NumSoilLayer     ,&
-              VegType          => noahmp%config%domain%VegType          ,&
-              SoilType         => noahmp%config%domain%SoilType         ,&
-              FlagUrban        => noahmp%config%domain%FlagUrban        ,&
-              RunoffSlopeType  => noahmp%config%domain%RunoffSlopeType  ,&
-              NumSnowLayerNeg  => noahmp%config%domain%NumSnowLayerNeg   &
+    associate(                                                         &
+              I               => noahmp%config%domain%GridIndexI      ,&
+              J               => noahmp%config%domain%GridIndexJ      ,&
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
+              VegType         => noahmp%config%domain%VegType         ,&
+              SoilType        => noahmp%config%domain%SoilType        ,&
+              FlagUrban       => noahmp%config%domain%FlagUrban       ,&
+              RunoffSlopeType => noahmp%config%domain%RunoffSlopeType ,&
+              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg  &
              )
 
     ! water state variables
@@ -412,34 +412,37 @@ contains
     noahmp%water%param%SoilDrainSlope                     = NoahmpIO%SLOPE_TABLE(RunoffSlopeType)
 
     do IndexSoilLayer = 1, size(SoilType)
-       noahmp%water%param%SoilMoistureSat       (IndexSoilLayer)  = NoahmpIO%SMCMAX_TABLE(SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilMoistureWilt      (IndexSoilLayer)  = NoahmpIO%SMCWLT_TABLE(SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilMoistureFieldCap  (IndexSoilLayer)  = NoahmpIO%SMCREF_TABLE(SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilMoistureDry       (IndexSoilLayer)  = NoahmpIO%SMCDRY_TABLE(SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilWatDiffusivitySat (IndexSoilLayer)  = NoahmpIO%DWSAT_TABLE (SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilWatConductivitySat(IndexSoilLayer)  = NoahmpIO%DKSAT_TABLE (SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilExpCoeffB         (IndexSoilLayer)  = NoahmpIO%BEXP_TABLE  (SoilType(IndexSoilLayer))
-       noahmp%water%param%SoilMatPotentialSat   (IndexSoilLayer)  = NoahmpIO%PSISAT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilMoistureSat       (IndexSoilLayer) = NoahmpIO%SMCMAX_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilMoistureWilt      (IndexSoilLayer) = NoahmpIO%SMCWLT_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilMoistureFieldCap  (IndexSoilLayer) = NoahmpIO%SMCREF_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilMoistureDry       (IndexSoilLayer) = NoahmpIO%SMCDRY_TABLE(SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilWatDiffusivitySat (IndexSoilLayer) = NoahmpIO%DWSAT_TABLE (SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilWatConductivitySat(IndexSoilLayer) = NoahmpIO%DKSAT_TABLE (SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilExpCoeffB         (IndexSoilLayer) = NoahmpIO%BEXP_TABLE  (SoilType(IndexSoilLayer))
+       noahmp%water%param%SoilMatPotentialSat   (IndexSoilLayer) = NoahmpIO%PSISAT_TABLE(SoilType(IndexSoilLayer))
     enddo
 
     ! derived water parameters
-    noahmp%water%param%SoilInfilMaxCoeff  = noahmp%water%param%SoilInfilFacRef * &
-                              noahmp%water%param%SoilWatConductivitySat(1) / noahmp%water%param%SoilConductivityRef
+    noahmp%water%param%SoilInfilMaxCoeff  = noahmp%water%param%SoilInfilFacRef *           &
+                                            noahmp%water%param%SoilWatConductivitySat(1) / &
+                                            noahmp%water%param%SoilConductivityRef
     if ( FlagUrban .eqv. .true. ) then
-       noahmp%water%param%SoilMoistureSat = 0.45
+       noahmp%water%param%SoilMoistureSat      = 0.45
        noahmp%water%param%SoilMoistureFieldCap = 0.42
-       noahmp%water%param%SoilMoistureWilt = 0.40
-       noahmp%water%param%SoilMoistureDry = 0.40
+       noahmp%water%param%SoilMoistureWilt     = 0.40
+       noahmp%water%param%SoilMoistureDry      = 0.40
     endif
 
     if ( SoilType(1) /= 14 ) then
-       noahmp%water%param%SoilImpervFracCoeff = noahmp%water%param%GroundFrzCoeff * &
-             ((noahmp%water%param%SoilMoistureSat(1) / noahmp%water%param%SoilMoistureFieldCap(1)) * (0.412/0.468))
+       noahmp%water%param%SoilImpervFracCoeff = noahmp%water%param%GroundFrzCoeff *       &
+                                                ((noahmp%water%param%SoilMoistureSat(1) / &
+                                                 noahmp%water%param%SoilMoistureFieldCap(1)) * (0.412/0.468))
     endif
 
     noahmp%water%state%SnowIceFracPrev = 0.0
-    noahmp%water%state%SnowIceFracPrev(NumSnowLayerNeg+1:0) = NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) / & 
-                            (NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) + NoahmpIO%SNLIQXY(I,NumSnowLayerNeg+1:0,J))
+    noahmp%water%state%SnowIceFracPrev(NumSnowLayerNeg+1:0) = NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) /  & 
+                                                              (NoahmpIO%SNICEXY(I,NumSnowLayerNeg+1:0,J) + &
+                                                               NoahmpIO%SNLIQXY(I,NumSnowLayerNeg+1:0,J))
 
     if ( (noahmp%config%nmlist%OptSoilProperty == 3) .and. (.not. noahmp%config%domain%FlagUrban) ) then
        allocate( SoilSand(1:NumSoilLayer) )

@@ -20,7 +20,7 @@ contains
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: TSNOSOI
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
@@ -29,34 +29,33 @@ contains
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variable
-    integer                :: IZ         ! loop index
-    real(kind=kind_noahmp), allocatable, dimension(:) :: RHSTS  ! right-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:) :: AI     ! left-hand side term
-    real(kind=kind_noahmp), allocatable, dimension(:) :: BI     ! left-hand side term
-    real(kind=kind_noahmp), allocatable, dimension(:) :: CI     ! left-hand side term
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MatRight     ! right-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MatLeft1     ! left-hand side term
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MatLeft2     ! left-hand side term
+    real(kind=kind_noahmp), allocatable, dimension(:) :: MatLeft3     ! left-hand side term
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,   number of soil layers
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax,& ! in,   maximum number of snow layers
-              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg,& ! in,   actual number of snow layers (negative)
-              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,   main noahmp timestep (s)
-              DepthSoilTempBottom => noahmp%config%domain%DepthSoilTempBottom ,& ! in,   depth [m] from soil surface for soil temperature lower boundary forcing
-              SnowDepth           => noahmp%water%state%SnowDepth            ,& ! in,   snow depth [m]
-              DepthSoilTempBotToSno         => noahmp%energy%state%DepthSoilTempBotToSno         ,& ! out,  depth of soil temperature lower boundary condition (m) from snow surface
-              RadSwPenetrateGrd             => noahmp%energy%flux%RadSwPenetrateGrd               & ! out,  light penetrating through soil/snow water (W/m2)
+    associate(                                                                    &
+              NumSoilLayer          => noahmp%config%domain%NumSoilLayer         ,& ! in,  number of soil layers
+              NumSnowLayerMax       => noahmp%config%domain%NumSnowLayerMax      ,& ! in,  maximum number of snow layers
+              NumSnowLayerNeg       => noahmp%config%domain%NumSnowLayerNeg      ,& ! in,  actual number of snow layers (negative)
+              MainTimeStep          => noahmp%config%domain%MainTimeStep         ,& ! in,  main noahmp timestep [s]
+              DepthSoilTempBottom   => noahmp%config%domain%DepthSoilTempBottom  ,& ! in,  depth [m] from soil surface for soil temp. lower boundary
+              SnowDepth             => noahmp%water%state%SnowDepth              ,& ! in,  snow depth [m]
+              DepthSoilTempBotToSno => noahmp%energy%state%DepthSoilTempBotToSno ,& ! out, depth [m] of soil temp. lower boundary from snow surface
+              RadSwPenetrateGrd     => noahmp%energy%flux%RadSwPenetrateGrd       & ! out, light penetrating through soil/snow water [W/m2]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( RHSTS (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( AI    (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( BI    (-NumSnowLayerMax+1:NumSoilLayer) )
-    allocate( CI    (-NumSnowLayerMax+1:NumSoilLayer) )
-    RHSTS(:) = 0.0
-    AI(:)    = 0.0
-    BI(:)    = 0.0
-    CI(:)    = 0.0
+    allocate( MatRight(-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MatLeft1(-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MatLeft2(-NumSnowLayerMax+1:NumSoilLayer) )
+    allocate( MatLeft3(-NumSnowLayerMax+1:NumSoilLayer) )
+    MatRight(:) = 0.0
+    MatLeft1(:) = 0.0
+    MatLeft2(:) = 0.0
+    MatLeft3(:) = 0.0
 
     ! compute solar penetration through water, needs more work
     RadSwPenetrateGrd(NumSnowLayerNeg+1:NumSoilLayer) = 0.0
@@ -65,8 +64,8 @@ contains
     DepthSoilTempBotToSno = DepthSoilTempBottom - SnowDepth
 
     ! compute soil temperatures
-    call SoilSnowThermalDiffusion(noahmp, AI, BI, CI, RHSTS)
-    call SoilSnowTemperatureSolver(noahmp, MainTimeStep, AI, BI, CI, RHSTS)
+    call SoilSnowThermalDiffusion(noahmp, MatLeft1, MatLeft2, MatLeft3, MatRight)
+    call SoilSnowTemperatureSolver(noahmp, MainTimeStep, MatLeft1, MatLeft2, MatLeft3, MatRight)
 
     end associate
 

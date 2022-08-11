@@ -12,7 +12,7 @@ module ResistanceBareGroundChen97Mod
 
 contains
 
-  subroutine ResistanceBareGroundChen97(noahmp, IterationInd)
+  subroutine ResistanceBareGroundChen97(noahmp, IndIter)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: SFCDIF2 for bare ground portion
@@ -23,7 +23,7 @@ contains
     implicit none
 
 ! in & out variables
-    integer               , intent(in   ) :: IterationInd   ! iteration index
+    integer               , intent(in   ) :: IndIter   ! iteration index
     type(noahmp_type)     , intent(inout) :: noahmp
 
 ! local variables
@@ -105,7 +105,7 @@ contains
     ! BELJARS correction of friction velocity u*
     DU2   = max(WindSpdRefHeight*WindSpdRefHeight, EPSU2)
     BTGH  = BTG * HPBL
-    if ( IterationInd == 1 ) then
+    if ( IndIter == 1 ) then
        if ( (BTGH*ExchCoeffShBare*DTHV) /= 0.0 ) then
           FrictionVelVertBare = WWST2 * abs(BTGH*ExchCoeffShBare*DTHV)**(2.0/3.0)
        else

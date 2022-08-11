@@ -2,7 +2,7 @@ module SnowCoverGlacierMod
 
 !!! Compute glacier ground snow cover fraction
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: None (embedded in RADIATION_GLACIER subroutine)
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -25,9 +25,9 @@ contains
 ! local variable
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SnowWaterEquiv           => noahmp%water%state%SnowWaterEquiv            ,& ! in,    snow water equivalent [mm]
-              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac              & ! out,   snow cover fraction [-]
+    associate(                                                     &
+              SnowWaterEquiv => noahmp%water%state%SnowWaterEquiv ,& ! in,  snow water equivalent [mm]
+              SnowCoverFrac  => noahmp%water%state%SnowCoverFrac   & ! out, snow cover fraction
              )
 ! ----------------------------------------------------------------------
 

@@ -36,9 +36,9 @@ contains
     implicit none
 
 ! in & out variables
-    integer               , intent(in)    :: IndTopLayer          ! top layer index: soil layer starts from IndTopLayer = 1
-    integer               , intent(in)    :: NumSoilLayer         ! number of soil layers
-    integer               , intent(in)    :: NumSnowLayerMax      ! maximum number of snow layers
+    integer               , intent(in) :: IndTopLayer          ! top layer index: soil layer starts from IndTopLayer = 1
+    integer               , intent(in) :: NumSoilLayer         ! number of soil layers
+    integer               , intent(in) :: NumSnowLayerMax      ! maximum number of snow layers
     real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(in)    :: A, B, D    ! Tri-diagonal matrix elements
     real(kind=kind_noahmp), dimension(-NumSnowLayerMax+1:NumSoilLayer), intent(inout) :: C,P,Delta  ! Tri-diagonal matrix elements
 

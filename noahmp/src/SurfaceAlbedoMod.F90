@@ -21,7 +21,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: ALBEDO
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -29,78 +29,78 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    integer                          :: IB       ! waveband indices
-    integer                          :: IC       ! direct beam: IC=0; diffuse: IC=1
-    real(kind=kind_noahmp)           :: WL       ! fraction of LeafAreaIndex+StemAreaIndex that is LeafAreaIndex
-    real(kind=kind_noahmp)           :: WS       ! fraction of LeafAreaIndex+StemAreaIndex that is StemAreaIndex
-    real(kind=kind_noahmp)           :: MPE      ! prevents overflow for division by zero
-    real(kind=kind_noahmp)           :: EXT      ! optical depth direct beam per unit leaf + stem area
+    integer                          :: IndBand         ! waveband indices
+    integer                          :: IndDif          ! direct beam: IndDif=0; diffuse: IndDif=1
+    real(kind=kind_noahmp)           :: LeafWgt         ! fraction of LeafAreaIndex+StemAreaIndex that is LeafAreaIndex
+    real(kind=kind_noahmp)           :: StemWgt         ! fraction of LeafAreaIndex+StemAreaIndex that is StemAreaIndex
+    real(kind=kind_noahmp)           :: MinThr          ! prevents overflow for division by zero
+    real(kind=kind_noahmp)           :: LightExtDir     ! optical depth direct beam per unit leaf + stem area
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
+    associate(                                                                 &
+              NumSWRadBand        => noahmp%config%domain%NumSWRadBand        ,& ! in,  number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
-              OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
-              ReflectanceLeaf            => noahmp%energy%param%ReflectanceLeaf            ,& ! in,    leaf reflectance: 1=vis, 2=nir
-              ReflectanceStem            => noahmp%energy%param%ReflectanceStem            ,& ! in,    stem reflectance: 1=vis, 2=nir
-              TransmittanceLeaf            => noahmp%energy%param%TransmittanceLeaf            ,& ! in,    leaf transmittance: 1=vis, 2=nir
-              TransmittanceStem            => noahmp%energy%param%TransmittanceStem            ,& ! in,    stem transmittance: 1=vis, 2=nir
-              LeafAreaIndEff            => noahmp%energy%state%LeafAreaIndEff            ,& ! in,    leaf area index, after burying by snow
-              StemAreaIndEff            => noahmp%energy%state%StemAreaIndEff            ,& ! in,    stem area index, after burying by snow
-              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! out,   ground albedo (direct beam: vis, nir)
-              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! out,   ground albedo (diffuse: vis, nir)
-              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! out,   snow albedo for direct(1=vis, 2=nir)
-              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
-              AlbedoSfcDir            => noahmp%energy%state%AlbedoSfcDir            ,& ! out,   surface albedo (direct)
-              AlbedoSfcDif            => noahmp%energy%state%AlbedoSfcDif            ,& ! out,   surface albedo (diffuse)
-              CanopySunlitFrac            => noahmp%energy%state%CanopySunlitFrac            ,& ! out,   sunlit fraction of canopy
-              CanopyShadeFrac            => noahmp%energy%state%CanopyShadeFrac            ,& ! out,   shaded fraction of canopy
-              LeafAreaIndSunlit          => noahmp%energy%state%LeafAreaIndSunlit          ,& ! out,   sunlit leaf area
-              LeafAreaIndShade          => noahmp%energy%state%LeafAreaIndShade          ,& ! out,   shaded leaf area
-              GapBtwCanopy            => noahmp%energy%state%GapBtwCanopy            ,& ! out,   between canopy gap fraction for beam
-              GapInCanopy            => noahmp%energy%state%GapInCanopy            ,& ! out,   within canopy gap fraction for beam
-              ReflectanceVeg             => noahmp%energy%state%ReflectanceVeg             ,& ! out,   leaf/stem reflectance weighted by fraction LeafAreaIndex and StemAreaIndex
-              TransmittanceVeg             => noahmp%energy%state%TransmittanceVeg             ,& ! out,   leaf/stem transmittance weighted by fraction LeafAreaIndex and StemAreaIndex
-              VegAreaIndEff             => noahmp%energy%state%VegAreaIndEff             ,& ! out,   one-sided leaf+stem area index (m2/m2)
-              VegAreaProjDir            => noahmp%energy%state%VegAreaProjDir            ,& ! out,   projected leaf+stem area in solar direction
-              RadSwAbsVegDir            => noahmp%energy%flux%RadSwAbsVegDir             ,& ! out,   flux abs by veg (per unit direct flux)
-              RadSwAbsVegDif            => noahmp%energy%flux%RadSwAbsVegDif             ,& ! out,   flux abs by veg (per unit diffuse flux)
-              RadSwDirTranGrdDir            => noahmp%energy%flux%RadSwDirTranGrdDir             ,& ! out,   down direct flux below veg (per unit dir flux)
-              RadSwDifTranGrdDir            => noahmp%energy%flux%RadSwDifTranGrdDir             ,& ! out,   down diffuse flux below veg (per unit dir flux)
-              RadSwDifTranGrdDif            => noahmp%energy%flux%RadSwDifTranGrdDif             ,& ! out,   down diffuse flux below veg (per unit dif flux)
-              RadSwDirTranGrdDif            => noahmp%energy%flux%RadSwDirTranGrdDif             ,& ! out,   down direct flux below veg per unit dif flux (= 0)
-              RadSwReflVegDir           => noahmp%energy%flux%RadSwReflVegDir            ,& ! out,   flux reflected by veg layer (per unit direct flux)
-              RadSwReflVegDif           => noahmp%energy%flux%RadSwReflVegDif            ,& ! out,   flux reflected by veg layer (per unit diffuse flux)
-              RadSwReflGrdDir           => noahmp%energy%flux%RadSwReflGrdDir            ,& ! out,   flux reflected by ground (per unit direct flux)
-              RadSwReflGrdDif           => noahmp%energy%flux%RadSwReflGrdDif             & ! out,   flux reflected by ground (per unit diffuse flux)
+              OptSnowAlbedo       => noahmp%config%nmlist%OptSnowAlbedo       ,& ! in,  options for ground snow surface albedo
+              ReflectanceLeaf     => noahmp%energy%param%ReflectanceLeaf      ,& ! in,  leaf reflectance: 1=vis, 2=nir
+              ReflectanceStem     => noahmp%energy%param%ReflectanceStem      ,& ! in,  stem reflectance: 1=vis, 2=nir
+              TransmittanceLeaf   => noahmp%energy%param%TransmittanceLeaf    ,& ! in,  leaf transmittance: 1=vis, 2=nir
+              TransmittanceStem   => noahmp%energy%param%TransmittanceStem    ,& ! in,  stem transmittance: 1=vis, 2=nir
+              LeafAreaIndEff      => noahmp%energy%state%LeafAreaIndEff       ,& ! in,  leaf area index, after burying by snow
+              StemAreaIndEff      => noahmp%energy%state%StemAreaIndEff       ,& ! in,  stem area index, after burying by snow
+              AlbedoGrdDir        => noahmp%energy%state%AlbedoGrdDir         ,& ! out, ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif        => noahmp%energy%state%AlbedoGrdDif         ,& ! out, ground albedo (diffuse: vis, nir)
+              AlbedoSnowDir       => noahmp%energy%state%AlbedoSnowDir        ,& ! out, snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif       => noahmp%energy%state%AlbedoSnowDif        ,& ! out, snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoSfcDir        => noahmp%energy%state%AlbedoSfcDir         ,& ! out, surface albedo (direct)
+              AlbedoSfcDif        => noahmp%energy%state%AlbedoSfcDif         ,& ! out, surface albedo (diffuse)
+              CanopySunlitFrac    => noahmp%energy%state%CanopySunlitFrac     ,& ! out, sunlit fraction of canopy
+              CanopyShadeFrac     => noahmp%energy%state%CanopyShadeFrac      ,& ! out, shaded fraction of canopy
+              LeafAreaIndSunlit   => noahmp%energy%state%LeafAreaIndSunlit    ,& ! out, sunlit leaf area
+              LeafAreaIndShade    => noahmp%energy%state%LeafAreaIndShade     ,& ! out, shaded leaf area
+              GapBtwCanopy        => noahmp%energy%state%GapBtwCanopy         ,& ! out, between canopy gap fraction for beam
+              GapInCanopy         => noahmp%energy%state%GapInCanopy          ,& ! out, within canopy gap fraction for beam
+              ReflectanceVeg      => noahmp%energy%state%ReflectanceVeg       ,& ! out, leaf/stem reflectance weighted by fraction LAI and SAI
+              TransmittanceVeg    => noahmp%energy%state%TransmittanceVeg     ,& ! out, leaf/stem transmittance weighted by fraction LAI and SAI
+              VegAreaIndEff       => noahmp%energy%state%VegAreaIndEff        ,& ! out, one-sided leaf+stem area index [m2/m2]
+              VegAreaProjDir      => noahmp%energy%state%VegAreaProjDir       ,& ! out, projected leaf+stem area in solar direction
+              RadSwAbsVegDir      => noahmp%energy%flux%RadSwAbsVegDir        ,& ! out, flux abs by veg (per unit direct flux)
+              RadSwAbsVegDif      => noahmp%energy%flux%RadSwAbsVegDif        ,& ! out, flux abs by veg (per unit diffuse flux)
+              RadSwDirTranGrdDir  => noahmp%energy%flux%RadSwDirTranGrdDir    ,& ! out, down direct flux below veg (per unit dir flux)
+              RadSwDifTranGrdDir  => noahmp%energy%flux%RadSwDifTranGrdDir    ,& ! out, down diffuse flux below veg (per unit dir flux)
+              RadSwDifTranGrdDif  => noahmp%energy%flux%RadSwDifTranGrdDif    ,& ! out, down diffuse flux below veg (per unit dif flux)
+              RadSwDirTranGrdDif  => noahmp%energy%flux%RadSwDirTranGrdDif    ,& ! out, down direct flux below veg per unit dif flux (= 0)
+              RadSwReflVegDir     => noahmp%energy%flux%RadSwReflVegDir       ,& ! out, flux reflected by veg layer (per unit direct flux)
+              RadSwReflVegDif     => noahmp%energy%flux%RadSwReflVegDif       ,& ! out, flux reflected by veg layer (per unit diffuse flux)
+              RadSwReflGrdDir     => noahmp%energy%flux%RadSwReflGrdDir       ,& ! out, flux reflected by ground (per unit direct flux)
+              RadSwReflGrdDif     => noahmp%energy%flux%RadSwReflGrdDif        & ! out, flux reflected by ground (per unit diffuse flux)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    MPE   = 1.0e-06
-    GapBtwCanopy  = 0.0
-    GapInCanopy  = 0.0
-    VegAreaProjDir  = 0.0
+    MinThr           = 1.0e-06
+    GapBtwCanopy     = 0.0
+    GapInCanopy      = 0.0
+    VegAreaProjDir   = 0.0
     ReflectanceVeg   = 0.0
-    TransmittanceVeg   = 0.0
-    CanopySunlitFrac  = 0.0
-    do IB = 1, NumSWRadBand
-       AlbedoSfcDir(IB)   = 0.0
-       AlbedoSfcDif(IB)   = 0.0
-       AlbedoGrdDir(IB) = 0.0
-       AlbedoGrdDif(IB) = 0.0
-       AlbedoSnowDir(IB) = 0.0
-       AlbedoSnowDif(IB) = 0.0
-       RadSwAbsVegDir(IB)   = 0.0
-       RadSwAbsVegDif(IB)   = 0.0
-       RadSwDirTranGrdDir(IB)   = 0.0
-       RadSwDirTranGrdDif(IB)   = 0.0
-       RadSwDifTranGrdDir(IB)   = 0.0
-       RadSwDifTranGrdDif(IB)   = 0.0
-       RadSwReflVegDir(IB)  = 0.0
-       RadSwReflVegDif(IB)  = 0.0
-       RadSwReflGrdDir(IB)  = 0.0
-       RadSwReflGrdDif(IB)  = 0.0
+    TransmittanceVeg = 0.0
+    CanopySunlitFrac = 0.0
+    do IndBand = 1, NumSWRadBand
+       AlbedoSfcDir      (IndBand) = 0.0
+       AlbedoSfcDif      (IndBand) = 0.0
+       AlbedoGrdDir      (IndBand) = 0.0
+       AlbedoGrdDif      (IndBand) = 0.0
+       AlbedoSnowDir     (IndBand) = 0.0
+       AlbedoSnowDif     (IndBand) = 0.0
+       RadSwAbsVegDir    (IndBand) = 0.0
+       RadSwAbsVegDif    (IndBand) = 0.0
+       RadSwDirTranGrdDir(IndBand) = 0.0
+       RadSwDirTranGrdDif(IndBand) = 0.0
+       RadSwDifTranGrdDir(IndBand) = 0.0
+       RadSwDifTranGrdDif(IndBand) = 0.0
+       RadSwReflVegDir   (IndBand) = 0.0
+       RadSwReflVegDif   (IndBand) = 0.0
+       RadSwReflGrdDir   (IndBand) = 0.0
+       RadSwReflGrdDif   (IndBand) = 0.0
     enddo
     VegAreaIndEff = LeafAreaIndEff + StemAreaIndEff
 
@@ -108,11 +108,11 @@ contains
     if ( CosSolarZenithAngle > 0 ) then
 
        ! weight reflectance/transmittance by LeafAreaIndex and StemAreaIndex
-       WL  = LeafAreaIndEff / max(VegAreaIndEff, MPE)
-       WS  = StemAreaIndEff / max(VegAreaIndEff, MPE)
-       do IB = 1, NumSWRadBand
-          ReflectanceVeg(IB) = max( ReflectanceLeaf(IB)*WL + ReflectanceStem(IB)*WS, MPE )
-          TransmittanceVeg(IB) = max( TransmittanceLeaf(IB)*WL + TransmittanceStem(IB)*WS, MPE )
+       LeafWgt = LeafAreaIndEff / max(VegAreaIndEff, MinThr)
+       StemWgt = StemAreaIndEff / max(VegAreaIndEff, MinThr)
+       do IndBand = 1, NumSWRadBand
+          ReflectanceVeg(IndBand)   = max(ReflectanceLeaf(IndBand)*LeafWgt+ReflectanceStem(IndBand)*StemWgt, MinThr)
+          TransmittanceVeg(IndBand) = max(TransmittanceLeaf(IndBand)*LeafWgt+TransmittanceStem(IndBand)*StemWgt, MinThr)
        enddo
 
        ! snow aging
@@ -126,31 +126,31 @@ contains
        call GroundAlbedo(noahmp)
 
        ! loop over shortwave bands to calculate surface albedos and solar
-       ! fluxes for unit incoming direct (IC=0) and diffuse flux (IC=1)
-       do IB = 1, NumSWRadBand
-          IC = 0      ! direct
-          call CanopyRadiationTwoStream(noahmp, IB, IC)
-          IC = 1      ! diffuse
-          call CanopyRadiationTwoStream(noahmp, IB, IC)
+       ! fluxes for unit incoming direct (IndDif=0) and diffuse flux (IndDif=1)
+       do IndBand = 1, NumSWRadBand
+          IndDif = 0      ! direct
+          call CanopyRadiationTwoStream(noahmp, IndBand, IndDif)
+          IndDif = 1      ! diffuse
+          call CanopyRadiationTwoStream(noahmp, IndBand, IndDif)
        enddo
 
        ! sunlit fraction of canopy. set CanopySunlitFrac = 0 if CanopySunlitFrac < 0.01.
-       EXT  = VegAreaProjDir / CosSolarZenithAngle * sqrt( 1.0 - ReflectanceVeg(1) - TransmittanceVeg(1) )
-       CanopySunlitFrac = ( 1.0 - exp(-EXT * VegAreaIndEff) ) / max( EXT*VegAreaIndEff, MPE )
-       EXT  = CanopySunlitFrac
-       if ( EXT < 0.01 ) then
-          WL = 0.0
+       LightExtDir      = VegAreaProjDir / CosSolarZenithAngle * sqrt(1.0-ReflectanceVeg(1)-TransmittanceVeg(1))
+       CanopySunlitFrac = (1.0 - exp(-LightExtDir*VegAreaIndEff)) / max(LightExtDir*VegAreaIndEff, MinThr)
+       LightExtDir      = CanopySunlitFrac
+       if ( LightExtDir < 0.01 ) then
+          LeafWgt = 0.0
        else
-          WL = EXT
+          LeafWgt = LightExtDir
        endif
-       CanopySunlitFrac = WL
+       CanopySunlitFrac = LeafWgt
 
     endif  ! CosSolarZenithAngle > 0
 
     ! shaded canopy fraction
     CanopyShadeFrac   = 1.0 - CanopySunlitFrac
     LeafAreaIndSunlit = LeafAreaIndEff * CanopySunlitFrac
-    LeafAreaIndShade = LeafAreaIndEff * CanopyShadeFrac
+    LeafAreaIndShade  = LeafAreaIndEff * CanopyShadeFrac
 
     end associate
 

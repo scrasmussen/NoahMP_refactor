@@ -2,7 +2,7 @@ module TileDrainageEquiDepthMod
 
 !!! Calculate tile drainage equivalent depth (currently used in Hooghoudt's scheme)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -10,53 +10,59 @@ module TileDrainageEquiDepthMod
 
 contains
 
-  subroutine TileDrainageEquiDepth(TD_D, TD_L, TD_RD, TD_DE)
+  subroutine TileDrainageEquiDepth(DrainDepthToImp, DrainTubeDist, DrainTubeRadius, DrainWatHgtAbvImp)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: TD_EQUIVALENT_DEPTH
 ! Original code: P. Valayamkunnath (NCAR)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
 
 ! in & out variables
-    real(kind=kind_noahmp), intent(in)    :: TD_D    ! tile drainage depth to impermeable layer (m)
-    real(kind=kind_noahmp), intent(in)    :: TD_L    ! distance between two drain tubes or tiles (m)
-    real(kind=kind_noahmp), intent(in)    :: TD_RD   ! effective radius of drains (m)
-    real(kind=kind_noahmp), intent(out)   :: TD_DE   ! Height of water table in the drain Above Impermeable Layer (m)
+    real(kind=kind_noahmp), intent(in)    :: DrainDepthToImp    ! tile drainage depth to impermeable layer [m]
+    real(kind=kind_noahmp), intent(in)    :: DrainTubeDist      ! distance between two drain tubes or tiles [m]
+    real(kind=kind_noahmp), intent(in)    :: DrainTubeRadius    ! effective radius of drains [m]
+    real(kind=kind_noahmp), intent(out)   :: DrainWatHgtAbvImp  ! Height of water table in drain Above Impermeable Layer [m]
 
 ! local variables
-    integer                :: I               ! loop index
-    real(kind=kind_noahmp) :: PII = 22.0/7.0  ! pi
-    real(kind=kind_noahmp) :: TD_X            ! temporary drain variable
-    real(kind=kind_noahmp) :: TD_FX, EX, TERM ! temporary drain variable
+    integer                               :: LoopInd            ! loop index
+    real(kind=kind_noahmp)                :: PiMath = 22.0/7.0  ! pi value
+    real(kind=kind_noahmp)                :: DrainAspect        ! temporary drain variable
+    real(kind=kind_noahmp)                :: DrainFac           ! temporary drain factor
+    real(kind=kind_noahmp)                :: DrainExpFac        ! temporary drain exponential factor
+    real(kind=kind_noahmp)                :: DrainFacTmp        ! temporary drain factor
 
 ! ----------------------------------------------------------------------
 
-    TD_FX = 0.0
-    EX    = 0.0
-    TERM  = 0.0
-    TD_X  = (2.0 * PII * TD_D) / TD_L
+    ! initialization
+    DrainFac    = 0.0
+    DrainExpFac = 0.0
+    DrainFacTmp = 0.0
+    DrainAspect = (2.0 * PiMath * DrainDepthToImp) / DrainTubeDist
 
-    if ( TD_X > 0.5 ) then
-       do I = 1, 45, 2
-          EX    = exp(-2.0 * I * TD_X)
-          TERM  = (4.0 * EX) / ( I* (1.0-EX) )
-          TD_FX = TD_FX + TERM
-          if ( TERM < 1.0e-6 ) then
-             TD_DE = ( (PII*TD_L) / 8.0 ) / ( log(TD_L/(PII*TD_RD)) + TD_FX )
+    ! compute tile drainage equivalent depth
+    if ( DrainAspect > 0.5 ) then
+       do LoopInd = 1, 45, 2
+          DrainExpFac = exp(-2.0 * LoopInd * DrainAspect)
+          DrainFacTmp = (4.0 * DrainExpFac) / (LoopInd * (1.0-DrainExpFac))
+          DrainFac    = DrainFac + DrainFacTmp
+          if ( DrainFacTmp < 1.0e-6 ) then
+             DrainWatHgtAbvImp = ((PiMath*DrainTubeDist) / 8.0) / &
+                                 (log(DrainTubeDist/(PiMath*DrainTubeRadius)) + DrainFac)
              exit
           endif
        enddo
-    else if ( TD_X < 1.0e-8 ) then
-       TD_DE = TD_D
+    elseif ( DrainAspect < 1.0e-8 ) then
+       DrainWatHgtAbvImp = DrainDepthToImp
     else
-       TD_FX = ( (PII*PII) / (4.0*TD_X) ) + ( log(TD_X/(2.0*PII)) )
-       TD_DE = ( (PII*TD_L) / 8.0 ) / ( log(TD_L/(PII*TD_RD)) + TD_FX )
+       DrainFac          = ((PiMath*PiMath)/(4.0*DrainAspect)) + (log(DrainAspect/(2.0*PiMath)))
+       DrainWatHgtAbvImp = ((PiMath*DrainTubeDist) / 8.0) / &
+                           (log(DrainTubeDist/(PiMath*DrainTubeRadius)) + DrainFac)
     endif
 
-    if ( (TD_DE < 0.0) .and. (I <= 2) ) TD_DE = TD_D
+    if ( (DrainWatHgtAbvImp < 0.0) .and. (LoopInd <= 2) ) DrainWatHgtAbvImp = DrainDepthToImp
 
   end subroutine TileDrainageEquiDepth
 

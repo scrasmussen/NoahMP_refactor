@@ -17,102 +17,104 @@ module SoilWaterSupercoolLiquidMod
 
 contains
 
-  subroutine SoilWaterSupercoolLiquid(noahmp, ISOIL, FREE, TKELV, SoilMoisture, SoilLiqWater)
+  subroutine SoilWaterSupercoolLiquid(noahmp, IndSoil, SoilWatSupercool, &
+                                      SoilTemperature, SoilMoisture, SoilLiqWater)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: FRH2O
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
 
 ! in & out variables
     type(noahmp_type)     , intent(inout) :: noahmp
-    integer               , intent(in   ) :: ISOIL          ! soil layer index
-    real(kind=kind_noahmp), intent(in   ) :: SoilLiqWater           ! soil liquid water content (m3/m3)
-    real(kind=kind_noahmp), intent(in   ) :: SoilMoisture            ! total soil moisture content (m3/m3)
-    real(kind=kind_noahmp), intent(in   ) :: TKELV          ! soil temperature (K)
-    real(kind=kind_noahmp), intent(out  ) :: FREE           ! soil supercooled liquid water content (m3/m3)
+    integer               , intent(in   ) :: IndSoil              ! soil layer index
+    real(kind=kind_noahmp), intent(in   ) :: SoilLiqWater         ! soil liquid water content [m3/m3]
+    real(kind=kind_noahmp), intent(in   ) :: SoilMoisture         ! total soil moisture content [m3/m3]
+    real(kind=kind_noahmp), intent(in   ) :: SoilTemperature      ! soil temperature [K]
+    real(kind=kind_noahmp), intent(out  ) :: SoilWatSupercool     ! soil supercooled liquid water content [m3/m3]
 
 ! local variable
-    integer                               :: NLOG,KCOUNT    ! temporary variables                 
-    character(len=256)                    :: message        ! error message
-    real(kind=kind_noahmp)                :: BX,DENOM,DF    ! temporary variables
-    real(kind=kind_noahmp)                :: DSWL,FK        ! temporary variables
-    real(kind=kind_noahmp)                :: SWL,SWLK       ! temporary frozen content variables
-    real(kind=kind_noahmp), parameter     :: CK    = 8.0    ! parameter
-    real(kind=kind_noahmp), parameter     :: BLIM  = 5.5    ! limit of B soil parameter
-    real(kind=kind_noahmp), parameter     :: ERROR = 0.005  ! error threshold
-    real(kind=kind_noahmp), parameter     :: DICE  = 920.0  ! ice density (kg/m3)
+    integer                               :: NumIter              ! number of iteration
+    integer                               :: IndCnt               ! counting index 
+    real(kind=kind_noahmp)                :: SoilExpB             ! temporary soil B parameter
+    real(kind=kind_noahmp)                :: Denom                ! temporary denominator variable
+    real(kind=kind_noahmp)                :: DF                   ! temporary nominator variable
+    real(kind=kind_noahmp)                :: SoilIceChg           ! soil ice content change
+    real(kind=kind_noahmp)                :: FlerFac              ! factor in Flerchinger solution
+    real(kind=kind_noahmp)                :: SoilIce              ! soil ice content
+    real(kind=kind_noahmp)                :: SoilIceTmp           ! temporary soil ice content
+    real(kind=kind_noahmp), parameter     :: CK          = 8.0    ! parameter
+    real(kind=kind_noahmp), parameter     :: SoilExpBMax = 5.5    ! limit of B soil parameter
+    real(kind=kind_noahmp), parameter     :: ErrorThr    = 0.005  ! error threshold
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,    soil B parameter
-              SoilMatPotentialSat          => noahmp%water%param%SoilMatPotentialSat           ,& ! in,    saturated soil matric potential (m)
-              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat            & ! in,    saturated value of soil moisture [m3/m3]
+    associate(                                                               &
+              SoilExpCoeffB       => noahmp%water%param%SoilExpCoeffB       ,& ! in, soil B parameter
+              SoilMatPotentialSat => noahmp%water%param%SoilMatPotentialSat ,& ! in, saturated soil matric potential [m]
+              SoilMoistureSat     => noahmp%water%param%SoilMoistureSat      & ! in, saturated value of soil moisture [m3/m3]
              )
 ! ----------------------------------------------------------------------
 
-    ! limit on parameter B: B < 5.5  (use parameter BLIM)
+    ! limit on parameter B: B < 5.5  (use parameter SoilExpBMax)
     ! simulations showed if B > 5.5 unfrozen water content is
     ! non-realistically high at very low temperatures
-    BX = SoilExpCoeffB(ISOIL)
+    SoilExpB = SoilExpCoeffB(IndSoil)
 
     ! initializing iterations counter and interative solution flag
-    if ( SoilExpCoeffB(ISOIL) >  BLIM ) BX = BLIM
-    NLOG = 0
+    if ( SoilExpCoeffB(IndSoil) > SoilExpBMax ) SoilExpB = SoilExpBMax
+    NumIter = 0
 
     ! if soil temperature not largely below freezing point, SoilLiqWater = SoilMoisture
-    KCOUNT = 0
-    if ( TKELV > (ConstFreezePoint-1.0e-3) ) then
-       FREE = SoilMoisture
+    IndCnt = 0
+    if ( SoilTemperature > (ConstFreezePoint-1.0e-3) ) then
+       SoilWatSupercool = SoilMoisture
     else  ! frozen soil case
 
        !--- Option 1: iterated solution in Koren et al. 1999 JGR Eqn.17
-       ! initial guess for SWL (frozen content) 
+       ! initial guess for SoilIce (frozen content) 
        if ( CK /= 0.0 ) then
-          SWL = SoilMoisture - SoilLiqWater
-          if ( SWL > (SoilMoisture-0.02) ) SWL = SoilMoisture - 0.02   ! keep within bounds
+          SoilIce = SoilMoisture - SoilLiqWater
+          if ( SoilIce > (SoilMoisture-0.02) ) SoilIce = SoilMoisture - 0.02   ! keep within bounds
           ! start the iterations
-          if ( SWL < 0.0 ) SWL = 0.0
+          if ( SoilIce < 0.0 ) SoilIce = 0.0
 1001      Continue
-          if ( .not. ((NLOG < 10) .and. (KCOUNT == 0)) ) goto 1002
-          NLOG  = NLOG +1
-          DF    = alog ( (SoilMatPotentialSat(ISOIL)*ConstGravityAcc/ConstLatHeatFusion) * &
-                         ((1.0 + CK*SWL)**2.0) * (SoilMoistureSat(ISOIL)/(SoilMoisture - SWL))**BX ) - &
-                         alog ( -(TKELV - ConstFreezePoint) / TKELV )
-          DENOM = 2.0 * CK / (1.0 + CK * SWL) + BX / (SoilMoisture - SWL)
-          SWLK  = SWL - DF / DENOM
+          if ( .not. ((NumIter < 10) .and. (IndCnt == 0)) ) goto 1002
+          NumIter    = NumIter +1
+          DF         = alog((SoilMatPotentialSat(IndSoil)*ConstGravityAcc/ConstLatHeatFusion) * &
+                       ((1.0 + CK*SoilIce)**2.0) * (SoilMoistureSat(IndSoil)/(SoilMoisture - SoilIce))**SoilExpB) - &
+                       alog(-(SoilTemperature - ConstFreezePoint) / SoilTemperature)
+          Denom      = 2.0 * CK / (1.0 + CK * SoilIce) + SoilExpB / (SoilMoisture - SoilIce)
+          SoilIceTmp = SoilIce - DF / Denom
           ! bounds useful for mathematical solution
-          if ( SWLK > (SoilMoisture-0.02) ) SWLK = SoilMoisture - 0.02
-          if ( SWLK < 0.0 ) SWLK = 0.0
-          DSWL = abs(SWLK - SWL)    ! mathematical solution bounds applied
+          if ( SoilIceTmp > (SoilMoisture-0.02) ) SoilIceTmp = SoilMoisture - 0.02
+          if ( SoilIceTmp < 0.0 ) SoilIceTmp = 0.0
+          SoilIceChg = abs(SoilIceTmp - SoilIce)    ! mathematical solution bounds applied
           ! if more than 10 iterations, use explicit method (CK=0 approx.)
-          ! when DSWL <= ERROR, no more interations required.
-          SWL = SWLK
-          if ( DSWL <= ERROR ) then
-             KCOUNT = KCOUNT +1
+          ! when SoilIceChg <= ErrorThr, no more interations required.
+          SoilIce = SoilIceTmp
+          if ( SoilIceChg <= ErrorThr ) then
+             IndCnt = IndCnt +1
           endif
           ! end of iteration
           ! bounds applied within do-block are valid for physical solution 
           goto 1001
 1002      continue
-          FREE = SoilMoisture - SWL
+          SoilWatSupercool = SoilMoisture - SoilIce
        endif
        !--- End Option 1
 
        !--- Option 2: explicit solution for Flerchinger Eq. i.e., CK=0
        ! in Koren et al. 1999 JGR Eqn. 17
        ! apply physical bounds to Flerchinger solution
-       if ( KCOUNT == 0 ) then
-          print*, 'Flerchinger used in NEW version. Iterations=', NLOG
-          !write(message, '("Flerchinger used in NEW version. Iterations=", I6)') NLOG
-          !call wrf_message(trim(message))
-          FK = ( ( (ConstLatHeatFusion / (ConstGravityAcc * (-SoilMatPotentialSat(ISOIL)))) * &
-                   ((TKELV-ConstFreezePoint) / TKELV) )**(-1.0/BX) ) * SoilMoistureSat(ISOIL)
-          if ( FK < 0.02 ) FK = 0.02
-          FREE = min( FK, SoilMoisture )
+       if ( IndCnt == 0 ) then
+          print*, 'Flerchinger used in NEW version. Iterations=', NumIter
+          FlerFac = (((ConstLatHeatFusion / (ConstGravityAcc * (-SoilMatPotentialSat(IndSoil)))) * &
+                    ((SoilTemperature-ConstFreezePoint) / SoilTemperature))**(-1.0/SoilExpB)) * SoilMoistureSat(IndSoil)
+          if ( FlerFac < 0.02 ) FlerFac = 0.02
+          SoilWatSupercool = min(FlerFac, SoilMoisture)
        endif
        !--- End Option 2
 

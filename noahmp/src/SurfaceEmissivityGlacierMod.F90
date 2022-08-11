@@ -2,7 +2,7 @@ module SurfaceEmissivityGlacierMod
 
 !!! Compute glacier surface longwave emissivity
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -15,7 +15,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: None (embedded in ENERGY_GLACIER subroutine)
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -24,12 +24,12 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              EmissivitySnow       => noahmp%energy%param%EmissivitySnow       ,& ! in,    snow emissivity
-              EmissivityIceSfc            => noahmp%energy%param%EmissivityIceSfc            ,& ! in,    emissivity ice surface
-              SnowCoverFrac            => noahmp%water%state%SnowCoverFrac             ,& ! in,    snow cover fraction [-]
-              EmissivityGrd             => noahmp%energy%state%EmissivityGrd             ,& ! out,   ground emissivity
-              EmissivitySfc          => noahmp%energy%state%EmissivitySfc           & ! out,   surface emissivity
+    associate(                                                          &
+              EmissivitySnow   => noahmp%energy%param%EmissivitySnow   ,& ! in,  snow emissivity
+              EmissivityIceSfc => noahmp%energy%param%EmissivityIceSfc ,& ! in,  emissivity ice surface
+              SnowCoverFrac    => noahmp%water%state%SnowCoverFrac     ,& ! in,  snow cover fraction
+              EmissivityGrd    => noahmp%energy%state%EmissivityGrd    ,& ! out, ground emissivity
+              EmissivitySfc    => noahmp%energy%state%EmissivitySfc     & ! out, surface emissivity
              )
 ! ----------------------------------------------------------------------
 

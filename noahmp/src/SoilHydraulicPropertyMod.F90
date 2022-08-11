@@ -3,7 +3,7 @@ module SoilHydraulicPropertyMod
 !!! Two methods for calculating soil water diffusivity and soil hydraulic conductivity
 !!! Option 1: linear effects (more permeable, Niu and Yang,2006); Option 2: nonlinear effects (less permeable)
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -12,48 +12,48 @@ module SoilHydraulicPropertyMod
 contains
 
   subroutine SoilDiffusivityConductivityOpt1(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
-                                             SoilMoisture, SoilImpervFrac, ISOIL)
+                                             SoilMoisture, SoilImpervFrac, IndLayer)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND1
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
 
 ! IN and OUT variables
     type(noahmp_type)     , intent(inout) :: noahmp
-    integer               , intent(in)    :: ISOIL    ! soil layer index
-    real(kind=kind_noahmp), intent(in)    :: SoilMoisture      ! soil moisture [m3/m3]
-    real(kind=kind_noahmp), intent(in)    :: SoilImpervFrac      ! impervious fraction due to frozen soil
-    real(kind=kind_noahmp), intent(out)   :: SoilWatConductivity     ! soil water conductivity [m/s]
-    real(kind=kind_noahmp), intent(out)   :: SoilWatDiffusivity      ! soil water diffusivity [m2/s]
+    integer               , intent(in)    :: IndLayer               ! soil layer index
+    real(kind=kind_noahmp), intent(in)    :: SoilMoisture           ! soil moisture [m3/m3]
+    real(kind=kind_noahmp), intent(in)    :: SoilImpervFrac         ! impervious fraction due to frozen soil
+    real(kind=kind_noahmp), intent(out)   :: SoilWatConductivity    ! soil water conductivity [m/s]
+    real(kind=kind_noahmp), intent(out)   :: SoilWatDiffusivity     ! soil water diffusivity [m2/s]
 
 ! local variable
-    real(kind=kind_noahmp)                :: EXPON    ! exponential local factor
-    real(kind=kind_noahmp)                :: FACTR    ! pre-factor
+    real(kind=kind_noahmp)                :: SoilExpTmp             ! exponential local factor
+    real(kind=kind_noahmp)                :: SoilPreFac             ! pre-factor
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
-              SoilWatDiffusivitySat           => noahmp%water%param%SoilWatDiffusivitySat            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
-              SoilWatConductivitySat           => noahmp%water%param%SoilWatConductivitySat             & ! in,     saturated soil hydraulic conductivity [m/s]
+    associate(                                                                     &
+              SoilMoistureSat        => noahmp%water%param%SoilMoistureSat        ,& ! in, saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB          => noahmp%water%param%SoilExpCoeffB          ,& ! in, soil B parameter
+              SoilWatDiffusivitySat  => noahmp%water%param%SoilWatDiffusivitySat  ,& ! in, saturated soil hydraulic diffusivity [m2/s]
+              SoilWatConductivitySat => noahmp%water%param%SoilWatConductivitySat  & ! in, saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
-    FACTR = max( 0.01, SoilMoisture/SoilMoistureSat(ISOIL) )
+    SoilPreFac = max(0.01, SoilMoisture/SoilMoistureSat(IndLayer))
 
     ! soil water diffusivity
-    EXPON = SoilExpCoeffB(ISOIL) + 2.0
-    SoilWatDiffusivity   = SoilWatDiffusivitySat(ISOIL) * FACTR ** EXPON
-    SoilWatDiffusivity   = SoilWatDiffusivity * (1.0 - SoilImpervFrac)
+    SoilExpTmp         = SoilExpCoeffB(IndLayer) + 2.0
+    SoilWatDiffusivity = SoilWatDiffusivitySat(IndLayer) * SoilPreFac ** SoilExpTmp
+    SoilWatDiffusivity = SoilWatDiffusivity * (1.0 - SoilImpervFrac)
 
     ! soil hydraulic conductivity
-    EXPON = 2.0 * SoilExpCoeffB(ISOIL) + 3.0
-    SoilWatConductivity  = SoilWatConductivitySat(ISOIL) * FACTR ** EXPON
-    SoilWatConductivity  = SoilWatConductivity * (1.0 - SoilImpervFrac)
+    SoilExpTmp          = 2.0 * SoilExpCoeffB(IndLayer) + 3.0
+    SoilWatConductivity = SoilWatConductivitySat(IndLayer) * SoilPreFac ** SoilExpTmp
+    SoilWatConductivity = SoilWatConductivity * (1.0 - SoilImpervFrac)
 
     end associate
 
@@ -61,54 +61,55 @@ contains
 
 
   subroutine SoilDiffusivityConductivityOpt2(noahmp, SoilWatDiffusivity, SoilWatConductivity, &
-                                             SoilMoisture, SoilIce, ISOIL)
+                                             SoilMoisture, SoilIce, IndLayer)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: WDFCND2
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
 
 ! IN and OUT variables
     type(noahmp_type)     , intent(inout) :: noahmp
-    integer               , intent(in)    :: ISOIL    ! soil layer index
-    real(kind=kind_noahmp), intent(in)    :: SoilMoisture      ! soil moisture [m3/m3]
-    real(kind=kind_noahmp), intent(in)    :: SoilIce     ! soil ice content [m3/m3]
-    real(kind=kind_noahmp), intent(out)   :: SoilWatConductivity     ! soil water conductivity [m/s]
-    real(kind=kind_noahmp), intent(out)   :: SoilWatDiffusivity      ! soil water diffusivity [m2/s]
+    integer               , intent(in)    :: IndLayer              ! soil layer index
+    real(kind=kind_noahmp), intent(in)    :: SoilMoisture          ! soil moisture [m3/m3]
+    real(kind=kind_noahmp), intent(in)    :: SoilIce               ! soil ice content [m3/m3]
+    real(kind=kind_noahmp), intent(out)   :: SoilWatConductivity   ! soil water conductivity [m/s]
+    real(kind=kind_noahmp), intent(out)   :: SoilWatDiffusivity    ! soil water diffusivity [m2/s]
 
 ! local variable
-    real(kind=kind_noahmp)                :: EXPON    ! exponential local factor
-    real(kind=kind_noahmp)                :: FACTR1   ! pre-factor
-    real(kind=kind_noahmp)                :: FACTR2   ! pre-factor
-    real(kind=kind_noahmp)                :: VKWGT    ! weights
+    real(kind=kind_noahmp)                :: SoilExpTmp            ! exponential local factor
+    real(kind=kind_noahmp)                :: SoilPreFac1           ! pre-factor
+    real(kind=kind_noahmp)                :: SoilPreFac2           ! pre-factor
+    real(kind=kind_noahmp)                :: SoilIceWgt            ! weights
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              SoilMoistureSat          => noahmp%water%param%SoilMoistureSat           ,& ! in,     saturated value of soil moisture [m3/m3]
-              SoilExpCoeffB            => noahmp%water%param%SoilExpCoeffB             ,& ! in,     soil B parameter
-              SoilWatDiffusivitySat           => noahmp%water%param%SoilWatDiffusivitySat            ,& ! in,     saturated soil hydraulic diffusivity [m2/s]
-              SoilWatConductivitySat           => noahmp%water%param%SoilWatConductivitySat             & ! in,     saturated soil hydraulic conductivity [m/s]
+    associate(                                                                     &
+              SoilMoistureSat        => noahmp%water%param%SoilMoistureSat        ,& ! in, saturated value of soil moisture [m3/m3]
+              SoilExpCoeffB          => noahmp%water%param%SoilExpCoeffB          ,& ! in, soil B parameter
+              SoilWatDiffusivitySat  => noahmp%water%param%SoilWatDiffusivitySat  ,& ! in, saturated soil hydraulic diffusivity [m2/s]
+              SoilWatConductivitySat => noahmp%water%param%SoilWatConductivitySat  & ! in, saturated soil hydraulic conductivity [m/s]
              )
 ! ----------------------------------------------------------------------
 
-    FACTR1 = 0.05 / SoilMoistureSat(ISOIL)
-    FACTR2 = max( 0.01, SoilMoisture/SoilMoistureSat(ISOIL) )
-    FACTR1 = min( FACTR1, FACTR2 )
+    SoilPreFac1 = 0.05 / SoilMoistureSat(IndLayer)
+    SoilPreFac2 = max(0.01, SoilMoisture/SoilMoistureSat(IndLayer))
+    SoilPreFac1 = min(SoilPreFac1, SoilPreFac2)
 
     ! soil water diffusivity
-    EXPON  = SoilExpCoeffB(ISOIL) + 2.0
-    SoilWatDiffusivity    = SoilWatDiffusivitySat(ISOIL) * FACTR2 ** EXPON
+    SoilExpTmp         = SoilExpCoeffB(IndLayer) + 2.0
+    SoilWatDiffusivity = SoilWatDiffusivitySat(IndLayer) * SoilPreFac2 ** SoilExpTmp
     if ( SoilIce > 0.0 ) then
-       VKWGT = 1.0 / ( 1.0 + (500.0 * SoilIce)**3.0 )
-       SoilWatDiffusivity   = VKWGT * SoilWatDiffusivity + (1.0-VKWGT) * SoilWatDiffusivitySat(ISOIL) * FACTR1 ** EXPON
+       SoilIceWgt         = 1.0 / (1.0 + (500.0 * SoilIce)**3.0)
+       SoilWatDiffusivity = SoilIceWgt * SoilWatDiffusivity + &
+                            (1.0-SoilIceWgt) * SoilWatDiffusivitySat(IndLayer) * SoilPreFac1**SoilExpTmp
     endif
 
     ! soil hydraulic conductivity
-    EXPON = 2.0 * SoilExpCoeffB(ISOIL) + 3.0
-    SoilWatConductivity  = SoilWatConductivitySat(ISOIL) * FACTR2 ** EXPON
+    SoilExpTmp          = 2.0 * SoilExpCoeffB(IndLayer) + 3.0
+    SoilWatConductivity = SoilWatConductivitySat(IndLayer) * SoilPreFac2 ** SoilExpTmp
 
     end associate
 

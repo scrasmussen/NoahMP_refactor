@@ -2,7 +2,7 @@ module SoilWaterDiffusionRichardsMod
 
 !!! Solve Richards equation for soil water movement/diffusion
 !!! Compute the right hand side of the time tendency term of the soil
-!!! water diffusion equation.  also to compute ( prepare ) the matrix
+!!! water diffusion equation.  also to compute (prepare) the matrix
 !!! coefficients for the tri-diagonal matrix of the implicit time scheme.
 
   use Machine
@@ -14,149 +14,156 @@ module SoilWaterDiffusionRichardsMod
 
 contains
 
-  subroutine SoilWaterDiffusionRichards(noahmp, AI, BI, CI, RHSTT)
+  subroutine SoilWaterDiffusionRichards(noahmp, MatLeft1, MatLeft2, MatLeft3, MatRight)
 
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: SRT
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
 
 ! in & out variables
     type(noahmp_type)     , intent(inout) :: noahmp
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: RHSTT  ! right-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: AI     ! left-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: BI     ! left-hand side term of the matrix
-    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: CI     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: MatRight     ! right-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: MatLeft1     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: MatLeft2     ! left-hand side term of the matrix
+    real(kind=kind_noahmp), allocatable, dimension(:), intent(inout) :: MatLeft3     ! left-hand side term of the matrix
 
 ! local variable
-    integer                :: K         ! loop index
-    real(kind=kind_noahmp) :: TEMP1     ! temporary variable
-    real(kind=kind_noahmp) :: SMXWTD    ! temporary soil moisture between bottom of the soil and water table
-    real(kind=kind_noahmp) :: SMXBOT    ! temporary soil moisture below bottom to calculate flux
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DDZ     ! temporary variable
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DENOM   ! temporary soil thickness
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DSMDZ   ! temporary soil moisture
-    real(kind=kind_noahmp), allocatable, dimension(:) :: WFLUX   ! temporary water flux
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SMX     ! temporary soil moisture
+    integer                                           :: LoopInd                     ! loop index
+    real(kind=kind_noahmp)                            :: DepthSnowSoilTmp            ! temporary snow/soil layer depth [m]
+    real(kind=kind_noahmp)                            :: SoilMoistTmpToWT            ! temporary soil moisture between bottom of the soil and water table
+    real(kind=kind_noahmp)                            :: SoilMoistBotTmp             ! temporary soil moisture below bottom to calculate flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: DepthSnowSoilInv            ! inverse of snow/soil layer depth [1/m]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilThickTmp                ! temporary soil thickness
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilWaterGrad               ! temporary soil moisture vertical gradient
+    real(kind=kind_noahmp), allocatable, dimension(:) :: WaterExcess                 ! temporary excess water flux
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoistureTmp             ! temporary soil moisture
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,     number of soil layers
-              DepthSoilLayer           => noahmp%config%domain%DepthSoilLayer          ,& ! in,     depth [m] of layer-bottom from soil surface
-              OptSoilPermeabilityFrozen => noahmp%config%nmlist%OptSoilPermeabilityFrozen,& ! in,     options for frozen soil permeability
-              OptRunoffSubsurface => noahmp%config%nmlist%OptRunoffSubsurface ,& ! in,     options for drainage and subsurface runoff
-              SoilDrainSlope           => noahmp%water%param%SoilDrainSlope            ,& ! in,     slope index for soil drainage
-              InfilRateSfc           => noahmp%water%flux%InfilRateSfc             ,& ! in,     infiltration rate at surface (mm/s)
-              EvapSoilSfcLiq           => noahmp%water%flux%EvapSoilSfcLiq             ,& ! in,     evaporation from soil surface [mm/s]
-              TranspWatLossSoil          => noahmp%water%flux%TranspWatLossSoil            ,& ! in,    transpiration water loss from soil layers [mm/s]
-              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! in,     soil water content [m3/m3]
-              SoilMoisture             => noahmp%water%state%SoilMoisture              ,& ! in,     total soil moisture [m3/m3]
-              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! in,     water table depth [m]
-              SoilImpervFrac             => noahmp%water%state%SoilImpervFrac              ,& ! in,     fraction of imperviousness due to frozen soil
-              SoilImpervFracMax          => noahmp%water%state%SoilImpervFracMax           ,& ! in,     maximum soil imperviousness fraction
-              SoilIceMax         => noahmp%water%state%SoilIceMax          ,& ! in,     maximum soil ice content (m3/m3)
-              SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT           ,& ! in,     soil moisture between bottom of the soil and the water table
-              SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! out,    soil hydraulic conductivity [m/s]
-              SoilWatDiffusivity             => noahmp%water%state%SoilWatDiffusivity              ,& ! out,    soil water diffusivity [m2/s]
-              DrainSoilBot          => noahmp%water%flux%DrainSoilBot             & ! out,    soil bottom drainage (m/s)
+    associate(                                                                             &
+              NumSoilLayer              => noahmp%config%domain%NumSoilLayer              ,& ! in,  number of soil layers
+              DepthSoilLayer            => noahmp%config%domain%DepthSoilLayer            ,& ! in,  depth [m] of layer-bottom from soil surface
+              OptSoilPermeabilityFrozen => noahmp%config%nmlist%OptSoilPermeabilityFrozen ,& ! in,  options for frozen soil permeability
+              OptRunoffSubsurface       => noahmp%config%nmlist%OptRunoffSubsurface       ,& ! in,  options for drainage and subsurface runoff
+              SoilDrainSlope            => noahmp%water%param%SoilDrainSlope              ,& ! in,  slope index for soil drainage
+              InfilRateSfc              => noahmp%water%flux%InfilRateSfc                 ,& ! in,  infiltration rate at surface [mm/s]
+              EvapSoilSfcLiq            => noahmp%water%flux%EvapSoilSfcLiq               ,& ! in,  evaporation from soil surface [mm/s]
+              TranspWatLossSoil         => noahmp%water%flux%TranspWatLossSoil            ,& ! in,  transpiration water loss from soil layers [mm/s]
+              SoilLiqWater              => noahmp%water%state%SoilLiqWater                ,& ! in,  soil water content [m3/m3]
+              SoilMoisture              => noahmp%water%state%SoilMoisture                ,& ! in,  total soil moisture [m3/m3]
+              WaterTableDepth           => noahmp%water%state%WaterTableDepth             ,& ! in,  water table depth [m]
+              SoilImpervFrac            => noahmp%water%state%SoilImpervFrac              ,& ! in,  fraction of imperviousness due to frozen soil
+              SoilImpervFracMax         => noahmp%water%state%SoilImpervFracMax           ,& ! in,  maximum soil imperviousness fraction
+              SoilIceMax                => noahmp%water%state%SoilIceMax                  ,& ! in,  maximum soil ice content [m3/m3]
+              SoilMoistureToWT          => noahmp%water%state%SoilMoistureToWT            ,& ! in,  soil moisture between bottom of the soil and the water table
+              SoilWatConductivity       => noahmp%water%state%SoilWatConductivity         ,& ! out, soil hydraulic conductivity [m/s]
+              SoilWatDiffusivity        => noahmp%water%state%SoilWatDiffusivity          ,& ! out, soil water diffusivity [m2/s]
+              DrainSoilBot              => noahmp%water%flux%DrainSoilBot                  & ! out, soil bottom drainage [m/s]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( DDZ  (1:NumSoilLayer) )
-    allocate( DENOM(1:NumSoilLayer) )
-    allocate( DSMDZ(1:NumSoilLayer) )
-    allocate( WFLUX(1:NumSoilLayer) )
-    allocate( SMX  (1:NumSoilLayer) )
-    RHSTT(:) = 0.0
-    AI(:)    = 0.0
-    BI(:)    = 0.0
-    CI(:)    = 0.0
-    DDZ(:)   = 0.0
-    DENOM(:) = 0.0
-    DSMDZ(:) = 0.0
-    WFLUX(:) = 0.0
-    SMX(:)   = 0.0
+    allocate( DepthSnowSoilInv(1:NumSoilLayer) )
+    allocate( SoilThickTmp    (1:NumSoilLayer) )
+    allocate( SoilWaterGrad   (1:NumSoilLayer) )
+    allocate( WaterExcess     (1:NumSoilLayer) )
+    allocate( SoilMoistureTmp (1:NumSoilLayer) )
+    MatRight(:)         = 0.0
+    MatLeft1(:)         = 0.0
+    MatLeft2(:)         = 0.0
+    MatLeft3(:)         = 0.0
+    DepthSnowSoilInv(:) = 0.0
+    SoilThickTmp(:)     = 0.0
+    SoilWaterGrad(:)    = 0.0
+    WaterExcess(:)      = 0.0
+    SoilMoistureTmp(:)  = 0.0
 
     ! compute soil hydraulic conductivity and diffusivity
     if ( OptSoilPermeabilityFrozen == 1 ) then
-       do K = 1, NumSoilLayer
-          call SoilDiffusivityConductivityOpt1(noahmp,SoilWatDiffusivity(K),SoilWatConductivity(K),SoilMoisture(K),SoilImpervFrac(K),K) 
-          SMX(K) = SoilMoisture(K)
+       do LoopInd = 1, NumSoilLayer
+          call SoilDiffusivityConductivityOpt1(noahmp,SoilWatDiffusivity(LoopInd),SoilWatConductivity(LoopInd),&
+                                               SoilMoisture(LoopInd),SoilImpervFrac(LoopInd),LoopInd) 
+          SoilMoistureTmp(LoopInd) = SoilMoisture(LoopInd)
        enddo
-       if ( OptRunoffSubsurface == 5 ) SMXWTD = SoilMoistureToWT
+       if ( OptRunoffSubsurface == 5 ) SoilMoistTmpToWT = SoilMoistureToWT
     endif
 
     if ( OptSoilPermeabilityFrozen == 2 ) then
-       do K = 1, NumSoilLayer
-          call SoilDiffusivityConductivityOpt2(noahmp,SoilWatDiffusivity(K),SoilWatConductivity(K),SoilLiqWater(K),SoilIceMax,K)
-          SMX(K) = SoilLiqWater(K)
+       do LoopInd = 1, NumSoilLayer
+          call SoilDiffusivityConductivityOpt2(noahmp,SoilWatDiffusivity(LoopInd),SoilWatConductivity(LoopInd),&
+                                               SoilLiqWater(LoopInd),SoilIceMax,LoopInd)
+          SoilMoistureTmp(LoopInd) = SoilLiqWater(LoopInd)
        enddo
-       if ( OptRunoffSubsurface == 5 ) SMXWTD = SoilMoistureToWT * SoilLiqWater(NumSoilLayer) / SoilMoisture(NumSoilLayer)  !same liquid fraction as in the bottom layer
+       if ( OptRunoffSubsurface == 5 ) &
+          SoilMoistTmpToWT = SoilMoistureToWT * SoilLiqWater(NumSoilLayer) / SoilMoisture(NumSoilLayer)  !same liquid fraction as in the bottom layer
     endif
 
     ! compute gradient and flux of soil water diffusion terms
-    do K = 1, NumSoilLayer
-       if ( K == 1 ) then
-          DENOM(K) = - DepthSoilLayer(K)
-          TEMP1    = - DepthSoilLayer(K+1)
-          DDZ(K)   = 2.0 / TEMP1
-          DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
-          WFLUX(K) = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K) - InfilRateSfc + TranspWatLossSoil(K) + EvapSoilSfcLiq
-       else if ( K < NumSoilLayer ) then
-          DENOM(k) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
-          TEMP1    = (DepthSoilLayer(K-1) - DepthSoilLayer(K+1))
-          DDZ(K)   = 2.0 / TEMP1
-          DSMDZ(K) = 2.0 * (SMX(K) - SMX(K+1)) / TEMP1
-          WFLUX(K) = SoilWatDiffusivity(K  ) * DSMDZ(K  ) + SoilWatConductivity(K  )         &
-                   - SoilWatDiffusivity(K-1) * DSMDZ(K-1) - SoilWatConductivity(K-1) + TranspWatLossSoil(K)
+    do LoopInd = 1, NumSoilLayer
+       if ( LoopInd == 1 ) then
+          SoilThickTmp(LoopInd)     = - DepthSoilLayer(LoopInd)
+          DepthSnowSoilTmp          = - DepthSoilLayer(LoopInd+1)
+          DepthSnowSoilInv(LoopInd) = 2.0 / DepthSnowSoilTmp
+          SoilWaterGrad(LoopInd)    = 2.0 * (SoilMoistureTmp(LoopInd)-SoilMoistureTmp(LoopInd+1)) / DepthSnowSoilTmp
+          WaterExcess(LoopInd)      = SoilWatDiffusivity(LoopInd)*SoilWaterGrad(LoopInd) + SoilWatConductivity(LoopInd) - &
+                                      InfilRateSfc + TranspWatLossSoil(LoopInd) + EvapSoilSfcLiq
+       else if ( LoopInd < NumSoilLayer ) then
+          SoilThickTmp(k)           = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd))
+          DepthSnowSoilTmp          = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd+1))
+          DepthSnowSoilInv(LoopInd) = 2.0 / DepthSnowSoilTmp
+          SoilWaterGrad(LoopInd)    = 2.0 * (SoilMoistureTmp(LoopInd) - SoilMoistureTmp(LoopInd+1)) / DepthSnowSoilTmp
+          WaterExcess(LoopInd)      = SoilWatDiffusivity(LoopInd)*SoilWaterGrad(LoopInd) + SoilWatConductivity(LoopInd) - &
+                                      SoilWatDiffusivity(LoopInd-1)*SoilWaterGrad(LoopInd-1) - SoilWatConductivity(LoopInd-1) + &
+                                      TranspWatLossSoil(LoopInd)
        else
-          DENOM(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
+          SoilThickTmp(LoopInd) = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd))
           if ( (OptRunoffSubsurface == 1) .or. (OptRunoffSubsurface == 2) ) then
              DrainSoilBot = 0.0
           endif
           if ( (OptRunoffSubsurface == 3) .or. (OptRunoffSubsurface == 6) .or. &
                (OptRunoffSubsurface == 7) .or. (OptRunoffSubsurface == 8) ) then
-             DrainSoilBot = SoilDrainSlope * SoilWatConductivity(K)
+             DrainSoilBot = SoilDrainSlope * SoilWatConductivity(LoopInd)
           endif
           if ( OptRunoffSubsurface == 4 ) then
-             DrainSoilBot = (1.0 - SoilImpervFracMax) * SoilWatConductivity(K)
+             DrainSoilBot = (1.0 - SoilImpervFracMax) * SoilWatConductivity(LoopInd)
           endif
-          if ( OptRunoffSubsurface == 5 ) then   !gmm new m-m&f water table dynamics formulation
-             TEMP1  = 2.0 * DENOM(K)
-             if ( WaterTableDepth < (DepthSoilLayer(NumSoilLayer)-DENOM(NumSoilLayer)) ) then
+          if ( OptRunoffSubsurface == 5 ) then   ! gmm new m-m&f water table dynamics formulation
+             DepthSnowSoilTmp  = 2.0 * SoilThickTmp(LoopInd)
+             if ( WaterTableDepth < (DepthSoilLayer(NumSoilLayer)-SoilThickTmp(NumSoilLayer)) ) then
                 ! gmm interpolate from below, midway to the water table, 
                 ! to the middle of the auxiliary layer below the soil bottom
-                SMXBOT = SMX(K) - (SMX(K) - SMXWTD) * DENOM(K) * 2.0 / (DENOM(K) + DepthSoilLayer(K) - WaterTableDepth)
+                SoilMoistBotTmp = SoilMoistureTmp(LoopInd) - (SoilMoistureTmp(LoopInd)-SoilMoistTmpToWT) * &
+                                  SoilThickTmp(LoopInd)*2.0 / (SoilThickTmp(LoopInd)+DepthSoilLayer(LoopInd)-WaterTableDepth)
              else
-                SMXBOT = SMXWTD
+                SoilMoistBotTmp = SoilMoistTmpToWT
              endif
-             DSMDZ(K) = 2.0 * (SMX(K) - SMXBOT) / TEMP1
-             DrainSoilBot   = SoilWatDiffusivity(K) * DSMDZ(K) + SoilWatConductivity(K)
+             SoilWaterGrad(LoopInd) = 2.0 * (SoilMoistureTmp(LoopInd) - SoilMoistBotTmp) / DepthSnowSoilTmp
+             DrainSoilBot           = SoilWatDiffusivity(LoopInd) * SoilWaterGrad(LoopInd) + SoilWatConductivity(LoopInd)
           endif
-          WFLUX(K) = -(SoilWatDiffusivity(K-1)*DSMDZ(K-1)) - SoilWatConductivity(K-1) + TranspWatLossSoil(K) + DrainSoilBot
+          WaterExcess(LoopInd) = -(SoilWatDiffusivity(LoopInd-1)*SoilWaterGrad(LoopInd-1)) - SoilWatConductivity(LoopInd-1) + &
+                                 TranspWatLossSoil(LoopInd) + DrainSoilBot
        endif
     enddo
 
     ! prepare the matrix coefficients for the tri-diagonal matrix
-    do K = 1, NumSoilLayer
-       if ( K == 1 ) then
-          AI(K)    =   0.0
-          BI(K)    =   SoilWatDiffusivity(K  ) * DDZ(K  ) / DENOM(K)
-          CI(K)    = - BI (K)
-       else if ( K < NumSoilLayer ) then
-          AI(K)    = - SoilWatDiffusivity(K-1) * DDZ(K-1) / DENOM(K)
-          CI(K)    = - SoilWatDiffusivity(K  ) * DDZ(K  ) / DENOM(K)
-          BI(K)    = - ( AI (K) + CI (K) )
+    do LoopInd = 1, NumSoilLayer
+       if ( LoopInd == 1 ) then
+          MatLeft1(LoopInd) =   0.0
+          MatLeft2(LoopInd) =   SoilWatDiffusivity(LoopInd  ) * DepthSnowSoilInv(LoopInd  ) / SoilThickTmp(LoopInd)
+          MatLeft3(LoopInd) = - MatLeft2(LoopInd)
+       else if ( LoopInd < NumSoilLayer ) then
+          MatLeft1(LoopInd) = - SoilWatDiffusivity(LoopInd-1) * DepthSnowSoilInv(LoopInd-1) / SoilThickTmp(LoopInd)
+          MatLeft3(LoopInd) = - SoilWatDiffusivity(LoopInd  ) * DepthSnowSoilInv(LoopInd  ) / SoilThickTmp(LoopInd)
+          MatLeft2(LoopInd) = - (MatLeft1(LoopInd) + MatLeft3(LoopInd))
        else
-          AI(K)    = - SoilWatDiffusivity(K-1) * DDZ(K-1) / DENOM(K)
-          CI(K)    =   0.0
-          BI(K)    = - ( AI (K) + CI (K) )
+          MatLeft1(LoopInd) = - SoilWatDiffusivity(LoopInd-1) * DepthSnowSoilInv(LoopInd-1) / SoilThickTmp(LoopInd)
+          MatLeft3(LoopInd) =   0.0
+          MatLeft2(LoopInd) = - (MatLeft1(LoopInd) + MatLeft3(LoopInd))
        endif
-       RHSTT(K) = WFLUX(K) / (-DENOM(K))
+       MatRight(LoopInd) = WaterExcess(LoopInd) / (-SoilThickTmp(LoopInd))
     enddo
 
     end associate

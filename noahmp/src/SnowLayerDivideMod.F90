@@ -17,7 +17,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: DIVIDE
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Oct 27, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -25,126 +25,126 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    integer                :: J        ! indices
-    integer                :: MSNO     ! number of layer (top) to MSNO (bot)
-    real(kind=kind_noahmp) :: DRR      ! thickness of the combined [m]
-    real(kind=kind_noahmp) :: ZWICE    ! extra snow ice to be divided compared to allowed layer thickness
-    real(kind=kind_noahmp) :: ZWLIQ    ! extra snow liquid water to be divided compared to allowed layer thickness
-    real(kind=kind_noahmp) :: PROPOR   ! fraction of extra snow to be divided compared to allowed layer thickness
-    real(kind=kind_noahmp) :: DTDZ     ! temperature gradient between two snow layers
-    real(kind=kind_noahmp), allocatable, dimension(:) :: DZ      ! snow layer thickness [m]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SWICE   ! partial volume of ice [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SWLIQ   ! partial volume of liquid water [m3/m3]
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TSNO    ! node temperature [k]
+    integer                          :: LoopInd                              ! snow layer loop index
+    integer                          :: NumSnowLayerTmp                      ! number of snow layer top to bottom
+    real(kind=kind_noahmp)           :: SnowThickCombTmp                     ! thickness of the combined [m]
+    real(kind=kind_noahmp)           :: SnowIceExtra                         ! extra snow ice to be divided compared to allowed layer thickness
+    real(kind=kind_noahmp)           :: SnowLiqExtra                         ! extra snow liquid water to be divided compared to allowed layer thickness
+    real(kind=kind_noahmp)           :: SnowFracExtra                        ! fraction of extra snow to be divided compared to allowed layer thickness
+    real(kind=kind_noahmp)           :: SnowTempGrad                         ! temperature gradient between two snow layers
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowThickTmp        ! snow layer thickness [m]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceTmp          ! partial volume of ice [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowLiqTmp          ! partial volume of liquid water [m3/m3]
+    real(kind=kind_noahmp), allocatable, dimension(:) :: TemperatureSnowTmp  ! node temperature [K]
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,& ! in,    maximum number of snow layers
-              NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,& ! inout, actual number of snow layers (negative)
-              TemperatureSoilSnow             => noahmp%energy%state%TemperatureSoilSnow             ,& ! inout, snow and soil layer temperature [k]
-              SnowIce           => noahmp%water%state%SnowIce            ,& ! inout, snow layer ice [mm]
-              SnowLiqWater           => noahmp%water%state%SnowLiqWater            ,& ! inout, snow layer liquid water [mm]
-              ThicknessSnowSoilLayer          => noahmp%config%domain%ThicknessSnowSoilLayer          & ! inout, thickness of snow/soil layers (m)
+    associate(                                                                       &
+              NumSnowLayerMax        => noahmp%config%domain%NumSnowLayerMax        ,& ! in,    maximum number of snow layers
+              NumSnowLayerNeg        => noahmp%config%domain%NumSnowLayerNeg        ,& ! inout, actual number of snow layers (negative)
+              ThicknessSnowSoilLayer => noahmp%config%domain%ThicknessSnowSoilLayer ,& ! inout, thickness of snow/soil layers [m]
+              TemperatureSoilSnow    => noahmp%energy%state%TemperatureSoilSnow     ,& ! inout, snow and soil layer temperature [K]
+              SnowIce                => noahmp%water%state%SnowIce                  ,& ! inout, snow layer ice [mm]
+              SnowLiqWater           => noahmp%water%state%SnowLiqWater              & ! inout, snow layer liquid water [mm]
              )
 ! ----------------------------------------------------------------------
 
 ! initialization
-    allocate( SWICE (1:NumSnowLayerMax) )
-    allocate( SWLIQ (1:NumSnowLayerMax) )
-    allocate( TSNO  (1:NumSnowLayerMax) )
-    allocate( DZ    (1:NumSnowLayerMax) )
-    SWICE(:) = 0.0
-    SWLIQ(:) = 0.0
-    TSNO (:) = 0.0
-    DZ   (:) = 0.0
+    allocate( SnowIceTmp        (1:NumSnowLayerMax) )
+    allocate( SnowLiqTmp        (1:NumSnowLayerMax) )
+    allocate( TemperatureSnowTmp(1:NumSnowLayerMax) )
+    allocate( SnowThickTmp      (1:NumSnowLayerMax) )
+    SnowIceTmp        (:) = 0.0
+    SnowLiqTmp        (:) = 0.0
+    TemperatureSnowTmp(:) = 0.0
+    SnowThickTmp      (:) = 0.0
 
-    do J = 1, NumSnowLayerMax
-       if ( J <= abs(NumSnowLayerNeg) ) then
-          DZ(J)    = ThicknessSnowSoilLayer(J+NumSnowLayerNeg)
-          SWICE(J) = SnowIce(J+NumSnowLayerNeg)
-          SWLIQ(J) = SnowLiqWater(J+NumSnowLayerNeg)
-          TSNO(J)  = TemperatureSoilSnow(J+NumSnowLayerNeg)
+    do LoopInd = 1, NumSnowLayerMax
+       if ( LoopInd <= abs(NumSnowLayerNeg) ) then
+          SnowThickTmp(LoopInd)       = ThicknessSnowSoilLayer(LoopInd+NumSnowLayerNeg)
+          SnowIceTmp(LoopInd)         = SnowIce(LoopInd+NumSnowLayerNeg)
+          SnowLiqTmp(LoopInd)         = SnowLiqWater(LoopInd+NumSnowLayerNeg)
+          TemperatureSnowTmp(LoopInd) = TemperatureSoilSnow(LoopInd+NumSnowLayerNeg)
        endif
     enddo
 
 ! start snow layer division
-    MSNO = abs(NumSnowLayerNeg)
+    NumSnowLayerTmp = abs(NumSnowLayerNeg)
 
-    if ( MSNO == 1 ) then
+    if ( NumSnowLayerTmp == 1 ) then
        ! Specify a new snow layer
-       if ( DZ(1) > 0.05 ) then
-          MSNO     = 2
-          DZ(1)    = DZ(1)/2.0
-          SWICE(1) = SWICE(1)/2.0
-          SWLIQ(1) = SWLIQ(1)/2.0
-          DZ(2)    = DZ(1)
-          SWICE(2) = SWICE(1)
-          SWLIQ(2) = SWLIQ(1)
-          TSNO(2)  = TSNO(1)
+       if ( SnowThickTmp(1) > 0.05 ) then
+          NumSnowLayerTmp       = 2
+          SnowThickTmp(1)       = SnowThickTmp(1)/2.0
+          SnowIceTmp(1)         = SnowIceTmp(1)/2.0
+          SnowLiqTmp(1)         = SnowLiqTmp(1)/2.0
+          SnowThickTmp(2)       = SnowThickTmp(1)
+          SnowIceTmp(2)         = SnowIceTmp(1)
+          SnowLiqTmp(2)         = SnowLiqTmp(1)
+          TemperatureSnowTmp(2) = TemperatureSnowTmp(1)
        endif
     endif
 
-    if ( MSNO > 1 ) then
-       if ( DZ(1) > 0.05 ) then     ! maximum allowed thickness (5cm) for top snow layer
-          DRR      = DZ(1) - 0.05
-          PROPOR   = DRR / DZ(1)
-          ZWICE    = PROPOR * SWICE(1)
-          ZWLIQ    = PROPOR * SWLIQ(1)
-          PROPOR   = 0.05 / DZ(1)
-          SWICE(1) = PROPOR*SWICE(1)
-          SWLIQ(1) = PROPOR*SWLIQ(1)
-          DZ(1)    = 0.05
+    if ( NumSnowLayerTmp > 1 ) then
+       if ( SnowThickTmp(1) > 0.05 ) then     ! maximum allowed thickness (5cm) for top snow layer
+          SnowThickCombTmp = SnowThickTmp(1) - 0.05
+          SnowFracExtra    = SnowThickCombTmp / SnowThickTmp(1)
+          SnowIceExtra     = SnowFracExtra * SnowIceTmp(1)
+          SnowLiqExtra     = SnowFracExtra * SnowLiqTmp(1)
+          SnowFracExtra    = 0.05 / SnowThickTmp(1)
+          SnowIceTmp(1)    = SnowFracExtra*SnowIceTmp(1)
+          SnowLiqTmp(1)    = SnowFracExtra*SnowLiqTmp(1)
+          SnowThickTmp(1)  = 0.05
 
           ! update combined snow water & temperature
-          call SnowLayerWaterCombo(DZ(2), SWLIQ(2), SWICE(2), TSNO(2), &
-                                   DRR  , ZWLIQ   , ZWICE   , TSNO(1) )
+          call SnowLayerWaterCombo(SnowThickTmp(2), SnowLiqTmp(2), SnowIceTmp(2), TemperatureSnowTmp(2), &
+                                   SnowThickCombTmp, SnowLiqExtra, SnowIceExtra, TemperatureSnowTmp(1))
 
           ! subdivide a new layer, maximum allowed thickness (20cm) for second snow layer
-          if ( (MSNO <= 2) .and. (DZ(2) > 0.20) ) then  ! MB: change limit
-          !if ( (MSNO <= 2) .and. (DZ(2) > 0.10) ) then
-             MSNO     = 3
-             DTDZ     = ( TSNO(1) - TSNO(2) ) / ( (DZ(1)+DZ(2)) / 2.0 )
-             DZ(2)    = DZ(2) / 2.0
-             SWICE(2) = SWICE(2) / 2.0
-             SWLIQ(2) = SWLIQ(2) / 2.0
-             DZ(3)    = DZ(2)
-             SWICE(3) = SWICE(2)
-             SWLIQ(3) = SWLIQ(2)
-             TSNO(3)  = TSNO(2) - DTDZ * DZ(2) / 2.0
-             if ( TSNO(3) >= ConstFreezePoint ) then
-                TSNO(3)  = TSNO(2)
+          if ( (NumSnowLayerTmp <= 2) .and. (SnowThickTmp(2) > 0.20) ) then  ! MB: change limit
+         !if ( (NumSnowLayerTmp <= 2) .and. (SnowThickTmp(2) > 0.10) ) then
+             NumSnowLayerTmp       = 3
+             SnowTempGrad          = (TemperatureSnowTmp(1) - TemperatureSnowTmp(2)) / &
+                                     ((SnowThickTmp(1)+SnowThickTmp(2)) / 2.0)
+             SnowThickTmp(2)       = SnowThickTmp(2) / 2.0
+             SnowIceTmp(2)         = SnowIceTmp(2) / 2.0
+             SnowLiqTmp(2)         = SnowLiqTmp(2) / 2.0
+             SnowThickTmp(3)       = SnowThickTmp(2)
+             SnowIceTmp(3)         = SnowIceTmp(2)
+             SnowLiqTmp(3)         = SnowLiqTmp(2)
+             TemperatureSnowTmp(3) = TemperatureSnowTmp(2) - SnowTempGrad * SnowThickTmp(2) / 2.0
+             if ( TemperatureSnowTmp(3) >= ConstFreezePoint ) then
+                TemperatureSnowTmp(3) = TemperatureSnowTmp(2)
              else
-                TSNO(2) = TSNO(2) + DTDZ * DZ(2) / 2.0
+                TemperatureSnowTmp(2) = TemperatureSnowTmp(2) + SnowTempGrad * SnowThickTmp(2) / 2.0
              endif
           endif
-       endif ! if(DZ(1) > 0.05)
-    endif  ! if (MSNO > 1)
+       endif ! if(SnowThickTmp(1) > 0.05)
+    endif  ! if (NumSnowLayerTmp > 1)
 
-    if ( MSNO > 2 ) then
-       if ( DZ(2) > 0.2 ) then
-          DRR      = DZ(2) - 0.2
-          PROPOR   = DRR / DZ(2)
-          ZWICE    = PROPOR * SWICE(2)
-          ZWLIQ    = PROPOR * SWLIQ(2)
-          PROPOR   = 0.2 / DZ(2)
-          SWICE(2) = PROPOR * SWICE(2)
-          SWLIQ(2) = PROPOR * SWLIQ(2)
-          DZ(2)    = 0.2
+    if ( NumSnowLayerTmp > 2 ) then
+       if ( SnowThickTmp(2) > 0.2 ) then
+          SnowThickCombTmp = SnowThickTmp(2) - 0.2
+          SnowFracExtra    = SnowThickCombTmp / SnowThickTmp(2)
+          SnowIceExtra     = SnowFracExtra * SnowIceTmp(2)
+          SnowLiqExtra     = SnowFracExtra * SnowLiqTmp(2)
+          SnowFracExtra    = 0.2 / SnowThickTmp(2)
+          SnowIceTmp(2)    = SnowFracExtra * SnowIceTmp(2)
+          SnowLiqTmp(2)    = SnowFracExtra * SnowLiqTmp(2)
+          SnowThickTmp(2)  = 0.2
 
           ! update combined snow water & temperature
-          call SnowLayerWaterCombo(DZ(3), SWLIQ(3), SWICE(3), TSNO(3), &
-                                   DRR  , ZWLIQ   , ZWICE   , TSNO(2) )
-
+          call SnowLayerWaterCombo(SnowThickTmp(3), SnowLiqTmp(3), SnowIceTmp(3), TemperatureSnowTmp(3), &
+                                   SnowThickCombTmp, SnowLiqExtra, SnowIceExtra, TemperatureSnowTmp(2))
        endif
     endif
 
-    NumSnowLayerNeg = -MSNO
+    NumSnowLayerNeg = -NumSnowLayerTmp
 
-    do J = NumSnowLayerNeg+1, 0
-       ThicknessSnowSoilLayer(J) = DZ(J-NumSnowLayerNeg)
-       SnowIce(J)  = SWICE(J-NumSnowLayerNeg)
-       SnowLiqWater(J)  = SWLIQ(J-NumSnowLayerNeg)
-       TemperatureSoilSnow(J)    = TSNO(J-NumSnowLayerNeg)
+    do LoopInd = NumSnowLayerNeg+1, 0
+       ThicknessSnowSoilLayer(LoopInd) = SnowThickTmp(LoopInd-NumSnowLayerNeg)
+       SnowIce(LoopInd)                = SnowIceTmp(LoopInd-NumSnowLayerNeg)
+       SnowLiqWater(LoopInd)           = SnowLiqTmp(LoopInd-NumSnowLayerNeg)
+       TemperatureSoilSnow(LoopInd)    = TemperatureSnowTmp(LoopInd-NumSnowLayerNeg)
     enddo
 
     end associate

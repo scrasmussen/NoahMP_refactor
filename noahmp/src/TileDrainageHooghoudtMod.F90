@@ -1,6 +1,6 @@
 module TileDrainageHooghoudtMod
 
-!!! Calculate tile drainage discharge (mm) based on Hooghoudt's equation
+!!! Calculate tile drainage discharge [mm] based on Hooghoudt's equation
 
   use Machine
   use NoahmpVarType
@@ -18,7 +18,7 @@ contains
 ! ------------------------ Code history --------------------------------------------------
 ! Original Noah-MP subroutine: TILE_HOOGHOUDT
 ! Original code: P. Valayamkunnath (NCAR)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Nov 8, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! ----------------------------------------------------------------------------------------
 
     implicit none
@@ -26,152 +26,154 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    integer                :: K         ! loop index 
-    integer                :: NDRAINS   ! number of drains
-    real(kind=kind_noahmp) :: TD_TTSZ   ! Total Thickness of Saturated Zone
-    real(kind=kind_noahmp) :: TD_LQ     ! lateral flow
-    real(kind=kind_noahmp) :: DTOPL     ! depth to top of the layer
-    real(kind=kind_noahmp) :: XX        ! temporary water table variable
-    real(kind=kind_noahmp) :: YY        ! temporary water table variable
-    real(kind=kind_noahmp) :: KLAT      ! average lateral hydruaic conductivity
-    real(kind=kind_noahmp) :: TD_HAIL   ! Height of water table in the drain Above Impermeable Layer
-    real(kind=kind_noahmp) :: TD_DEPTH  ! Effective Depth to impermeable layer from soil surface
-    real(kind=kind_noahmp) :: TD_HEMD   ! Effective Height between water level in the drains to the water table MiDpoint
-    real(kind=kind_noahmp) :: TDDC      ! Drainage Coefficient
-    real(kind=kind_noahmp) :: TileDrainTmp   ! temporary drainage discharge
-    real(kind=kind_noahmp) :: TD_DD     ! drain depth to impermeable layer
-    real(kind=kind_noahmp) :: OVRFCS    ! amount of water over field capacity
-    real(kind=kind_noahmp), allocatable, dimension(:) :: TD_SATZ ! thickness of saturated zone
-    real(kind=kind_noahmp), allocatable, dimension(:) :: KLATK   ! lateral hydraulic ocnductivity kth layer
-    real(kind=kind_noahmp), allocatable, dimension(:) :: OVRFC   ! layer-wise amount of water over field capacity
+    integer                          :: IndSoil                                ! soil layer loop index 
+    integer                          :: NumDrain                               ! number of drains
+    real(kind=kind_noahmp)           :: ThickSatZoneTot                        ! total thickness of saturated zone
+    real(kind=kind_noahmp)           :: LateralFlow                            ! lateral flow
+    real(kind=kind_noahmp)           :: DepthToLayerTop                        ! depth to top of the layer
+    real(kind=kind_noahmp)           :: WatTblTmp1                             ! temporary water table variable
+    real(kind=kind_noahmp)           :: WatTblTmp2                             ! temporary water table variable
+    real(kind=kind_noahmp)           :: LateralWatCondAve                      ! average lateral hydruaic conductivity
+    real(kind=kind_noahmp)           :: DrainWatHgtAbvImp                      ! Height of water table in the drain Above Impermeable Layer
+    real(kind=kind_noahmp)           :: DepthSfcToImp                          ! Effective Depth to impermeable layer from soil surface
+    real(kind=kind_noahmp)           :: HgtDrnToWatTbl                         ! Effective Height between water level in drains to water table MiDpoint
+    real(kind=kind_noahmp)           :: DrainCoeffTmp                          ! Drainage Coefficient
+    real(kind=kind_noahmp)           :: TileDrainTmp                           ! temporary drainage discharge
+    real(kind=kind_noahmp)           :: DrainDepthToImpTmp                     ! drain depth to impermeable layer
+    real(kind=kind_noahmp)           :: WatExcFieldCapTot                      ! amount of water over field capacity
+    real(kind=kind_noahmp), allocatable, dimension(:) :: ThickSatZone          ! thickness of saturated zone
+    real(kind=kind_noahmp), allocatable, dimension(:) :: LateralWatCondTmp     ! lateral hydraulic ocnductivity kth layer
+    real(kind=kind_noahmp), allocatable, dimension(:) :: WatExcFieldCapTmp     ! layer-wise amount of water over field capacity
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilLiqWaterAftDrain  ! remaining water after tile drain
 
-! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer   ,& ! in,    number of soil layers
-              DepthSoilLayer     => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
-              MainTimeStep    => noahmp%config%domain%MainTimeStep   ,& ! in,    main noahmp timestep (s)
-              GridSize        => noahmp%config%domain%GridSize       ,& ! in,    noahmp model grid spacing (m)
-              ThicknessSoilLayer => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
-              SoilMoistureFieldCap          => noahmp%water%param%SoilMoistureFieldCap           ,& ! in,    reference soil moisture (field capacity) (m3/m3)
-              TileDrainCoeff        => noahmp%water%param%TileDrainCoeff         ,& ! in,    drainage coefficent (m/day)
-              DrainDepthToImperv       => noahmp%water%param%DrainDepthToImperv        ,& ! in,    Actual depth to impermeable layer from surface (m)
-              LateralWatCondFac        => noahmp%water%param%LateralWatCondFac         ,& ! in,    multiplication factor to determine lateral hydraulic conductivity
-              TileDrainDepth       => noahmp%water%param%TileDrainDepth        ,& ! in,    Depth of drain [m]
-              DrainTubeDist         => noahmp%water%param%DrainTubeDist          ,& ! in,    distance between two drain tubes or tiles (m)
-              DrainTubeRadius         => noahmp%water%param%DrainTubeRadius          ,& ! in,    effective radius of drains (m)
-              SoilWatConductivity            => noahmp%water%state%SoilWatConductivity             ,& ! in,    soil hydraulic conductivity [m/s]
-              SoilIce            => noahmp%water%state%SoilIce             ,& ! in,    soil ice content [m3/m3]
-              WaterTableHydro         => noahmp%water%state%WaterTableHydro          ,& ! in,    water table depth estimated in WRF-Hydro fine grids (m)
-              SoilLiqWater            => noahmp%water%state%SoilLiqWater             ,& ! inout, soil water content [m3/m3]
-              SoilMoisture    => noahmp%water%state%SoilMoisture    ,& ! inout, total soil moisture [m3/m3]
-              WaterTableDepth             => noahmp%water%state%WaterTableDepth              ,& ! inout, water table depth [m]
-              TileDrain          => noahmp%water%flux%TileDrain             & ! inout, tile drainage (mm/s)
+! ----------------------------------------------------------------------------
+    associate(                                                                 &
+              NumSoilLayer         => noahmp%config%domain%NumSoilLayer       ,& ! in,    number of soil layers
+              DepthSoilLayer       => noahmp%config%domain%DepthSoilLayer     ,& ! in,    depth [m] of layer-bottom from soil surface
+              MainTimeStep         => noahmp%config%domain%MainTimeStep       ,& ! in,    main noahmp timestep [s]
+              GridSize             => noahmp%config%domain%GridSize           ,& ! in,    noahmp model grid spacing [m]
+              ThicknessSoilLayer   => noahmp%config%domain%ThicknessSoilLayer ,& ! in,    soil layer thickness [m]
+              SoilMoistureFieldCap => noahmp%water%param%SoilMoistureFieldCap ,& ! in,    reference soil moisture (field capacity) [m3/m3]
+              TileDrainCoeff       => noahmp%water%param%TileDrainCoeff       ,& ! in,    drainage coefficent [m/day]
+              DrainDepthToImperv   => noahmp%water%param%DrainDepthToImperv   ,& ! in,    Actual depth to impermeable layer from surface [m]
+              LateralWatCondFac    => noahmp%water%param%LateralWatCondFac    ,& ! in,    multiplication factor to determine lateral hydraulic conductivity
+              TileDrainDepth       => noahmp%water%param%TileDrainDepth       ,& ! in,    Depth of drain [m]
+              DrainTubeDist        => noahmp%water%param%DrainTubeDist        ,& ! in,    distance between two drain tubes or tiles [m]
+              DrainTubeRadius      => noahmp%water%param%DrainTubeRadius      ,& ! in,    effective radius of drains [m]
+              SoilWatConductivity  => noahmp%water%state%SoilWatConductivity  ,& ! in,    soil hydraulic conductivity [m/s]
+              SoilIce              => noahmp%water%state%SoilIce              ,& ! in,    soil ice content [m3/m3]
+              WaterTableHydro      => noahmp%water%state%WaterTableHydro      ,& ! in,    water table depth estimated in WRF-Hydro fine grids [m]
+              SoilLiqWater         => noahmp%water%state%SoilLiqWater         ,& ! inout, soil water content [m3/m3]
+              SoilMoisture         => noahmp%water%state%SoilMoisture         ,& ! inout, total soil moisture [m3/m3]
+              WaterTableDepth      => noahmp%water%state%WaterTableDepth      ,& ! inout, water table depth [m]
+              TileDrain            => noahmp%water%flux%TileDrain              & ! inout, tile drainage [mm/s]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    allocate( TD_SATZ(1:NumSoilLayer) )
-    allocate( KLATK  (1:NumSoilLayer) )
-    allocate( OVRFC  (1:NumSoilLayer) )
-    allocate( SoilLiqWaterAftDrain (1:NumSoilLayer) )
-    TD_SATZ = 0.0
-    KLATK   = 0.0
-    OVRFC   = 0.0
-    SoilLiqWaterAftDrain  = 0.0
-    DTOPL   = 0.0
-    TD_LQ   = 0.0
-    TD_TTSZ = 0.0
-    TDDC    = TileDrainCoeff * 1000.0 * MainTimeStep / (24.0 * 3600.0) ! m per day to mm per timestep
+    allocate( ThickSatZone        (1:NumSoilLayer) )
+    allocate( LateralWatCondTmp   (1:NumSoilLayer) )
+    allocate( WatExcFieldCapTmp   (1:NumSoilLayer) )
+    allocate( SoilLiqWaterAftDrain(1:NumSoilLayer) )
+    ThickSatZone         = 0.0
+    LateralWatCondTmp    = 0.0
+    WatExcFieldCapTmp    = 0.0
+    SoilLiqWaterAftDrain = 0.0
+    DepthToLayerTop      = 0.0
+    LateralFlow          = 0.0
+    ThickSatZoneTot      = 0.0
+    DrainCoeffTmp        = TileDrainCoeff * 1000.0 * MainTimeStep / (24.0 * 3600.0)                   ! m per day to mm per timestep
 
     ! Thickness of soil layers    
-    do K = 1, NumSoilLayer
-       if ( K == 1 ) then
-          ThicknessSoilLayer(K) = -1.0 * DepthSoilLayer(K)
+    do IndSoil = 1, NumSoilLayer
+       if ( IndSoil == 1 ) then
+          ThicknessSoilLayer(IndSoil) = -1.0 * DepthSoilLayer(IndSoil)
        else
-          ThicknessSoilLayer(K) = (DepthSoilLayer(K-1) - DepthSoilLayer(K))
+          ThicknessSoilLayer(IndSoil) = (DepthSoilLayer(IndSoil-1) - DepthSoilLayer(IndSoil))
        endif
     enddo
 
 #ifdef WRF_HYDRO
     ! Depth to water table from WRF-HYDRO, m
-    YY = WaterTableHydro
+    WatTblTmp2 = WaterTableHydro
 #else
     call WaterTableDepthSearch(noahmp)
     !call WaterTableEquilibrium(noahmp)
-    YY = WaterTableDepth
+    WatTblTmp2 = WaterTableDepth
 #endif
 
-    if ( YY > DrainDepthToImperv) YY = DrainDepthToImperv
+    if ( WatTblTmp2 > DrainDepthToImperv) WatTblTmp2 = DrainDepthToImperv
 
     ! Depth of saturated zone
-    do K = 1, NumSoilLayer
-       if ( YY > (-1.0*DepthSoilLayer(K)) ) then
-          TD_SATZ(K) = 0.0
+    do IndSoil = 1, NumSoilLayer
+       if ( WatTblTmp2 > (-1.0*DepthSoilLayer(IndSoil)) ) then
+          ThickSatZone(IndSoil) = 0.0
        else
-          TD_SATZ(K) = (-1.0 * DepthSoilLayer(K)) - YY
-          XX         = (-1.0 * DepthSoilLayer(K)) - DTOPL
-          if ( TD_SATZ(K) > XX ) TD_SATZ(K) = XX
+          ThickSatZone(IndSoil) = (-1.0 * DepthSoilLayer(IndSoil)) - WatTblTmp2
+          WatTblTmp1            = (-1.0 * DepthSoilLayer(IndSoil)) - DepthToLayerTop
+          if ( ThickSatZone(IndSoil) > WatTblTmp1 ) ThickSatZone(IndSoil) = WatTblTmp1
        endif
-       DTOPL = -1.0 * DepthSoilLayer(K)
+       DepthToLayerTop = -1.0 * DepthSoilLayer(IndSoil)
     enddo
 
     ! amount of water over field capacity
-    OVRFCS = 0.0
-    do K = 1, NumSoilLayer
-       OVRFC(K) = (SoilLiqWater(K) - (SoilMoistureFieldCap(K)-SoilIce(K))) * ThicknessSoilLayer(K) * 1000.0 !mm
-       if ( OVRFC(K) < 0.0 ) OVRFC(K) = 0.0
-       OVRFCS   = OVRFCS + OVRFC(K)
+    WatExcFieldCapTot = 0.0
+    do IndSoil = 1, NumSoilLayer
+       WatExcFieldCapTmp(IndSoil) = (SoilLiqWater(IndSoil) - (SoilMoistureFieldCap(IndSoil)-SoilIce(IndSoil))) * &
+                                    ThicknessSoilLayer(IndSoil) * 1000.0
+       if ( WatExcFieldCapTmp(IndSoil) < 0.0 ) WatExcFieldCapTmp(IndSoil) = 0.0
+       WatExcFieldCapTot = WatExcFieldCapTot + WatExcFieldCapTmp(IndSoil)
     enddo
 
     ! lateral hydraulic conductivity and total lateral flow
-    do K = 1, NumSoilLayer
-       KLATK(K) = SoilWatConductivity(K) * LateralWatCondFac * MainTimeStep ! m/s to m/timestep
-       TD_LQ    = TD_LQ + (TD_SATZ(K) * KLATK(K))
-       TD_TTSZ  = TD_TTSZ + TD_SATZ(K)
+    do IndSoil = 1, NumSoilLayer
+       LateralWatCondTmp(IndSoil) = SoilWatConductivity(IndSoil) * LateralWatCondFac * MainTimeStep      ! m/s to m/timestep
+       LateralFlow                = LateralFlow + (ThickSatZone(IndSoil) * LateralWatCondTmp(IndSoil))
+       ThickSatZoneTot            = ThickSatZoneTot + ThickSatZone(IndSoil)
     enddo
-    if ( TD_TTSZ < 0.001 ) TD_TTSZ = 0.001 ! unit is m
-    if ( TD_LQ   < 0.001 ) TD_LQ   = 0.0    ! unit is m
-    KLAT  = TD_LQ / TD_TTSZ ! lateral hydraulic conductivity per timestep
-    TD_DD = DrainDepthToImperv - TileDrainDepth
+    if ( ThickSatZoneTot < 0.001 ) ThickSatZoneTot = 0.001                                               ! unit is m
+    if ( LateralFlow < 0.001 )     LateralFlow     = 0.0                                                 ! unit is m
+    LateralWatCondAve  = LateralFlow / ThickSatZoneTot                                                   ! lateral hydraulic conductivity per timestep
+    DrainDepthToImpTmp = DrainDepthToImperv - TileDrainDepth
 
-    call TileDrainageEquiDepth(TD_DD, DrainTubeDist, DrainTubeRadius, TD_HAIL)
+    call TileDrainageEquiDepth(DrainDepthToImpTmp, DrainTubeDist, DrainTubeRadius, DrainWatHgtAbvImp)
 
-    TD_DEPTH = TD_HAIL + TileDrainDepth
-    TD_HEMD  = TileDrainDepth - YY
-    if ( TD_HEMD <= 0.0 ) then
+    DepthSfcToImp  = DrainWatHgtAbvImp + TileDrainDepth
+    HgtDrnToWatTbl = TileDrainDepth - WatTblTmp2
+    if ( HgtDrnToWatTbl <= 0.0 ) then
        TileDrain = 0.0
     else
-       TileDrain = ( (8.0*KLAT*TD_HAIL*TD_HEMD) + (4.0*KLAT*TD_HEMD*TD_HEMD) ) & ! m per timestep
-                                                        / (DrainTubeDist*DrainTubeDist)
+       TileDrain = ((8.0*LateralWatCondAve*DrainWatHgtAbvImp*HgtDrnToWatTbl) + &
+                   (4.0*LateralWatCondAve*HgtDrnToWatTbl*HgtDrnToWatTbl)) / (DrainTubeDist*DrainTubeDist)
     endif
-    TileDrain = TileDrain * 1000.0 ! m per timestep to mm/timestep /one tile
+    TileDrain    = TileDrain * 1000.0                                                                     ! m per timestep to mm/timestep /one tile
     if ( TileDrain <= 0.0 ) TileDrain = 0.0
-    if ( TileDrain > TDDC ) TileDrain = TDDC
-    NDRAINS = int( GridSize / DrainTubeDist )
-    TileDrain  = TileDrain * NDRAINS
-    if ( TileDrain > OVRFCS ) TileDrain = OVRFCS
+    if ( TileDrain > DrainCoeffTmp ) TileDrain = DrainCoeffTmp
+    NumDrain  = int(GridSize / DrainTubeDist)
+    TileDrain = TileDrain * NumDrain
+    if ( TileDrain > WatExcFieldCapTot ) TileDrain = WatExcFieldCapTot
 
     ! update soil moisture after drainage: moisture drains from top to bottom
     TileDrainTmp = TileDrain
-    do K = 1, NumSoilLayer
+    do IndSoil = 1, NumSoilLayer
        if ( TileDrainTmp > 0.0) then
-          if ( (TD_SATZ(K) > 0.0) .and. (OVRFC(K) > 0.0) ) then
-             SoilLiqWaterAftDrain(K) = OVRFC(K) - TileDrainTmp ! remaining water after tile drain
-             if ( SoilLiqWaterAftDrain(K) > 0.0 ) then
-                SoilLiqWater(K) = (SoilMoistureFieldCap(K) - SoilIce(K)) + SoilLiqWaterAftDrain(K) / (ThicknessSoilLayer(K) * 1000.0)
-                SoilMoisture(K)  = SoilLiqWater(K) + SoilIce(K)
+          if ( (ThickSatZone(IndSoil) > 0.0) .and. (WatExcFieldCapTmp(IndSoil) > 0.0) ) then
+             SoilLiqWaterAftDrain(IndSoil) = WatExcFieldCapTmp(IndSoil) - TileDrainTmp                    ! remaining water after tile drain
+             if ( SoilLiqWaterAftDrain(IndSoil) > 0.0 ) then
+                SoilLiqWater(IndSoil) = (SoilMoistureFieldCap(IndSoil) - SoilIce(IndSoil)) + &
+                                         SoilLiqWaterAftDrain(IndSoil) / (ThicknessSoilLayer(IndSoil) * 1000.0)
+                SoilMoisture(IndSoil) = SoilLiqWater(IndSoil) + SoilIce(IndSoil)
                 exit
              else
-                SoilLiqWater(K) = SoilMoistureFieldCap(K) - SoilIce(K)
-                SoilMoisture(K)  = SoilLiqWater(K) + SoilIce (K)
-                TileDrainTmp = TileDrainTmp - OVRFC(K)
+                SoilLiqWater(IndSoil) = SoilMoistureFieldCap(IndSoil) - SoilIce(IndSoil)
+                SoilMoisture(IndSoil) = SoilLiqWater(IndSoil) + SoilIce (IndSoil)
+                TileDrainTmp          = TileDrainTmp - WatExcFieldCapTmp(IndSoil)
              endif
           endif
        endif
     enddo
 
-    TileDrain = TileDrain / MainTimeStep ![mm/s]
+    TileDrain = TileDrain / MainTimeStep            ! mm/s
 
     end associate
 

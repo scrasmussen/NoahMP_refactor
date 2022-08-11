@@ -19,7 +19,7 @@ contains
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: RADIATION_GLACIER
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
@@ -27,30 +27,30 @@ contains
     type(noahmp_type), intent(inout) :: noahmp
 
 ! local variable
-    integer                          :: IB       ! waveband indices
+    integer                          :: IndBand       ! solar band index
 
 ! --------------------------------------------------------------------
-    associate(                                                        &
-              NumSWRadBand           => noahmp%config%domain%NumSWRadBand          ,& ! in,    number of solar radiation wave bands
+    associate(                                                                 &
+              NumSWRadBand        => noahmp%config%domain%NumSWRadBand        ,& ! in,  number of solar radiation wave bands
               CosSolarZenithAngle => noahmp%config%domain%CosSolarZenithAngle ,& ! in,  cosine solar zenith angle
-              OptSnowAlbedo   => noahmp%config%nmlist%OptSnowAlbedo  ,& ! in,    options for ground snow surface albedo
-              AlbedoGrdDir          => noahmp%energy%state%AlbedoGrdDir          ,& ! out,   ground albedo (direct beam: vis, nir)
-              AlbedoGrdDif          => noahmp%energy%state%AlbedoGrdDif          ,& ! out,   ground albedo (diffuse: vis, nir)
-              AlbedoSnowDir          => noahmp%energy%state%AlbedoSnowDir          ,& ! out,   snow albedo for direct(1=vis, 2=nir)
-              AlbedoSnowDif          => noahmp%energy%state%AlbedoSnowDif          ,& ! out,   snow albedo for diffuse(1=vis, 2=nir)
-              AlbedoSfcDir            => noahmp%energy%state%AlbedoSfcDir            ,& ! out,   surface albedo (direct)
-              AlbedoSfcDif            => noahmp%energy%state%AlbedoSfcDif             & ! out,   surface albedo (diffuse)
+              OptSnowAlbedo       => noahmp%config%nmlist%OptSnowAlbedo       ,& ! in,  options for ground snow surface albedo
+              AlbedoGrdDir        => noahmp%energy%state%AlbedoGrdDir         ,& ! out, ground albedo (direct beam: vis, nir)
+              AlbedoGrdDif        => noahmp%energy%state%AlbedoGrdDif         ,& ! out, ground albedo (diffuse: vis, nir)
+              AlbedoSnowDir       => noahmp%energy%state%AlbedoSnowDir        ,& ! out, snow albedo for direct(1=vis, 2=nir)
+              AlbedoSnowDif       => noahmp%energy%state%AlbedoSnowDif        ,& ! out, snow albedo for diffuse(1=vis, 2=nir)
+              AlbedoSfcDir        => noahmp%energy%state%AlbedoSfcDir         ,& ! out, surface albedo (direct)
+              AlbedoSfcDif        => noahmp%energy%state%AlbedoSfcDif          & ! out, surface albedo (diffuse)
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    do IB = 1, NumSWRadBand
-       AlbedoSfcDir(IB)   = 0.0
-       AlbedoSfcDif(IB)   = 0.0
-       AlbedoGrdDir(IB) = 0.0
-       AlbedoGrdDif(IB) = 0.0
-       AlbedoSnowDir(IB) = 0.0
-       AlbedoSnowDif(IB) = 0.0
+    do IndBand = 1, NumSWRadBand
+       AlbedoSfcDir (IndBand) = 0.0
+       AlbedoSfcDif (IndBand) = 0.0
+       AlbedoGrdDir (IndBand) = 0.0
+       AlbedoGrdDif (IndBand) = 0.0
+       AlbedoSnowDir(IndBand) = 0.0
+       AlbedoSnowDif(IndBand) = 0.0
     enddo
 
     ! solar radiation process is only done if there is light

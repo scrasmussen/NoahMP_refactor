@@ -3,7 +3,7 @@ module VaporPressureSaturationMod
 !!! Calculate saturation vapor pressure and derivative with respect to temperature
 !!! using polynomials; over water when t > 0C and over ice when t <= 0C
 
-  use Machine, only : kind_noahmp
+  use Machine
   use NoahmpVarType
   use ConstantDefineMod
 
@@ -11,21 +11,21 @@ module VaporPressureSaturationMod
 
 contains
 
-  subroutine VaporPressureSaturation(T, ESW, ESI, DESW, DESI)
+  subroutine VaporPressureSaturation(T, VapPresSatWat, VapPresSatIce, VapPresSatWatD, VapPresSatIceD)
 
 ! ------------------------ Code history -----------------------------------
 ! Original Noah-MP subroutine: ESAT
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
-! Refactered code: C. He, P. Valayamkunnath, & refactor team (Dec 21, 2021)
+! Refactered code: C. He, P. Valayamkunnath, & refactor team (July 2022)
 ! -------------------------------------------------------------------------
 
     implicit none
 
-    real(kind=kind_noahmp), intent(in)   :: T         ! air temperature (K)
-    real(kind=kind_noahmp), intent(out)  :: ESW       ! saturation vapor pressure over water (pa)
-    real(kind=kind_noahmp), intent(out)  :: ESI       ! saturation vapor pressure over ice (pa)
-    real(kind=kind_noahmp), intent(out)  :: DESW      ! d(ESAT)/dT over water (pa/K)
-    real(kind=kind_noahmp), intent(out)  :: DESI      ! d(ESAT)/dT over ice (pa/K)
+    real(kind=kind_noahmp), intent(in)   :: T                     ! air temperature [K]
+    real(kind=kind_noahmp), intent(out)  :: VapPresSatWat         ! saturation vapor pressure over water [Pa]
+    real(kind=kind_noahmp), intent(out)  :: VapPresSatIce         ! saturation vapor pressure over ice [Pa]
+    real(kind=kind_noahmp), intent(out)  :: VapPresSatWatD        ! d(ESAT)/dT over water [Pa/K]
+    real(kind=kind_noahmp), intent(out)  :: VapPresSatIceD        ! d(ESAT)/dT over ice [Pa/K]
 
 ! local variable
     real(kind=kind_noahmp), parameter    :: A0 = 6.107799961      ! coefficients for ESAT over water
@@ -59,10 +59,10 @@ contains
 
 ! ----------------------------------------------------------------------
 
-  ESW  = 100.0 * (A0 + T * (A1 + T * (A2 + T * (A3 + T * ( A4 + T * (A5 + T*A6) ) ) ) ) )
-  ESI  = 100.0 * (B0 + T * (B1 + T * (B2 + T * (B3 + T * ( B4 + T * (B5 + T*B6) ) ) ) ) )
-  DESW = 100.0 * (C0 + T * (C1 + T * (C2 + T * (C3 + T * ( C4 + T * (C5 + T*C6) ) ) ) ) )
-  DESI = 100.0 * (D0 + T * (D1 + T * (D2 + T * (D3 + T * ( D4 + T * (D5 + T*D6) ) ) ) ) )
+  VapPresSatWat  = 100.0 * (A0 + T * (A1 + T * (A2 + T * (A3 + T * ( A4 + T * (A5 + T*A6) ) ) ) ) )
+  VapPresSatIce  = 100.0 * (B0 + T * (B1 + T * (B2 + T * (B3 + T * ( B4 + T * (B5 + T*B6) ) ) ) ) )
+  VapPresSatWatD = 100.0 * (C0 + T * (C1 + T * (C2 + T * (C3 + T * ( C4 + T * (C5 + T*C6) ) ) ) ) )
+  VapPresSatIceD = 100.0 * (D0 + T * (D1 + T * (D2 + T * (D3 + T * ( D4 + T * (D5 + T*D6) ) ) ) ) )
 
   end subroutine VaporPressureSaturation
 
