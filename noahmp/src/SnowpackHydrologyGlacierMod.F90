@@ -56,7 +56,7 @@ contains
               SoilIce                => noahmp%water%state%SoilIce                  ,& ! inout, soil ice moisture [m3/m3]
               SnowEffPorosity        => noahmp%water%state%SnowEffPorosity          ,& ! out,   snow effective porosity [m3/m3]
               SnowBotOutflow         => noahmp%water%flux%SnowBotOutflow             & ! out,   total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
-             
+             )
 ! ----------------------------------------------------------------------
 
     ! initialization

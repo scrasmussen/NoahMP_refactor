@@ -111,7 +111,7 @@ contains
           WaterExcess(LoopInd)      = SoilWatDiffusivity(LoopInd)*SoilWaterGrad(LoopInd) + SoilWatConductivity(LoopInd) - &
                                       InfilRateSfc + TranspWatLossSoil(LoopInd) + EvapSoilSfcLiq
        else if ( LoopInd < NumSoilLayer ) then
-          SoilThickTmp(k)           = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd))
+          SoilThickTmp(LoopInd)     = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd))
           DepthSnowSoilTmp          = (DepthSoilLayer(LoopInd-1) - DepthSoilLayer(LoopInd+1))
           DepthSnowSoilInv(LoopInd) = 2.0 / DepthSnowSoilTmp
           SoilWaterGrad(LoopInd)    = 2.0 * (SoilMoistureTmp(LoopInd) - SoilMoistureTmp(LoopInd+1)) / DepthSnowSoilTmp
