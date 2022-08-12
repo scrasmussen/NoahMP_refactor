@@ -648,15 +648,7 @@ module NoahmpIOVarType
     character(len=256)                                     ::  forcing_name_PR
     character(len=256)                                     ::  forcing_name_SN
 
-    integer                                                ::  soil_data_option
-    integer                                                ::  pedotransfer_option
-    integer                                                ::  crop_option
-    integer                                                ::  irrigation_option
-    integer                                                ::  irrigation_method
-    integer                                                ::  dvic_infiltration_option
-    integer                                                ::  tile_drainage_option
     integer                                                ::  noahmp_output
-
     integer                                                ::  split_output_count
     logical                                                ::  skip_first_output
     integer                                                ::  khour

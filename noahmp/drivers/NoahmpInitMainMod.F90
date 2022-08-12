@@ -108,9 +108,9 @@ contains
               chstarxy          => NoahmpIO%CHSTARXY,          &
               NSOIL             => NoahmpIO%NSOIL,             &
               IOPT_RUNSRF       => NoahmpIO%IOPT_RUNSRF,       & 
-              OptCropModel      => NoahmpIO%crop_option,       &
-              OptIrrigation       => NoahmpIO%irrigation_option, &
-              OptIrrigationMethod => NoahmpIO%irrigation_method, &
+              OptCropModel      => NoahmpIO%IOPT_CROP,       &
+              OptIrrigation       => NoahmpIO%IOPT_IRR, &
+              OptIrrigationMethod => NoahmpIO%IOPT_IRRM, &
               sf_urban_physics  => NoahmpIO%sf_urban_physics,  &
               smoiseq           => NoahmpIO%smoiseq,           &
               smcwtdxy          => NoahmpIO%smcwtdxy,          &
