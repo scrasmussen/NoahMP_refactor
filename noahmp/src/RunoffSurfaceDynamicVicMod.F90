@@ -126,13 +126,13 @@ contains
            WaterDepthInit = WaterDepthMax * (1.0-(1.0-(WaterDepthTop/WaterDepthSatTop)**(1.0/(1.0+InfilFacDynVic))))
            if ( (WaterInSoilSfc+WaterDepthInit) > WaterDepthMax ) then
               if ( (InfilSfcMax*TimeStep) >= WaterInSoilSfc) then
-                 DepthYTmp   = WaterDepthMax - WaterDepthInit
+                 DepthYTmp       = WaterDepthMax - WaterDepthInit
                  RunoffSatExcTmp = 0.0
                  call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
                  TmpVar1 = WaterDepthMax - WaterDepthInit - RunoffSatExcTmp - (InfilSfcTmp*TimeStep) * &
                            (1.0-(1.0-((WaterInSoilSfc-RunoffSatExcTmp)/(InfilSfcMax*TimeStep))**(InfilExpB+1.0)))
                  if ( TmpVar1 <= 0.0 ) then
-                    DepthYTmp     = WaterDepthMax - WaterDepthInit
+                    DepthYTmp         = WaterDepthMax - WaterDepthInit
                     InfilTmp          = WaterDepthSatTop - WaterDepthTop
                     RunoffSatExcess   = WaterInSoilSfc - InfilTmp
                     RunoffInfilExcess = 0.0
@@ -142,11 +142,11 @@ contains
                  else
                     DepthYTmp = 0.0
                     do IndIter = 1, NumIter ! loop : iteration 1
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                       DepthYTmp = RunoffSatExcTmp + ((InfilSfcTmp*TimeStep) * &
-                                      (1.0-(1.0-((WaterInSoilSfc-RunoffSatExcTmp)/(InfilSfcMax*TimeStep))**(InfilExpB+1.0))))
+                       DepthYTmp       = RunoffSatExcTmp + ((InfilSfcTmp*TimeStep) * &
+                                         (1.0-(1.0-((WaterInSoilSfc-RunoffSatExcTmp)/(InfilSfcMax*TimeStep))**(InfilExpB+1.0))))
                        if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                           goto 1003
                        endif
@@ -157,7 +157,7 @@ contains
                  call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
                  if ( (RunoffSatExcTmp+(InfilSfcMax*TimeStep)) <= WaterInSoilSfc ) then
                     if ( (WaterDepthMax-WaterDepthInit-RunoffSatExcTmp-(InfilSfcMax*TimeStep)) <= 0.0 ) then
-                       DepthYTmp     = WaterDepthMax - WaterDepthInit
+                       DepthYTmp         = WaterDepthMax - WaterDepthInit
                        InfilTmp          = WaterDepthSatTop - WaterDepthTop
                        RunoffSatExcess   = WaterInSoilSfc - InfilTmp
                        RunoffInfilExcess = 0.0
@@ -167,10 +167,10 @@ contains
                     else
                        DepthYTmp = 0.0
                        do IndIter = 1, NumIter ! loop : iteration 2
-                          DepthYPrev  = DepthYTmp
+                          DepthYPrev      = DepthYTmp
                           RunoffSatExcTmp = 0.0
                           call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                          DepthYTmp   = RunoffSatExcTmp + (InfilSfcTmp*TimeStep)
+                          DepthYTmp       = RunoffSatExcTmp + (InfilSfcTmp*TimeStep)
                           if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                              goto 1003
                           endif
@@ -179,25 +179,25 @@ contains
                  else
                     DepthYTmp = WaterInSoilSfc / 2.0
                     do IndIter = 1, NumIter ! loop : iteration 3_0
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                       DepthYTmp   = DepthYTmp - RunoffSatExcTmp - (InfilSfcTmp*TimeStep) + WaterInSoilSfc
+                       DepthYTmp       = DepthYTmp - RunoffSatExcTmp - (InfilSfcTmp*TimeStep) + WaterInSoilSfc
                        if ( DepthYTmp <= 0.0 )             DepthYTmp = 0.0
                        if ( DepthYTmp >= WaterInSoilSfc  ) DepthYTmp = WaterInSoilSfc
                        if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
-                          DepthYInit = DepthYTmp
+                          DepthYInit   = DepthYTmp
                           exit
                        endif
                     enddo
                     do IndIter = 1, NumIter ! loop : iteration 3
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        RunoffInfExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
                        call RunoffInfilExcessDynamicVic(DepthYTmp,DepthYInit,RunoffSatExcTmp,InfilSfcMax,&
                                                         InfilSfcTmp,TimeStep,WaterInSoilSfc,InfilExpB,RunoffInfExcTmp)
-                       DepthYTmp   = WaterInSoilSfc - RunoffInfExcTmp
+                       DepthYTmp       = WaterInSoilSfc - RunoffInfExcTmp
                        if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                           goto 1003
                        endif
@@ -209,7 +209,7 @@ contains
                     RunoffInfilExcess = WaterInSoilSfc - DepthYTmp
                     InfilTmp          = DepthYTmp - RunoffSatExcess
                     WaterDepthTop     = WaterDepthTop + InfilTmp
-                    DepthYTmp     = WaterDepthInit + DepthYTmp
+                    DepthYTmp         = WaterDepthInit + DepthYTmp
                     if ( WaterDepthTop <= 0.0 ) WaterDepthTop = 0.0
                     if ( WaterDepthTop >= WaterDepthSatTop ) WaterDepthTop = WaterDepthSatTop
                     WaterDepthInit = WaterDepthMax * (1.0-(1.0-(WaterDepthTop/WaterDepthSatTop)**(1.0/(1.0+InfilFacDynVic))))
@@ -220,11 +220,11 @@ contains
               if ( (InfilSfcMax*TimeStep) >= WaterInSoilSfc) then
                  DepthYTmp = WaterInSoilSfc / 2.0
                  do IndIter = 1, NumIter           ! iteration 1
-                    DepthYPrev  = DepthYTmp
+                    DepthYPrev      = DepthYTmp
                     RunoffSatExcTmp = 0.0
                     call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                    DepthYTmp = RunoffSatExcTmp + ((InfilSfcTmp*TimeStep) * &
-                                   (1.0-(1.0-((WaterInSoilSfc-RunoffSatExcTmp)/(InfilSfcMax*TimeStep))**(InfilExpB+1.0))))
+                    DepthYTmp       = RunoffSatExcTmp + ((InfilSfcTmp*TimeStep) * &
+                                      (1.0-(1.0-((WaterInSoilSfc-RunoffSatExcTmp)/(InfilSfcMax*TimeStep))**(InfilExpB+1.0))))
                     if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                        goto 1004
                     endif
@@ -235,10 +235,10 @@ contains
                  if ( (RunoffSatExcTmp+(InfilSfcMax*TimeStep)) <= WaterInSoilSfc ) then
                     DepthYTmp = WaterInSoilSfc / 2.0
                     do IndIter = 1, NumIter        ! iteration 2
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                       DepthYTmp   = RunoffSatExcTmp+(InfilSfcTmp*TimeStep)
+                       DepthYTmp       = RunoffSatExcTmp+(InfilSfcTmp*TimeStep)
                        if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                           goto 1004
                        endif
@@ -246,27 +246,27 @@ contains
                  else
                     DepthYTmp = 0.0
                     do IndIter = 1, NumIter        ! iteration 3_0
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
-                       DepthYTmp   = (WaterInSoilSfc - (InfilSfcMax*TimeStep)) + DepthYTmp - RunoffSatExcTmp
+                       DepthYTmp       = (WaterInSoilSfc - (InfilSfcMax*TimeStep)) + DepthYTmp - RunoffSatExcTmp
                        if ( DepthYTmp <= 0.0 )             DepthYTmp = 0.0
                        if ( DepthYTmp >= WaterInSoilSfc  ) DepthYTmp = WaterInSoilSfc
                        RunoffSatExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
                        if ( (abs(RunoffSatExcTmp+(InfilSfcMax*TimeStep)-WaterInSoilSfc) <= Error) .or. (IndIter == NumIter) ) then
-                          DepthYInit = DepthYTmp
+                          DepthYInit   = DepthYTmp
                           exit
                        endif
                     enddo
                     do IndIter = 1, NumIter ! iteration 3
-                       DepthYPrev  = DepthYTmp
+                       DepthYPrev      = DepthYTmp
                        RunoffSatExcTmp = 0.0
                        RunoffInfExcTmp = 0.0
                        call RunoffSatExcessDynamicVic(noahmp,WaterDepthInit,WaterDepthMax,DepthYTmp,RunoffSatExcTmp)
                        call RunoffInfilExcessDynamicVic(DepthYTmp,DepthYInit,RunoffSatExcTmp,InfilSfcMax,&
                                                         InfilSfcTmp,TimeStep,WaterInSoilSfc,InfilExpB,RunoffInfExcTmp)
-                       DepthYTmp   = WaterInSoilSfc - RunoffInfExcTmp
+                       DepthYTmp       = WaterInSoilSfc - RunoffInfExcTmp
                        if ( (abs(DepthYTmp-DepthYPrev) <= Error) .or. (IndIter == NumIter) ) then
                           goto 1004
                        endif
