@@ -6,14 +6,12 @@
 include ../../hrldas/user_build_options
 
 OBJS = ConstantDefineMod.o \
-       NoahmpIOVarType.o \
        ConfigVarType.o \
        ForcingVarType.o \
        EnergyVarType.o \
        WaterVarType.o \
        BiochemVarType.o \
        NoahmpVarType.o \
-       NoahmpIOVarInitMod.o \
        ConfigVarInitMod.o \
        ForcingVarInitMod.o \
        EnergyVarInitMod.o \
@@ -149,12 +147,12 @@ GroundWaterMmfMod.o: GroundWaterMmfMod.F90
 	$(RM) GroundWaterMmfMod.f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F90 > $(*).f90
 	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I ../../hrldas/MPP -I. \
-	-I../Utility_routines -I../utility $(NETCDFMOD) $(*).f90
+	-I../../hrldas/Utility_routines -I../utility $(NETCDFMOD) $(*).f90
 	$(RM) GroundWaterMmfMod.f90
 	@echo ""
 
 .F90.o:
-	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) -I../utility $(NETCDFMOD) $(*).F90
+	$(COMPILERF90) -c $(F90FLAGS) $(FREESOURCE) -I../utility -I../drivers $(NETCDFMOD) $(*).F90
 
 clean:
 	rm -f *.o *.mod *.exe
@@ -164,7 +162,6 @@ clean:
 #
 
 ConstantDefineMod.o:    ../utility/Machine.o
-NoahmpIOVarType.o:      ../utility/Machine.o
 ConfigVarType.o:        ../utility/Machine.o
 ForcingVarType.o:       ../utility/Machine.o
 EnergyVarType.o:        ../utility/Machine.o
@@ -172,17 +169,16 @@ WaterVarType.o:         ../utility/Machine.o
 BiochemVarType.o:       ../utility/Machine.o
 NoahmpVarType.o:        ConfigVarType.o ForcingVarType.o EnergyVarType.o \
                         WaterVarType.o BiochemVarType.o
-NoahmpIOVarInitMod.o:   ../utility/Machine.o NoahmpIOVarType.o
-PedoTransferSR2006.o:   ../utility/Machine.o NoahmpIOVarType.o
-ConfigVarInitMod.o:     ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-ForcingVarInitMod.o:    ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-EnergyVarInitMod.o:     ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-WaterVarInitMod.o:      ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o PedoTransferSR2006.o
-BiochemVarInitMod.o:    ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-ConfigVarOutMod.o:      ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-EnergyVarOutMod.o:      ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-WaterVarOutMod.o:       ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
-BiochemVarOutMod.o:     ../utility/Machine.o NoahmpIOVarType.o NoahmpVarType.o
+PedoTransferSR2006.o:   ../utility/Machine.o ../drivers/NoahmpIOVarType.o
+ConfigVarInitMod.o:     ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+ForcingVarInitMod.o:    ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+EnergyVarInitMod.o:     ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+WaterVarInitMod.o:      ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o PedoTransferSR2006.o
+BiochemVarInitMod.o:    ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+ConfigVarOutMod.o:      ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+EnergyVarOutMod.o:      ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+WaterVarOutMod.o:       ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
+BiochemVarOutMod.o:     ../utility/Machine.o ../drivers/NoahmpIOVarType.o NoahmpVarType.o
 CanopyHydrologyMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GroundWaterTopModelMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 IrrigationFloodMod.o:   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
@@ -326,7 +322,7 @@ BiochemCropMainMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o C
 IrrigationPrepareMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o IrrigationTriggerMod.o
 BalanceErrorCheckMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GeneralInitMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-GroundWaterMmfMod.o: ../utility/Machine.o NoahmpVarType.o
+GroundWaterMmfMod.o: ../utility/Machine.o NoahmpVarType.o ../drivers/NoahmpIOVarType.o 
 BalanceErrorCheckGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 EnergyMainGlacierMod.o: ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowCoverGlacierMod.o \
                         GroundRoughnessPropertyGlacierMod.o GroundThermalPropertyGlacierMod.o \

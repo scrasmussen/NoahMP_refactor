@@ -85,7 +85,7 @@ use module_wrf_error
    REAL, DIMENSION(1:24)           :: hsequip_tbl
 
 !===Yang, 2014/10/08, urban hydrological processes for single layer UCM===
-   INTEGER                         :: IMP_SCHEME, IRI_SCHEME
+   INTEGER                         :: IMP_SCHEME, IRI_SCHEME 
    INTEGER                         :: alhoption       ! anthropogenic latent heat option
    INTEGER                         :: groption        ! anthropogenic latent heat option
    REAL                            :: fgr             ! green roof fraction
@@ -1947,7 +1947,7 @@ ENDIF
 !
 !===============================================================================
    SUBROUTINE urban_param_init(DZR,DZB,DZG,num_soil_layers, &
-                               sf_urban_physics,use_wudapt_lcz)
+                               sf_urban_physics,use_wudapt_lcz,IRI_URBAN) ! cenlin added
 !                              num_roof_layers,num_wall_layers,num_road_layers)
 
    IMPLICIT NONE
@@ -1962,7 +1962,7 @@ ENDIF
    REAL, DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZG
    INTEGER,                            INTENT(IN)    :: SF_URBAN_PHYSICS
    INTEGER,                            INTENT(IN)    :: USE_WUDAPT_LCZ !AndreaLCZ
-
+   INTEGER,                            INTENT(INOUT) :: IRI_URBAN
    INTEGER :: LC, K
    INTEGER :: IOSTATUS, ALLOCATE_STATUS
    INTEGER :: num_roof_layers
@@ -2370,6 +2370,9 @@ ENDIF
    enddo READLOOP
 
    CLOSE(11)
+
+   ! cenlin: pass IRI_SCHEME value to NoahmpIO variable IRI_URBAN
+   IRI_URBAN = IRI_SCHEME
 
    ! Assign a few table values that do not need to come from URBPARM.TBL
 

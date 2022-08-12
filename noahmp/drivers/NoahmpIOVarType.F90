@@ -383,7 +383,7 @@ module NoahmpIOVarType
 !------------------------------------------------------------------------
 
     integer                                                ::  num_urban_atmosphere ! atmospheric levels including ZLVL for BEP/BEM models
-
+    integer                                                ::  IRI_URBAN            ! urban irrigation flag (move from module_sf_urban to here)
     real(kind=kind_noahmp), allocatable                    ::  GMT                  ! Hour of day (fractional) (needed for urban)
     integer, allocatable                                   ::  JULDAY               ! Integer day (needed for urban)
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  HRANG                ! hour angle (needed for urban)

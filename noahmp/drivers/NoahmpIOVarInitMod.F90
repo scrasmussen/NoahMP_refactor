@@ -2048,7 +2048,7 @@ contains
     allocate (NoahmpIO%ZWATBLE2D  (XSTART:XEND,YSTART:YEND) )
 #endif    
 
-    endassociate  
+    end associate  
     
     !-------------------------------------------------------------------
     ! Initialize variables with default values 
@@ -2297,6 +2297,7 @@ contains
       NoahmpIO%ts_urb2d      = undefined_real
       NoahmpIO%GMT           = undefined_real
       NoahmpIO%JULDAY        = undefined_int
+      NoahmpIO%IRI_URBAN     = undefined_int
       NoahmpIO%frc_urb2d     = undefined_real
       NoahmpIO%utype_urb2d   = undefined_int
       NoahmpIO%lp_urb2d      = undefined_real
@@ -2422,6 +2423,5 @@ contains
 #endif 
     
   end subroutine NoahmpIOVarInitDefault
-
 
 end module NoahmpIOVarInitMod

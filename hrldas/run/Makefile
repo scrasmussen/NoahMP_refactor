@@ -39,17 +39,17 @@ OBJS = \
         ../../noahmp/drivers/NoahmpInitMainMod.o \
         ../../noahmp/drivers/NoahmpGroundwaterInitMod.o \
         ../../noahmp/drivers/NoahmpSnowInitMod.o \
+        ../../noahmp/drivers/NoahmpIOVarType.o \
+        ../../noahmp/drivers/NoahmpIOVarInitMod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
         ../../noahmp/src/ConstantDefineMod.o \
-        ../../noahmp/src/NoahmpIOVarType.o \
         ../../noahmp/src/ConfigVarType.o \
         ../../noahmp/src/ForcingVarType.o \
         ../../noahmp/src/EnergyVarType.o \
         ../../noahmp/src/WaterVarType.o \
         ../../noahmp/src/BiochemVarType.o \
         ../../noahmp/src/NoahmpVarType.o \
-        ../../noahmp/src/NoahmpIOVarInitMod.o \
         ../../noahmp/src/ConfigVarInitMod.o \
         ../../noahmp/src/ForcingVarInitMod.o \
         ../../noahmp/src/EnergyVarInitMod.o \

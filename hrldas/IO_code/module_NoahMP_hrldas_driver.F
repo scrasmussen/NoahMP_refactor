@@ -519,7 +519,8 @@ contains
 
      IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
         
-        CALL urban_param_init(NoahmpIO%DZR, NoahmpIO%DZB, NoahmpIO%DZG, NoahmpIO%num_soil_layers, NoahmpIO%sf_urban_physics, NoahmpIO%use_wudapt_lcz)
+        CALL urban_param_init(NoahmpIO%DZR, NoahmpIO%DZB, NoahmpIO%DZG, NoahmpIO%num_soil_layers, &
+                              NoahmpIO%sf_urban_physics, NoahmpIO%use_wudapt_lcz, NoahmpIO%IRI_URBAN) ! cenlin added
 
         CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                              & !urban
                             NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
@@ -672,7 +673,7 @@ contains
          if(NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
 
                  CALL urban_param_init(NoahmpIO%DZR,NoahmpIO%DZB,NoahmpIO%DZG,NoahmpIO%num_soil_layers,    &
-                                       NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz)
+                                       NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz,NoahmpIO%IRI_URBAN) ! cenlin added
 
                  CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                                & !urban
                                     NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban

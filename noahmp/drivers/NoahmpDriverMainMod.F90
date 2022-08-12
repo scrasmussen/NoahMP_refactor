@@ -22,7 +22,6 @@ module NoahmpDriverMainMod
   use NoahmpMainMod
   use NoahmpMainGlacierMod
   use module_ra_gfdleta,  only: cal_mon_day
-  use module_sf_urban,    only: IRI_SCHEME 
 !-------------------------------
 #if ( WRF_CHEM == 1 )
   USE module_data_gocart_dust
@@ -143,7 +142,7 @@ contains
              NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_8_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_9_TABLE  .or. &
              NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_10_TABLE  .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_11_TABLE ) THEN
 
-             if(NoahmpIO%SF_URBAN_PHYSICS > 0 .AND. IRI_SCHEME == 1 ) then
+             if(NoahmpIO%SF_URBAN_PHYSICS > 0 .AND. NoahmpIO%IRI_URBAN == 1 ) then
                 SOLAR_TIME = (NoahmpIO%JULIAN - INT(NoahmpIO%JULIAN))*24 + NoahmpIO%XLONG(I,J)/15.0
                 if(SOLAR_TIME < 0.) SOLAR_TIME = SOLAR_TIME + 24.
                 call CAL_MON_DAY(INT(NoahmpIO%JULIAN),NoahmpIO%YR,JMONTH,JDAY)
