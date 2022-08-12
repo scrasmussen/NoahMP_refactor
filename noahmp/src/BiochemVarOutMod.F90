@@ -36,6 +36,10 @@ contains
     NoahmpIO%WOODXY  (I,J) = noahmp%biochem%state%WoodMass
     NoahmpIO%STBLCPXY(I,J) = noahmp%biochem%state%CarbonMassDeepSoil
     NoahmpIO%FASTCPXY(I,J) = noahmp%biochem%state%CarbonMassShallowSoil
+    NoahmpIO%GDDXY   (I,J) = noahmp%biochem%state%GrowDegreeDay
+    NoahmpIO%PGSXY   (I,J) = noahmp%biochem%state%PlantGrowStage
+    NoahmpIO%GRAINXY (I,J) = noahmp%biochem%state%GrainMass
+
 
     ! biochem flux variables
     NoahmpIO%NEEXY   (I,J) = noahmp%biochem%flux%NetEcoExchange
