@@ -123,8 +123,8 @@
                                                              !   2 -> CLM  (matric potential)
                                                              !   3 -> SSiB (matric potential)
 
- RUNOFF_OPTION                     = 3                       ! options for runoff and groundwater      [default = none]
-
+ SURFACE_RUNOFF_OPTION             = 3                       ! options for surface runoff         [default = none]
+ SUBSURFACE_RUNOFF_OPTION          = 3                       ! options for subsurface runoff (currently only tested for same as surface runoff option)
                                                              !   1 -> TOPMODEL with groundwater (Niu et al. 2007 JGR) ;
                                                              !   2 -> TOPMODEL with an equilibrium water table (Niu et al. 2005 JGR) ;
                                                              ! **3 -> original surface and subsurface runoff (free drainage)
