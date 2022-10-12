@@ -4,7 +4,7 @@ module GroundWaterMmfMod
 ! plus the routine to update soil moisture and water table due to those two fluxes
 ! according to the Miguez-Macho & Fan groundwater scheme (Miguez-Macho et al., JGR 2007).
 ! Module written by Gonzalo Miguez-Macho , U. de Santiago de Compostela, Galicia, Spain
-! November 2012 
+! November 2012
 !===============================================================================
 
   use NoahmpIOVarType
@@ -60,11 +60,11 @@ contains
                                                        RIVERBED, &
                                                       RIVERCOND
 
-! IN and OUT 
+! IN and OUT
 
     REAL,     DIMENSION( ims:ime , 1:nsoil, jms:jme ), &
          &    INTENT(INOUT)   ::                          SMOIS, &
-         &                                                SH2OXY 
+         &                                                SH2OXY
 
 
     REAL,    DIMENSION( ims:ime, jms:jme )                     , &
@@ -82,9 +82,9 @@ contains
          &   INTENT(OUT)      ::                            QRF, &  !groundwater - river water flux
                                                         QSPRING     !water springing at the surface from groundwater convergence in the column
 
-!LOCAL  
-  
-  INTEGER                          :: I,J,K  
+!LOCAL
+
+  INTEGER                          :: I,J,K
   REAL, DIMENSION(       0:NSOIL)  :: ZSOIL !depth of soil layer-bottom [m]
   REAL,  DIMENSION(      1:NSOIL)  :: SMCEQ  !equilibrium soil water  content [m3/m3]
   REAL,  DIMENSION(      1:NSOIL)  :: SMC,SH2O
@@ -93,7 +93,7 @@ contains
                                                 ,WPLUS,WMINUS
   REAL,      DIMENSION( ims:ime, jms:jme )    :: QLAT
   INTEGER,   DIMENSION( ims:ime, jms:jme )    :: LANDMASK !-1 for water (ice or no ice) and glacial areas, 1 for land where the LSM does its soil moisture calculations.
-  
+
   REAL :: BEXP,DKSAT,PSISAT,SMCMAX,SMCWLT
 
     DELTAT = WTDDT * 60. !timestep in seconds for this calculation
@@ -126,8 +126,8 @@ contains
           IF(LANDMASK(I,J).GT.0)THEN
              IF(WTD(I,J) .GT. RIVERBED(I,J) .AND.  EQWTD(I,J) .GT. RIVERBED(I,J)) THEN
                RCOND = RIVERCOND(I,J) * EXP(PEXP(I,J)*(WTD(I,J)-EQWTD(I,J)))
-             ELSE    
-               RCOND = RIVERCOND(I,J)       
+             ELSE
+               RCOND = RIVERCOND(I,J)
              ENDIF
              QRF(I,J) = RCOND * (WTD(I,J)-RIVERBED(I,J)) * DELTAT/AREA(I,J)
 !for now, dont allow it to go from river to groundwater
@@ -232,7 +232,7 @@ contains
   INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &
        &                           ims,ime, jms,jme, kms,kme,  &
        &                           its,ite, jts,jte, kts,kte
-  REAL                                  , INTENT(IN) :: DELTAT                                 
+  REAL                                  , INTENT(IN) :: DELTAT
   INTEGER, DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: ISLTYP, LANDMASK
   REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: FDEPTH,WTD,TOPO,AREA
 
@@ -243,7 +243,7 @@ contains
   INTEGER                              :: I, J, itsh, iteh, jtsh, jteh, nx, ny
   REAL                                 :: Q, KLAT
 
-#ifdef MPP_LAND 
+#ifdef MPP_LAND
   ! halo'ed arrays
   REAL,    DIMENSION(ims-1:ime+1, jms-1:jme+1) :: KCELL, HEAD
   integer, dimension(ims-1:ime+1, jms-1:jme+1) :: landmask_h
@@ -255,7 +255,7 @@ contains
   REAL, DIMENSION(19)      :: KLATFACTOR
   DATA KLATFACTOR /2.,3.,4.,10.,10.,12.,14.,20.,24.,28.,40.,48.,2.,0.,10.,0.,20.,2.,2./
 
-  REAL,    PARAMETER :: PI = 3.14159265 
+  REAL,    PARAMETER :: PI = 3.14159265
   REAL,    PARAMETER :: FANGLE = 0.22754493   ! = 0.5*sqrt(0.5*tan(pi/8))
 
 #ifdef MPP_LAND
@@ -265,7 +265,7 @@ contains
 
   nx = ((ime-ims) + 1) + 2      ! include halos
   ny = ((jme-jms) + 1) + 2      ! include halos
-  
+
   !copy neighbor's values for landmask and area
   call mpp_land_com_integer(landmask_h, nx, ny, 99)
   call mpp_land_com_real(area_h, nx, ny, 99)
@@ -288,7 +288,7 @@ contains
                  IF(WTD(I,J) < -1.5)THEN
                      KCELL(I,J) = FDEPTH(I,J) * KLAT * EXP( (WTD(I,J) + 1.5) / FDEPTH(I,J) )
                  ELSE
-                     KCELL(I,J) = KLAT * ( WTD(I,J) + 1.5 + FDEPTH(I,J) )  
+                     KCELL(I,J) = KLAT * ( WTD(I,J) + 1.5 + FDEPTH(I,J) )
                  ENDIF
            ELSE
                  KCELL(i,J) = 0.
@@ -307,7 +307,7 @@ contains
     iteh=min(ite,global_nx-1)
     jtsh=max(jts,2)
     jteh=min(jte,global_ny-1)
-    
+
     qlat_h  = 0.
 #else
     itsh=max(its,ids+1)
@@ -324,10 +324,10 @@ contains
           IF( LANDMASK(I,J).GT.0   )THEN
 #endif
                  Q=0.
-                             
+
                  Q  = Q + (KCELL(I-1,J+1)+KCELL(I,J)) &
                         * (HEAD(I-1,J+1)-HEAD(I,J))/SQRT(2.)
-                             
+
                  Q  = Q +  (KCELL(I-1,J)+KCELL(I,J)) &
                         *  (HEAD(I-1,J)-HEAD(I,J))
 
@@ -342,7 +342,7 @@ contains
 
                  Q  = Q +  (KCELL(I+1,J+1)+KCELL(I,J)) &
                         * (HEAD(I+1,J+1)-HEAD(I,J))/SQRT(2.)
-  
+
                  Q  = Q +  (KCELL(I+1,J)+KCELL(I,J)) &
                         * (HEAD(I+1,J)-HEAD(I,J))
 
@@ -364,7 +364,7 @@ contains
     call mpp_land_com_real(qlat_h, nx, ny, 1)
     qlat = qlat_h(ims:ime, jms:jme)
 #endif
- 
+
   end subroutine LATERALFLOW
 
 
