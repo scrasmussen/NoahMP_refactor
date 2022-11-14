@@ -112,6 +112,14 @@ module NoahmpIOVarType
     integer                 :: forc_typ
     integer                 :: snow_assim
     integer                 :: HRLDAS_ini_typ
+    ! =REFACTOR=
+    integer                 :: crocus_opt = 0
+    integer                 :: act_lev    = 0
+    integer                 :: rst_bi_out
+    integer                 :: rst_bi_in
+    character(len=256)      :: mmf_runoff_file = " "
+    integer                 :: IOPT_IMPERV = 9
+    integer                 :: IOPT_RUNOFF = 9
 #endif
 
     ! Spatially varying fields

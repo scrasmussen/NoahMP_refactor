@@ -1281,18 +1281,23 @@ contains
     integer, parameter      :: MAX_SOIL_LEVELS                    = 10     ! maximum soil levels in namelist
     real(kind=kind_noahmp), dimension(MAX_SOIL_LEVELS) :: soil_thick_input ! depth to soil interfaces from namelist [m]
 #ifdef WRF_HYDRO
+    ! NOT USING FROM HERE
     integer                 :: finemesh
     integer                 :: finemesh_factor
     integer                 :: forc_typ
     integer                 :: snow_assim
     character(len = 256)    :: GEO_STATIC_FLNM
     integer                 :: HRLDAS_ini_typ
+    ! TO HERE RIGHT NOW
+    integer :: rst_bi_in = 0
+    integer :: rst_bi_out = 0
 #endif
 
     namelist / NOAHLSM_OFFLINE /    &
 #ifdef WRF_HYDRO
-         finemesh, finemesh_factor, forc_typ, snow_assim ,                                &
-         GEO_STATIC_FLNM, HRLDAS_ini_typ,                                                 &
+         ! finemesh, finemesh_factor, forc_typ, snow_assim ,                                &
+         ! GEO_STATIC_FLNM, HRLDAS_ini_typ,                                                 &
+         rst_bi_in, rst_bi_out, &
 #endif
          indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep, soil_timestep,  &
          start_year, start_month, start_day, start_hour, start_min,                       &
@@ -1387,10 +1392,10 @@ contains
         write(*, '(" *****      Either KHOUR or KDAY must be defined.")')
         write(*, '(" ***** ")')
         stop
-    else if (( khour < 0 ) .and. (kday > 0)) then
-        khour = kday * 24
     else if ((khour > 0) .and. (kday > 0)) then
         write(*, '("Namelist warning:  KHOUR and KDAY both defined.")')
+    else if (( khour < 0 ) .and. (kday > 0)) then
+        khour = kday * 24
     else
         ! all is well.  KHOUR defined
     endif
@@ -1585,12 +1590,12 @@ contains
     NoahmpIO%MAX_SOIL_LEVELS                   = MAX_SOIL_LEVELS
     NoahmpIO%soil_thick_input                  = soil_thick_input
 #ifdef WRF_HYDRO
-    NoahmpIO%GEO_STATIC_FLNM                   = GEO_STATIC_FLNM
-    NoahmpIO%finemesh = finemesh
-    NoahmpIO%finemesh_factor = finemesh_factor
-    NoahmpIO%forc_typ = forc_typ
-    NoahmpIO%snow_assim = snow_assim
-    NoahmpIO%HRLDAS_ini_typ = HRLDAS_ini_typ
+    ! NoahmpIO%GEO_STATIC_FLNM                   = GEO_STATIC_FLNM
+    ! NoahmpIO%finemesh = finemesh
+    ! NoahmpIO%finemesh_factor = finemesh_factor
+    ! NoahmpIO%forc_typ = forc_typ
+    ! NoahmpIO%snow_assim = snow_assim
+    ! NoahmpIO%HRLDAS_ini_typ = HRLDAS_ini_typ
 #endif
 
 !---------------------------------------------------------------------

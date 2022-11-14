@@ -120,7 +120,7 @@ contains
          NoahmpIO%xend = (wrfite-1)*NoahmpIO%finemesh_factor
          NoahmpIO%ystart = (wrfjts-1)*NoahmpIO%finemesh_factor + 1
          NoahmpIO%yend = (wrfjte-1)*NoahmpIO%finemesh_factor
-         call CPL_LAND_INIT(xstart,xend, ystart,yend)
+         call CPL_LAND_INIT(NoahmpIO%xstart,NoahmpIO%xend, NoahmpIO%ystart,NoahmpIO%yend)
          ix_tmp = NoahmpIO%xend - NoahmpIO%xstart + 1
          jx_tmp = NoahmpIO%yend - NoahmpIO%ystart + 1
     else
@@ -268,7 +268,7 @@ contains
 !------------------------------------------------------------------------
 
   if (NoahmpIO%IOPT_RUNSUB == 5) then
-    CALL READ_MMF_RUNOFF(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
+    CALL READ_MMF_RUNOFF(NoahmpIO%mmf_runoff_file, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                          NoahmpIO%FDEPTHXY, NoahmpIO%EQZWT, NoahmpIO%RECHCLIM, NoahmpIO%RIVERBEDXY)
   end if
 
