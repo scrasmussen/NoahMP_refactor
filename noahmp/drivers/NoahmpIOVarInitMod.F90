@@ -1329,6 +1329,7 @@ contains
     !  if they have not been set properly.
     !---------------------------------------------------------------
     NoahmpIO%nsoil                   = -999
+    allocate(NoahmpIO%soil_thick_input(MAX_SOIL_LEVELS))
     NoahmpIO%soil_thick_input        = -999
     NoahmpIO%DTBL                    = -999.0
     NoahmpIO%soiltstep               = -999.0
@@ -1652,6 +1653,12 @@ contains
     allocate ( NoahmpIO%SNOWNCV      (XSTART:XEND,YSTART:YEND) )            ! non-covective snow forcing (subset of rainncv) [mm]
     allocate ( NoahmpIO%GRAUPELNCV   (XSTART:XEND,YSTART:YEND) )            ! non-convective graupel forcing (subset of rainncv) [mm]
     allocate ( NoahmpIO%HAILNCV      (XSTART:XEND,YSTART:YEND) )            ! non-convective hail forcing (subset of rainncv) [mm]
+    allocate ( NoahmpIO%MP_RAINC     (XSTART:XEND,YSTART:YEND) )            ! convective precipitation entering land model [mm] ! MB/AN : v3.7
+    allocate ( NoahmpIO%MP_RAINNC    (XSTART:XEND,YSTART:YEND) )            ! large-scale precipitation entering land model [mm]! MB/AN : v3.7
+    allocate ( NoahmpIO%MP_SHCV      (XSTART:XEND,YSTART:YEND) )            ! shallow conv precip entering land model [mm]      ! MB/AN : v3.7
+    allocate ( NoahmpIO%MP_SNOW      (XSTART:XEND,YSTART:YEND) )            ! snow precipitation entering land model [mm]       ! MB/AN : v3.7
+    allocate ( NoahmpIO%MP_GRAUP     (XSTART:XEND,YSTART:YEND) )            ! graupel precipitation entering land model [mm]    ! MB/AN : v3.7
+    allocate ( NoahmpIO%MP_HAIL      (XSTART:XEND,YSTART:YEND) )            ! hail precipitation entering land model [mm]       ! MB/AN : v3.7
 
     allocate ( NoahmpIO%bexp_3d      (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! C-H B exponent
     allocate ( NoahmpIO%smcdry_3D    (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Dry
