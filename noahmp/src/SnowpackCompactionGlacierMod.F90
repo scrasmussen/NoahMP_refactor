@@ -66,6 +66,7 @@ contains
 ! start snow compaction
     SnowBurden = 0.0
     do LoopInd = NumSnowLayerNeg+1, 0
+
        SnowWatTotTmp        = SnowIce(LoopInd) + SnowLiqWater(LoopInd)
        SnowIceFrac(LoopInd) = SnowIce(LoopInd) / SnowWatTotTmp
        SnowVoid             = 1.0 - (SnowIce(LoopInd)/ConstDensityIce + SnowLiqWater(LoopInd)/ConstDensityWater) / &
@@ -106,10 +107,16 @@ contains
           ThicknessSnowSoilLayer(LoopInd) = ThicknessSnowSoilLayer(LoopInd) * (1.0 + CompactionSnowTot(LoopInd))
           ThicknessSnowSoilLayer(LoopInd) = max(ThicknessSnowSoilLayer(LoopInd), &
                                                 SnowIce(LoopInd)/ConstDensityIce+SnowLiqWater(LoopInd)/ConstDensityWater)
+
+          ! Constrain snow density to a reasonable range (50~500 kg/m3)
+          ThicknessSnowSoilLayer(LoopInd) = min( max( ThicknessSnowSoilLayer(LoopInd),&
+                                                     (SnowIce(LoopInd)+SnowLiqWater(LoopInd))/500.0 ), &
+                                                (SnowIce(LoopInd)+SnowLiqWater(LoopInd))/50.0 )
        endif
 
        ! Pressure of overlying snow
        SnowBurden = SnowBurden + SnowWatTotTmp
+
     enddo
 
     end associate
