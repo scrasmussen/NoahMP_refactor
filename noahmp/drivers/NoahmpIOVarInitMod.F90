@@ -924,6 +924,10 @@ contains
     endif
     read(15,noahmp_irrigation_parameters)
     close(15)
+    if ( (FILOSS < 0.0) .or. (FILOSS > 0.99) ) then
+       write(*,'("WARNING: FILOSS should be >=0.0 and <=0.99")')
+       stop "STOP in NoahMP_irrigation_parameters"
+    endif
 
     ! assign values
     NoahmpIO%IRR_FRAC_TABLE   = IRR_FRAC

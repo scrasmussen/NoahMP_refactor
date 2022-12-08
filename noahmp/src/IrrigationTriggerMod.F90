@@ -121,11 +121,11 @@ contains
          ! another, surface layers will be saturated. 
          ! flood irrigation amount (m) based on 2D IrrigationFracFlood
          if ( (IrrigationAmtFlood == 0.0) .and. (IrrigationFracFlood > 0.0) .and. (OptIrrigationMethod == 0) ) then
-            IrrigationAmtFlood = IrrigationFracFlood * IrrigationWater * (IrriFloodLossFrac + 1)
+            IrrigationAmtFlood = IrrigationFracFlood * IrrigationWater * (1.0/(1.0 - IrriFloodLossFrac))
             IrrigationCntFlood = IrrigationCntFlood + 1
          !flood irrigation amount (m) based on namelist choice
          elseif ( (IrrigationAmtFlood == 0.0) .and. (OptIrrigationMethod == 3) ) then
-            IrrigationAmtFlood = IrrigationWater * (IrriFloodLossFrac + 1)
+            IrrigationAmtFlood = IrrigationWater * (1.0/(1.0 - IrriFloodLossFrac))
             IrrigationCntFlood = IrrigationCntFlood + 1
          endif
       else
