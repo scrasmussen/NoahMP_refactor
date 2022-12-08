@@ -118,9 +118,11 @@ contains
              endif
           endif
           if ( OptSoilSupercoolWater == 2 ) then
-               call SoilWaterSupercoolLiquid(noahmp, LoopInd, SoilSupercoolWater(LoopInd), &
-                                             TemperatureSoilSnow(LoopInd), SoilMoisture(LoopInd), SoilLiqWater(LoopInd))
-               SoilSupercoolWater(LoopInd) = SoilSupercoolWater(LoopInd) * ThicknessSnowSoilLayer(LoopInd) * 1000.0
+             if ( TemperatureSoilSnow(LoopInd) < ConstFreezePoint ) then
+                call SoilWaterSupercoolLiquid(noahmp, LoopInd, SoilSupercoolWater(LoopInd), &
+                                              TemperatureSoilSnow(LoopInd), SoilMoisture(LoopInd), SoilLiqWater(LoopInd))
+                SoilSupercoolWater(LoopInd) = SoilSupercoolWater(LoopInd) * ThicknessSnowSoilLayer(LoopInd) * 1000.0
+             endif
           endif
        enddo
     endif
