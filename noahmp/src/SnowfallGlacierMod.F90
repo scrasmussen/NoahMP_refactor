@@ -44,15 +44,17 @@ contains
 
     IndNewSnowLayer = 0
 
-! shallow snow / no layer
+    ! shallow snow / no layer
     if ( (NumSnowLayerNeg == 0) .and. (SnowfallGround > 0.0) ) then
        SnowDepth      = SnowDepth + SnowDepthIncr * MainTimeStep
        SnowWaterEquiv = SnowWaterEquiv + SnowfallGround * MainTimeStep
     endif
 
-! creating a new layer
-!    if ( (NumSnowLayerNeg == 0)  .and. (SnowfallGround > 0.0) .and. (SnowDepth >= 0.025) ) then !MB: change limit
-   if ( (NumSnowLayerNeg == 0)  .and. (SnowfallGround > 0.0) .and. (SnowDepth >= 0.05) ) then
+    ! creating a new layer
+    !if ( (NumSnowLayerNeg == 0)  .and. (SnowfallGround > 0.0) .and. (SnowDepth >= 0.05) ) then
+    !if ( (NumSnowLayerNeg == 0)  .and. (SnowfallGround > 0.0) .and. (SnowDepth >= 0.025) ) then !MB: change limit
+    ! C.He: remove SnowfallGround > 0.0 to allow adjusting snow layer number based on SnowDepth when no snowfall
+    if ( (NumSnowLayerNeg == 0) .and. (SnowDepth >= 0.05) ) then
        NumSnowLayerNeg           = -1
        IndNewSnowLayer           =  1
        ThicknessSnowSoilLayer(0) = SnowDepth
@@ -62,7 +64,7 @@ contains
        SnowLiqWater(0)           = 0.0
     endif
 
-! snow with layers
+    ! snow with layers
     if ( (NumSnowLayerNeg < 0) .and. (IndNewSnowLayer == 0) .and. (SnowfallGround > 0.0) ) then
        SnowIce(NumSnowLayerNeg+1) = SnowIce(NumSnowLayerNeg+1) + SnowfallGround * MainTimeStep
        ThicknessSnowSoilLayer(NumSnowLayerNeg+1) = ThicknessSnowSoilLayer(NumSnowLayerNeg+1) + &
