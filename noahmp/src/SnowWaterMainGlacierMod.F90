@@ -101,7 +101,7 @@ contains
        enddo
     endif
 
-    ! Reset DepthSnowSoilLayer and layer thinkness ThicknessSnowSoilLayer
+    ! Reset DepthSnowSoilLayer and ThicknessSnowSoilLayer
     do LoopInd = NumSnowLayerNeg+1, 0
        ThicknessSnowSoilLayer(LoopInd) = -ThicknessSnowSoilLayer(LoopInd)
     enddo
@@ -119,6 +119,14 @@ contains
     do LoopInd = NumSnowLayerNeg+1, NumSoilLayer
        ThicknessSnowSoilLayer(LoopInd) = -ThicknessSnowSoilLayer(LoopInd)
     enddo
+
+    ! Update SnowDepth for multi-layer snow
+    if ( NumSnowLayerNeg < 0 ) then
+       SnowDepth = 0.0
+       do LoopInd = NumSnowLayerNeg+1, 0
+          SnowDepth = SnowDepth + ThicknessSnowSoilLayer(LoopInd)
+       enddo
+    endif
 
     ! update snow quantity
     if ( (SnowDepth <= 1.0e-6) .or. (SnowWaterEquiv <= 1.0e-3) ) then
