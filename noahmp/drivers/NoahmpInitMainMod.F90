@@ -180,18 +180,18 @@ contains
           enddo
        endif
    
-       ! Check if snow/snowh are consistent and cap SWE at 5000mm;
-       !  the Noah-MP code does it internally but if we don't do it here, problems ensue
+       ! Check if snow/snowh are consistent and cap SWE at 2000mm
+       ! the Noah-MP code does it internally but if we don't do it here, problems ensue
        do J = jts,jtf
           do I = its,itf
-             if ( SNOW(i,j) > 0. .AND. SNOWH(i,j) == 0. .OR. SNOWH(i,j) > 0. .AND. SNOW(i,j) == 0.) then
+             if ( SNOW(i,j) > 0.0 .AND. SNOWH(i,j) == 0.0 .OR. SNOWH(i,j) > 0.0 .AND. SNOW(i,j) == 0.0 ) then
                write(err_message,*)"problem with initial snow fields: snow/snowh>0 while snowh/snow=0 at i,j" &
                                      ,i,j,snow(i,j),snowh(i,j)
                call wrf_message(err_message)
              endif
-             if ( SNOW( i,j ) > 5000. ) then
-               SNOWH(I,J) = SNOWH(I,J) * 5000. / SNOW(I,J)      ! SNOW in mm and SNOWH in m
-               SNOW (I,J) = 5000.                               ! cap SNOW at 5000, maintain density
+             if ( SNOW( i,j ) > 2000.0 ) then
+               SNOWH(I,J) = SNOWH(I,J) * 2000.0 / SNOW(I,J)      ! SNOW in mm and SNOWH in m
+               SNOW (I,J) = 2000.0                               ! cap SNOW at 2000, maintain density
              endif
           enddo
        enddo
