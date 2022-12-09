@@ -114,6 +114,7 @@ contains
        IceDripFacWind      = sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0) / 1.56e5
        ! MB: changed below to reflect the rain assumption that all precip gets intercepted 
        CanopySnowDrip      = max( 0.0, CanopyIce ) * (IceDripFacWind + IceDripFacTemp)
+       CanopySnowDrip      = min( CanopyIce/MainTimeStep + InterceptCanopySnow, CanopySnowDrip) ! add constraint to keep water balance
        DripCanopySnow      = (VegFrac * SnowfallRefHeight - InterceptCanopySnow) + CanopySnowDrip
        ThroughfallSnow     = (1.0 - VegFrac) * SnowfallRefHeight
        CanopyIce           = max( 0.0, CanopyIce + (InterceptCanopySnow-CanopySnowDrip)*MainTimeStep )
