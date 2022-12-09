@@ -27,6 +27,7 @@ contains
               SoilSfcInflow     => noahmp%water%flux%SoilSfcInflow      ,& ! in,  water input on soil surface [mm/s]
               RunoffDecayFac    => noahmp%water%param%RunoffDecayFac    ,& ! in,  runoff decay factor [1/m]
               SoilSfcSatFracMax => noahmp%water%param%SoilSfcSatFracMax ,& ! in,  maximum surface saturated fraction (global mean)
+              SoilExpCoeffB     => noahmp%water%param%SoilExpCoeffB     ,& ! in,  soil B parameter
               SoilImpervFrac    => noahmp%water%state%SoilImpervFrac    ,& ! in,  impervious fraction due to frozen soil
               WaterTableDepth   => noahmp%water%state%WaterTableDepth   ,& ! in,  water table depth [m]
               SoilSaturateFrac  => noahmp%water%state%SoilSaturateFrac  ,& ! out, fractional saturated area for soil moisture
@@ -36,10 +37,12 @@ contains
 ! ----------------------------------------------------------------------
 
     ! set up key parameter
-    RunoffDecayFac = 6.0
+    !RunoffDecayFac = 6.0
+    RunoffDecayFac = SoilExpCoeffB(1) / 3.0 ! calibratable, GY Niu's update 2022
 
     ! compute saturated area fraction
-    SoilSaturateFrac = SoilSfcSatFracMax * exp(-0.5 * RunoffDecayFac * (WaterTableDepth-2.0))
+    !SoilSaturateFrac = SoilSfcSatFracMax * exp(-0.5 * RunoffDecayFac * (WaterTableDepth-2.0))
+    SoilSaturateFrac = SoilSfcSatFracMax * exp(-0.5 * RunoffDecayFac * WaterTableDepth) ! GY Niu's update 2022
 
     ! compute surface runoff and infiltration  m/s
     if ( SoilSfcInflow > 0.0 ) then

@@ -42,27 +42,28 @@ contains
     real(kind=kind_noahmp), allocatable, dimension(:) :: SoilMoisture        ! total soil water  content [m3/m3]
 
 ! --------------------------------------------------------------------
-    associate(                                                               &
-              NumSoilLayer        => noahmp%config%domain%NumSoilLayer      ,& ! in,    number of soil layers
-              MainTimeStep        => noahmp%config%domain%MainTimeStep      ,& ! in,    noahmp main time step [s]
-              DepthSoilLayer      => noahmp%config%domain%DepthSoilLayer    ,& ! in,    depth of soil layer-bottom [m]
-              SoilImpervFracMax   => noahmp%water%state%SoilImpervFracMax   ,& ! in,    maximum soil imperviousness fraction
-              SoilIce             => noahmp%water%state%SoilIce             ,& ! in,    soil ice content [m3/m3]
-              SoilWatConductivity => noahmp%water%state%SoilWatConductivity ,& ! in,    soil hydraulic conductivity [m/s]
-              SoilMoistureSat     => noahmp%water%param%SoilMoistureSat     ,& ! in,    saturated value of soil moisture [m3/m3]
-              GridTopoIndex       => noahmp%water%param%GridTopoIndex       ,& ! in,    gridcell mean topgraphic index (global mean)
-              SoilMatPotentialSat => noahmp%water%param%SoilMatPotentialSat ,& ! in,    saturated soil matric potential
-              SoilExpCoeffB       => noahmp%water%param%SoilExpCoeffB       ,& ! in,    soil B parameter
-              SpecYieldGw         => noahmp%water%param%SpecYieldGw         ,& ! in,    specific yield [-], default:0.2
-              MicroPoreContent    => noahmp%water%param%MicroPoreContent    ,& ! in,    microprore content (0.0-1.0), default:0.2
-              SoilLiqWater        => noahmp%water%state%SoilLiqWater        ,& ! inout, soil water content [m3/m3]
-              WaterTableDepth     => noahmp%water%state%WaterTableDepth     ,& ! inout, water table depth [m]
-              WaterStorageAquifer => noahmp%water%state%WaterStorageAquifer ,& ! inout, water storage in aquifer [mm]
-              WaterStorageSoilAqf => noahmp%water%state%WaterStorageSoilAqf ,& ! inout, water storage in aquifer + saturated soil [mm]
-              RunoffDecayFac      => noahmp%water%param%RunoffDecayFac      ,& ! inout, runoff decay factor (1/m)
-              BaseflowCoeff       => noahmp%water%param%BaseflowCoeff       ,& ! inout, baseflow coefficient [mm/s]
-              RechargeGw          => noahmp%water%flux%RechargeGw           ,& ! out,   groundwater recharge rate [mm/s]
-              DischargeGw         => noahmp%water%flux%DischargeGw           & ! out,   groundwater discharge rate [mm/s]
+    associate(                                                                     &
+              NumSoilLayer           => noahmp%config%domain%NumSoilLayer         ,& ! in,    number of soil layers
+              MainTimeStep           => noahmp%config%domain%MainTimeStep         ,& ! in,    noahmp main time step [s]
+              DepthSoilLayer         => noahmp%config%domain%DepthSoilLayer       ,& ! in,    depth of soil layer-bottom [m]
+              SoilImpervFracMax      => noahmp%water%state%SoilImpervFracMax      ,& ! in,    maximum soil imperviousness fraction
+              SoilIce                => noahmp%water%state%SoilIce                ,& ! in,    soil ice content [m3/m3]
+              SoilWatConductivity    => noahmp%water%state%SoilWatConductivity    ,& ! in,    soil hydraulic conductivity [m/s]
+              SoilMoistureSat        => noahmp%water%param%SoilMoistureSat        ,& ! in,    saturated value of soil moisture [m3/m3]
+              GridTopoIndex          => noahmp%water%param%GridTopoIndex          ,& ! in,    gridcell mean topgraphic index (global mean)
+              SoilMatPotentialSat    => noahmp%water%param%SoilMatPotentialSat    ,& ! in,    saturated soil matric potential
+              SoilExpCoeffB          => noahmp%water%param%SoilExpCoeffB          ,& ! in,    soil B parameter
+              SpecYieldGw            => noahmp%water%param%SpecYieldGw            ,& ! in,    specific yield [-], default:0.2
+              MicroPoreContent       => noahmp%water%param%MicroPoreContent       ,& ! in,    microprore content (0.0-1.0), default:0.2
+              SoilWatConductivitySat => noahmp%water%param%SoilWatConductivitySat ,& ! in,    saturated soil hydraulic conductivity [m/s]
+              SoilLiqWater           => noahmp%water%state%SoilLiqWater           ,& ! inout, soil water content [m3/m3]
+              WaterTableDepth        => noahmp%water%state%WaterTableDepth        ,& ! inout, water table depth [m]
+              WaterStorageAquifer    => noahmp%water%state%WaterStorageAquifer    ,& ! inout, water storage in aquifer [mm]
+              WaterStorageSoilAqf    => noahmp%water%state%WaterStorageSoilAqf    ,& ! inout, water storage in aquifer + saturated soil [mm]
+              RunoffDecayFac         => noahmp%water%param%RunoffDecayFac         ,& ! inout, runoff decay factor (1/m)
+              BaseflowCoeff          => noahmp%water%param%BaseflowCoeff          ,& ! inout, baseflow coefficient [mm/s]
+              RechargeGw             => noahmp%water%flux%RechargeGw              ,& ! out,   groundwater recharge rate [mm/s]
+              DischargeGw            => noahmp%water%flux%DischargeGw              & ! out,   groundwater discharge rate [mm/s]
              )
 ! ----------------------------------------------------------------------
 
@@ -107,10 +108,15 @@ contains
     enddo
 
     ! Groundwater discharge [mm/s]
-    RunoffDecayFac    = 6.0
-    BaseflowCoeff     = 5.0
-    DischargeGw       = (1.0 - SoilImpervFracMax) * BaseflowCoeff * &
-                        exp(-GridTopoIndex) * exp(-RunoffDecayFac * (WaterTableDepth-2.0))
+    !RunoffDecayFac    = 6.0
+    !BaseflowCoeff     = 5.0
+    !DischargeGw       = (1.0 - SoilImpervFracMax) * BaseflowCoeff * &
+    !                    exp(-GridTopoIndex) * exp(-RunoffDecayFac * (WaterTableDepth-2.0))
+    ! Update from GY Niu 2022
+    RunoffDecayFac    = SoilExpCoeffB(IndUnsatSoil) / 3.0
+    BaseflowCoeff     = SoilWatConductTmp(IndUnsatSoil) * 1.0e3 * exp(3.0)  ! [mm/s]
+    DischargeGw       = (1.0 - SoilImpervFracMax) * BaseflowCoeff * exp(-GridTopoIndex) * &
+                        exp(-RunoffDecayFac * WaterTableDepth)
 
     ! Matric potential at the layer above the water table
     SatDegUnsatSoil   = min(1.0, SoilMoisture(IndUnsatSoil)/SoilMoistureSat(IndUnsatSoil))
@@ -120,7 +126,9 @@ contains
     SoilMatPotFrz     = max(-120000.0, MicroPoreContent*SoilMatPotFrz)
 
     ! Recharge rate qin to groundwater
-    AquiferWatConduct = SoilWatConductTmp(IndUnsatSoil)
+    !AquiferWatConduct = SoilWatConductTmp(IndUnsatSoil)
+    AquiferWatConduct = 2.0 * (SoilWatConductTmp(IndUnsatSoil) * SoilWatConductivitySat(IndUnsatSoil)*1.0e3) / &
+                        (SoilWatConductTmp(IndUnsatSoil) + SoilWatConductivitySat(IndUnsatSoil)*1.0e3)  ! harmonic average, GY Niu's update 2022
     WaterHeadTbl      = -WaterTableDepth * 1.0e3                 !(mm)
     WaterHead         = SoilMatPotFrz - DepthSoilMid(IndUnsatSoil) * 1.0e3   !(mm)
     RechargeGw        = -AquiferWatConduct * (WaterHeadTbl - WaterHead) / &
