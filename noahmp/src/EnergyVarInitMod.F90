@@ -257,6 +257,7 @@ contains
     noahmp%energy%flux%HeatSensibleSfc              = undefined_real
     noahmp%energy%flux%RadPhotoActAbsCan            = undefined_real
     noahmp%energy%flux%RadLwEmitSfc                 = undefined_real
+    noahmp%energy%flux%HeatCanStorageChg            = undefined_real
     noahmp%energy%flux%HeatLatentIrriEvap           = 0.0
  
     if ( .not. allocated(noahmp%energy%flux%RadSwAbsVegDir) )      &

@@ -311,7 +311,7 @@ module NoahmpIOVarType
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  EFLXBXY
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  SOILENERGY
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  SNOWENERGY
-    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  CANHSXY
+    real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  CANHSXY             ! canopy heat storage change [W/m2]
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  ACC_DWATERXY
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  ACC_PRCPXY
     real(kind=kind_noahmp), allocatable, dimension(:,:)    ::  ACC_ECANXY

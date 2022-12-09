@@ -181,6 +181,7 @@ contains
               HeatPrecipAdvVegGrd  => noahmp%energy%flux%HeatPrecipAdvVegGrd  ,& ! in,  precipitation advected heat - under canopy net [W/m2]
               HeatPrecipAdvCanopy  => noahmp%energy%flux%HeatPrecipAdvCanopy  ,& ! in,  precipitation advected heat - vegetation net [W/m2]
               HeatLatentIrriEvap   => noahmp%energy%flux%HeatLatentIrriEvap   ,& ! in,  latent heating due to sprinkler evaporation [W/m2]
+              HeatCanStorageChg    => noahmp%energy%flux%HeatCanStorageChg    ,& ! in,  canopy heat storage change [W/m2]
               EnergyBalanceError   => noahmp%energy%state%EnergyBalanceError  ,& ! out, error in surface energy balance [W/m2]
               RadSwBalanceError    => noahmp%energy%state%RadSwBalanceError    & ! out, error in shortwave radiation balance [W/m2]
              )
@@ -212,7 +213,7 @@ contains
     ! error in surface energy balance should be <0.01 W/m2
     EnergyBalanceError = RadSwAbsVeg + RadSwAbsGrd + HeatPrecipAdvSfc -                     &
                         (RadLwNetSfc + HeatSensibleSfc + HeatLatentCanopy + HeatLatentGrd + &
-                         HeatLatentTransp + HeatGroundTot + HeatLatentIrriEvap)
+                         HeatLatentTransp + HeatGroundTot + HeatLatentIrriEvap + HeatCanStorageChg)
     ! print out diagnostics when error is large
     if ( abs(EnergyBalanceError) > 0.01 ) then
        write(*,*) 'EnergyBalanceError = ', EnergyBalanceError, ' at GridIndexI,GridIndexJ: ', GridIndexI, GridIndexJ
@@ -224,6 +225,7 @@ contains
        write(*,'(a17,F10.4)' ) "Transpiration:    ", HeatLatentTransp
        write(*,'(a17,F10.4)' ) "Total ground:     ", HeatGroundTot
        write(*,'(a17,F10.4)' ) "Sprinkler:        ", HeatLatentIrriEvap
+       write(*,'(a17,F10.4)' ) "Canopy heat storage change: ", HeatCanStorageChg
        write(*,'(a17,4F10.4)') "Precip advected:  ", HeatPrecipAdvSfc,HeatPrecipAdvCanopy,HeatPrecipAdvVegGrd,HeatPrecipAdvBareGrd
        write(*,'(a17,F10.4)' ) "Veg fraction:     ", VegFrac
        stop "Error: Energy budget problem in NoahMP LSM"

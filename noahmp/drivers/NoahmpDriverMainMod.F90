@@ -180,17 +180,18 @@ contains
               !  Transfer Noah-MP glacial states for output  (this can be moved to transferout module using ICE as if-statement) 
               !---------------------------------------------------------------------
               
-              noahmp%water%state%SnowCoverFrac   = 1.0  
-              noahmp%energy%state%VegFrac  = 0.0
+              noahmp%water%state%SnowCoverFrac        = 1.0  
+              noahmp%energy%state%VegFrac             = 0.0
               noahmp%energy%state%RoughLenMomSfcToAtm = 0.002 
-              noahmp%energy%state%TemperatureGrdBare   = noahmp%energy%state%TemperatureGrd  
-              noahmp%energy%state%ExchCoeffShBare   = noahmp%energy%state%ExchCoeffShSfc 
-              noahmp%energy%flux%RadLwNetBareGrd    = noahmp%energy%flux%RadLwNetSfc
-              noahmp%energy%flux%HeatSensibleBareGrd    = noahmp%energy%flux%HeatSensibleSfc
+              noahmp%energy%state%TemperatureGrdBare  = noahmp%energy%state%TemperatureGrd  
+              noahmp%energy%state%ExchCoeffShBare     = noahmp%energy%state%ExchCoeffShSfc 
+              noahmp%energy%flux%RadLwNetBareGrd      = noahmp%energy%flux%RadLwNetSfc
+              noahmp%energy%flux%HeatSensibleBareGrd  = noahmp%energy%flux%HeatSensibleSfc
               noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrd
               noahmp%energy%flux%HeatGroundBareGrd    = noahmp%energy%flux%HeatGroundTot 
-              NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapSoilNet
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrd         
+              noahmp%energy%flux%HeatCanStorageChg    = 0.0
+              NoahmpIO%QFX (I,J)                      = noahmp%water%flux%EvapSoilNet
+              NoahmpIO%LH  (I,J)                      = noahmp%energy%flux%HeatLatentGrd         
           else
 
               !---------------------------------------------------------------------

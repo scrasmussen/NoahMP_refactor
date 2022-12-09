@@ -55,6 +55,7 @@ contains
     NoahmpIO%GHBXY   (I,J) = noahmp%energy%flux%HeatGroundBareGrd
     NoahmpIO%TRXY    (I,J) = noahmp%energy%flux%HeatLatentCanTransp
     NoahmpIO%EVCXY   (I,J) = noahmp%energy%flux%HeatLatentCanEvap
+    NoahmpIO%CANHSXY (I,J) = noahmp%energy%flux%HeatCanStorageChg
 
     ! energy state variables
     NoahmpIO%TSK     (I,J) = noahmp%energy%state%TemperatureRadSfc

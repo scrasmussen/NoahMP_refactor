@@ -156,6 +156,7 @@ contains
               HeatLatentCanTransp     => noahmp%energy%flux%HeatLatentCanTransp      ,& ! out,   canopy transpiration heat flux [W/m2] (+ to atm)
               HeatGroundVegGrd        => noahmp%energy%flux%HeatGroundVegGrd         ,& ! out,   vegetated ground heat [W/m2] (+ to soil/snow)
               HeatGroundBareGrd       => noahmp%energy%flux%HeatGroundBareGrd        ,& ! out,   bare ground heat flux [W/m2] (+ to soil/snow)
+              HeatCanStorageChg       => noahmp%energy%flux%HeatCanStorageChg        ,& ! out,   canopy heat storage change [W/m2]
               PhotosynTotal           => noahmp%biochem%flux%PhotosynTotal           ,& ! out,   total leaf photosynthesis [umol co2 /m2 /s]
               PhotosynLeafSunlit      => noahmp%biochem%flux%PhotosynLeafSunlit      ,& ! out,   sunlit leaf photosynthesis [umol co2 /m2 /s]
               PhotosynLeafShade       => noahmp%biochem%flux%PhotosynLeafShade        & ! out,   shaded leaf photosynthesis [umol co2 /m2 /s]
@@ -182,6 +183,7 @@ contains
     ExchCoeffShUndCan   = 0.0
     ExchCoeffSh2mVeg    = 0.0
     HeatPrecipAdvSfc    = 0.0
+    HeatCanStorageChg   = 0.0
 
     ! wind speed at reference height: ur >= 1
     WindSpdRefHeight = max(sqrt(WindEastwardRefHeight**2.0 + WindNorthwardRefHeight**2.0), 1.0)

@@ -1850,7 +1850,7 @@ contains
     allocate ( NoahmpIO%EFLXBXY      (XSTART:XEND,YSTART:YEND) )
     allocate ( NoahmpIO%SOILENERGY   (XSTART:XEND,YSTART:YEND) )
     allocate ( NoahmpIO%SNOWENERGY   (XSTART:XEND,YSTART:YEND) )
-    allocate ( NoahmpIO%CANHSXY      (XSTART:XEND,YSTART:YEND) )
+    allocate ( NoahmpIO%CANHSXY      (XSTART:XEND,YSTART:YEND) )            ! canopy heat storage change [W/m2]
     allocate ( NoahmpIO%ACC_DWATERXY (XSTART:XEND,YSTART:YEND) )
     allocate ( NoahmpIO%ACC_PRCPXY   (XSTART:XEND,YSTART:YEND) )
     allocate ( NoahmpIO%ACC_ECANXY   (XSTART:XEND,YSTART:YEND) )
@@ -2198,6 +2198,7 @@ contains
     NoahmpIO%CHV2XY          = undefined_real
     NoahmpIO%CHB2XY          = undefined_real
     NoahmpIO%RS              = undefined_real
+    NoahmpIO%CANHSXY         = undefined_real
     ! additional output
     NoahmpIO%PAHXY           = undefined_real
     NoahmpIO%PAHGXY          = undefined_real
@@ -2235,7 +2236,6 @@ contains
     NoahmpIO%EFLXBXY         = undefined_real
     NoahmpIO%SOILENERGY      = 0.0
     NoahmpIO%SNOWENERGY      = 0.0
-    NoahmpIO%CANHSXY         = undefined_real
     NoahmpIO%ACC_DWATERXY    = 0.0
     NoahmpIO%ACC_PRCPXY      = 0.0
     NoahmpIO%ACC_ECANXY      = 0.0
