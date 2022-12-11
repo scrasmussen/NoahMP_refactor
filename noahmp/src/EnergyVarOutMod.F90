@@ -32,9 +32,42 @@ contains
               I               => noahmp%config%domain%GridIndexI      ,&
               J               => noahmp%config%domain%GridIndexJ      ,&
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
-              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax  &
+              NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
+              IndicatorIceSfc => noahmp%config%domain%IndicatorIceSfc  &
              )
-   
+
+    ! special treatment for glacier point output
+    if ( IndicatorIceSfc == -1 ) then ! land ice point
+       noahmp%energy%state%VegFrac             = 0.0
+       noahmp%energy%state%RoughLenMomSfcToAtm = 0.002
+       noahmp%energy%flux%RadSwAbsVeg          = 0.0
+       noahmp%energy%flux%RadLwNetCanopy       = 0.0
+       noahmp%energy%flux%RadLwNetVegGrd       = 0.0
+       noahmp%energy%flux%HeatSensibleCanopy   = 0.0
+       noahmp%energy%flux%HeatSensibleVegGrd   = 0.0
+       noahmp%energy%flux%HeatLatentVegGrd     = 0.0
+       noahmp%energy%flux%HeatGroundVegGrd     = 0.0
+       noahmp%energy%flux%HeatCanStorageChg    = 0.0
+       noahmp%energy%flux%HeatLatentCanTransp  = 0.0
+       noahmp%energy%flux%HeatLatentCanEvap    = 0.0
+       noahmp%energy%flux%HeatPrecipAdvCanopy  = 0.0
+       noahmp%energy%flux%HeatPrecipAdvVegGrd  = 0.0
+
+
+       noahmp%energy%state%TemperatureGrdBare  = noahmp%energy%state%TemperatureGrd
+       noahmp%energy%state%ExchCoeffShBare     = noahmp%energy%state%ExchCoeffShSfc
+       noahmp%energy%flux%RadLwNetBareGrd      = noahmp%energy%flux%RadLwNetSfc
+       noahmp%energy%flux%HeatSensibleBareGrd  = noahmp%energy%flux%HeatSensibleSfc
+       noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrd
+       noahmp%energy%flux%HeatGroundBareGrd    = noahmp%energy%flux%HeatGroundTot
+       NoahmpIO%LH(I,J)                        = noahmp%energy%flux%HeatLatentGrd
+    endif
+
+    if ( IndicatorIceSfc == 0 ) then ! land soil point
+       NoahmpIO%LH(I,J) = noahmp%energy%flux%HeatLatentGrd + noahmp%energy%flux%HeatLatentCanopy + &
+                          noahmp%energy%flux%HeatLatentTransp + noahmp%energy%flux%HeatLatentIrriEvap 
+    endif
+
     ! energy flux variables
     NoahmpIO%HFX     (I,J) = noahmp%energy%flux%HeatSensibleSfc
     NoahmpIO%GRDFLX  (I,J) = noahmp%energy%flux%HeatGroundTot
@@ -56,6 +89,10 @@ contains
     NoahmpIO%TRXY    (I,J) = noahmp%energy%flux%HeatLatentCanTransp
     NoahmpIO%EVCXY   (I,J) = noahmp%energy%flux%HeatLatentCanEvap
     NoahmpIO%CANHSXY (I,J) = noahmp%energy%flux%HeatCanStorageChg
+    NoahmpIO%PAHXY   (I,J) = noahmp%energy%flux%
+    NoahmpIO%PAHGXY  (I,J) = noahmp%energy%flux%
+    NoahmpIO%PAHVXY  (I,J) = noahmp%energy%flux%
+    NoahmpIO%PAHBXY  (I,J) = noahmp%energy%flux%
 
     ! energy state variables
     NoahmpIO%TSK     (I,J) = noahmp%energy%state%TemperatureRadSfc

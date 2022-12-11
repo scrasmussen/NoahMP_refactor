@@ -29,8 +29,25 @@ contains
               I               => noahmp%config%domain%GridIndexI      ,&
               J               => noahmp%config%domain%GridIndexJ      ,&
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
-              NumSoilLayer    => noahmp%config%domain%NumSoilLayer     &
+              NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
+              IndicatorIceSfc => noahmp%config%domain%IndicatorIceSfc  &
              )
+
+    ! special treatment for glacier point output
+    if ( IndicatorIceSfc == -1 ) then ! land ice point
+       noahmp%water%state%SnowCoverFrac = 1.0
+       noahmp%water%flux%EvapCanopyNet  = 0.0
+       noahmp%water%flux%Transpiration  = 0.0
+       
+
+
+       NoahmpIO%QFX(I,J)                = noahmp%water%flux%EvapGroundNet
+    endif
+
+    if ( IndicatorIceSfc == 0 ) then ! land soil point
+       NoahmpIO%QFX(I,J) = noahmp%water%flux%EvapCanopyNet + noahmp%water%flux%EvapGroundNet + &
+                           noahmp%water%flux%Transpiration + noahmp%water%flux%EvapIrriSprinkler
+    endif
 
     NoahmpIO%SMSTAV    (I,J) = 0.0  ! [maintained as Noah consistency] water
     NoahmpIO%SMSTOT    (I,J) = 0.0  ! [maintained as Noah consistency] water
@@ -58,7 +75,7 @@ contains
     NoahmpIO%RUNSFXY   (I,J) = noahmp%water%flux%RunoffSurface
     NoahmpIO%RUNSBXY   (I,J) = noahmp%water%flux%RunoffSubsurface
     NoahmpIO%ECANXY    (I,J) = noahmp%water%flux%EvapCanopyNet
-    NoahmpIO%EDIRXY    (I,J) = noahmp%water%flux%EvapSoilNet
+    NoahmpIO%EDIRXY    (I,J) = noahmp%water%flux%EvapGroundNet
     NoahmpIO%ETRANXY   (I,J) = noahmp%water%flux%Transpiration
     NoahmpIO%RECHXY    (I,J) = NoahmpIO%RECHXY(I,J) + (noahmp%water%state%RechargeGwShallowWT*1.0e3)     ! RECHARGE TO THE WATER TABLE
     NoahmpIO%DEEPRECHXY(I,J) = NoahmpIO%DEEPRECHXY(I,J) + noahmp%water%state%RechargeGwDeepWT

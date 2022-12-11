@@ -51,14 +51,48 @@ contains
     integer                             :: J
     integer                             :: K
     integer                             :: JMONTH, JDAY
-    LOGICAL                             :: IPRINT    =  .false.     ! debug printout
-    real(kind=kind_noahmp)              :: SOLAR_TIME
-   
+    LOGICAL                             :: IPRINT = .false.     ! debug printout
+    real(kind=kind_noahmp)              :: SOLAR_TIME 
     real(kind=kind_noahmp), parameter   :: undefined_value = -1.E36
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: SAND
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: CLAY
     real(kind=kind_noahmp), dimension( 1:NoahmpIO%nsoil ) :: ORGM
-  
+
+    !---------------------------------------------------------------------
+    !  Treatment of Noah-MP soil timestep
+    !---------------------------------------------------------------------
+    NoahmpIO%calculate_soil    = .false.
+    NoahmpIO%soil_update_steps = nint(NoahmpIO%soiltstep / NoahmpIO%DTBL)
+    NoahmpIO%soil_update_steps = max(NoahmpIO%soil_update_steps,1)
+
+    if ( NoahmpIO%soil_update_steps == 1 ) then
+       NoahmpIO%ACC_SSOILXY  = 0.0
+       NoahmpIO%ACC_QINSURXY = 0.0
+       NoahmpIO%ACC_QSEVAXY  = 0.0
+       NoahmpIO%ACC_ETRANIXY = 0.0
+       NoahmpIO%ACC_DWATERXY = 0.0
+       NoahmpIO%ACC_PRCPXY   = 0.0
+       NoahmpIO%ACC_ECANXY   = 0.0
+       NoahmpIO%ACC_ETRANXY  = 0.0
+       NoahmpIO%ACC_EDIRXY   = 0.0
+    endif
+
+    if ( NoahmpIO%soil_update_steps > 1 ) then
+       if ( mod(NoahmpIO%itimestep, NoahmpIO%soil_update_steps) == 1 ) then
+          NoahmpIO%ACC_SSOILXY  = 0.0
+          NoahmpIO%ACC_QINSURXY = 0.0
+          NoahmpIO%ACC_QSEVAXY  = 0.0
+          NoahmpIO%ACC_ETRANIXY = 0.0
+          NoahmpIO%ACC_DWATERXY = 0.0
+          NoahmpIO%ACC_PRCPXY   = 0.0
+          NoahmpIO%ACC_ECANXY   = 0.0
+          NoahmpIO%ACC_ETRANXY  = 0.0
+          NoahmpIO%ACC_EDIRXY   = 0.0
+       end if
+    endif
+
+    if ( mod(NoahmpIO%itimestep, NoahmpIO%soil_update_steps) == 0 ) NoahmpIO%calculate_soil = .true.
+ 
     !---------------------------------------------------------------------
     !  Prepare Noah-MP driver
     !---------------------------------------------------------------------
@@ -134,7 +168,7 @@ contains
           !  hydrological processes for vegetation in urban model
           !  irrigate vegetaion only in urban area, MAY-SEP, 9-11pm
           !---------------------------------------------------------------------
-          
+          ! need to be separated from main Noah-MP into urban specific module in the future 
           if(NoahmpIO%IVGTYP(I,J) == NoahmpIO%ISURBAN_TABLE .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_1_TABLE  .or. &
              NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_2_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_3_TABLE  .or. &
              NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_4_TABLE   .or. NoahmpIO%IVGTYP(I,J) == NoahmpIO%LCZ_5_TABLE  .or. &
@@ -158,64 +192,20 @@ contains
           !------------------------------------------------------------------------
           !  Call 1D Noah-MP LSM  
           !------------------------------------------------------------------------
-          
-          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%VegFrac = 0.0  ! Set playa, lava, sand to bare
-          if(noahmp%config%domain%VegType == 25) noahmp%energy%state%LeafAreaIndex  = 0.0 
-          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%VegFrac = 0.0  ! hard coded for USGS
-          if(noahmp%config%domain%VegType == 26) noahmp%energy%state%LeafAreaIndex  = 0.0
-          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%VegFrac = 0.0
-          if(noahmp%config%domain%VegType == 27) noahmp%energy%state%LeafAreaIndex  = 0.0
-
+         
+          ! glacier ice
           if (noahmp%config%domain%VegType == noahmp%config%domain%IndexIcePoint ) then
               noahmp%config%domain%IndicatorIceSfc = -1                          ! Land-ice point      
               noahmp%forcing%TemperatureSoilBottom = min(noahmp%forcing%TemperatureSoilBottom,263.15) ! set deep temp to at most -10C
 
-              !---------------------------------------------------------------------
-              !  Call 1D Noah-MP LSM for glacier points
-              !---------------------------------------------------------------------
-
               call NoahmpMainGlacier(noahmp)
 
-              !---------------------------------------------------------------------
-              !  Transfer Noah-MP glacial states for output  (this can be moved to transferout module using ICE as if-statement) 
-              !---------------------------------------------------------------------
-              
-              noahmp%water%state%SnowCoverFrac        = 1.0  
-              noahmp%energy%state%VegFrac             = 0.0
-              noahmp%energy%state%RoughLenMomSfcToAtm = 0.002 
-              noahmp%energy%state%TemperatureGrdBare  = noahmp%energy%state%TemperatureGrd  
-              noahmp%energy%state%ExchCoeffShBare     = noahmp%energy%state%ExchCoeffShSfc 
-              noahmp%energy%flux%RadLwNetBareGrd      = noahmp%energy%flux%RadLwNetSfc
-              noahmp%energy%flux%HeatSensibleBareGrd  = noahmp%energy%flux%HeatSensibleSfc
-              noahmp%energy%flux%HeatLatentBareGrd    = noahmp%energy%flux%HeatLatentGrd
-              noahmp%energy%flux%HeatGroundBareGrd    = noahmp%energy%flux%HeatGroundTot 
-              noahmp%energy%flux%HeatCanStorageChg    = 0.0
-              NoahmpIO%QFX (I,J)                      = noahmp%water%flux%EvapSoilNet
-              NoahmpIO%LH  (I,J)                      = noahmp%energy%flux%HeatLatentGrd         
+          ! non-glacier land
           else
-
-              !---------------------------------------------------------------------
-              !  Call 1D Noah-MP LSM for land points
-              !---------------------------------------------------------------------
-              
               noahmp%config%domain%IndicatorIceSfc = 0          ! Neither sea ice or land ice.
          
               call NoahmpMain(noahmp)
               
-              !---------------------------------------------------------------------
-              !  Transfer QFX and LH for output (this can be moved to transferout module using ICE as if-statement)     
-              !---------------------------------------------------------------------
-              
-              NoahmpIO%QFX (I,J)        = noahmp%water%flux%EvapCanopyNet  + &
-                                          noahmp%water%flux%EvapSoilNet  + &
-                                          noahmp%water%flux%Transpiration + &
-                                          noahmp%water%flux%EvapIrriSprinkler
-                                     
-              NoahmpIO%LH  (I,J)        = noahmp%energy%flux%HeatLatentGrd + &
-                                          noahmp%energy%flux%HeatLatentCanopy + &
-                                          noahmp%energy%flux%HeatLatentTransp + &
-                                          noahmp%energy%flux%HeatLatentIrriEvap                                     
-         
           endif ! glacial split ends 
  
         !---------------------------------------------------------------------
@@ -227,7 +217,7 @@ contains
         call WaterVarOutTransfer  (noahmp, NoahmpIO)
         call BiochemVarOutTransfer(noahmp, NoahmpIO) 
 
-        endif    ! land-sea test ends
+        endif    ! land-sea split ends
 
       enddo ILOOP    ! I loop
     enddo  JLOOP     ! J loop

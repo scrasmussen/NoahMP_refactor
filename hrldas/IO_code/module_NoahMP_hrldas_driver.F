@@ -298,7 +298,6 @@ contains
 !----------------------------------------------------------------------
 ! Initialize Model State
 !----------------------------------------------------------------------
-
   NoahmpIO%SLOPETYP  =  1 ! it was 2 here and 1 in the noahmpdrv- pvk
   NoahmpIO%DZS       =  NoahmpIO%SOIL_THICK_INPUT(1:NoahmpIO%NSOIL)
 
@@ -514,7 +513,6 @@ contains
 !------------------------------------------------------------------------------------------
 !    Initialize Noah-MP states and variables
 !------------------------------------------------------------------------------------------
-
      CALL NoahmpInitMain(NoahmpIO)
 
      IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
@@ -650,27 +648,19 @@ contains
   endif
 #endif
 
-!     SNOW = SNOW * 1000.    ! Convert snow water equivalent to mm. MB: remove v3.7
-
         !----------------------------------------------------------------------------------
         !   Initialize Noah-MP variables
         !----------------------------------------------------------------------------------
- 
         call NoahmpInitMain(NoahmpIO)
-
-        if(NoahmpIO%IOPT_RUNSUB == 5) then
 
         !----------------------------------------------------------------------------------
         !   Initialize MMF Groundwater variables
         !----------------------------------------------------------------------------------
-         
+        if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
             call NoahmpGroundwaterInitMain(grid, NoahmpIO)
-         
-         endif
+        endif
 
-         NoahmpIO%TAUSSXY = 0.0   ! Need to be added to _INIT later
-
-         if(NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
+        if (NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
 
                  CALL urban_param_init(NoahmpIO%DZR,NoahmpIO%DZB,NoahmpIO%DZG,NoahmpIO%num_soil_layers,    &
                                        NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz,NoahmpIO%IRI_URBAN) ! cenlin added
@@ -988,13 +978,14 @@ contains
 ! Call to Noah-MP driver same as surface_driver
 !------------------------------------------------------------------------
 
-         NoahmpIO%sflx_count_sum = 0 ! Timing
+         NoahmpIO%sflx_count_sum = 0      ! Timing
+         NoahmpIO%ITIMESTEP      = ITIME  ! update time step counter
 
          ! Timing information for SFLX:
     
          call system_clock(count=NoahmpIO%count_before_sflx, count_rate=NoahmpIO%clock_rate)
 
-         call NoahmpDriverMain (NoahmpIO)                                       
+         call NoahmpDriverMain(NoahmpIO)                                       
 
          call system_clock(count=NoahmpIO%count_after_sflx, count_rate=NoahmpIO%clock_rate)
          NoahmpIO%sflx_count_sum = NoahmpIO%sflx_count_sum + ( NoahmpIO%count_after_sflx - NoahmpIO%count_before_sflx )

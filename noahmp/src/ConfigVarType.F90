@@ -152,6 +152,7 @@ module ConfigVarType
     integer                :: NumDayInYear                ! Number of days in the particular year
     integer                :: RunoffSlopeType             ! underground runoff slope term type
     real(kind=kind_noahmp) :: MainTimeStep                ! noahmp main timestep [sec]
+    real(kind=kind_noahmp) :: SoilTimeStep                ! soil process timestep [sec]
     real(kind=kind_noahmp) :: GridSize                    ! noahmp model grid spacing [m]
     real(kind=kind_noahmp) :: DayJulianInYear             ! julian day of the year
     real(kind=kind_noahmp) :: CosSolarZenithAngle         ! cosine solar zenith angle

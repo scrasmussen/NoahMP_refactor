@@ -1194,6 +1194,7 @@ contains
     integer                 :: NSOIL                 ! number of soil layers
     integer                 :: forcing_timestep
     integer                 :: noah_timestep
+    real(kind=kind_noahmp)  :: soil_timestep = 0.0   ! soil timestep (default=0: same as main noahmp timestep)
     integer                 :: start_year
     integer                 :: start_month
     integer                 :: start_day
@@ -1284,7 +1285,7 @@ contains
 #ifdef WRF_HYDRO
          finemesh,finemesh_factor,forc_typ, snow_assim , GEO_STATIC_FLNM, HRLDAS_ini_typ, &
 #endif
-         indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep,                 &
+         indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep, soil_timestep,  &
          start_year, start_month, start_day, start_hour, start_min,                       &
          outdir, skip_first_output,                                                       &
          restart_filename_requested, restart_frequency_hours, output_timestep,            &
@@ -1315,7 +1316,8 @@ contains
     !---------------------------------------------------------------
     NoahmpIO%nsoil                   = -999
     NoahmpIO%soil_thick_input        = -999
-    NoahmpIO%dtbl                    = -999
+    NoahmpIO%DTBL                    = -999.0
+    NoahmpIO%soiltstep               = -999.0
     NoahmpIO%start_year              = -999
     NoahmpIO%start_month             = -999
     NoahmpIO%start_day               = -999
@@ -1323,8 +1325,8 @@ contains
     NoahmpIO%start_min               = -999
     NoahmpIO%khour                   = -999
     NoahmpIO%kday                    = -999
-    NoahmpIO%zlvl                    = -999
-    NoahmpIO%forcing_timestep        = -999
+    NoahmpIO%zlvl                    = -999.0
+    NoahmpIO%forcing_timestep        = -999.0
     NoahmpIO%noah_timestep           = -999
     NoahmpIO%output_timestep         = -999
     NoahmpIO%restart_frequency_hours = -999
@@ -1344,7 +1346,8 @@ contains
     endif
     close(30)
   
-    NoahmpIO%dtbl            = real(noah_timestep)
+    NoahmpIO%DTBL            = real(noah_timestep)
+    NoahmpIO%soiltstep       = soil_timestep
     NoahmpIO%num_soil_layers = nsoil      ! because surface driver uses the long form
     NoahmpIO%NSOIL           = nsoil
 
@@ -1596,6 +1599,7 @@ contains
               NSOIL   =>  NoahmpIO%NSOIL    ,&
               NSNOW   =>  NoahmpIO%NSNOW     &
              )
+
     allocate ( NoahmpIO%COSZEN       (XSTART:XEND,YSTART:YEND) )            ! cosine zenith angle
     allocate ( NoahmpIO%XLAT         (XSTART:XEND,YSTART:YEND) )            ! latitude [radians] 
     allocate ( NoahmpIO%DZ8W         (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! thickness of atmo layers [m]
@@ -1607,19 +1611,15 @@ contains
     allocate ( NoahmpIO%TMN          (XSTART:XEND,YSTART:YEND) )            ! deep soil temperature [K]
     allocate ( NoahmpIO%XLAND        (XSTART:XEND,YSTART:YEND) )            ! =2 ocean; =1 land/seaice
     allocate ( NoahmpIO%XICE         (XSTART:XEND,YSTART:YEND) )            ! fraction of grid that is seaice
-
     allocate ( NoahmpIO%T_PHY        (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! 3D atmospheric temperature valid at mid-levels [K]
     allocate ( NoahmpIO%QV_CURR      (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! 3D water vapor mixing ratio [kg/kg_dry]
     allocate ( NoahmpIO%U_PHY        (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! 3D U wind component [m/s]
     allocate ( NoahmpIO%V_PHY        (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! 3D V wind component [m/s]
-    
     allocate ( NoahmpIO%SWDOWN       (XSTART:XEND,YSTART:YEND) )            ! solar down at surface [W m-2]
     allocate ( NoahmpIO%SWDDIR       (XSTART:XEND,YSTART:YEND) )            ! solar down at surface [W m-2] for new urban solar panel
     allocate ( NoahmpIO%SWDDIF       (XSTART:XEND,YSTART:YEND) )            ! solar down at surface [W m-2] for new urban solar panel
     allocate ( NoahmpIO%GLW          (XSTART:XEND,YSTART:YEND) )            ! longwave down at surface [W m-2]
-
     allocate ( NoahmpIO%P8W          (XSTART:XEND,KDS:KDE,YSTART:YEND) )    ! 3D pressure, valid at interface [Pa]
-    
     allocate ( NoahmpIO%RAINBL       (XSTART:XEND,YSTART:YEND) )            ! total precipitation entering land model [mm] per time step
     allocate ( NoahmpIO%SNOWBL       (XSTART:XEND,YSTART:YEND) )            ! snow entering land model [mm] per time step
     allocate ( NoahmpIO%RAINBL_tmp   (XSTART:XEND,YSTART:YEND) )            ! precipitation entering land model [mm]
@@ -1642,9 +1642,7 @@ contains
     allocate ( NoahmpIO%quartz_3D    (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil quartz content
     allocate ( NoahmpIO%refdk_2D     (XSTART:XEND,YSTART:YEND) )            ! Reference Soil Conductivity
     allocate ( NoahmpIO%refkdt_2D    (XSTART:XEND,YSTART:YEND) )            ! Soil Infiltration Parameter
-    
     allocate ( NoahmpIO%soilcomp     (XSTART:XEND,1:2*NSOIL,YSTART:YEND) )  ! Soil sand and clay content [fraction]
-
     allocate ( NoahmpIO%soilcl1      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
     allocate ( NoahmpIO%soilcl2      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
     allocate ( NoahmpIO%soilcl3      (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
@@ -1685,12 +1683,10 @@ contains
     allocate ( NoahmpIO%UDRUNOFF     (XSTART:XEND,YSTART:YEND) )            ! accumulated sub-surface runoff [m]
     allocate ( NoahmpIO%ALBEDO       (XSTART:XEND,YSTART:YEND) )            ! total grid albedo []
     allocate ( NoahmpIO%SNOWC        (XSTART:XEND,YSTART:YEND) )            ! snow cover fraction []
-    
     allocate ( NoahmpIO%SMOISEQ      (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! eq volumetric soil moisture [m3/m3]
     allocate ( NoahmpIO%SMOIS        (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! volumetric soil moisture [m3/m3]
     allocate ( NoahmpIO%SH2O         (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! volumetric liquid soil moisture [m3/m3]
     allocate ( NoahmpIO%TSLB         (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! soil temperature [K]
-    
     allocate ( NoahmpIO%SNOW         (XSTART:XEND,YSTART:YEND) )            ! snow water equivalent [mm]
     allocate ( NoahmpIO%SNOWH        (XSTART:XEND,YSTART:YEND) )            ! physical snow depth [m]
     allocate ( NoahmpIO%CANWAT       (XSTART:XEND,YSTART:YEND) )            ! total canopy water + ice [mm]
@@ -1721,12 +1717,10 @@ contains
     allocate ( NoahmpIO%SMCWTDXY     (XSTART:XEND,YSTART:YEND) )            ! soil moisture below the bottom of the column (m3m-3)
     allocate ( NoahmpIO%DEEPRECHXY   (XSTART:XEND,YSTART:YEND) )            ! recharge to the water table when deep (m)
     allocate ( NoahmpIO%RECHXY       (XSTART:XEND,YSTART:YEND) )            ! recharge to the water table (diagnostic) (m)
-
     allocate ( NoahmpIO%TSNOXY       (XSTART:XEND,-NSNOW+1:0,    YSTART:YEND) )  ! snow temperature [K]
     allocate ( NoahmpIO%ZSNSOXY      (XSTART:XEND,-NSNOW+1:NSOIL,YSTART:YEND) )  ! snow layer depth [m]
     allocate ( NoahmpIO%SNICEXY      (XSTART:XEND,-NSNOW+1:0,    YSTART:YEND) )  ! snow layer ice [mm]
     allocate ( NoahmpIO%SNLIQXY      (XSTART:XEND,-NSNOW+1:0,    YSTART:YEND) )  ! snow layer liquid water [mm]
-    
     allocate ( NoahmpIO%LFMASSXY     (XSTART:XEND,YSTART:YEND) )            ! leaf mass [g/m2]
     allocate ( NoahmpIO%RTMASSXY     (XSTART:XEND,YSTART:YEND) )            ! mass of fine roots [g/m2]
     allocate ( NoahmpIO%STMASSXY     (XSTART:XEND,YSTART:YEND) )            ! stem mass [g/m2]
@@ -1768,8 +1762,8 @@ contains
     allocate ( NoahmpIO%GPPXY        (XSTART:XEND,YSTART:YEND) )            ! gross primary assimilation [g/m2/s C]
     allocate ( NoahmpIO%NPPXY        (XSTART:XEND,YSTART:YEND) )            ! net primary productivity [g/m2/s C]
     allocate ( NoahmpIO%FVEGXY       (XSTART:XEND,YSTART:YEND) )            ! Noah-MP vegetation fraction [-]
-    allocate ( NoahmpIO%RUNSFXY      (XSTART:XEND,YSTART:YEND) )            ! surface runoff [mm/s]
-    allocate ( NoahmpIO%RUNSBXY      (XSTART:XEND,YSTART:YEND) )            ! subsurface runoff [mm/s]
+    allocate ( NoahmpIO%RUNSFXY      (XSTART:XEND,YSTART:YEND) )            ! surface runoff [mm per soil timestep]
+    allocate ( NoahmpIO%RUNSBXY      (XSTART:XEND,YSTART:YEND) )            ! subsurface runoff [mm per soil timestep]
     allocate ( NoahmpIO%ECANXY       (XSTART:XEND,YSTART:YEND) )            ! evaporation of intercepted water (mm/s)
     allocate ( NoahmpIO%EDIRXY       (XSTART:XEND,YSTART:YEND) )            ! soil surface evaporation rate (mm/s]
     allocate ( NoahmpIO%ETRANXY      (XSTART:XEND,YSTART:YEND) )            ! transpiration rate (mm/s)
@@ -2141,7 +2135,7 @@ contains
     NoahmpIO%LAI             = undefined_real
     NoahmpIO%LAI_tmp         = undefined_real
     NoahmpIO%XSAIXY          = undefined_real
-    NoahmpIO%TAUSSXY         = undefined_real
+    NoahmpIO%TAUSSXY         = 0.0
     NoahmpIO%XLONG           = undefined_real
     NoahmpIO%SEAICE          = undefined_real
     NoahmpIO%SMCWTDXY        = undefined_real
@@ -2413,10 +2407,13 @@ contains
       NoahmpIO%lfg_urb3d     = undefined_real
     endif
 
-    NoahmpIO%XLAND           = 1.0   ! water = 2.0, land = 1.0
-    NoahmpIO%XICE            = 0.0   ! fraction of grid that is seaice
-    NoahmpIO%XICE_THRESHOLD  = 0.5   ! fraction of grid determining seaice (from WRF)
-    NoahmpIO%SLOPETYP        =  1
+    NoahmpIO%XLAND             = 1.0      ! water = 2.0, land = 1.0
+    NoahmpIO%XICE              = 0.0      ! fraction of grid that is seaice
+    NoahmpIO%XICE_THRESHOLD    = 0.5      ! fraction of grid determining seaice (from WRF)
+    NoahmpIO%SLOPETYP          = 1        ! soil parameter slope type
+    NoahmpIO%soil_update_steps = 1        ! number of model time step to update soil proces
+    NoahmpIO%calculate_soil    = .false.  ! index for if do soil process
+    NoahmpIO%ITIMESTEP         = 0        ! model time step count
 
 #ifdef WRF_HYDRO
     NoahmpIO%infxsrt         = 0.0

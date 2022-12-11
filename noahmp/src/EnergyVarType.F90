@@ -38,6 +38,7 @@ module EnergyVarType
     real(kind=kind_noahmp) :: HeatGroundTot               ! total ground heat flux [W/m2] (+ to soil/snow)
     real(kind=kind_noahmp) :: HeatFromSoilBot             ! energy influx from soil bottom [W/m2]
     real(kind=kind_noahmp) :: HeatCanStorageChg           ! canopy heat storage change [W/m2]
+    real(kind=kind_noahmp) :: HeatGroundTotAcc            ! accumulated total ground heat flux per soil timestep [W/m2 * dt_soil/dt_main] (+ to soil/snow)
     real(kind=kind_noahmp) :: RadPhotoActAbsSunlit        ! absorbed photosyn. active radiation for sunlit leaves [W/m2]
     real(kind=kind_noahmp) :: RadPhotoActAbsShade         ! absorbed photosyn. active radiation  for shaded leaves [W/m2]
     real(kind=kind_noahmp) :: RadSwAbsVeg                 ! solar radiation absorbed by vegetation [W/m2]

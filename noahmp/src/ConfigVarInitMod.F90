@@ -74,6 +74,7 @@ contains
     noahmp%config%domain%NumDayInYear                = undefined_int
     noahmp%config%domain%RunoffSlopeType             = undefined_int
     noahmp%config%domain%MainTimeStep                = undefined_real
+    noahmp%config%domain%SoilTimeStep                = undefined_real
     noahmp%config%domain%GridSize                    = undefined_real
     noahmp%config%domain%DayJulianInYear             = undefined_real
     noahmp%config%domain%CosSolarZenithAngle         = undefined_real
@@ -136,6 +137,7 @@ contains
     noahmp%config%domain%GridIndexI                  = NoahmpIO%I
     noahmp%config%domain%GridIndexJ                  = NoahmpIO%J
     noahmp%config%domain%MainTimeStep                = NoahmpIO%DTBL
+    noahmp%config%domain%SoilTimeStep                = NoahmpIO%soiltstep
     noahmp%config%domain%GridSize                    = NoahmpIO%DX
     noahmp%config%domain%LandUseDataName             = NoahmpIO%LLANDUSE
     noahmp%config%domain%VegType                     = NoahmpIO%IVGTYP(I,J)

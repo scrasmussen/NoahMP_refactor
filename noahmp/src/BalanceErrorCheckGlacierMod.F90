@@ -60,7 +60,7 @@ contains
               SnowWaterEquiv     => noahmp%water%state%SnowWaterEquiv     ,& ! in,  snow water equivalent [mm]
               WaterStorageTotBeg => noahmp%water%state%WaterStorageTotBeg ,& ! in,  total water storage [mm] at the beginning
               PrecipTotRefHeight => noahmp%water%flux%PrecipTotRefHeight  ,& ! in,  total precipitation [mm/s] at reference height
-              EvapSoilNet        => noahmp%water%flux%EvapSoilNet         ,& ! in,  net direct soil evaporation [mm/s]
+              EvapGroundNet      => noahmp%water%flux%EvapGroundNet       ,& ! in,  net ground evaporation [mm/s]
               RunoffSurface      => noahmp%water%flux%RunoffSurface       ,& ! in,  surface runoff [mm/s]
               RunoffSubsurface   => noahmp%water%flux%RunoffSubsurface    ,& ! in,  subsurface runoff [mm/s]
               WaterStorageTotEnd => noahmp%water%state%WaterStorageTotEnd ,& ! out, total water storage [mm] at the end
@@ -73,7 +73,7 @@ contains
     ! need more work on including glacier ice mass underneath snow
     WaterStorageTotEnd = SnowWaterEquiv
     WaterBalanceError  = WaterStorageTotEnd - WaterStorageTotBeg - &
-                         (PrecipTotRefHeight - EvapSoilNet - RunoffSurface - RunoffSubsurface) * MainTimeStep
+                         (PrecipTotRefHeight - EvapGroundNet - RunoffSurface - RunoffSubsurface) * MainTimeStep
 
 #ifndef WRF_HYDRO
     if ( abs(WaterBalanceError) > 0.1 ) then
@@ -85,9 +85,9 @@ contains
        write(*,*) "WaterBalanceError = ",WaterBalanceError, "kg m{-2} timestep{-1}"
        write(*, &
            '("  GridIndexI   GridIndexJ     WaterStorageTotEnd  WaterStorageTotBeg  PrecipTotRefHeight  &
-                EvapSoilNet  RunoffSurface  RunoffSubsurface")')
+                EvapGroundNet  RunoffSurface  RunoffSubsurface")')
        write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI, GridIndexJ, WaterStorageTotEnd, WaterStorageTotBeg, &
-                                              PrecipTotRefHeight*MainTimeStep, EvapSoilNet*MainTimeStep,      &
+                                              PrecipTotRefHeight*MainTimeStep, EvapGroundNet*MainTimeStep,    &
                                               RunoffSurface*MainTimeStep, RunoffSubsurface*MainTimeStep
        stop "Error: Water budget problem in NoahMP LSM"
     endif

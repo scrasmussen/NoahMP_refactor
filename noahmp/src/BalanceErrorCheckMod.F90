@@ -90,7 +90,7 @@ contains
               PrecipTotRefHeight      => noahmp%water%flux%PrecipTotRefHeight        ,& ! in,  total precipitation [mm/s] at reference height
               EvapCanopyNet           => noahmp%water%flux%EvapCanopyNet             ,& ! in,  evaporation of intercepted water [mm/s]
               Transpiration           => noahmp%water%flux%Transpiration             ,& ! in,  transpiration rate [mm/s]
-              EvapSoilNet             => noahmp%water%flux%EvapSoilNet               ,& ! in,  net direct soil evaporation [mm/s]
+              EvapGroundNet           => noahmp%water%flux%EvapGroundNet             ,& ! in,  net ground (soil/snow) evaporation [mm/s]
               RunoffSurface           => noahmp%water%flux%RunoffSurface             ,& ! in,  surface runoff [mm/s]
               RunoffSubsurface        => noahmp%water%flux%RunoffSubsurface          ,& ! in,  subsurface runoff [mm/s]
               TileDrain               => noahmp%water%flux%TileDrain                 ,& ! in,  tile drainage [mm/s]
@@ -115,7 +115,7 @@ contains
           WaterStorageTotEnd = WaterStorageTotEnd + SoilMoisture(LoopInd) * ThicknessSnowSoilLayer(LoopInd) * 1000.0
        enddo
        WaterBalanceError = WaterStorageTotEnd - WaterStorageTotBeg - (PrecipTotRefHeight - EvapCanopyNet - &
-                           Transpiration - EvapSoilNet - RunoffSurface - RunoffSubsurface - TileDrain) * MainTimeStep
+                           Transpiration - EvapGroundNet - RunoffSurface - RunoffSubsurface - TileDrain) * MainTimeStep
 #ifndef WRF_HYDRO
        if ( abs(WaterBalanceError) > 0.1 ) then
           if ( WaterBalanceError > 0 ) then
@@ -126,11 +126,11 @@ contains
           write(*,*) 'WaterBalanceError = ',WaterBalanceError, "kg m{-2} timestep{-1}"
           write(*, &
                '("  GridIndexI  GridIndexJ  WaterStorageTotEnd  WaterStorageTotBeg  PrecipTotRefHeight &
-                    EvapCanopyNet  EvapSoilNet  Transpiration  RunoffSurface  RunoffSubsurface         &
+                    EvapCanopyNet  EvapGroundNet  Transpiration  RunoffSurface  RunoffSubsurface       &
                     WaterTableDepth  TileDrain")')
           write(*,'(i6,1x,i6,1x,2f15.3,9f11.5)') GridIndexI, GridIndexJ, WaterStorageTotEnd, WaterStorageTotBeg, &
                                                  PrecipTotRefHeight*MainTimeStep, EvapCanopyNet*MainTimeStep,    &
-                                                 EvapSoilNet*MainTimeStep, Transpiration*MainTimeStep,           &
+                                                 EvapGroundNet*MainTimeStep, Transpiration*MainTimeStep,         &
                                                  RunoffSurface*MainTimeStep, RunoffSubsurface*MainTimeStep,      &
                                                  WaterTableDepth, TileDrain*MainTimeStep
           stop "Error: Water budget problem in NoahMP LSM"

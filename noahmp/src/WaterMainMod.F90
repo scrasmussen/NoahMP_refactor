@@ -70,7 +70,7 @@ contains
               GlacierExcessFlow      => noahmp%water%flux%GlacierExcessFlow         ,& ! inout, glacier excess flow [mm/s]
               SpecHumidity2mBare     => noahmp%energy%state%SpecHumidity2mBare      ,& ! out,   bare ground 2-m specific humidity [kg/kg]
               SpecHumiditySfcBare    => noahmp%energy%state%SpecHumiditySfcBare     ,& ! out,   specific humidity at bare surface [kg/kg]
-              EvapSoilNet            => noahmp%water%flux%EvapSoilNet               ,& ! out,   net direct soil evaporation [mm/s]
+              EvapGroundNet          => noahmp%water%flux%EvapGroundNet             ,& ! out,   net ground (soil/snow) evaporation [mm/s]
               Transpiration          => noahmp%water%flux%Transpiration             ,& ! out,   transpiration rate [mm/s]
               EvapCanopyNet          => noahmp%water%flux%EvapCanopyNet             ,& ! out,   evaporation of intercepted water [mm/s]
               RunoffSurface          => noahmp%water%flux%RunoffSurface             ,& ! out,   surface runoff [mm/s]
@@ -94,7 +94,7 @@ contains
     ! compute soil/snow surface evap/dew rate based on energy flux
     VaporizeGrd        = max(HeatLatentGrd/LatHeatVapGrd, 0.0)       ! positive part of ground latent heat; Barlage change to ground v3.6
     CondenseVapGrd     = abs(min(HeatLatentGrd/LatHeatVapGrd, 0.0))  ! negative part of ground latent heat
-    EvapSoilNet        = VaporizeGrd - CondenseVapGrd
+    EvapGroundNet      = VaporizeGrd - CondenseVapGrd
 
     ! canopy-intercepted snowfall/rainfall, drips, and throughfall
     call CanopyHydrology(noahmp)
@@ -169,7 +169,7 @@ contains
     RunoffSubsurface = RunoffSubsurface + GlacierExcessFlow         !mm/s
 
     ! update surface water vapor flux ! urban - jref
-    WaterToAtmosTotal = Transpiration + EvapCanopyNet + EvapSoilNet
+    WaterToAtmosTotal = Transpiration + EvapCanopyNet + EvapGroundNet
     if ( (FlagUrban .eqv. .true.) ) then
        SpecHumiditySfcBare = WaterToAtmosTotal / (DensityAirRefHeight*ExchCoeffShSfc) + SpecHumidityRefHeight
        SpecHumidity2mBare  = SpecHumiditySfcBare

@@ -258,6 +258,7 @@ contains
     noahmp%energy%flux%RadPhotoActAbsCan            = undefined_real
     noahmp%energy%flux%RadLwEmitSfc                 = undefined_real
     noahmp%energy%flux%HeatCanStorageChg            = undefined_real
+    noahmp%energy%flux%HeatGroundTotAcc             = undefined_real
     noahmp%energy%flux%HeatLatentIrriEvap           = 0.0
  
     if ( .not. allocated(noahmp%energy%flux%RadSwAbsVegDir) )      &
@@ -434,6 +435,14 @@ contains
     noahmp%energy%state%TemperatureSoilSnow(1:NumSoilLayer)       = NoahmpIO%TSLB    (I,1:NumSoilLayer,J)
     noahmp%energy%state%PressureAtmosCO2                          = NoahmpIO%CO2_TABLE * noahmp%forcing%PressureAirRefHeight
     noahmp%energy%state%PressureAtmosO2                           = NoahmpIO%O2_TABLE  * noahmp%forcing%PressureAirRefHeight
+    ! vegetation treatment for USGS land types (playa, lava, sand to bare)
+    if ( (VegType == 25) .or. (VegType == 26) .or. (VegType == 27) ) then
+       noahmp%energy%state%VegFrac       = 0.0
+       noahmp%energy%state%LeafAreaIndex = 0.0
+    endif
+
+    ! energy flux variables
+    noahmp%energy%flux%HeatGroundTotAcc                           = NoahmpIO%ACC_SSOILXY(I,J)
 
     ! energy parameter variables
     noahmp%energy%param%SoilHeatCapacity                          = NoahmpIO%CSOIL_TABLE
