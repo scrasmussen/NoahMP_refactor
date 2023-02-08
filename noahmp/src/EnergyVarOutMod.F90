@@ -65,7 +65,7 @@ contains
 
     if ( IndicatorIceSfc == 0 ) then ! land soil point
        NoahmpIO%LH(I,J) = noahmp%energy%flux%HeatLatentGrd + noahmp%energy%flux%HeatLatentCanopy + &
-                          noahmp%energy%flux%HeatLatentTransp + noahmp%energy%flux%HeatLatentIrriEvap 
+                          noahmp%energy%flux%HeatLatentTransp + noahmp%energy%flux%HeatLatentIrriEvap
     endif
 
     ! energy flux variables
@@ -89,10 +89,11 @@ contains
     NoahmpIO%TRXY    (I,J) = noahmp%energy%flux%HeatLatentCanTransp
     NoahmpIO%EVCXY   (I,J) = noahmp%energy%flux%HeatLatentCanEvap
     NoahmpIO%CANHSXY (I,J) = noahmp%energy%flux%HeatCanStorageChg
-    NoahmpIO%PAHXY   (I,J) = noahmp%energy%flux%
-    NoahmpIO%PAHGXY  (I,J) = noahmp%energy%flux%
-    NoahmpIO%PAHVXY  (I,J) = noahmp%energy%flux%
-    NoahmpIO%PAHBXY  (I,J) = noahmp%energy%flux%
+    ! Refactor Todo
+    ! NoahmpIO%PAHXY   (I,J) = noahmp%energy%flux%
+    ! NoahmpIO%PAHGXY  (I,J) = noahmp%energy%flux%
+    ! NoahmpIO%PAHVXY  (I,J) = noahmp%energy%flux%
+    ! NoahmpIO%PAHBXY  (I,J) = noahmp%energy%flux%
 
     ! energy state variables
     NoahmpIO%TSK     (I,J) = noahmp%energy%state%TemperatureRadSfc
